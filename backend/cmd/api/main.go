@@ -1,23 +1,20 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/leoferamos/aroma-sense/internal/bootstrap"
 	"github.com/leoferamos/aroma-sense/internal/db"
+	"github.com/leoferamos/aroma-sense/internal/router"
 )
 
 func main() {
-	// Connect to PostgreSQL
+
 	db.Connect()
-	defer db.Close()
 
-	// Initialize Gin router
-	router := gin.Default()
+	// Initialize user module
+	userHandler := bootstrap.InitUserModule(db.DB)
 
-	// Health check endpoint
-	router.GET("/healthz", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
-	})
+	r := router.SetupRouter(userHandler)
 
-	// Start server
-	router.Run(":8080")
+	// Start the server
+	r.Run(":8080")
 }
