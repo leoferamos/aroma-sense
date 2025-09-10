@@ -1,21 +1,21 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var Conn *pgx.Conn
+var DB *gorm.DB
 
+// Connect initializes the global GORM DB connection
 func Connect() {
-	// Load environment variables from .env file if it exists
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, using environment variables")
+		log.Println("No .env file found")
 	}
 
 	dbHost := os.Getenv("DB_HOST")
@@ -23,24 +23,12 @@ func Connect() {
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require", dbHost, dbPort, dbUser, dbPassword, dbName)
 
-	// Build connection string
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
-		dbHost, dbPort, dbUser, dbPassword, dbName,
-	)
-
-	var err error
-	Conn, err = pgx.Connect(context.Background(), dsn)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	fmt.Println("Connected to database")
-}
-
-func Close() {
-	if Conn != nil {
-		if err := Conn.Close(context.Background()); err != nil {
-			log.Printf("Error closing database: %v", err)
-		}
-	}
+	DB = db
+	log.Println("Connected to database (GORM)")
 }
