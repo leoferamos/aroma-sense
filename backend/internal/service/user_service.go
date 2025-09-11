@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 
+	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
@@ -12,6 +13,7 @@ import (
 // UserService defines the interface for user-related business logic
 type UserService interface {
 	RegisterUser(input dto.CreateUserRequest) error
+	Login(input dto.LoginRequest) (string, *model.User, error)
 }
 
 type userService struct {
@@ -37,10 +39,28 @@ func (s *userService) RegisterUser(input dto.CreateUserRequest) error {
 	}
 
 	user := model.User{
-		Username:     input.Username,
 		Email:        input.Email,
 		PasswordHash: string(hashedPassword),
 	}
 
 	return s.repo.Create(&user)
+}
+
+// Login handles the business logic for user login
+func (s *userService) Login(input dto.LoginRequest) (string, *model.User, error) {
+	user, err := s.repo.FindByEmail(input.Email)
+	if err != nil {
+		return "", nil, errors.New("invalid credentials")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password)); err != nil {
+		return "", nil, errors.New("invalid credentials")
+	}
+
+	token, err := auth.GenerateJWT(user.PublicID, user.Role)
+	if err != nil {
+		return "", nil, errors.New("failed to generate token")
+	}
+
+	return token, user, nil
 }

@@ -33,3 +33,19 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
+
+// LoginUser handles user login requests
+func (h *UserHandler) LoginUser(c *gin.Context) {
+	var input dto.LoginRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	token, user, err := h.userService.Login(input)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
+}

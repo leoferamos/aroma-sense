@@ -5,11 +5,11 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/handler"
 )
 
-// RegisterUserRoutes sets up the user-related routes
-func RegisterUserRoutes(r *gin.Engine, handler *handler.UserHandler) {
+// UserRoutes sets up the user-related routes
+func UserRoutes(r *gin.Engine, handler *handler.UserHandler) {
 	userGroup := r.Group("/users")
 	{
 		userGroup.POST("/register", handler.RegisterUser)
-
+		userGroup.POST("/login", handler.LoginUser)
 	}
 }
