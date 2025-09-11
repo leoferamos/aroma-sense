@@ -8,6 +8,6 @@ type CreateUserRequest struct {
 
 // LoginRequest represents the expected payload for user login.
 type LoginRequest struct {
-	EmailOrUsername string `json:"email_or_username" binding:"required"`
-	Password        string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
