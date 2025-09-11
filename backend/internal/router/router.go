@@ -15,7 +15,8 @@ func SetupRouter(userHandler *handler.UserHandler) *gin.Engine {
 	})
 
 	// Register domain routes
-	RegisterUserRoutes(r, userHandler)
+	UserRoutes(r, userHandler)
+	AdminRoutes(r, userHandler)
 
 	return r
 }
