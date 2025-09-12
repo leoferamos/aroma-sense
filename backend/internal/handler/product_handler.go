@@ -30,7 +30,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 	defer file.Close()
 
-	if err := h.productService.CreateProduct(form, file, fileHeader); err != nil {
+	if err := h.productService.CreateProduct(c.Request.Context(), form, file, fileHeader); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

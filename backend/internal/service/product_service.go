@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -11,21 +12,24 @@ import (
 
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	"github.com/leoferamos/aroma-sense/internal/storage"
 )
 
+// ProductService defines the interface for product-related business logic
 type ProductService interface {
-	CreateProduct(input dto.ProductFormDTO, file multipart.File, fileHeader *multipart.FileHeader) error
+	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file multipart.File, fileHeader *multipart.FileHeader) error
 }
 
 type productService struct {
-	repo repository.ProductRepository
+	repo    repository.ProductRepository
+	storage storage.ImageStorage
 }
 
-func NewProductService(repo repository.ProductRepository) ProductService {
-	return &productService{repo: repo}
+func NewProductService(repo repository.ProductRepository, storage storage.ImageStorage) ProductService {
+	return &productService{repo: repo, storage: storage}
 }
 
-func (s *productService) CreateProduct(input dto.ProductFormDTO, file multipart.File, fileHeader *multipart.FileHeader) error {
+func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFormDTO, file multipart.File, fileHeader *multipart.FileHeader) error {
 	if fileHeader.Size > 5*1024*1024 {
 		return fmt.Errorf("image too large (max 5MB)")
 	}
@@ -52,14 +56,18 @@ func (s *productService) CreateProduct(input dto.ProductFormDTO, file multipart.
 
 	// Generate a unique name for the image
 	uuidStr := uuid.New().String()
-	ext := ""
+	ext := ".jpg"
 	if strings.HasSuffix(fileHeader.Filename, ".png") {
 		ext = ".png"
-	} else {
-		ext = ".jpg"
 	}
 	imageName := fmt.Sprintf("product-%s%s", uuidStr, ext)
-	imageURL := fmt.Sprintf("https://bucket-url/%s", imageName)
 
+	// Uploads the image to storage
+	imageURL, err := s.storage.UploadImage(ctx, imageName, file, fileHeader)
+	if err != nil {
+		return fmt.Errorf("failed to upload image: %w", err)
+	}
+	
+	// Chama o repository para salvar no banco
 	return s.repo.Create(input, imageURL)
 }

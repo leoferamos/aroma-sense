@@ -1,9 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/leoferamos/aroma-sense/internal/bootstrap"
 	"github.com/leoferamos/aroma-sense/internal/db"
 	"github.com/leoferamos/aroma-sense/internal/router"
+	"github.com/leoferamos/aroma-sense/internal/storage"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -24,10 +27,16 @@ import (
 func main() {
 	db.Connect()
 
-	// Initialize user module
-	userHandler := bootstrap.InitUserModule(db.DB)
+	storageClient, err := storage.NewSupabaseS3()
+	if err != nil {
+		log.Fatal("Failed to initialize storage client:", err)
+	}
 
-	r := router.SetupRouter(userHandler)
+	// Initialize modules
+	userHandler := bootstrap.InitUserModule(db.DB)
+	productHandler := bootstrap.InitProductModule(db.DB, storageClient)
+
+	r := router.SetupRouter(userHandler, productHandler)
 
 	// Swagger docs route
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

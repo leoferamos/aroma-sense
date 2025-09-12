@@ -9,7 +9,7 @@ import (
 func ProductRoutes(r *gin.Engine, handler *handler.ProductHandler) {
 	productGroup := r.Group("/products")
 	{
-		productGroup.GET("/:id", handler.GetProduct)
-		productGroup.GET("/", handler.GetProducts)
+		productGroup.GET("/:id", nil)
+		productGroup.GET("/", nil)
 	}
 }
