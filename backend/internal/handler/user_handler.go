@@ -71,7 +71,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		PublicID:  user.PublicID,
 		Email:     user.Email,
 		Role:      user.Role,
-		CreatedAt: user.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		CreatedAt: user.CreatedAt,
 	}
 	c.JSON(http.StatusOK, dto.LoginResponse{Token: token, User: userResp})
 }
