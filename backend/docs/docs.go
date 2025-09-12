@@ -108,7 +108,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
                 },
                 "password": {
                     "type": "string",
@@ -121,7 +123,7 @@ const docTemplate = `{
             "properties": {
                 "error": {
                     "type": "string",
-                    "example": "email already registered"
+                    "example": "error message"
                 }
             }
         },
@@ -133,7 +135,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
                 },
                 "password": {
                     "type": "string"
@@ -157,7 +161,7 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string",
-                    "example": "User registered successfully"
+                    "example": "success message"
                 }
             }
         },

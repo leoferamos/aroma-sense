@@ -102,7 +102,9 @@
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
                 },
                 "password": {
                     "type": "string",
@@ -115,7 +117,7 @@
             "properties": {
                 "error": {
                     "type": "string",
-                    "example": "email already registered"
+                    "example": "error message"
                 }
             }
         },
@@ -127,7 +129,9 @@
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
                 },
                 "password": {
                     "type": "string"
@@ -151,7 +155,7 @@
             "properties": {
                 "message": {
                     "type": "string",
-                    "example": "User registered successfully"
+                    "example": "success message"
                 }
             }
         },
