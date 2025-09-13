@@ -6,7 +6,7 @@ import (
 )
 
 // SetupRouter initializes the Gin router with all routes
-func SetupRouter(userHandler *handler.UserHandler) *gin.Engine {
+func SetupRouter(userHandler *handler.UserHandler, productHandler *handler.ProductHandler) *gin.Engine {
 	r := gin.Default()
 
 	// Health check
@@ -16,7 +16,8 @@ func SetupRouter(userHandler *handler.UserHandler) *gin.Engine {
 
 	// Register domain routes
 	UserRoutes(r, userHandler)
-	AdminRoutes(r, userHandler)
+	AdminRoutes(r, userHandler, productHandler)
+	ProductRoutes(r, productHandler)
 
 	return r
 }

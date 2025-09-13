@@ -33,3 +33,5 @@ bin/
 .env
 .env.local
 .env.*.local
+
+supabase
