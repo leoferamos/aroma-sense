@@ -37,11 +37,11 @@ func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFor
 	// Validates image type
 	allowedTypes := []string{"image/jpeg", "image/png"}
 	buf := make([]byte, 512)
-	_, err := file.Read(buf)
+	n, err := file.Read(buf)
 	if err != nil && err != io.EOF {
 		return fmt.Errorf("failed to read image: %w", err)
 	}
-	filetype := http.DetectContentType(buf)
+	filetype := http.DetectContentType(buf[:n])
 	isValidType := false
 	for _, t := range allowedTypes {
 		if filetype == t {
