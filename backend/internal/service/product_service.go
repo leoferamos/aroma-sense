@@ -68,6 +68,6 @@ func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFor
 		return fmt.Errorf("failed to upload image: %w", err)
 	}
 	
-	// Chama o repository para salvar no banco
+	// Call the repository to save to database
 	return s.repo.Create(input, imageURL)
 }
