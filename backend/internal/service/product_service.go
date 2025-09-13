@@ -56,9 +56,14 @@ func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFor
 
 	// Generate a unique name for the image
 	uuidStr := uuid.New().String()
-	ext := ".jpg"
-	if strings.HasSuffix(fileHeader.Filename, ".png") {
+	var ext string
+	switch filetype {
+	case "image/jpeg":
+		ext = ".jpg"
+	case "image/png":
 		ext = ".png"
+	default:
+		ext = ""
 	}
 	imageName := fmt.Sprintf("product-%s%s", uuidStr, ext)
 
