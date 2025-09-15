@@ -17,6 +17,7 @@ import (
 // ProductService defines the interface for product-related business logic
 type ProductService interface {
 	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
+	GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error)
 }
 
 type productService struct {
@@ -73,4 +74,31 @@ func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFor
 
 	// Call the repository to save to database
 	return s.repo.Create(input, imageURL)
+}
+
+// GetLatestProducts retrieves the latest products up to the specified limit
+func (s *productService) GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error) {
+	products, err := s.repo.FindAll(limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get products: %w", err)
+	}
+
+	var response []dto.ProductResponse
+	for _, p := range products {
+		response = append(response, dto.ProductResponse{
+			ID:            p.ID,
+			Name:          p.Name,
+			Brand:         p.Brand,
+			Weight:        p.Weight,
+			Description:   p.Description,
+			Price:         p.Price,
+			ImageURL:      p.ImageURL,
+			Category:      p.Category,
+			Notes:         p.Notes,
+			StockQuantity: p.StockQuantity,
+			CreatedAt:     p.CreatedAt,
+		})
+	}
+
+	return response, nil
 }
