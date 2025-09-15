@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
-	"io"
+	"mime/multipart"
 	"os"
 	"strings"
 
@@ -15,7 +15,7 @@ import (
 
 // ImageStorage defines an interface for image upload
 type ImageStorage interface {
-	UploadImage(ctx context.Context, imageName string, content io.Reader, size int64, contentType string) (string, error)
+	UploadImage(ctx context.Context, imageName string, file multipart.File, fileHeader *multipart.FileHeader) (string, error)
 }
 
 type SupabaseS3 struct {
@@ -58,7 +58,10 @@ func NewSupabaseS3() (*SupabaseS3, error) {
 }
 
 // UploadImage uploads an image to Supabase S3 and returns its public URL
-func (s *SupabaseS3) UploadImage(ctx context.Context, imageName string, content io.Reader, size int64, contentType string) (string, error) {
+func (s *SupabaseS3) UploadImage(ctx context.Context, imageName string, file multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+	defer file.Close()
+
+	contentType := fileHeader.Header.Get("Content-Type")
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
@@ -66,7 +69,7 @@ func (s *SupabaseS3) UploadImage(ctx context.Context, imageName string, content 
 	input := &s3.PutObjectInput{
 		Bucket:      aws.String(s.Bucket),
 		Key:         aws.String(imageName),
-		Body:        content,
+		Body:        file,
 		ContentType: aws.String(contentType),
 	}
 

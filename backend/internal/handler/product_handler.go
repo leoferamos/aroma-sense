@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,32 +30,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Convert multipart.File to FileUpload abstraction
-	fileUpload := dto.FileUpload{
-		Content:     file,
-		Name:        fileHeader.Filename,
-		Size:        fileHeader.Size,
-		ContentType: fileHeader.Header.Get("Content-Type"),
-	}
-
-	if fileUpload.ContentType == "" {
-		// Read first 512 bytes to detect content type
-		buf := make([]byte, 512)
-		n, err := file.Read(buf)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read file"})
-			return
-		}
-
-		// Reset file position
-		if seeker, ok := file.(io.Seeker); ok {
-			seeker.Seek(0, io.SeekStart)
-		}
-
-		fileUpload.ContentType = http.DetectContentType(buf[:n])
-	}
-
-	if err := h.productService.CreateProduct(c.Request.Context(), form, fileUpload); err != nil {
+	if err := h.productService.CreateProduct(c.Request.Context(), form, file, fileHeader); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
