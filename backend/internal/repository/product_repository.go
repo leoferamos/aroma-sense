@@ -11,6 +11,7 @@ type ProductRepository interface {
 	FindAll(limit int) ([]model.Product, error)
 	FindByID(id uint) (model.Product, error)
 	Update(product *model.Product) error
+	Delete(id uint) error
 }
 
 type productRepository struct {
@@ -66,4 +67,8 @@ func (r *productRepository) FindByID(id uint) (model.Product, error) {
 // Update updates an existing product in the database
 func (r *productRepository) Update(product *model.Product) error {
 	return r.db.Save(product).Error
+}
+
+func (r *productRepository) Delete(id uint) error {
+	return r.db.Delete(&model.Product{}, id).Error
 }

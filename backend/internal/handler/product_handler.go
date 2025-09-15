@@ -104,3 +104,20 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
 }
+
+// DeleteProduct handles deleting an existing product
+func (h *ProductHandler) DeleteProduct(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		return
+	}
+
+	if err := h.productService.DeleteProduct(c.Request.Context(), uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
+}

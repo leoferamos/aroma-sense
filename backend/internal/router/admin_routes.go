@@ -13,5 +13,6 @@ func AdminRoutes(r *gin.Engine, userHandler *handler.UserHandler, productHandler
 	{
 		adminGroup.POST("/products", productHandler.CreateProduct)
 		adminGroup.PUT("/products/:id", productHandler.UpdateProduct)
+		adminGroup.DELETE("/products/:id", productHandler.DeleteProduct)
 	}
 }

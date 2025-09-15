@@ -19,6 +19,7 @@ type ProductService interface {
 	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
 	GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error)
 	UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error
+	DeleteProduct(ctx context.Context, id uint) error
 }
 
 type productService struct {
@@ -143,4 +144,13 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 	}
 
 	return s.repo.Update(&product)
+}
+
+func (s *productService) DeleteProduct(ctx context.Context, id uint) error {
+	// Optional: check if product exists before deleting
+	_, err := s.repo.FindByID(id)
+	if err != nil {
+		return fmt.Errorf("product not found: %w", err)
+	}
+	return s.repo.Delete(id)
 }
