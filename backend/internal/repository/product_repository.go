@@ -9,6 +9,8 @@ import (
 type ProductRepository interface {
 	Create(input dto.ProductFormDTO, imageURL string) error
 	FindAll(limit int) ([]model.Product, error)
+	FindByID(id uint) (model.Product, error)
+	Update(product *model.Product) error
 }
 
 type productRepository struct {
@@ -52,4 +54,16 @@ func (r *productRepository) FindAll(limit int) ([]model.Product, error) {
 	}
 	err := query.Find(&products).Error
 	return products, err
+}
+
+// FindByID retrieves a product by its ID
+func (r *productRepository) FindByID(id uint) (model.Product, error) {
+	var product model.Product
+	err := r.db.First(&product, id).Error
+	return product, err
+}
+
+// Update updates an existing product in the database
+func (r *productRepository) Update(product *model.Product) error {
+	return r.db.Save(product).Error
 }

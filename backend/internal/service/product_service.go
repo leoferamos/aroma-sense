@@ -18,6 +18,7 @@ import (
 type ProductService interface {
 	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
 	GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error)
+	UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error
 }
 
 type productService struct {
@@ -101,4 +102,45 @@ func (s *productService) GetLatestProducts(ctx context.Context, limit int) ([]dt
 	}
 
 	return response, nil
+}
+
+// UpdateProduct updates an existing product with the provided details
+func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error {
+	product, err := s.repo.FindByID(id)
+	if err != nil {
+		return fmt.Errorf("product not found: %w", err)
+	}
+
+	if input.Name != nil {
+		product.Name = *input.Name
+	}
+	if input.Brand != nil {
+		product.Brand = *input.Brand
+	}
+	if input.Weight != nil {
+		product.Weight = *input.Weight
+	}
+	if input.Description != nil {
+		product.Description = *input.Description
+	}
+	if input.Price != nil {
+		product.Price = *input.Price
+	}
+	if input.Category != nil {
+		product.Category = *input.Category
+	}
+	if input.StockQuantity != nil {
+		product.StockQuantity = *input.StockQuantity
+	}
+	if len(input.Notes) > 0 {
+		notes := input.Notes[0]
+		if len(input.Notes) > 1 {
+			for _, n := range input.Notes[1:] {
+				notes += ", " + n
+			}
+		}
+		product.Notes = notes
+	}
+
+	return s.repo.Update(&product)
 }

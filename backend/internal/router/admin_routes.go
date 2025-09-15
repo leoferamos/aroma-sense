@@ -12,5 +12,6 @@ func AdminRoutes(r *gin.Engine, userHandler *handler.UserHandler, productHandler
 	adminGroup.Use(auth.JWTAuthMiddleware(), auth.AdminOnly())
 	{
 		adminGroup.POST("/products", productHandler.CreateProduct)
+		adminGroup.PUT("/products/:id", productHandler.UpdateProduct)
 	}
 }
