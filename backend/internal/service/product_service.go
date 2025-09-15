@@ -1,10 +1,10 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -16,7 +16,7 @@ import (
 
 // ProductService defines the interface for product-related business logic
 type ProductService interface {
-	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file multipart.File, fileHeader *multipart.FileHeader) error
+	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
 }
 
 type productService struct {
@@ -28,35 +28,29 @@ func NewProductService(repo repository.ProductRepository, storage storage.ImageS
 	return &productService{repo: repo, storage: storage}
 }
 
-func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFormDTO, file multipart.File, fileHeader *multipart.FileHeader) error {
-	if fileHeader.Size > 5*1024*1024 {
-		return fmt.Errorf("image too large (max 5MB)")
+func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error {
+	// Validate the file upload
+	if err := file.Validate(); err != nil {
+		return err
 	}
 
-	// Validates image type
-	allowedTypes := []string{"image/jpeg", "image/png"}
+	// Read first 512 bytes to detect actual content type
 	buf := make([]byte, 512)
-	n, err := file.Read(buf)
+	n, err := file.Content.Read(buf)
 	if err != nil && err != io.EOF {
 		return fmt.Errorf("failed to read image: %w", err)
 	}
-	filetype := http.DetectContentType(buf[:n])
-	isValidType := false
-	for _, t := range allowedTypes {
-		if filetype == t {
-			isValidType = true
-			break
-		}
+	detectedType := http.DetectContentType(buf[:n])
+
+	// Verify the detected type matches the provided content type
+	if detectedType != file.ContentType {
+		return fmt.Errorf("content type mismatch: detected %s, provided %s", detectedType, file.ContentType)
 	}
-	if !isValidType {
-		return fmt.Errorf("invalid image type: %s", filetype)
-	}
-	file.Seek(0, io.SeekStart)
 
 	// Generate a unique name for the image
 	uuidStr := uuid.New().String()
 	var ext string
-	switch filetype {
+	switch file.ContentType {
 	case "image/jpeg":
 		ext = ".jpg"
 	case "image/png":
@@ -66,12 +60,17 @@ func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFor
 	}
 	imageName := fmt.Sprintf("product-%s%s", uuidStr, ext)
 
-	// Uploads the image to storage
-	imageURL, err := s.storage.UploadImage(ctx, imageName, file, fileHeader)
+	combinedReader := io.MultiReader(
+		bytes.NewReader(buf[:n]),
+		file.Content,
+	)
+
+	// Upload the image to storage
+	imageURL, err := s.storage.UploadImage(ctx, imageName, combinedReader, file.Size, file.ContentType)
 	if err != nil {
 		return fmt.Errorf("failed to upload image: %w", err)
 	}
-	
+
 	// Call the repository to save to database
 	return s.repo.Create(input, imageURL)
 }
