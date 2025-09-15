@@ -31,7 +31,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Convert multipart.File to oFileUpload abstraction
+	// Convert multipart.File to FileUpload abstraction
 	fileUpload := dto.FileUpload{
 		Content:     file,
 		Name:        fileHeader.Filename,
