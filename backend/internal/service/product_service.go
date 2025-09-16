@@ -147,7 +147,6 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 }
 
 func (s *productService) DeleteProduct(ctx context.Context, id uint) error {
-	// Optional: check if product exists before deleting
 	_, err := s.repo.FindByID(id)
 	if err != nil {
 		return fmt.Errorf("product not found: %w", err)
