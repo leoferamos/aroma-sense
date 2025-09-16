@@ -14,4 +14,5 @@ type ProductResponse struct {
 	Notes         string    `json:"notes"`
 	StockQuantity int       `json:"stock_quantity"`
 	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }

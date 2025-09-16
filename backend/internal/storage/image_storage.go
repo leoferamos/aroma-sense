@@ -19,9 +19,9 @@ type ImageStorage interface {
 }
 
 type SupabaseS3 struct {
-	Client   *s3.Client
-	Bucket   string
-	Endpoint string
+	Client    *s3.Client
+	Bucket    string
+	PublicURL string
 }
 
 // NewSupabaseS3 initializes and returns a SupabaseS3 instance, or error if config is invalid
@@ -31,10 +31,11 @@ func NewSupabaseS3() (*SupabaseS3, error) {
 	accessKey := os.Getenv("SUPABASE_S3_ACCESS_KEY")
 	secretKey := os.Getenv("SUPABASE_S3_SECRET_KEY")
 	bucket := os.Getenv("SUPABASE_BUCKET")
+	publicURL := os.Getenv("SUPABASE_PUBLIC_URL")
 
 	// Basic validation of required env variables
-	if endpoint == "" || region == "" || accessKey == "" || secretKey == "" || bucket == "" {
-		return nil, fmt.Errorf("missing required Supabase S3 environment variables")
+	if endpoint == "" || region == "" || accessKey == "" || secretKey == "" || bucket == "" || publicURL == "" {
+		return nil, fmt.Errorf("missing required Supabase S3 environment variables, including SUPABASE_PUBLIC_URL")
 	}
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
@@ -51,9 +52,9 @@ func NewSupabaseS3() (*SupabaseS3, error) {
 	})
 
 	return &SupabaseS3{
-		Client:   s3Client,
-		Bucket:   bucket,
-		Endpoint: endpoint,
+		Client:    s3Client,
+		Bucket:    bucket,
+		PublicURL: publicURL,
 	}, nil
 }
 
@@ -75,6 +76,7 @@ func (s *SupabaseS3) UploadImage(ctx context.Context, imageName string, content 
 		return "", fmt.Errorf("failed to upload image to S3: %w", err)
 	}
 
-	publicURL := fmt.Sprintf("%s/%s/%s", strings.TrimRight(s.Endpoint, "/"), s.Bucket, imageName)
-	return publicURL, nil
+	finalURL := fmt.Sprintf("%s/%s/%s", strings.TrimRight(s.PublicURL, "/"), s.Bucket, imageName)
+
+	return finalURL, nil
 }
