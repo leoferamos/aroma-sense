@@ -64,6 +64,24 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Product created successfully"})
 }
 
+// GetProduct handles fetching a product by its ID
+func (h *ProductHandler) GetProduct(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		return
+	}
+
+	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, product)
+}
+
 // GetLatestProducts handles fetching the latest products with an optional limit
 func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")

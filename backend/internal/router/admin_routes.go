@@ -12,6 +12,7 @@ func AdminRoutes(r *gin.Engine, userHandler *handler.UserHandler, productHandler
 	adminGroup.Use(auth.JWTAuthMiddleware(), auth.AdminOnly())
 	{
 		adminGroup.POST("/products", productHandler.CreateProduct)
+		adminGroup.GET("/products/:id", productHandler.GetProduct)
 		adminGroup.PUT("/products/:id", productHandler.UpdateProduct)
 		adminGroup.DELETE("/products/:id", productHandler.DeleteProduct)
 	}
