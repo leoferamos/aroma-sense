@@ -13,150 +13,128 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/handler"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 // ---- MOCK SERVICE ----
-type mockUserService struct {
-	RegisterUserFunc func(input dto.CreateUserRequest) error
-	LoginFunc        func(input dto.LoginRequest) (string, *model.User, error)
+type MockUserService struct {
+	mock.Mock
 }
 
-func (m *mockUserService) RegisterUser(input dto.CreateUserRequest) error {
-	return m.RegisterUserFunc(input)
-}
-func (m *mockUserService) Login(input dto.LoginRequest) (string, *model.User, error) {
-	return m.LoginFunc(input)
+func (m *MockUserService) RegisterUser(input dto.CreateUserRequest) error {
+	args := m.Called(input)
+	return args.Error(0)
 }
 
-// ---- ROUTE HANDLER MAP ----
-type routeHandler func(*gin.Context)
-type routeMap map[string]routeHandler
-
-func newRouteMap(h *handler.UserHandler) routeMap {
-	return routeMap{
-		"/users/register": h.RegisterUser,
-		"/users/login":    h.LoginUser,
+func (m *MockUserService) Login(input dto.LoginRequest) (string, *model.User, error) {
+	args := m.Called(input)
+	var user *model.User
+	if args.Get(1) != nil {
+		user = args.Get(1).(*model.User)
 	}
+	return args.String(0), user, args.Error(2)
 }
 
-// ---- HELPER ----
-func performRequest(t *testing.T, routes routeMap, method, url string, payload interface{}) *httptest.ResponseRecorder {
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
+// ---- SETUP ROUTER ----
+func setupUserRouter() (*gin.Engine, *MockUserService) {
+	mockService := new(MockUserService)
+	userHandler := handler.NewUserHandler(mockService)
 
+	router := gin.Default()
+	router.POST("/users/register", userHandler.RegisterUser)
+	router.POST("/users/login", userHandler.LoginUser)
+
+	return router, mockService
+}
+
+func performRequest(t *testing.T, router *gin.Engine, method, url string, payload interface{}) *httptest.ResponseRecorder {
+	w := httptest.NewRecorder()
 	var bodyBytes []byte
-	var err error
-	switch p := payload.(type) {
-	case string:
-		bodyBytes = []byte(p)
-	default:
+	if payload != nil {
+		var err error
 		bodyBytes, err = json.Marshal(payload)
 		if err != nil {
 			t.Fatalf("failed to marshal payload: %v", err)
 		}
 	}
 
-	c.Request = httptest.NewRequest(method, url, bytes.NewBuffer(bodyBytes))
-	c.Request.Header.Set("Content-Type", "application/json")
-
-	handlerFunc, ok := routes[url]
-	if !ok {
-		t.Fatalf("route not found: %s", url)
-	}
-
-	handlerFunc(c)
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
 	return w
 }
 
 // ---- TESTS ----
-func TestRegisterUser_Success(t *testing.T) {
-	mockSvc := &mockUserService{RegisterUserFunc: func(input dto.CreateUserRequest) error { return nil }}
-	h := handler.NewUserHandler(mockSvc)
-	routes := newRouteMap(h)
-
-	payload := dto.CreateUserRequest{Email: "test@example.com", Password: "12345678"}
-	w := performRequest(t, routes, "POST", "/users/register", payload)
-
-	assert.Equal(t, http.StatusCreated, w.Code)
-	assert.Contains(t, w.Body.String(), "User registered successfully")
-}
-
-func TestRegisterUser_EmailExists(t *testing.T) {
-	mockSvc := &mockUserService{RegisterUserFunc: func(input dto.CreateUserRequest) error { return errors.New("email already registered") }}
-	h := handler.NewUserHandler(mockSvc)
-	routes := newRouteMap(h)
-
-	payload := dto.CreateUserRequest{Email: "test@example.com", Password: "12345678"}
-	w := performRequest(t, routes, "POST", "/users/register", payload)
-
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "email already registered")
-}
-
-func TestLoginUser_Success(t *testing.T) {
-	mockSvc := &mockUserService{
-		LoginFunc: func(input dto.LoginRequest) (string, *model.User, error) {
-			return "mocktoken", &model.User{PublicID: "uuid", Email: "test@example.com", Role: "client"}, nil
-		},
-	}
-	h := handler.NewUserHandler(mockSvc)
-	routes := newRouteMap(h)
-
-	payload := dto.LoginRequest{Email: "test@example.com", Password: "12345678"}
-	w := performRequest(t, routes, "POST", "/users/login", payload)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "mocktoken")
-	assert.Contains(t, w.Body.String(), "public_id")
-}
-
-func TestLoginUser_InvalidCredentials(t *testing.T) {
-	mockSvc := &mockUserService{LoginFunc: func(input dto.LoginRequest) (string, *model.User, error) {
-		return "", nil, errors.New("invalid credentials")
-	}}
-	h := handler.NewUserHandler(mockSvc)
-	routes := newRouteMap(h)
-
-	payload := dto.LoginRequest{Email: "test@example.com", Password: "wrongpass"}
-	w := performRequest(t, routes, "POST", "/users/login", payload)
-
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "invalid credentials")
-}
-
-func TestRegisterUser_InvalidPayload(t *testing.T) {
+func TestRegisterUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
 
-	mockSvc := &mockUserService{RegisterUserFunc: func(input dto.CreateUserRequest) error { return nil }}
-	h := handler.NewUserHandler(mockSvc)
+	t.Run("Success", func(t *testing.T) {
+		router, mockService := setupUserRouter()
+		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "password123"}
 
-	// Invalid Payload
-	body := []byte(`{"password": "12345678"}`)
-	c.Request = httptest.NewRequest("POST", "/users/register", bytes.NewBuffer(body))
-	c.Request.Header.Set("Content-Type", "application/json")
+		mockService.On("RegisterUser", payload).Return(nil)
 
-	h.RegisterUser(c)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "error")
+		w := performRequest(t, router, "POST", "/users/register", payload)
+
+		assert.Equal(t, http.StatusCreated, w.Code)
+		assert.Contains(t, w.Body.String(), "User registered successfully")
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("Email Exists", func(t *testing.T) {
+		router, mockService := setupUserRouter()
+		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "password123"}
+
+		mockService.On("RegisterUser", payload).Return(errors.New("email already registered"))
+
+		w := performRequest(t, router, "POST", "/users/register", payload)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "email already registered")
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("Invalid Payload", func(t *testing.T) {
+		router, _ := setupUserRouter()
+		w := performRequest(t, router, "POST", "/users/register", "invalid-payload")
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
 }
 
-func TestLoginUser_InvalidPayload(t *testing.T) {
+func TestLoginUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
 
-	mockSvc := &mockUserService{LoginFunc: func(input dto.LoginRequest) (string, *model.User, error) { return "", nil, nil }}
-	h := handler.NewUserHandler(mockSvc)
+	t.Run("Success", func(t *testing.T) {
+		router, mockService := setupUserRouter()
+		payload := dto.LoginRequest{Email: "test@example.com", Password: "password123"}
+		user := &model.User{PublicID: "uuid", Email: "test@example.com", Role: "client"}
 
-	// Invalid Payload
-	body := []byte(`{"password": "12345678"}`)
-	c.Request = httptest.NewRequest("POST", "/users/login", bytes.NewBuffer(body))
-	c.Request.Header.Set("Content-Type", "application/json")
+		mockService.On("Login", payload).Return("mock-token", user, nil)
 
-	h.LoginUser(c)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "error")
+		w := performRequest(t, router, "POST", "/users/login", payload)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), "mock-token")
+		assert.Contains(t, w.Body.String(), "public_id")
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("Invalid Credentials", func(t *testing.T) {
+		router, mockService := setupUserRouter()
+		payload := dto.LoginRequest{Email: "test@example.com", Password: "wrongpassword"}
+
+		mockService.On("Login", payload).Return("", (*model.User)(nil), errors.New("invalid credentials"))
+
+		w := performRequest(t, router, "POST", "/users/login", payload)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+		assert.Contains(t, w.Body.String(), "invalid credentials")
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("Invalid Payload", func(t *testing.T) {
+		router, _ := setupUserRouter()
+		w := performRequest(t, router, "POST", "/users/login", "invalid-payload")
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
 }
