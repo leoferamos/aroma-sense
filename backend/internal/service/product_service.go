@@ -170,6 +170,7 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 	return s.repo.Update(&product)
 }
 
+// DeleteProduct removes a product by its ID
 func (s *productService) DeleteProduct(ctx context.Context, id uint) error {
 	_, err := s.repo.FindByID(id)
 	if err != nil {

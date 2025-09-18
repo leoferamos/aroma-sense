@@ -69,6 +69,7 @@ func (r *productRepository) Update(product *model.Product) error {
 	return r.db.Save(product).Error
 }
 
+// Delete removes a product from the database by its ID
 func (r *productRepository) Delete(id uint) error {
 	return r.db.Delete(&model.Product{}, id).Error
 }
