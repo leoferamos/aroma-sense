@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-// Product represents a perfume/product in the catalog.
+// Product represents a fragance/product in the catalog.
 type Product struct {
 	ID            uint      `gorm:"primaryKey" json:"id"`
 	Name          string    `gorm:"size:128;not null" json:"name"`
