@@ -45,6 +45,79 @@ definitions:
         example: success message
         type: string
     type: object
+  dto.ProductResponse:
+    description: Product information returned by the API
+    properties:
+      brand:
+        example: Dior
+        type: string
+      category:
+        example: Eau de Parfum
+        type: string
+      created_at:
+        example: "2025-09-28T10:00:00Z"
+        type: string
+      description:
+        example: A fresh and woody fragrance
+        type: string
+      id:
+        example: 1
+        type: integer
+      image_url:
+        example: https://example.com/image.jpg
+        type: string
+      name:
+        example: Sauvage
+        type: string
+      notes:
+        example: bergamot, pepper, ambroxan
+        type: string
+      price:
+        example: 299.99
+        type: number
+      stock_quantity:
+        example: 50
+        type: integer
+      updated_at:
+        example: "2025-09-28T10:00:00Z"
+        type: string
+      weight:
+        example: 100
+        type: number
+    type: object
+  dto.UpdateProductRequest:
+    description: Product update request (all fields are optional)
+    properties:
+      brand:
+        example: Dior
+        type: string
+      category:
+        example: Eau de Parfum
+        type: string
+      description:
+        example: An intense and spicy fragrance
+        type: string
+      name:
+        example: Sauvage Elixir
+        type: string
+      notes:
+        example:
+        - cinnamon
+        - nutmeg
+        - cardamom
+        items:
+          type: string
+        type: array
+      price:
+        example: 399.99
+        type: number
+      stock_quantity:
+        example: 25
+        type: integer
+      weight:
+        example: 60
+        type: number
+    type: object
   dto.UserResponse:
     properties:
       created_at:
@@ -69,6 +142,282 @@ info:
   title: Aroma Sense API
   version: "1.0"
 paths:
+  /admin/products:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a new product with image upload (Admin only)
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Product name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Product brand
+        in: formData
+        name: brand
+        required: true
+        type: string
+      - description: Product weight in ml
+        in: formData
+        name: weight
+        required: true
+        type: number
+      - description: Product description
+        in: formData
+        name: description
+        type: string
+      - description: Product price
+        in: formData
+        name: price
+        required: true
+        type: number
+      - description: Product category
+        in: formData
+        name: category
+        required: true
+        type: string
+      - description: Product notes (fragrance notes)
+        in: formData
+        name: notes
+        required: true
+        type: array
+      - description: Stock quantity
+        in: formData
+        name: stock_quantity
+        required: true
+        type: integer
+      - description: Product image
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product created successfully
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: Invalid request data or missing image
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden - Admin only
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new product
+      tags:
+      - admin
+  /admin/products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing product (Admin only)
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product deleted successfully
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden - Admin only
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete product
+      tags:
+      - admin
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific product by its ID (Admin only)
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product details
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden - Admin only
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get product by ID
+      tags:
+      - admin
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing product (Admin only)
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product update data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product updated successfully
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: Invalid product ID or request data
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden - Admin only
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update product
+      tags:
+      - admin
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of the latest products with optional limit (Public
+        endpoint)
+      parameters:
+      - default: 10
+        description: Maximum number of products to return
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of latest products
+          schema:
+            items:
+              $ref: '#/definitions/dto.ProductResponse'
+            type: array
+        "400":
+          description: Invalid limit parameter
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: List latest products
+      tags:
+      - products
+  /products/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific product by its ID (Public endpoint)
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product details
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get product details
+      tags:
+      - products
   /users/login:
     post:
       consumes:
@@ -122,4 +471,10 @@ paths:
       summary: Register a new user
       tags:
       - auth
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -2,17 +2,19 @@ package dto
 
 import "time"
 
+// ProductResponse represents the product data returned to the client
+// @Description Product information returned by the API
 type ProductResponse struct {
-	ID            uint      `json:"id"`
-	Name          string    `json:"name"`
-	Brand         string    `json:"brand"`
-	Weight        float64   `json:"weight"`
-	Description   string    `json:"description"`
-	Price         float64   `json:"price"`
-	ImageURL      string    `json:"image_url"`
-	Category      string    `json:"category"`
-	Notes         string    `json:"notes"`
-	StockQuantity int       `json:"stock_quantity"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID            uint      `json:"id" example:"1"`
+	Name          string    `json:"name" example:"Sauvage"`
+	Brand         string    `json:"brand" example:"Dior"`
+	Weight        float64   `json:"weight" example:"100.0"`
+	Description   string    `json:"description" example:"A fresh and woody fragrance"`
+	Price         float64   `json:"price" example:"299.99"`
+	ImageURL      string    `json:"image_url" example:"https://example.com/image.jpg"`
+	Category      string    `json:"category" example:"Eau de Parfum"`
+	Notes         string    `json:"notes" example:"bergamot, pepper, ambroxan"`
+	StockQuantity int       `json:"stock_quantity" example:"50"`
+	CreatedAt     time.Time `json:"created_at" example:"2025-09-28T10:00:00Z"`
+	UpdatedAt     time.Time `json:"updated_at" example:"2025-09-28T10:00:00Z"`
 }

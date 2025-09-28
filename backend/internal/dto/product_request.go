@@ -13,13 +13,14 @@ type ProductFormDTO struct {
 }
 
 // UpdateProductRequest represents the payload for updating a product.
+// @Description Product update request (all fields are optional)
 type UpdateProductRequest struct {
-	Name          *string  `json:"name,omitempty"`
-	Brand         *string  `json:"brand,omitempty"`
-	Weight        *float64 `json:"weight,omitempty"`
-	Description   *string  `json:"description,omitempty"`
-	Price         *float64 `json:"price,omitempty"`
-	Category      *string  `json:"category,omitempty"`
-	Notes         []string `json:"notes,omitempty"`
-	StockQuantity *int     `json:"stock_quantity,omitempty"`
+	Name          *string  `json:"name,omitempty" example:"Sauvage Elixir"`
+	Brand         *string  `json:"brand,omitempty" example:"Dior"`
+	Weight        *float64 `json:"weight,omitempty" example:"60.0"`
+	Description   *string  `json:"description,omitempty" example:"An intense and spicy fragrance"`
+	Price         *float64 `json:"price,omitempty" example:"399.99"`
+	Category      *string  `json:"category,omitempty" example:"Eau de Parfum"`
+	Notes         []string `json:"notes,omitempty" example:"cinnamon,nutmeg,cardamom"`
+	StockQuantity *int     `json:"stock_quantity,omitempty" example:"25"`
 }

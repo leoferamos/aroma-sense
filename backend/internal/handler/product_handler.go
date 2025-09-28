@@ -19,6 +19,28 @@ func NewProductHandler(s service.ProductService) *ProductHandler {
 }
 
 // CreateProduct handles admin product creation
+//
+// @Summary      Create a new product
+// @Description  Creates a new product with image upload (Admin only)
+// @Tags         admin
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        Authorization  header  string  true  "Bearer JWT token"
+// @Param        name           formData  string   true   "Product name"
+// @Param        brand          formData  string   true   "Product brand"
+// @Param        weight         formData  number   true   "Product weight in ml"
+// @Param        description    formData  string   false  "Product description"
+// @Param        price          formData  number   true   "Product price"
+// @Param        category       formData  string   true   "Product category"
+// @Param        notes          formData  array    true   "Product notes (fragrance notes)"
+// @Param        stock_quantity formData  integer  true   "Stock quantity"
+// @Param        image          formData  file     true   "Product image"
+// @Success      201  {object}  dto.MessageResponse  "Product created successfully"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid request data or missing image"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
+// @Router       /admin/products [post]
+// @Security     BearerAuth
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var form dto.ProductFormDTO
 	if err := c.ShouldBind(&form); err != nil {
@@ -65,6 +87,21 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 }
 
 // GetProduct handles fetching a product by its ID
+//
+// @Summary      Get product by ID
+// @Description  Retrieves a specific product by its ID (Admin only)
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header  string  true  "Bearer JWT token"
+// @Param        id             path    int     true  "Product ID"
+// @Success      200  {object}  dto.ProductResponse  "Product details"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
+// @Failure      404  {object}  dto.ErrorResponse    "Product not found"
+// @Router       /admin/products/{id} [get]
+// @Security     BearerAuth
 func (h *ProductHandler) GetProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -83,6 +120,17 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 }
 
 // GetLatestProducts handles fetching the latest products with an optional limit
+//
+// @Summary      List latest products
+// @Description  Retrieves a list of the latest products with optional limit (Public endpoint)
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        limit  query    int  false  "Maximum number of products to return"  default(10)
+// @Success      200  {array}   dto.ProductResponse  "List of latest products"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid limit parameter"
+// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
+// @Router       /products [get]
 func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err := strconv.Atoi(limitStr)
@@ -101,6 +149,22 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 }
 
 // UpdateProduct handles updating an existing product
+//
+// @Summary      Update product
+// @Description  Updates an existing product (Admin only)
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header  string                      true  "Bearer JWT token"
+// @Param        id             path    int                         true  "Product ID"
+// @Param        product        body    dto.UpdateProductRequest    true  "Product update data"
+// @Success      200  {object}  dto.MessageResponse  "Product updated successfully"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID or request data"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
+// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
+// @Router       /admin/products/{id} [patch]
+// @Security     BearerAuth
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -124,6 +188,21 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 }
 
 // DeleteProduct handles deleting an existing product
+//
+// @Summary      Delete product
+// @Description  Deletes an existing product (Admin only)
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header  string  true  "Bearer JWT token"
+// @Param        id             path    int     true  "Product ID"
+// @Success      200  {object}  dto.MessageResponse  "Product deleted successfully"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
+// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
+// @Router       /admin/products/{id} [delete]
+// @Security     BearerAuth
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
