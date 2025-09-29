@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
@@ -116,8 +117,11 @@ func (s *cartService) AddItemToCart(userID string, productID uint, quantity int)
 	}
 
 	// Check stock availability
+	if product.StockQuantity <= 0 {
+		return nil, errors.New("product out of stock")
+	}
 	if product.StockQuantity < quantity {
-		return nil, errors.New("insufficient stock")
+		return nil, fmt.Errorf("insufficient stock - only %d items available", product.StockQuantity)
 	}
 
 	// Get user's cart
@@ -135,8 +139,11 @@ func (s *cartService) AddItemToCart(userID string, productID uint, quantity int)
 			itemExists = true
 			// Calculate new total quantity and validate stock
 			newQuantity := item.Quantity + quantity
+			if product.StockQuantity <= 0 {
+				return nil, errors.New("product out of stock")
+			}
 			if product.StockQuantity < newQuantity {
-				return nil, errors.New("insufficient stock for requested quantity")
+				return nil, fmt.Errorf("insufficient stock - only %d items available, you already have %d in cart", product.StockQuantity, item.Quantity)
 			}
 			break
 		}
@@ -208,8 +215,11 @@ func (s *cartService) UpdateItemQuantity(userID string, itemID uint, quantity in
 			return nil, errors.New("product not found")
 		}
 
+		if product.StockQuantity <= 0 {
+			return nil, errors.New("product out of stock")
+		}
 		if product.StockQuantity < quantity {
-			return nil, errors.New("insufficient stock for requested quantity")
+			return nil, fmt.Errorf("insufficient stock - only %d items available", product.StockQuantity)
 		}
 
 		// Update the quantity

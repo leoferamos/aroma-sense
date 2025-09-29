@@ -441,13 +441,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request body",
+                        "description": "Invalid request body or insufficient stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Product out of stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -631,7 +643,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request body or item ID",
+                        "description": "Invalid request body, item ID, or insufficient stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -643,7 +655,13 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Cart item not found",
+                        "description": "Cart item or product not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Product out of stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }

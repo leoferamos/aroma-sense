@@ -64,8 +64,10 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // @Param        Authorization  header  string                true   "Bearer JWT token"
 // @Param        request        body    dto.AddToCartRequest  true   "Product ID and quantity to add"
 // @Success      200  {object}  dto.CartResponse    "Updated cart with new item"
-// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body"
+// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body or insufficient stock"
 // @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
+// @Failure      404  {object}  dto.ErrorResponse   "Product not found"
+// @Failure      409  {object}  dto.ErrorResponse   "Product out of stock"
 // @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
 // @Router       /cart [post]
 // @Security     BearerAuth
@@ -91,6 +93,16 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	// Add item to cart
 	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductID, req.Quantity)
 	if err != nil {
+		// Handle different types of errors with appropriate HTTP status codes
+		if err.Error() == "product not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		if err.Error() == "product out of stock" {
+			c.JSON(http.StatusConflict, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		// For insufficient stock or other validation errors
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -109,9 +121,10 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 // @Param        itemId         path    int                          true   "Cart item ID"
 // @Param        request        body    dto.UpdateCartItemRequest    true   "New quantity (0 to remove item)"
 // @Success      200  {object}  dto.CartResponse    "Updated cart"
-// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body or item ID"
+// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body, item ID, or insufficient stock"
 // @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
-// @Failure      404  {object}  dto.ErrorResponse   "Cart item not found"
+// @Failure      404  {object}  dto.ErrorResponse   "Cart item or product not found"
+// @Failure      409  {object}  dto.ErrorResponse   "Product out of stock"
 // @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
 // @Router       /cart/items/{itemId} [patch]
 // @Security     BearerAuth
@@ -151,6 +164,15 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
 			return
 		}
+		if err.Error() == "product not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		if err.Error() == "product out of stock" {
+			c.JSON(http.StatusConflict, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		// For insufficient stock or other validation errors
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
