@@ -417,6 +417,40 @@ paths:
       tags:
       - admin
   /cart:
+    delete:
+      consumes:
+      - application/json
+      description: Removes all items from the user's cart, returning an empty cart
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Empty cart after clearing all items
+          schema:
+            $ref: '#/definitions/dto.CartResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Cart not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Clear cart
+      tags:
+      - cart
     get:
       consumes:
       - application/json

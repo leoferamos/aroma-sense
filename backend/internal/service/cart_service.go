@@ -17,6 +17,7 @@ type CartService interface {
 	AddItemToCart(userID string, productID uint, quantity int) (*dto.CartResponse, error)
 	UpdateItemQuantity(userID string, itemID uint, quantity int) (*dto.CartResponse, error)
 	RemoveItem(userID string, itemID uint) (*dto.CartResponse, error)
+	ClearCart(userID string) (*dto.CartResponse, error)
 }
 
 type cartService struct {
@@ -225,4 +226,20 @@ func (s *cartService) UpdateItemQuantity(userID string, itemID uint, quantity in
 // RemoveItem removes an item from the user's cart
 func (s *cartService) RemoveItem(userID string, itemID uint) (*dto.CartResponse, error) {
 	return s.UpdateItemQuantity(userID, itemID, 0)
+}
+
+// ClearCart removes all items from the user's cart
+func (s *cartService) ClearCart(userID string) (*dto.CartResponse, error) {
+	// Get user's cart
+	cart, err := s.GetCartByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.repo.ClearCartItems(cart.ID); err != nil {
+		return nil, errors.New("failed to clear cart")
+	}
+
+	// Return empty cart response
+	return s.GetCartResponse(userID)
 }

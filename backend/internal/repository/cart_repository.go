@@ -15,6 +15,7 @@ type CartRepository interface {
 	UpdateCartItem(item *model.CartItem) error
 	FindCartItemByID(itemID uint) (*model.CartItem, error)
 	DeleteCartItem(itemID uint) error
+	ClearCartItems(cartID uint) error
 }
 
 type cartRepository struct {
@@ -73,4 +74,9 @@ func (r *cartRepository) FindCartItemByID(itemID uint) (*model.CartItem, error) 
 // DeleteCartItem removes a cart item by its ID
 func (r *cartRepository) DeleteCartItem(itemID uint) error {
 	return r.db.Delete(&model.CartItem{}, itemID).Error
+}
+
+// ClearCartItems removes all items from a specific cart
+func (r *cartRepository) ClearCartItems(cartID uint) error {
+	return r.db.Where("cart_id = ?", cartID).Delete(&model.CartItem{}).Error
 }
