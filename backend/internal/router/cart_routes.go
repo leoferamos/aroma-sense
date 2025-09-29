@@ -14,5 +14,6 @@ func CartRoutes(r *gin.Engine, handler *handler.CartHandler) {
 		cartGroup.GET("", handler.GetCart)
 		cartGroup.POST("", handler.AddItem)
 		cartGroup.PATCH("/items/:itemId", handler.UpdateItemQuantity)
+		cartGroup.DELETE("/items/:itemId", handler.RemoveItem)
 	}
 }

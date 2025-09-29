@@ -157,3 +157,56 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 
 	c.JSON(http.StatusOK, cartResponse)
 }
+
+// RemoveItem removes a specific item from the user's cart
+//
+// @Summary      Remove item from cart
+// @Description  Removes a specific item from the user's cart completely
+// @Tags         cart
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header  string  true   "Bearer JWT token"
+// @Param        itemId         path    int     true   "Cart item ID"
+// @Success      200  {object}  dto.CartResponse    "Updated cart after item removal"
+// @Failure      400  {object}  dto.ErrorResponse   "Invalid item ID"
+// @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
+// @Failure      404  {object}  dto.ErrorResponse   "Cart item not found"
+// @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
+// @Router       /cart/items/{itemId} [delete]
+// @Security     BearerAuth
+func (h *CartHandler) RemoveItem(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+		return
+	}
+
+	// Get item ID from URL parameter
+	itemIDParam := c.Param("itemId")
+	var itemID uint
+	if id, err := strconv.ParseUint(itemIDParam, 10, 32); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid item ID"})
+		return
+	} else {
+		itemID = uint(id)
+	}
+
+	// Remove item from cart
+	cartResponse, err := h.cartService.RemoveItem(userIDStr, itemID)
+	if err != nil {
+		if err.Error() == "cart item not found" || err.Error() == "cart item not found in user's cart" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, cartResponse)
+}

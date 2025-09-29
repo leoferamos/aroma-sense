@@ -494,6 +494,49 @@ paths:
       tags:
       - cart
   /cart/items/{itemId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a specific item from the user's cart completely
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Cart item ID
+        in: path
+        name: itemId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated cart after item removal
+          schema:
+            $ref: '#/definitions/dto.CartResponse'
+        "400":
+          description: Invalid item ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Cart item not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove item from cart
+      tags:
+      - cart
     patch:
       consumes:
       - application/json

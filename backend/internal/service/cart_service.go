@@ -16,6 +16,7 @@ type CartService interface {
 	GetCartResponse(userID string) (*dto.CartResponse, error)
 	AddItemToCart(userID string, productID uint, quantity int) (*dto.CartResponse, error)
 	UpdateItemQuantity(userID string, itemID uint, quantity int) (*dto.CartResponse, error)
+	RemoveItem(userID string, itemID uint) (*dto.CartResponse, error)
 }
 
 type cartService struct {
@@ -219,4 +220,9 @@ func (s *cartService) UpdateItemQuantity(userID string, itemID uint, quantity in
 
 	// Return updated cart
 	return s.GetCartResponse(userID)
+}
+
+// RemoveItem removes an item from the user's cart
+func (s *cartService) RemoveItem(userID string, itemID uint) (*dto.CartResponse, error) {
+	return s.UpdateItemQuantity(userID, itemID, 0)
 }
