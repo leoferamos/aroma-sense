@@ -37,12 +37,10 @@ func main() {
 		log.Fatal("Failed to initialize storage client:", err)
 	}
 
-	// Initialize modules
-	userHandler := bootstrap.InitUserModule(db.DB)
-	productHandler := bootstrap.InitProductModule(db.DB, storageClient)
-	cartHandler := bootstrap.InitCartModule(db.DB)
+	// Initialize all modules with proper dependency injection
+	handlers := bootstrap.InitializeApp(db.DB, storageClient)
 
-	r := router.SetupRouter(userHandler, productHandler, cartHandler)
+	r := router.SetupRouter(handlers.UserHandler, handlers.ProductHandler, handlers.CartHandler)
 
 	// Swagger docs route
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
