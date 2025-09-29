@@ -9,7 +9,9 @@ import (
 
 // InitUserModule initializes the user module components and returns a UserHandler
 func InitUserModule(db *gorm.DB) *handler.UserHandler {
-	repo := repository.NewUserRepository(db)
-	service := service.NewUserService(repo)
-	return handler.NewUserHandler(service)
+	userRepo := repository.NewUserRepository(db)
+	cartRepo := repository.NewCartRepository(db)
+	cartService := service.NewCartService(cartRepo)
+	userService := service.NewUserService(userRepo, cartService)
+	return handler.NewUserHandler(userService)
 }

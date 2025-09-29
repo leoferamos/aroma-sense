@@ -17,12 +17,13 @@ type UserService interface {
 }
 
 type userService struct {
-	repo repository.UserRepository
+	repo        repository.UserRepository
+	cartService CartService
 }
 
 // NewUserService creates a new instance of UserService
-func NewUserService(repo repository.UserRepository) UserService {
-	return &userService{repo: repo}
+func NewUserService(repo repository.UserRepository, cartService CartService) UserService {
+	return &userService{repo: repo, cartService: cartService}
 }
 
 // RegisterUser handles the business logic for user registration
@@ -43,7 +44,17 @@ func (s *userService) RegisterUser(input dto.CreateUserRequest) error {
 		PasswordHash: string(hashedPassword),
 	}
 
-	return s.repo.Create(&user)
+	// Create the user
+	if err := s.repo.Create(&user); err != nil {
+		return err
+	}
+
+	// Create a cart for the new user
+	if err := s.cartService.CreateCartForUser(user.PublicID); err != nil {
+		return errors.New("failed to create cart for user")
+	}
+
+	return nil
 }
 
 // Login handles the business logic for user login
@@ -55,6 +66,11 @@ func (s *userService) Login(input dto.LoginRequest) (string, *model.User, error)
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password)); err != nil {
 		return "", nil, errors.New("invalid credentials")
+	}
+
+	// Ensure user has a cart
+	if err := s.cartService.CreateCartForUser(user.PublicID); err != nil {
+		return "", nil, errors.New("failed to ensure cart exists")
 	}
 
 	token, err := auth.GenerateJWT(user.PublicID, user.Role)
