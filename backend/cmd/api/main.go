@@ -40,8 +40,9 @@ func main() {
 	// Initialize modules
 	userHandler := bootstrap.InitUserModule(db.DB)
 	productHandler := bootstrap.InitProductModule(db.DB, storageClient)
+	cartHandler := bootstrap.InitCartModule(db.DB)
 
-	r := router.SetupRouter(userHandler, productHandler)
+	r := router.SetupRouter(userHandler, productHandler, cartHandler)
 
 	// Swagger docs route
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

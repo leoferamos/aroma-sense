@@ -1,5 +1,45 @@
 basePath: /
 definitions:
+  dto.CartItemResponse:
+    properties:
+      cart_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      product:
+        $ref: '#/definitions/dto.ProductResponse'
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      total:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  dto.CartResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      item_count:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/dto.CartItemResponse'
+        type: array
+      total:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   dto.CreateUserRequest:
     properties:
       email:
@@ -357,6 +397,42 @@ paths:
       summary: Update product
       tags:
       - admin
+  /cart:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the shopping cart for the authenticated user with items,
+        quantities and totals
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User's cart with items and totals
+          schema:
+            $ref: '#/definitions/dto.CartResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Cart not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user's cart
+      tags:
+      - cart
   /products:
     get:
       consumes:
@@ -387,35 +463,6 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: List latest products
-      tags:
-      - products
-  /products/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a specific product by its ID (Public endpoint)
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Product details
-          schema:
-            $ref: '#/definitions/dto.ProductResponse'
-        "400":
-          description: Invalid product ID
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Product not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get product details
       tags:
       - products
   /users/login:

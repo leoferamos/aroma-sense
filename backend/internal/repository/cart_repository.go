@@ -27,10 +27,13 @@ func (r *cartRepository) Create(cart *model.Cart) error {
 	return r.db.Create(cart).Error
 }
 
-// FindByUserID retrieves a cart by user ID
+// FindByUserID retrieves a cart by user ID with items and products preloaded
 func (r *cartRepository) FindByUserID(userID string) (*model.Cart, error) {
 	var cart model.Cart
-	err := r.db.Where("user_id = ?", userID).First(&cart).Error
+	err := r.db.Where("user_id = ?", userID).
+		Preload("Items").
+		Preload("Items.Product").
+		First(&cart).Error
 	return &cart, err
 }
 
