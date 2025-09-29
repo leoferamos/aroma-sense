@@ -1,5 +1,16 @@
 basePath: /
 definitions:
+  dto.AddToCartRequest:
+    properties:
+      product_id:
+        type: integer
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
   dto.CartItemResponse:
     properties:
       cart_id:
@@ -431,6 +442,47 @@ paths:
       security:
       - BearerAuth: []
       summary: Get current user's cart
+      tags:
+      - cart
+    post:
+      consumes:
+      - application/json
+      description: Adds a product to the user's shopping cart. If item already exists,
+        increases quantity.
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Product ID and quantity to add
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddToCartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated cart with new item
+          schema:
+            $ref: '#/definitions/dto.CartResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add item to cart
       tags:
       - cart
   /products:

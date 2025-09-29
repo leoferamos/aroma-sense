@@ -11,6 +11,8 @@ type CartRepository interface {
 	FindByUserID(userID string) (*model.Cart, error)
 	Update(cart *model.Cart) error
 	Delete(id uint) error
+	CreateCartItem(item *model.CartItem) error
+	UpdateCartItem(item *model.CartItem) error
 }
 
 type cartRepository struct {
@@ -45,4 +47,14 @@ func (r *cartRepository) Update(cart *model.Cart) error {
 // Delete removes a cart by its ID
 func (r *cartRepository) Delete(id uint) error {
 	return r.db.Delete(&model.Cart{}, id).Error
+}
+
+// CreateCartItem creates a new cart item
+func (r *cartRepository) CreateCartItem(item *model.CartItem) error {
+	return r.db.Create(item).Error
+}
+
+// UpdateCartItem updates an existing cart item
+func (r *cartRepository) UpdateCartItem(item *model.CartItem) error {
+	return r.db.Save(item).Error
 }

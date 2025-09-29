@@ -12,5 +12,6 @@ func CartRoutes(r *gin.Engine, handler *handler.CartHandler) {
 	cartGroup.Use(auth.JWTAuthMiddleware())
 	{
 		cartGroup.GET("", handler.GetCart)
+		cartGroup.POST("", handler.AddItem)
 	}
 }

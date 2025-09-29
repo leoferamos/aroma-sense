@@ -44,57 +44,54 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 	}
 
 	// Get user's cart
-	cart, err := h.cartService.GetCartByUserID(userIDStr)
+	cartResponse, err := h.cartService.GetCartResponse(userIDStr)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "cart not found"})
 		return
 	}
 
-	cartResponse := dto.CartResponse{
-		ID:        cart.ID,
-		UserID:    cart.UserID,
-		Items:     []dto.CartItemResponse{},
-		Total:     0.0,
-		ItemCount: 0,
-		CreatedAt: cart.CreatedAt,
-		UpdatedAt: cart.UpdatedAt,
+	c.JSON(http.StatusOK, cartResponse)
+}
+
+// AddItem adds an item to the user's cart
+//
+// @Summary      Add item to cart
+// @Description  Adds a product to the user's shopping cart. If item already exists, increases quantity.
+// @Tags         cart
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header  string                true   "Bearer JWT token"
+// @Param        request        body    dto.AddToCartRequest  true   "Product ID and quantity to add"
+// @Success      200  {object}  dto.CartResponse    "Updated cart with new item"
+// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body"
+// @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
+// @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
+// @Router       /cart [post]
+// @Security     BearerAuth
+func (h *CartHandler) AddItem(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		return
 	}
 
-	// Convert cart items and calculate totals
-	for _, item := range cart.Items {
-		itemTotal := item.Price * float64(item.Quantity)
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+		return
+	}
 
-		cartItemResponse := dto.CartItemResponse{
-			ID:        item.ID,
-			CartID:    item.CartID,
-			ProductID: item.ProductID,
-			Quantity:  item.Quantity,
-			Price:     item.Price,
-			Total:     itemTotal,
-			CreatedAt: item.CreatedAt,
-			UpdatedAt: item.UpdatedAt,
-		}
+	var req dto.AddToCartRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid request body"})
+		return
+	}
 
-		if item.Product != nil {
-			cartItemResponse.Product = &dto.ProductResponse{
-				ID:            item.Product.ID,
-				Name:          item.Product.Name,
-				Brand:         item.Product.Brand,
-				Weight:        item.Product.Weight,
-				Description:   item.Product.Description,
-				Price:         item.Product.Price,
-				ImageURL:      item.Product.ImageURL,
-				Category:      item.Product.Category,
-				Notes:         item.Product.Notes,
-				StockQuantity: item.Product.StockQuantity,
-				CreatedAt:     item.Product.CreatedAt,
-				UpdatedAt:     item.Product.UpdatedAt,
-			}
-		}
-
-		cartResponse.Items = append(cartResponse.Items, cartItemResponse)
-		cartResponse.Total += itemTotal
-		cartResponse.ItemCount += item.Quantity
+	// Add item to cart
+	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductID, req.Quantity)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, cartResponse)
