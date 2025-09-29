@@ -15,6 +15,7 @@ type CartService interface {
 	GetCartByUserID(userID string) (*model.Cart, error)
 	GetCartResponse(userID string) (*dto.CartResponse, error)
 	AddItemToCart(userID string, productID uint, quantity int) (*dto.CartResponse, error)
+	UpdateItemQuantity(userID string, itemID uint, quantity int) (*dto.CartResponse, error)
 }
 
 type cartService struct {
@@ -124,26 +125,29 @@ func (s *cartService) AddItemToCart(userID string, productID uint, quantity int)
 	}
 
 	// Check if item already exists in cart
-	var existingItem *model.CartItem
-	for i := range cart.Items {
-		if cart.Items[i].ProductID == productID {
-			existingItem = &cart.Items[i]
+	var existingItemID uint
+	itemExists := false
+	for _, item := range cart.Items {
+		if item.ProductID == productID {
+			existingItemID = item.ID
+			itemExists = true
+			// Calculate new total quantity and validate stock
+			newQuantity := item.Quantity + quantity
+			if product.StockQuantity < newQuantity {
+				return nil, errors.New("insufficient stock for requested quantity")
+			}
 			break
 		}
 	}
 
-	if existingItem != nil {
-		// Check total stock for new quantity
-		totalQuantity := existingItem.Quantity + quantity
-		if product.StockQuantity < totalQuantity {
-			return nil, errors.New("insufficient stock for requested quantity")
+	if itemExists {
+		// Get current quantity and add the new quantity
+		currentItem, err := s.repo.FindCartItemByID(existingItemID)
+		if err != nil {
+			return nil, errors.New("failed to find existing cart item")
 		}
-
-		// Update quantity and save to database
-		existingItem.Quantity = totalQuantity
-		if err := s.repo.UpdateCartItem(existingItem); err != nil {
-			return nil, errors.New("failed to update cart item")
-		}
+		newQuantity := currentItem.Quantity + quantity
+		return s.UpdateItemQuantity(userID, existingItemID, newQuantity)
 	} else {
 		// Create new cart item
 		newItem := model.CartItem{
@@ -156,6 +160,60 @@ func (s *cartService) AddItemToCart(userID string, productID uint, quantity int)
 		// Save to database
 		if err := s.repo.CreateCartItem(&newItem); err != nil {
 			return nil, errors.New("failed to add item to cart")
+		}
+	}
+
+	// Return updated cart
+	return s.GetCartResponse(userID)
+}
+
+// UpdateItemQuantity updates the quantity of a specific cart item
+func (s *cartService) UpdateItemQuantity(userID string, itemID uint, quantity int) (*dto.CartResponse, error) {
+	// Get the cart item
+	cartItem, err := s.repo.FindCartItemByID(itemID)
+	if err != nil {
+		return nil, errors.New("cart item not found")
+	}
+
+	// Verify the item belongs to the user's cart
+	cart, err := s.GetCartByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the item belongs to this user's cart
+	itemBelongsToUser := false
+	for _, item := range cart.Items {
+		if item.ID == itemID {
+			itemBelongsToUser = true
+			break
+		}
+	}
+
+	if !itemBelongsToUser {
+		return nil, errors.New("cart item not found in user's cart")
+	}
+
+	// If quantity is 0, remove the item
+	if quantity == 0 {
+		if err := s.repo.DeleteCartItem(itemID); err != nil {
+			return nil, errors.New("failed to remove cart item")
+		}
+	} else {
+		// Validate stock availability for the new quantity
+		product, err := s.productService.GetProductByID(context.Background(), cartItem.ProductID)
+		if err != nil {
+			return nil, errors.New("product not found")
+		}
+
+		if product.StockQuantity < quantity {
+			return nil, errors.New("insufficient stock for requested quantity")
+		}
+
+		// Update the quantity
+		cartItem.Quantity = quantity
+		if err := s.repo.UpdateCartItem(cartItem); err != nil {
+			return nil, errors.New("failed to update cart item quantity")
 		}
 	}
 

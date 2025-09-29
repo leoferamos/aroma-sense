@@ -34,5 +34,5 @@ type AddToCartRequest struct {
 
 // UpdateCartItemRequest represents the payload for updating cart item quantity
 type UpdateCartItemRequest struct {
-	Quantity int `json:"quantity" binding:"required,min=1"`
+	Quantity int `json:"quantity" binding:"required,min=0"`
 }

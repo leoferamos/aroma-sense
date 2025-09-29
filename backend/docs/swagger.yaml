@@ -136,6 +136,14 @@ definitions:
         example: 100
         type: number
     type: object
+  dto.UpdateCartItemRequest:
+    properties:
+      quantity:
+        minimum: 0
+        type: integer
+    required:
+    - quantity
+    type: object
   dto.UpdateProductRequest:
     description: Product update request (all fields are optional)
     properties:
@@ -483,6 +491,57 @@ paths:
       security:
       - BearerAuth: []
       summary: Add item to cart
+      tags:
+      - cart
+  /cart/items/{itemId}:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the quantity of a specific item in the user's cart. If
+        quantity is 0, removes the item.
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Cart item ID
+        in: path
+        name: itemId
+        required: true
+        type: integer
+      - description: New quantity (0 to remove item)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCartItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated cart
+          schema:
+            $ref: '#/definitions/dto.CartResponse'
+        "400":
+          description: Invalid request body or item ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Cart item not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update cart item quantity
       tags:
       - cart
   /products:

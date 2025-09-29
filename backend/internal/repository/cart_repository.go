@@ -13,6 +13,8 @@ type CartRepository interface {
 	Delete(id uint) error
 	CreateCartItem(item *model.CartItem) error
 	UpdateCartItem(item *model.CartItem) error
+	FindCartItemByID(itemID uint) (*model.CartItem, error)
+	DeleteCartItem(itemID uint) error
 }
 
 type cartRepository struct {
@@ -57,4 +59,18 @@ func (r *cartRepository) CreateCartItem(item *model.CartItem) error {
 // UpdateCartItem updates an existing cart item
 func (r *cartRepository) UpdateCartItem(item *model.CartItem) error {
 	return r.db.Save(item).Error
+}
+
+// FindCartItemByID retrieves a cart item by its ID with product preloaded
+func (r *cartRepository) FindCartItemByID(itemID uint) (*model.CartItem, error) {
+	var item model.CartItem
+	err := r.db.Where("id = ?", itemID).
+		Preload("Product").
+		First(&item).Error
+	return &item, err
+}
+
+// DeleteCartItem removes a cart item by its ID
+func (r *cartRepository) DeleteCartItem(itemID uint) error {
+	return r.db.Delete(&model.CartItem{}, itemID).Error
 }

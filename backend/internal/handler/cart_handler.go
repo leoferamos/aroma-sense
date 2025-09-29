@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
@@ -90,6 +91,66 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	// Add item to cart
 	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductID, req.Quantity)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, cartResponse)
+}
+
+// UpdateItemQuantity updates the quantity of a specific cart item
+//
+// @Summary      Update cart item quantity
+// @Description  Updates the quantity of a specific item in the user's cart. If quantity is 0, removes the item.
+// @Tags         cart
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header  string                       true   "Bearer JWT token"
+// @Param        itemId         path    int                          true   "Cart item ID"
+// @Param        request        body    dto.UpdateCartItemRequest    true   "New quantity (0 to remove item)"
+// @Success      200  {object}  dto.CartResponse    "Updated cart"
+// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body or item ID"
+// @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
+// @Failure      404  {object}  dto.ErrorResponse   "Cart item not found"
+// @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
+// @Router       /cart/items/{itemId} [patch]
+// @Security     BearerAuth
+func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+		return
+	}
+
+	// Get item ID from URL parameter
+	itemIDParam := c.Param("itemId")
+	var itemID uint
+	if id, err := strconv.ParseUint(itemIDParam, 10, 32); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid item ID"})
+		return
+	} else {
+		itemID = uint(id)
+	}
+
+	var req dto.UpdateCartItemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid request body"})
+		return
+	}
+
+	// Update item quantity
+	cartResponse, err := h.cartService.UpdateItemQuantity(userIDStr, itemID, req.Quantity)
+	if err != nil {
+		if err.Error() == "cart item not found" || err.Error() == "cart item not found in user's cart" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
