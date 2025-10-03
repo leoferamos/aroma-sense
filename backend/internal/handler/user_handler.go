@@ -3,6 +3,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
@@ -36,6 +37,8 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
+	input.Email = strings.ToLower(input.Email)
+
 	if err := h.userService.RegisterUser(input); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
@@ -61,6 +64,9 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
+
+	input.Email = strings.ToLower(input.Email)
+
 	token, user, err := h.userService.Login(input)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid credentials"})
