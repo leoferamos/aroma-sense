@@ -1,45 +1,104 @@
 package auth
 
 import (
-	"log"
+	"errors"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func getJWTSecret() []byte {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		log.Fatal("JWT_SECRET not set")
-	}
-	return []byte(secret)
-}
+const (
+	defaultIssuer     = "aroma-sense-api"
+	minSecretLength   = 32
+	defaultExpiryMins = 15
+	clockSkewSeconds  = 5
+)
 
-// GenerateJWT creates a JWT token for a given public_id and role
-func GenerateJWT(publicID string, role string) (string, error) {
-	now := time.Now()
-	claims := jwt.MapClaims{
-		"sub":  publicID,
-		"role": role,
-		"exp":  now.Add(15 * time.Minute).Unix(),
-		"iat":  now.Unix(),
-		"iss":  "aroma-sense-api",
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(getJWTSecret())
-}
+var (
+	secretOnce sync.Once
+	secret     []byte
+	secretErr  error
+)
 
-// ParseJWT validates and returns the claims of the token
-func ParseJWT(tokenStr string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return getJWTSecret(), nil
+func loadSecret() ([]byte, error) {
+	secretOnce.Do(func() {
+		s := os.Getenv("JWT_SECRET")
+		if s == "" {
+			secretErr = errors.New("JWT_SECRET not set")
+			return
+		}
+		if len(s) < minSecretLength {
+			secretErr = errors.New("JWT_SECRET too short; must be >= 32 bytes")
+			return
+		}
+		secret = []byte(s)
 	})
-	if err != nil || !token.Valid {
+	return secret, secretErr
+}
+
+// CustomClaims use RegisteredClaims and a role field.
+type CustomClaims struct {
+	Role string `json:"role"`
+	jwt.RegisteredClaims
+}
+
+// GenerateJWT creates a signed JWT token for the given user public ID and role.
+func GenerateJWT(publicID string, role string) (string, error) {
+	sec, err := loadSecret()
+	if err != nil {
+		return "", err
+	}
+
+	claims := CustomClaims{
+		Role: role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   publicID,
+			Issuer:    defaultIssuer,
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(defaultExpiryMins * time.Minute)),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(sec)
+}
+
+// ParseJWT validates and parses a JWT token string, returning the custom claims.
+func ParseJWT(tokenStr string) (*CustomClaims, error) {
+	sec, err := loadSecret()
+	if err != nil {
 		return nil, err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		return claims, nil
+
+	keyFunc := func(token *jwt.Token) (any, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrTokenUnverifiable
+		}
+		return sec, nil
 	}
-	return nil, jwt.ErrTokenMalformed
+
+	claims := &CustomClaims{}
+	parser := jwt.NewParser(jwt.WithLeeway(time.Second * clockSkewSeconds))
+	token, err := parser.ParseWithClaims(tokenStr, claims, keyFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate token
+	if !token.Valid {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+
+	// Validate Issuer
+	if claims.Issuer != defaultIssuer {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+
+	// Check Subject field
+	if claims.Subject == "" {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+	return claims, nil
 }

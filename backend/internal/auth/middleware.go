@@ -26,8 +26,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Inject relevant claims into context
-		c.Set("userID", claims["sub"])
-		c.Set("role", claims["role"])
+		c.Set("userID", claims.Subject)
+		c.Set("role", claims.Role)
 
 		c.Next()
 	}
