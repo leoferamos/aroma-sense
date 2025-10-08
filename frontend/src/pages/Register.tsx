@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
+import WordGrid from '../components/WordGrid';
 
 const Register: React.FC = () => {
   const [form, setForm] = useState({
@@ -75,13 +76,17 @@ const Register: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left side - gray background */}
-      <div className="hidden md:flex md:w-1/2 bg-gray-200 items-center justify-center relative">
-  {/* Fragrance image: small part overlapping the white square */}
-        <img
-          src="/fragance.png"
-          alt="Fragrance"
-          className="absolute top-1/2 right-[-60px] -translate-y-1/2 w-[38vw] max-w-[420px] min-w-[180px] h-auto object-contain z-10"
-        />
+  <div className="hidden md:flex md:w-1/2 items-center justify-center relative" style={{ background: '#EAECEF' }}>
+        {/* Background words grid */}
+          <div className="absolute inset-0 pl-4 pr-6 flex items-center overflow-hidden z-10">
+            <WordGrid />
+          </div>
+          <img
+            src="/fragance.png"
+            alt="Fragrance"
+            className="frag-mid frag-xl absolute top-1/2 right-[-120px] w-[42vw] max-w-[560px] min-w-[220px] lg:w-[48vw] xl:w-[52vw] h-auto object-contain z-30"
+            style={{ transform: 'translateY(-50%) rotate(-20deg)' }}
+          />
       </div>
       {/* Right side - white box */}
       <div className="w-full md:w-1/2 bg-white flex items-center justify-center px-4 py-8 md:px-0 md:py-0 relative">

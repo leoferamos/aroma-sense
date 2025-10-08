@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom responsive adjustments */
+@media (min-width: 1280px) and (max-width: 1700px) {
+	/* Slightly reduce fragrance image and nudge right for screens (1280-1700px) */
+	.frag-mid {
+		width: 42vw !important;
+		max-width: 620px !important;
+		right: -80px !important;
+	}
+}
+
+@media (min-width: 1701px) {
+	.frag-xl {
+		right: -140px !important;
+	}
+}
+
+/* Small viewport adjustment */
+@media (max-width: 970px) and (max-height: 787px) {
+	.frag-mid.frag-xl, .frag-mid {
+		right: -60px !important;
+		transform: translateY(-50%) rotate(-18deg) !important;
+		width: 36vw !important;
+		max-width: 420px !important;
+	}
+}
