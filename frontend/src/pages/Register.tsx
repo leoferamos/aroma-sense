@@ -3,22 +3,19 @@
  * Renders the registration form with validation and error handling.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
 import WordGrid from '../components/WordGrid';
+import { useRegisterValidation } from '../hooks/useRegisterValidation';
+import { messages } from '../constants/messages';
 
 const Register: React.FC = () => {
   const [form, setForm] = useState({
     email: '',
     password: '',
     repeatPassword: '',
-  });
-  const [errors, setErrors] = useState({
-    email: '',
-    password: '',
-    repeatPassword: '',
-    general: '',
   });
   const [touched, setTouched] = useState({
     email: false,
@@ -28,37 +25,7 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
-  useEffect(() => {
-    const newErrors = { email: '', password: '', repeatPassword: '', general: '' };
-    if (touched.email) {
-      if (!form.email) {
-        newErrors.email = 'Email is required.';
-      } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
-        newErrors.email = 'Enter a valid email address.';
-      }
-    }
-    if (touched.password) {
-      if (!form.password) {
-        newErrors.password = 'Password is required.';
-      } else if (form.password.length < 8) {
-        newErrors.password = 'Password must be at least 8 characters.';
-      } else if (!/[A-Z]/.test(form.password)) {
-        newErrors.password = 'Password must contain at least one uppercase letter.';
-      } else if (!/[0-9]/.test(form.password)) {
-        newErrors.password = 'Password must contain at least one number.';
-      } else if (!/[!@#$%^&*(),.?":{}|<>\[\]\/\\'_;+=-]/.test(form.password)) {
-        newErrors.password = 'Password must contain at least one symbol.';
-      }
-    }
-    if (touched.repeatPassword) {
-      if (!form.repeatPassword) {
-        newErrors.repeatPassword = 'Repeat your password.';
-      } else if (form.repeatPassword !== form.password) {
-        newErrors.repeatPassword = 'Passwords do not match.';
-      }
-    }
-    setErrors(newErrors);
-  }, [form, touched]);
+  const errors = useRegisterValidation(form, touched);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -94,7 +61,7 @@ const Register: React.FC = () => {
           <div className="flex flex-col items-center mb-8">
             <img src="/logo.png" alt="Logo" className="h-16 md:h-20 mb-4" />
             <h2 className="text-2xl md:text-3xl font-medium text-center" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Create Account
+              {messages.createAccount}
             </h2>
           </div>
           <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
@@ -136,7 +103,7 @@ const Register: React.FC = () => {
               onRightIconMouseLeave={() => setShowPassword(false)}
             />
             <FormError message={errors.password} />
-            <span className="text-xs text-gray-500 mt-1">Use at least 8 characters, numbers and symbols</span>
+            <span className="text-xs text-gray-500 mt-1">{messages.passwordHelper}</span>
             <InputField
               label="Repeat Password"
               type={showRepeatPassword ? 'text' : 'password'}
@@ -169,12 +136,12 @@ const Register: React.FC = () => {
               className="w-full bg-gray-300 text-white text-lg font-medium py-3 rounded-full mt-2 cursor-pointer"
               disabled={!form.email || !form.password || !form.repeatPassword}
             >
-              Create Account
+{messages.createAccount}
             </button>
             <FormError message={errors.general} />
           </form>
           <div className="mt-6 text-gray-700 text-base text-center">
-            Already have an account? <span className="underline cursor-pointer">Login</span>
+            {messages.alreadyHaveAccount} <Link to="/login" className="underline">{messages.login}</Link>
           </div>
         </div>
       </div>
@@ -183,4 +150,3 @@ const Register: React.FC = () => {
 };
 
 export default Register;
-
