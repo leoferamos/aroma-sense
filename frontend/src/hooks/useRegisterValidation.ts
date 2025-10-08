@@ -46,7 +46,7 @@ export function useRegisterValidation(form: RegisterForm, touched: RegisterTouch
         newErrors.password = messages.passwordUppercase;
       } else if (!/[0-9]/.test(form.password)) {
         newErrors.password = messages.passwordNumber;
-      } else if (!/[!@#$%^&*(),.?":{}|<>\[\]\/\\'_;+=-]/.test(form.password)) {
+      } else if (!/[!@#$%^&*(),.?":{}|<>[\]/'_;+=-]/.test(form.password)) {
         newErrors.password = messages.passwordSymbol;
       }
     }
