@@ -1,0 +1,15 @@
+export const messages = {
+  emailRequired: 'Email is required.',
+  emailInvalid: 'Enter a valid email address.',
+  passwordRequired: 'Password is required.',
+  passwordMinLength: 'Password must be at least 8 characters.',
+  passwordUppercase: 'Password must contain at least one uppercase letter.',
+  passwordNumber: 'Password must contain at least one number.',
+  passwordSymbol: 'Password must contain at least one symbol.',
+  repeatPasswordRequired: 'Repeat your password.',
+  passwordsDoNotMatch: 'Passwords do not match.',
+  passwordHelper: 'Use at least 8 characters, numbers and symbols',
+  createAccount: 'Create Account',
+  alreadyHaveAccount: 'Already have an account?',
+  login: 'Login',
+};
