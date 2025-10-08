@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * FormError component props
  * @property {string} [message] - Error message to display
