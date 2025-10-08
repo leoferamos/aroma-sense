@@ -12,4 +12,6 @@ export const messages = {
   createAccount: 'Create Account',
   alreadyHaveAccount: 'Already have an account?',
   login: 'Login',
+  dontHaveAccount: "Don't have an account?",
+  createOne: 'Create one',
 };
