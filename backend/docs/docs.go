@@ -928,9 +928,9 @@ const docTemplate = `{
         "dto.LoginResponse": {
             "type": "object",
             "properties": {
-                "token": {
+                "message": {
                     "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    "example": "Login successful"
                 },
                 "user": {
                     "$ref": "#/definitions/dto.UserResponse"

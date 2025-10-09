@@ -84,8 +84,8 @@ definitions:
     type: object
   dto.LoginResponse:
     properties:
-      token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      message:
+        example: Login successful
         type: string
       user:
         $ref: '#/definitions/dto.UserResponse'
