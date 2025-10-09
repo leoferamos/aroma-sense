@@ -12,7 +12,7 @@ func SetAuthCookie(c *gin.Context, token string) {
 
 	const defaultExpiryMins = 15
 	cookie := &http.Cookie{
-		Name:     "token",
+		Name:     "auth_token",
 		Value:    token,
 		Path:     "/",
 		Domain:   domain,
