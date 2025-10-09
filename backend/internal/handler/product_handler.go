@@ -44,12 +44,12 @@ func NewProductHandler(s service.ProductService) *ProductHandler {
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var form dto.ProductFormDTO
 	if err := c.ShouldBind(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 	file, fileHeader, err := c.Request.FormFile("image")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "image is required"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "image is required"})
 		return
 	}
 	defer file.Close()
@@ -67,7 +67,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		buf := make([]byte, 512)
 		n, err := file.Read(buf)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read file"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "failed to read file"})
 			return
 		}
 
@@ -80,10 +80,10 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	if err := h.productService.CreateProduct(c.Request.Context(), form, fileUpload); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Product created successfully"})
+	c.JSON(http.StatusCreated, dto.MessageResponse{Message: "Product created successfully"})
 }
 
 // GetProduct handles fetching a product by its ID
@@ -106,13 +106,13 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
 		return
 	}
 
 	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
@@ -135,13 +135,13 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
 		return
 	}
 
 	products, err := h.productService.GetLatestProducts(c.Request.Context(), limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -169,22 +169,22 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
 		return
 	}
 
 	var input dto.UpdateProductRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if err := h.productService.UpdateProduct(c.Request.Context(), uint(id), input); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Product updated successfully"})
 }
 
 // DeleteProduct handles deleting an existing product
@@ -207,14 +207,14 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
 		return
 	}
 
 	if err := h.productService.DeleteProduct(c.Request.Context(), uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Product deleted successfully"})
 }
