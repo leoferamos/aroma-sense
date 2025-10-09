@@ -10,19 +10,27 @@ import FormError from '../components/FormError';
 import WordGrid from '../components/WordGrid';
 import { useLoginValidation } from '../hooks/useLoginValidation';
 import { messages } from '../constants/messages';
+import { useLogin } from '../hooks/useLogin';
 
 const Login: React.FC = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const { errors, validateForm } = useLoginValidation();
+  const { login, loading, error, user } = useLogin();
+  const [generalError, setGeneralError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    validateForm(form);
+    const valid = validateForm(form);
+    if (valid) {
+      await login(form);
+      if (error) setGeneralError(error);
+      else setGeneralError("");
+    }
   };
 
   return (
@@ -87,10 +95,14 @@ const Login: React.FC = () => {
             />
             <FormError message={errors.password} />
 
-            <button type="submit" className="w-full bg-gray-300 text-white text-lg font-medium py-3 rounded-full mt-2">
-              {messages.login}
+            <button
+              type="submit"
+              className="w-full bg-gray-300 text-white text-lg font-medium py-3 rounded-full mt-2"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : messages.login}
             </button>
-            <FormError message={errors.general} />
+            <FormError message={generalError} />
           </form>
 
           <div className="mt-6 text-gray-700 text-base text-center">
