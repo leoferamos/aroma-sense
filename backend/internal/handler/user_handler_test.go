@@ -114,8 +114,22 @@ func TestLoginUser(t *testing.T) {
 		w := performRequest(t, router, "POST", "/users/login", payload)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Contains(t, w.Body.String(), "mock-token")
+
+		// Check that cookie is set with token
+		cookies := w.Result().Cookies()
+		var authCookie *http.Cookie
+		for _, cookie := range cookies {
+			if cookie.Name == "auth_token" {
+				authCookie = cookie
+				break
+			}
+		}
+		assert.NotNil(t, authCookie, "Auth cookie should be set")
+		assert.Equal(t, "mock-token", authCookie.Value)
+
+		// Check response body contains user data
 		assert.Contains(t, w.Body.String(), "public_id")
+		assert.Contains(t, w.Body.String(), "Login successful")
 		mockService.AssertExpectations(t)
 	})
 
