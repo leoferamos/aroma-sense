@@ -14,4 +14,6 @@ export const messages = {
   login: 'Login',
   dontHaveAccount: "Don't have an account?",
   createOne: 'Create one',
+  registrationSuccess: 'Registration successful!',
+  registrationFailed: 'Registration failed. Please try again later.',
 };

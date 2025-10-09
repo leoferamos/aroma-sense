@@ -10,6 +10,7 @@ import FormError from '../components/FormError';
 import WordGrid from '../components/WordGrid';
 import { useRegisterValidation } from '../hooks/useRegisterValidation';
 import { messages } from '../constants/messages';
+import { useRegister } from '../hooks/useRegister';
 
 const Register: React.FC = () => {
   const [form, setForm] = useState({
@@ -26,6 +27,7 @@ const Register: React.FC = () => {
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
   const errors = useRegisterValidation(form, touched);
+  const { register, loading, error, success } = useRegister();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -38,6 +40,9 @@ const Register: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ email: true, password: true, repeatPassword: true });
+    if (!errors.email && !errors.password && !errors.repeatPassword && form.email && form.password && form.repeatPassword) {
+      register({ email: form.email, password: form.password });
+    }
   };
 
   return (
@@ -131,14 +136,15 @@ const Register: React.FC = () => {
               onRightIconMouseLeave={() => setShowRepeatPassword(false)}
             />
             <FormError message={errors.repeatPassword} />
+            <FormError message={errors.general || error} />
+            {success && <span className="text-green-600 text-sm mt-2">{success}</span>}
             <button
               type="submit"
               className="w-full bg-gray-300 text-white text-lg font-medium py-3 rounded-full mt-2 cursor-pointer"
-              disabled={!form.email || !form.password || !form.repeatPassword}
+              disabled={!form.email || !form.password || !form.repeatPassword || loading}
             >
-{messages.createAccount}
+              {loading ? 'Registering...' : messages.createAccount}
             </button>
-            <FormError message={errors.general} />
           </form>
           <div className="mt-6 text-gray-700 text-base text-center">
             {messages.alreadyHaveAccount} <Link to="/login" className="underline">{messages.login}</Link>
