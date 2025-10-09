@@ -16,10 +16,12 @@ export function useRegister() {
       const res: RegisterResponse = await registerUser(data);
   setSuccess(res.message || messages.registrationSuccess);
     } catch (err: any) {
-      setError(
-        err?.response?.data?.error ||
-        messages.registrationFailed
-      );
+      const errorMsg = err?.response?.data?.error?.toLowerCase() || "";
+      if (errorMsg.includes("email already registered")) {
+        setError(messages.emailAlreadyRegistered);
+      } else {
+        setError(err?.response?.data?.error || messages.genericError);
+      }
     } finally {
       setLoading(false);
     }

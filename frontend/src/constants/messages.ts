@@ -16,4 +16,6 @@ export const messages = {
   createOne: 'Create one',
   registrationSuccess: 'Registration successful!',
   registrationFailed: 'Registration failed. Please try again later.',
+  emailAlreadyRegistered: 'This email is already registered. Please log in or use another email.',
+  genericError: 'An unexpected error occurred. Please try again.',
 };
