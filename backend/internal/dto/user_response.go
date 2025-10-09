@@ -12,6 +12,6 @@ type UserResponse struct {
 
 // LoginResponse represents a successful login response containing a JWT token and user info.
 type LoginResponse struct {
-	Token string       `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	User  UserResponse `json:"user"`
+	Message string       `json:"message" example:"Login successful"`
+	User    UserResponse `json:"user"`
 }

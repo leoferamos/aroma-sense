@@ -1,4 +1,3 @@
-// internal/handler/user_handler.go
 package handler
 
 import (
@@ -6,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
@@ -73,11 +73,17 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
+	auth.SetAuthCookie(c, token)
+
 	userResp := dto.UserResponse{
 		PublicID:  user.PublicID,
 		Email:     user.Email,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 	}
-	c.JSON(http.StatusOK, dto.LoginResponse{Token: token, User: userResp})
+	resp := dto.LoginResponse{
+		Message: "Login successful",
+		User:    userResp,
+	}
+	c.JSON(http.StatusOK, resp)
 }
