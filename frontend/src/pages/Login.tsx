@@ -27,9 +27,8 @@ const Login: React.FC = () => {
     e.preventDefault();
     const valid = validateForm(form);
     if (valid) {
+      setGeneralError("");
       await login(form);
-      if (error) setGeneralError(error);
-      else setGeneralError("");
     }
   };
 
@@ -97,12 +96,17 @@ const Login: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-gray-300 text-white text-lg font-medium py-3 rounded-full mt-2"
-              disabled={loading}
+              className={`w-full text-white text-lg font-medium py-3 rounded-full mt-2 transition-colors ${
+                loading || !form.email || !form.password
+                  ? 'bg-gray-300 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+              }`}
+              disabled={loading || !form.email || !form.password}
             >
               {loading ? "Logging in..." : messages.login}
             </button>
-            <FormError message={generalError} />
+            {error && <FormError message={error} />}
+            {generalError && <FormError message={generalError} />}
           </form>
 
           <div className="mt-6 text-gray-700 text-base text-center">

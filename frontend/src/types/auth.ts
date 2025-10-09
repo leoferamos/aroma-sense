@@ -17,7 +17,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
+  message: string;
   user: {
     public_id: string;
     email: string;
