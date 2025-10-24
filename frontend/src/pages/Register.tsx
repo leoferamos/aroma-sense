@@ -27,6 +27,8 @@ const Register: React.FC = () => {
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [touchedAgree, setTouchedAgree] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [touchedPrivacy, setTouchedPrivacy] = useState(false);
 
   const errors = useRegisterValidation(form, touched);
   const { register, loading, error, success } = useRegister();
@@ -43,11 +45,12 @@ const Register: React.FC = () => {
     e.preventDefault();
     setTouched({ email: true, password: true, repeatPassword: true });
     setTouchedAgree(true);
-    if (!agreeTerms) {
+    setTouchedPrivacy(true);
+    if (!agreeTerms || !agreePrivacy) {
       return;
     }
 
-    if (!errors.email && !errors.password && !errors.repeatPassword && form.email && form.password && form.repeatPassword && agreeTerms) {
+    if (!errors.email && !errors.password && !errors.repeatPassword && form.email && form.password && form.repeatPassword && agreeTerms && agreePrivacy) {
       register({ email: form.email, password: form.password });
     }
   };
@@ -159,16 +162,31 @@ const Register: React.FC = () => {
               </label>
             </div>
             <FormError message={touchedAgree && !agreeTerms ? 'Você precisa concordar com os termos de uso.' : ''} />
+
+            <div className="flex items-start gap-3">
+              <input
+                id="agreePrivacy"
+                type="checkbox"
+                checked={agreePrivacy}
+                onChange={(e) => setAgreePrivacy(e.target.checked)}
+                onBlur={() => setTouchedPrivacy(true)}
+                className="mt-1 w-4 h-4"
+              />
+              <label htmlFor="agreePrivacy" className="text-sm text-gray-700">
+                Concordo com a{' '}
+                <Link to="/privacy" className="underline text-blue-600">Política de Privacidade</Link>
+              </label>
+            </div>
+            <FormError message={touchedPrivacy && !agreePrivacy ? 'Você precisa concordar com a política de privacidade.' : ''} />
             <FormError message={errors.general || error} />
             {success && <span className="text-green-600 text-sm mt-2">{success}</span>}
             <button
               type="submit"
-              className={`w-full text-white text-lg font-medium py-3 rounded-full mt-2 transition-colors ${
-                loading || !form.email || !form.password || !form.repeatPassword || !agreeTerms
-                  ? 'bg-gray-300 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-              }`}
-              disabled={loading || !form.email || !form.password || !form.repeatPassword || !agreeTerms}
+              className={`w-full text-white text-lg font-medium py-3 rounded-full mt-2 transition-colors ${loading || !form.email || !form.password || !form.repeatPassword || !agreeTerms || !agreePrivacy
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                }`}
+              disabled={loading || !form.email || !form.password || !form.repeatPassword || !agreeTerms || !agreePrivacy}
             >
               {loading ? 'Registering...' : messages.createAccount}
             </button>
