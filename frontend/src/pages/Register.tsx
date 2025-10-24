@@ -25,6 +25,8 @@ const Register: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [touchedAgree, setTouchedAgree] = useState(false);
 
   const errors = useRegisterValidation(form, touched);
   const { register, loading, error, success } = useRegister();
@@ -40,7 +42,12 @@ const Register: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ email: true, password: true, repeatPassword: true });
-    if (!errors.email && !errors.password && !errors.repeatPassword && form.email && form.password && form.repeatPassword) {
+    setTouchedAgree(true);
+    if (!agreeTerms) {
+      return;
+    }
+
+    if (!errors.email && !errors.password && !errors.repeatPassword && form.email && form.password && form.repeatPassword && agreeTerms) {
       register({ email: form.email, password: form.password });
     }
   };
@@ -48,17 +55,17 @@ const Register: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left side - gray background */}
-  <div className="hidden md:flex md:w-1/2 items-center justify-center relative" style={{ background: '#EAECEF' }}>
+      <div className="hidden md:flex md:w-1/2 items-center justify-center relative" style={{ background: '#EAECEF' }}>
         {/* Background words grid */}
-          <div className="absolute inset-0 pl-4 pr-6 flex items-center overflow-hidden z-10">
-            <WordGrid />
-          </div>
-          <img
-            src="/fragance.png"
-            alt="Fragrance"
-            className="frag-mid frag-xl absolute top-1/2 right-[-120px] w-[42vw] max-w-[560px] min-w-[220px] lg:w-[48vw] xl:w-[52vw] h-auto object-contain z-30"
-            style={{ transform: 'translateY(-50%) rotate(-20deg)' }}
-          />
+        <div className="absolute inset-0 pl-4 pr-6 flex items-center overflow-hidden z-10">
+          <WordGrid />
+        </div>
+        <img
+          src="/fragance.png"
+          alt="Fragrance"
+          className="frag-mid frag-xl absolute top-1/2 right-[-120px] w-[42vw] max-w-[560px] min-w-[220px] lg:w-[48vw] xl:w-[52vw] h-auto object-contain z-30"
+          style={{ transform: 'translateY(-50%) rotate(-20deg)' }}
+        />
       </div>
       {/* Right side - white box */}
       <div className="w-full md:w-1/2 bg-white flex items-center justify-center px-4 py-8 md:px-0 md:py-0 relative">
@@ -136,12 +143,32 @@ const Register: React.FC = () => {
               onRightIconMouseLeave={() => setShowRepeatPassword(false)}
             />
             <FormError message={errors.repeatPassword} />
+
+            <div className="flex items-start gap-3">
+              <input
+                id="agreeTerms"
+                type="checkbox"
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                onBlur={() => setTouchedAgree(true)}
+                className="mt-1 w-4 h-4"
+              />
+              <label htmlFor="agreeTerms" className="text-sm text-gray-700">
+                Concordo com os{' '}
+                <Link to="/terms" className="underline text-blue-600">Termos de Uso</Link>
+              </label>
+            </div>
+            <FormError message={touchedAgree && !agreeTerms ? 'Você precisa concordar com os termos de uso.' : ''} />
             <FormError message={errors.general || error} />
             {success && <span className="text-green-600 text-sm mt-2">{success}</span>}
             <button
               type="submit"
-              className="w-full bg-gray-300 text-white text-lg font-medium py-3 rounded-full mt-2 cursor-pointer"
-              disabled={!form.email || !form.password || !form.repeatPassword || loading}
+              className={`w-full text-white text-lg font-medium py-3 rounded-full mt-2 transition-colors ${
+                loading || !form.email || !form.password || !form.repeatPassword || !agreeTerms
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+              }`}
+              disabled={loading || !form.email || !form.password || !form.repeatPassword || !agreeTerms}
             >
               {loading ? 'Registering...' : messages.createAccount}
             </button>
