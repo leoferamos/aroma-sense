@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
 import { loginUser } from "../services/auth";
 import { messages } from "../constants/messages";
 import { useAuth } from "../contexts/AuthContext";
@@ -26,12 +27,18 @@ export function useLogin() {
       } else {
         navigate("/products");
       }
-    } catch (err: any) {
-      const errorMsg = err?.response?.data?.error?.toLowerCase() || "";
-      if (errorMsg.includes("invalid credentials")) {
-        setError(messages.invalidCredentials || "Invalid email or password.");
+    } catch (err: unknown) {
+      if (isAxiosError(err)) {
+        const errorMsg = err.response?.data?.error?.toLowerCase() || "";
+        if (errorMsg.includes("invalid credentials")) {
+          setError(messages.invalidCredentials || "Invalid email or password.");
+        } else {
+          setError(err.response?.data?.error || messages.genericError);
+        }
+      } else if (err instanceof Error) {
+        setError(err.message || messages.genericError);
       } else {
-        setError(err?.response?.data?.error || messages.genericError);
+        setError(messages.genericError);
       }
     } finally {
       setLoading(false);
