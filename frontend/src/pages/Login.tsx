@@ -3,21 +3,35 @@
  * Renders the login form with validation and error handling.
  */
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
 import WordGrid from '../components/WordGrid';
 import { useLoginValidation } from '../hooks/useLoginValidation';
 import { messages } from '../constants/messages';
 import { useLogin } from '../hooks/useLogin';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const { errors, validateForm } = useLoginValidation();
-  const { login, loading, error, user } = useLogin();
+  const { login, loading, error } = useLogin();
+  const { isAuthenticated, role } = useAuth();
+  const navigate = useNavigate();
   const [generalError, setGeneralError] = useState("");
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/products');
+      }
+    }
+  }, [isAuthenticated, role, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

@@ -2,24 +2,30 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/auth";
 import { messages } from "../constants/messages";
+import { useAuth } from "../contexts/AuthContext";
 import type { LoginRequest, LoginResponse } from "../types/auth";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [user, setUser] = useState<LoginResponse | null>(null);
   const navigate = useNavigate();
+  const { setRole } = useAuth();
 
   async function login(data: LoginRequest) {
     setLoading(true);
     setError("");
-    setUser(null);
     try {
       const res: LoginResponse = await loginUser(data);
-      setUser(res);
       
-      // Redirect to products page on successful login
-      navigate("/products");
+      // Save only role to auth context
+      setRole(res.user.role as 'admin' | 'client');
+      
+      // Redirect based on role
+      if (res.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/products");
+      }
     } catch (err: any) {
       const errorMsg = err?.response?.data?.error?.toLowerCase() || "";
       if (errorMsg.includes("invalid credentials")) {
@@ -32,5 +38,5 @@ export function useLogin() {
     }
   }
 
-  return { login, loading, error, user };
+  return { login, loading, error };
 }
