@@ -3,14 +3,15 @@ import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { useProducts } from '../hooks/useProducts';
 import type { Product } from '../types/product';
-import { addToCart } from '../services/cart';
+import { useCart } from '../contexts/CartContext';
 
 const Products: React.FC = () => {
   const { products, loading, error } = useProducts();
+  const { addItem } = useCart();
 
   const handleAddToCart = async (product: Product) => {
     try {
-      await addToCart(product.id, 1);
+      await addItem(product.id, 1);
     } catch (err) {
       console.error('Failed to add to cart', err);
     }
@@ -18,7 +19,7 @@ const Products: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar cartItemCount={0} />
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
