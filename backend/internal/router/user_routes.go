@@ -11,5 +11,6 @@ func UserRoutes(r *gin.Engine, handler *handler.UserHandler) {
 	{
 		userGroup.POST("/register", handler.RegisterUser)
 		userGroup.POST("/login", handler.LoginUser)
+		userGroup.POST("/logout", handler.LogoutUser)
 	}
 }

@@ -87,3 +87,15 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resp)
 }
+
+// LogoutUser handles user logout requests.
+//
+// @Summary      Logout
+// @Description  Clears the authentication cookie.
+// @Tags         auth
+// @Success      200  {object}  dto.MessageResponse  "Logout successful"
+// @Router       /users/logout [post]
+func (h *UserHandler) LogoutUser(c *gin.Context) {
+	auth.ClearAuthCookie(c)
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Logout successful"})
+}
