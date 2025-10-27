@@ -47,7 +47,8 @@ const WordGrid: React.FC = () => {
     let mounted = true;
 
     const compute = () => {
-      const el = containerRef.current!;
+      const el = containerRef.current as unknown as Element | null;
+      if (!el || !(el instanceof Element)) return;
       const style = getComputedStyle(el);
       const paddingLeft = parseFloat(style.paddingLeft || '0');
       const paddingRight = parseFloat(style.paddingRight || '0');
@@ -76,7 +77,6 @@ const WordGrid: React.FC = () => {
               currentLine.push(word);
             }
           } else {
-            // finish current line
             if (currentLine.length > 0) {
               totalHeight += lineHeight;
               if (totalHeight > availableHeight) return { lines: resultLines, totalHeight, lineHeight };
@@ -124,8 +124,8 @@ const WordGrid: React.FC = () => {
       compute();
     };
 
-    const ro = new ResizeObserver(handleResize);
-    ro.observe(containerRef.current);
+  const ro = new ResizeObserver(handleResize);
+  if (containerRef.current) ro.observe(containerRef.current);
     window.addEventListener('orientationchange', handleResize);
 
     return () => {
