@@ -9,6 +9,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const Products = lazy(() => import('./pages/Products'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -41,6 +42,14 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />           
+            <Route
+              path="/products"
+              element={
+                <ProtectedRoute>
+                  <Products />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>
