@@ -1,0 +1,32 @@
+import api from "./api";
+import type { Product } from "../types/product";
+
+export interface CartItem {
+  id: number;
+  cart_id: number;
+  product_id: number;
+  product?: Product;
+  quantity: number;
+  price: number;
+  total: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CartResponse {
+  id: number;
+  user_id: string;
+  items: CartItem[];
+  total: number;
+  item_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function addToCart(productId: number, quantity = 1): Promise<CartResponse> {
+  const response = await api.post<CartResponse>("/cart", {
+    product_id: productId,
+    quantity,
+  });
+  return response.data;
+}

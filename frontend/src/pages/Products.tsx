@@ -3,13 +3,17 @@ import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { useProducts } from '../hooks/useProducts';
 import type { Product } from '../types/product';
+import { addToCart } from '../services/cart';
 
 const Products: React.FC = () => {
   const { products, loading, error } = useProducts();
 
-  const handleAddToCart = (product: Product) => {
-    // TODO: Implement cart functionality
-    console.log('Add to cart:', product.name);
+  const handleAddToCart = async (product: Product) => {
+    try {
+      await addToCart(product.id, 1);
+    } catch (err) {
+      console.error('Failed to add to cart', err);
+    }
   };
 
   return (
