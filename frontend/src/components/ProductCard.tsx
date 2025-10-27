@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Product } from '../types/product';
+import { formatCurrency } from '../utils/format';
+import { cn } from '../utils/cn';
+import { PLACEHOLDER_IMAGE, LOW_STOCK_THRESHOLD } from '../constants/app';
 
 interface ProductCardProps {
   product: Product;
@@ -21,12 +24,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price);
-  };
+  const isOutOfStock = product.stock_quantity === 0;
+  const isLowStock = product.stock_quantity > 0 && product.stock_quantity < LOW_STOCK_THRESHOLD;
 
   return (
     <div
@@ -36,14 +35,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
       {/* Image Container */}
       <div className="relative h-64 bg-gray-50 overflow-hidden flex items-center justify-center p-4">
         <img
-          src={product.image_url || '/placeholder-product.svg'}
+          src={product.image_url || PLACEHOLDER_IMAGE}
           alt={product.name}
           className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
-            e.currentTarget.src = '/placeholder-product.svg';
+            e.currentTarget.src = PLACEHOLDER_IMAGE;
           }}
         />
-        {product.stock_quantity === 0 && (
+        {isOutOfStock && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <span className="text-white font-bold text-lg">Out of Stock</span>
           </div>
@@ -70,9 +69,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         {/* Price */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-2xl font-bold text-blue-600">
-            {formatPrice(product.price)}
+            {formatCurrency(product.price)}
           </span>
-          {product.stock_quantity > 0 && product.stock_quantity < 10 && (
+          {isLowStock && (
             <span className="text-xs text-orange-600 font-medium">
               Only {product.stock_quantity} left
             </span>
@@ -82,14 +81,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          disabled={product.stock_quantity === 0}
-          className={`w-full py-2.5 px-4 rounded-lg font-medium transition-colors duration-200 ${
-            product.stock_quantity === 0
+          disabled={isOutOfStock}
+          className={cn(
+            'w-full py-2.5 px-4 rounded-lg font-medium transition-colors duration-200',
+            isOutOfStock
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
-          }`}
+          )}
         >
-          {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+          {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
         </button>
       </div>
     </div>
