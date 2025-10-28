@@ -12,8 +12,8 @@ import React from 'react';
  * @property {boolean} [required] - Whether the field is required
  * @property {string} [autoComplete] - Autocomplete attribute
  * @property {React.ReactNode} [rightIcon] - Optional icon rendered on the right
- * @property {() => void} [onRightIconMouseDown] - Mouse down handler for right icon
- * @property {() => void} [onRightIconMouseUp] - Mouse up handler for right icon
+ * @property {() => void} [onRightIconMouseDown] - Mouse/Touch down handler for right icon
+ * @property {() => void} [onRightIconMouseUp] - Mouse/Touch up handler for right icon
  * @property {() => void} [onRightIconMouseLeave] - Mouse leave handler for right icon
  */
 interface InputFieldProps {
@@ -68,12 +68,21 @@ const InputField: React.FC<InputFieldProps> = ({
         />
         {rightIcon && (
           <span
-            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400"
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
             onMouseDown={onRightIconMouseDown}
             onMouseUp={onRightIconMouseUp}
             onMouseLeave={onRightIconMouseLeave}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onRightIconMouseDown?.();
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              onRightIconMouseUp?.();
+            }}
             tabIndex={0}
             role="button"
+            aria-label="Toggle password visibility"
           >
             {rightIcon}
           </span>
