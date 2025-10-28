@@ -14,10 +14,6 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		var tokenStr string
 		if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
 			tokenStr = strings.TrimPrefix(authHeader, "Bearer ")
-		} else {
-			if cookie, err := c.Request.Cookie("auth_token"); err == nil {
-				tokenStr = cookie.Value
-			}
 		}
 		if tokenStr == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "missing or invalid token"})
