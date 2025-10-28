@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
+import NotFound from './NotFound';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useProducts } from '../hooks/useProducts';
 import { useCart } from '../contexts/CartContext';
@@ -50,25 +51,7 @@ const ProductDetail: React.FC = () => {
   }
 
   if (error || !product) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-white shadow rounded-lg p-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Product not found</h1>
-            <p className="text-gray-600 mb-6">
-              {error || 'The product you are looking for does not exist.'}
-            </p>
-            <Link
-              to="/products"
-              className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Back to Products
-            </Link>
-          </div>
-        </main>
-      </div>
-    );
+    return <NotFound />;
   }
 
   return (

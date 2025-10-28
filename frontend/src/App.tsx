@@ -15,6 +15,7 @@ const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
 const Checkout = lazy(() => import('./pages/Checkout.tsx'));
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation.tsx'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -75,6 +76,9 @@ const App: React.FC = () => {
                 }
               />
               <Route path="/" element={<Navigate to="/login" replace />} />
+              
+              {/* 404 - Catch all unmatched routes */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
             </ErrorBoundary>
           </Suspense>
