@@ -22,6 +22,7 @@ primary_region = 'gru'
     grace_period = '10s'
     method = 'GET'
     path = '/healthz'
+    type = 'http'
 
 [[vm]]
   memory = '256mb'
