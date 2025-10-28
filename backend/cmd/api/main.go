@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/leoferamos/aroma-sense/internal/bootstrap"
 	"github.com/leoferamos/aroma-sense/internal/db"
@@ -43,7 +44,9 @@ func main() {
 	r := router.SetupRouter(handlers.UserHandler, handlers.ProductHandler, handlers.CartHandler)
 
 	// Swagger docs route
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if os.Getenv("ENABLE_SWAGGER") == "true" {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	// Start the server
 	r.Run(":8080")
