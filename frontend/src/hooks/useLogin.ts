@@ -4,22 +4,22 @@ import { isAxiosError } from "axios";
 import { loginUser } from "../services/auth";
 import { messages } from "../constants/messages";
 import { useAuth } from "../contexts/AuthContext";
-import type { LoginRequest, LoginResponse } from "../types/auth";
+import type { LoginRequest } from "../types/auth";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { setRole } = useAuth();
+  const { setAuth } = useAuth();
 
   async function login(data: LoginRequest) {
     setLoading(true);
     setError("");
     try {
-      const res: LoginResponse = await loginUser(data);
+      const res = await loginUser(data);
       
-      // Save only role to auth context
-      setRole(res.user.role as 'admin' | 'client');
+      // Save access token and user to AuthContext
+      setAuth(res.access_token, res.user);
       
       // Redirect based on role
       if (res.user.role === "admin") {
