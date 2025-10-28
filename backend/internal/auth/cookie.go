@@ -2,9 +2,7 @@ package auth
 
 import (
 	"net/http"
-	"os"
-
-	"github.com/gin-gonic/gin"
+		"github.com/gin-gonic/gin"
 )
 
 func SetAuthCookie(c *gin.Context, token string) {
