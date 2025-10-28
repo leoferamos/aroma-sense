@@ -148,6 +148,35 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, products)
 }
 
+// GetProductByID handles fetching a single product by ID
+//
+// @Summary      Get product by ID
+// @Description  Retrieves detailed information about a specific product
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        id  path  int  true  "Product ID"
+// @Success      200  {object}  dto.ProductResponse  "Product details"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
+// @Failure      404  {object}  dto.ErrorResponse    "Product not found"
+// @Router       /products/{id} [get]
+func (h *ProductHandler) GetProductByID(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
+		return
+	}
+
+	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, product)
+}
+
 // UpdateProduct handles updating an existing product
 //
 // @Summary      Update product

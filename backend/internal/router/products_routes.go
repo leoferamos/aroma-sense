@@ -10,6 +10,6 @@ func ProductRoutes(r *gin.Engine, handler *handler.ProductHandler) {
 	productGroup := r.Group("/products")
 	{
 		productGroup.GET("", handler.GetLatestProducts)
-		productGroup.GET("/:id", nil)
+		productGroup.GET("/:id", handler.GetProductByID)
 	}
 }
