@@ -10,21 +10,21 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <img src="/logo.png" alt="Aroma Sense" className="h-10" />
-              <h1 className="ml-4 text-xl font-semibold text-gray-900">Admin Dashboard</h1>
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="Aroma Sense" className="h-8" />
+              <h1 className="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
-                Role: <span className="font-semibold text-blue-600">{role}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">
+                <span className="font-medium text-blue-600">{role}</span>
               </span>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
               >
                 Logout
               </button>
@@ -33,50 +33,78 @@ const AdminDashboard: React.FC = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Welcome, Admin
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Role: <span className="font-semibold">{role}</span>
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">Products</h3>
-                <p className="text-blue-700">Manage your product catalog</p>
-                <Link
-                  to="/admin/products"
-                  className="mt-4 inline-block text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  View Products →
-                </Link>
-              </div>
-
-              <div className="bg-green-50 p-6 rounded-lg border border-green-200">
-                <h3 className="text-lg font-semibold text-green-900 mb-2">Orders</h3>
-                <p className="text-green-700">Track and manage orders</p>
-                <Link
-                  to="/admin/orders"
-                  className="mt-4 inline-block text-green-600 hover:text-green-800 font-medium"
-                >
-                  View Orders →
-                </Link>
-              </div>
-
-              <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
-                <h3 className="text-lg font-semibold text-purple-900 mb-2">Users</h3>
-                <p className="text-purple-700">Manage user accounts</p>
-                <Link
-                  to="/admin/users"
-                  className="mt-4 inline-block text-purple-600 hover:text-purple-800 font-medium"
-                >
-                  View Users →
-                </Link>
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Welcome, Admin
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">Manage your store</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Products Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-900">Products</h3>
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
               </div>
             </div>
+            <p className="text-gray-600 text-sm mb-4">Manage your product catalog</p>
+            <div className="flex flex-col gap-2">
+              <Link
+                to="/admin/products/new"
+                className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm font-medium"
+              >
+                + Add New Product
+              </Link>
+              <Link
+                to="/admin/products"
+                className="text-blue-600 hover:text-blue-700 font-medium text-center text-sm"
+              >
+                View All Products →
+              </Link>
+            </div>
+          </div>
+
+          {/* Orders Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-900">Orders</h3>
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-gray-600 text-sm mb-4">Track and manage orders</p>
+            <Link
+              to="/admin/orders"
+              className="text-green-600 hover:text-green-700 font-medium text-sm inline-block"
+            >
+              View Orders →
+            </Link>
+          </div>
+
+          {/* Users Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-900">Users</h3>
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-gray-600 text-sm mb-4">Manage user accounts</p>
+            <Link
+              to="/admin/users"
+              className="text-purple-600 hover:text-purple-700 font-medium text-sm inline-block"
+            >
+              View Users →
+            </Link>
           </div>
         </div>
       </main>
