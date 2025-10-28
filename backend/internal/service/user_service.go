@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/dto"
@@ -14,6 +15,8 @@ import (
 type UserService interface {
 	RegisterUser(input dto.CreateUserRequest) error
 	Login(input dto.LoginRequest) (accessToken string, refreshToken string, user *model.User, err error)
+	RefreshAccessToken(refreshToken string) (accessToken string, newRefreshToken string, user *model.User, err error)
+	InvalidateRefreshToken(refreshToken string) error
 }
 
 type userService struct {
@@ -94,4 +97,56 @@ func (s *userService) Login(input dto.LoginRequest) (string, string, *model.User
 	}
 
 	return accessToken, refreshToken, user, nil
+}
+
+// RefreshAccessToken validates refresh token and generates new access token
+func (s *userService) RefreshAccessToken(refreshToken string) (string, string, *model.User, error) {
+	// Hash the refresh token to compare with DB
+	refreshTokenHash := auth.HashRefreshToken(refreshToken)
+
+	// Find user by refresh token hash
+	user, err := s.repo.FindByRefreshTokenHash(refreshTokenHash)
+	if err != nil {
+		return "", "", nil, errors.New("invalid refresh token")
+	}
+
+	// Check if refresh token is expired
+	if user.RefreshTokenExpiresAt == nil || user.RefreshTokenExpiresAt.Before(time.Now()) {
+		return "", "", nil, errors.New("refresh token expired")
+	}
+
+	// Generate new access token
+	accessToken, err := auth.GenerateJWT(user.PublicID, user.Role)
+	if err != nil {
+		return "", "", nil, errors.New("failed to generate access token")
+	}
+
+	// Rotate refresh token
+	newRefreshToken, newExpiresAt, err := auth.GenerateRefreshToken()
+	if err != nil {
+		return "", "", nil, errors.New("failed to generate refresh token")
+	}
+	newHash := auth.HashRefreshToken(newRefreshToken)
+	user.RefreshTokenHash = &newHash
+	user.RefreshTokenExpiresAt = &newExpiresAt
+	if err := s.repo.Update(user); err != nil {
+		return "", "", nil, errors.New("failed to save refresh token")
+	}
+
+	return accessToken, newRefreshToken, user, nil
+}
+
+// InvalidateRefreshToken clears the stored refresh token for the owning user
+func (s *userService) InvalidateRefreshToken(refreshToken string) error {
+	if refreshToken == "" {
+		return errors.New("missing refresh token")
+	}
+	hash := auth.HashRefreshToken(refreshToken)
+	user, err := s.repo.FindByRefreshTokenHash(hash)
+	if err != nil {
+		return err
+	}
+	user.RefreshTokenHash = nil
+	user.RefreshTokenExpiresAt = nil
+	return s.repo.Update(user)
 }
