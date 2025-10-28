@@ -16,12 +16,21 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface User {
+  public_id: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
+
 export interface LoginResponse {
   message: string;
-  user: {
-    public_id: string;
-    email: string;
-    role: string;
-    created_at: string;
-  };
+  access_token: string;
+  user: User;
+}
+
+export interface RefreshResponse {
+  message: string;
+  access_token: string;
+  user: User;
 }
