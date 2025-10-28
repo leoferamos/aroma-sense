@@ -9,6 +9,8 @@ import (
 type UserRepository interface {
 	Create(user *model.User) error
 	FindByEmail(email string) (*model.User, error)
+	FindByRefreshTokenHash(hash string) (*model.User, error)
+	Update(user *model.User) error
 }
 
 type userRepository struct {
@@ -32,4 +34,18 @@ func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+// FindByRefreshTokenHash retrieves a user by refresh token hash
+func (r *userRepository) FindByRefreshTokenHash(hash string) (*model.User, error) {
+	var user model.User
+	if err := r.db.Where("refresh_token_hash = ?", hash).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// Update saves changes to an existing user
+func (r *userRepository) Update(user *model.User) error {
+	return r.db.Save(user).Error
 }

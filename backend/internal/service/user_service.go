@@ -13,7 +13,7 @@ import (
 // UserService defines the interface for user-related business logic
 type UserService interface {
 	RegisterUser(input dto.CreateUserRequest) error
-	Login(input dto.LoginRequest) (string, *model.User, error)
+	Login(input dto.LoginRequest) (accessToken string, refreshToken string, user *model.User, err error)
 }
 
 type userService struct {
@@ -58,25 +58,40 @@ func (s *userService) RegisterUser(input dto.CreateUserRequest) error {
 }
 
 // Login handles the business logic for user login
-func (s *userService) Login(input dto.LoginRequest) (string, *model.User, error) {
+func (s *userService) Login(input dto.LoginRequest) (string, string, *model.User, error) {
 	user, err := s.repo.FindByEmail(input.Email)
 	if err != nil {
-		return "", nil, errors.New("invalid credentials")
+		return "", "", nil, errors.New("invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password)); err != nil {
-		return "", nil, errors.New("invalid credentials")
+		return "", "", nil, errors.New("invalid credentials")
 	}
 
 	// Ensure user has a cart
 	if err := s.cartService.CreateCartForUser(user.PublicID); err != nil {
-		return "", nil, errors.New("failed to ensure cart exists")
+		return "", "", nil, errors.New("failed to ensure cart exists")
 	}
 
-	token, err := auth.GenerateJWT(user.PublicID, user.Role)
+	// Generate access token
+	accessToken, err := auth.GenerateJWT(user.PublicID, user.Role)
 	if err != nil {
-		return "", nil, errors.New("failed to generate token")
+		return "", "", nil, errors.New("failed to generate access token")
 	}
 
-	return token, user, nil
+	// Generate refresh token
+	refreshToken, expiresAt, err := auth.GenerateRefreshToken()
+	if err != nil {
+		return "", "", nil, errors.New("failed to generate refresh token")
+	}
+
+	// Save refresh token hash in DB
+	refreshTokenHash := auth.HashRefreshToken(refreshToken)
+	user.RefreshTokenHash = &refreshTokenHash
+	user.RefreshTokenExpiresAt = &expiresAt
+	if err := s.repo.Update(user); err != nil {
+		return "", "", nil, errors.New("failed to save refresh token")
+	}
+
+	return accessToken, refreshToken, user, nil
 }
