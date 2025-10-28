@@ -9,8 +9,10 @@ import (
 func UserRoutes(r *gin.Engine, handler *handler.UserHandler) {
 	userGroup := r.Group("/users")
 	{
+		
 		userGroup.POST("/register", handler.RegisterUser)
 		userGroup.POST("/login", handler.LoginUser)
+		userGroup.POST("/refresh", handler.RefreshToken)
 		userGroup.POST("/logout", handler.LogoutUser)
 	}
 }
