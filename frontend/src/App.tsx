@@ -12,6 +12,7 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
 const Checkout = lazy(() => import('./pages/Checkout.tsx'));
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation.tsx'));
 
@@ -56,6 +57,7 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/products/:id" element={<ProductDetail />} />
               <Route
                 path="/checkout"
                 element={
