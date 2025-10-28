@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"os"
 	"sync"
@@ -10,10 +13,12 @@ import (
 )
 
 const (
-	defaultIssuer     = "aroma-sense-api"
-	minSecretLength   = 32
-	defaultExpiryMins = 15
-	clockSkewSeconds  = 5
+	defaultIssuer        = "aroma-sense-api"
+	minSecretLength      = 32
+	defaultExpiryMins    = 15
+	clockSkewSeconds     = 5
+	refreshTokenBytes    = 32 // 256 bits
+	refreshTokenDuration = 7 * 24 * time.Hour // 7 days
 )
 
 var (
@@ -101,4 +106,22 @@ func ParseJWT(tokenStr string) (*CustomClaims, error) {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
 	return claims, nil
+}
+
+// GenerateRefreshToken generates a cryptographically secure random refresh token.
+// Returns the raw token (to send to client) and expiration time.
+func GenerateRefreshToken() (string, time.Time, error) {
+	bytes := make([]byte, refreshTokenBytes)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", time.Time{}, err
+	}
+	token := base64.URLEncoding.EncodeToString(bytes)
+	expiresAt := time.Now().Add(refreshTokenDuration)
+	return token, expiresAt, nil
+}
+
+// HashRefreshToken creates a SHA-256 hash of the refresh token for DB storage.
+func HashRefreshToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return base64.URLEncoding.EncodeToString(hash[:])
 }
