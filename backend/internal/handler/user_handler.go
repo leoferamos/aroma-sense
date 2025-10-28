@@ -67,13 +67,58 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	input.Email = strings.ToLower(input.Email)
 
-	token, user, err := h.userService.Login(input)
+	accessToken, refreshToken, user, err := h.userService.Login(input)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid credentials"})
 		return
 	}
 
-	auth.SetAuthCookie(c, token)
+	// Set refresh token in HttpOnly cookie
+	auth.SetRefreshTokenCookie(c, refreshToken, *user.RefreshTokenExpiresAt)
+
+	// Return access token in JSON response
+	userResp := dto.UserResponse{
+		PublicID:  user.PublicID,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+	}
+	resp := dto.LoginResponse{
+		Message:     "Login successful",
+		AccessToken: accessToken,
+		User:        userResp,
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+// RefreshToken generates a new access token and rotates the refresh token.
+//
+// @Summary      Refresh access token
+// @Description  Uses the HttpOnly refresh_token cookie to issue a new short-lived access token.
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  dto.LoginResponse   "Token refreshed"
+// @Failure      401  {object}  dto.ErrorResponse   "Missing or invalid refresh token"
+// @Router       /users/refresh [post]
+func (h *UserHandler) RefreshToken(c *gin.Context) {
+	// Read refresh token from HttpOnly cookie
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil || refreshToken == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "missing refresh token"})
+		return
+	}
+
+	// Validate refresh token and generate new access token + rotate refresh token
+	accessToken, newRefreshToken, user, err := h.userService.RefreshAccessToken(refreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	// Set the rotated refresh token in HttpOnly cookie
+	if user.RefreshTokenExpiresAt != nil {
+		auth.SetRefreshTokenCookie(c, newRefreshToken, *user.RefreshTokenExpiresAt)
+	}
 
 	userResp := dto.UserResponse{
 		PublicID:  user.PublicID,
@@ -82,8 +127,9 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		CreatedAt: user.CreatedAt,
 	}
 	resp := dto.LoginResponse{
-		Message: "Login successful",
-		User:    userResp,
+		Message:     "Token refreshed",
+		AccessToken: accessToken,
+		User:        userResp,
 	}
 	c.JSON(http.StatusOK, resp)
 }
@@ -91,11 +137,15 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 // LogoutUser handles user logout requests.
 //
 // @Summary      Logout
-// @Description  Clears the authentication cookie.
+// @Description  Invalidates refresh token and clears refresh cookie.
 // @Tags         auth
 // @Success      200  {object}  dto.MessageResponse  "Logout successful"
 // @Router       /users/logout [post]
 func (h *UserHandler) LogoutUser(c *gin.Context) {
-	auth.ClearAuthCookie(c)
+	if refreshToken, err := c.Cookie("refresh_token"); err == nil && refreshToken != "" {
+		_ = h.userService.InvalidateRefreshToken(refreshToken)
+	}
+	auth.ClearRefreshTokenCookie(c)
+
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Logout successful"})
 }
