@@ -26,13 +26,27 @@ func (m *MockUserService) RegisterUser(input dto.CreateUserRequest) error {
 	return args.Error(0)
 }
 
-func (m *MockUserService) Login(input dto.LoginRequest) (string, *model.User, error) {
+func (m *MockUserService) Login(input dto.LoginRequest) (string, string, *model.User, error) {
 	args := m.Called(input)
 	var user *model.User
-	if args.Get(1) != nil {
-		user = args.Get(1).(*model.User)
+	if args.Get(2) != nil {
+		user = args.Get(2).(*model.User)
 	}
-	return args.String(0), user, args.Error(2)
+	return args.String(0), args.String(1), user, args.Error(3)
+}
+
+func (m *MockUserService) RefreshAccessToken(refreshToken string) (string, string, *model.User, error) {
+	args := m.Called(refreshToken)
+	var user *model.User
+	if args.Get(2) != nil {
+		user = args.Get(2).(*model.User)
+	}
+	return args.String(0), args.String(1), user, args.Error(3)
+}
+
+func (m *MockUserService) InvalidateRefreshToken(refreshToken string) error {
+	args := m.Called(refreshToken)
+	return args.Error(0)
 }
 
 // ---- SETUP ROUTER ----
@@ -109,26 +123,27 @@ func TestLoginUser(t *testing.T) {
 		payload := dto.LoginRequest{Email: "test@example.com", Password: "password123"}
 		user := &model.User{PublicID: "uuid", Email: "test@example.com", Role: "client"}
 
-		mockService.On("Login", payload).Return("mock-token", user, nil)
+		mockService.On("Login", payload).Return("mock-access", "mock-refresh", user, nil)
 
 		w := performRequest(t, router, "POST", "/users/login", payload)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		// Check that cookie is set with token
+		// Check that refresh cookie is set
 		cookies := w.Result().Cookies()
-		var authCookie *http.Cookie
+		var refreshCookie *http.Cookie
 		for _, cookie := range cookies {
-			if cookie.Name == "auth_token" {
-				authCookie = cookie
+			if cookie.Name == "refresh_token" {
+				refreshCookie = cookie
 				break
 			}
 		}
-		assert.NotNil(t, authCookie, "Auth cookie should be set")
-		assert.Equal(t, "mock-token", authCookie.Value)
+		assert.NotNil(t, refreshCookie, "Refresh cookie should be set")
+		assert.Equal(t, "mock-refresh", refreshCookie.Value)
 
 		// Check response body contains user data
 		assert.Contains(t, w.Body.String(), "public_id")
+		assert.Contains(t, w.Body.String(), "access_token")
 		assert.Contains(t, w.Body.String(), "Login successful")
 		mockService.AssertExpectations(t)
 	})
@@ -137,7 +152,7 @@ func TestLoginUser(t *testing.T) {
 		router, mockService := setupUserRouter()
 		payload := dto.LoginRequest{Email: "test@example.com", Password: "wrongpassword"}
 
-		mockService.On("Login", payload).Return("", (*model.User)(nil), errors.New("invalid credentials"))
+	mockService.On("Login", payload).Return("", "", (*model.User)(nil), errors.New("invalid credentials"))
 
 		w := performRequest(t, router, "POST", "/users/login", payload)
 
