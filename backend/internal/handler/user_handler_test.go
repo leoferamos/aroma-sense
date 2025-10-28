@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
@@ -121,7 +122,13 @@ func TestLoginUser(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupUserRouter()
 		payload := dto.LoginRequest{Email: "test@example.com", Password: "password123"}
-		user := &model.User{PublicID: "uuid", Email: "test@example.com", Role: "client"}
+		expiresAt := time.Now().Add(7 * 24 * time.Hour)
+		user := &model.User{
+			PublicID:              "uuid",
+			Email:                 "test@example.com",
+			Role:                  "client",
+			RefreshTokenExpiresAt: &expiresAt,
+		}
 
 		mockService.On("Login", payload).Return("mock-access", "mock-refresh", user, nil)
 
