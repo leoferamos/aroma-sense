@@ -2,16 +2,19 @@ package auth
 
 import (
 	"net/http"
-		"github.com/gin-gonic/gin"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-func SetAuthCookie(c *gin.Context, token string) {
-	const defaultExpiryMins = 15
+// SetRefreshTokenCookie sets the refresh token cookie
+func SetRefreshTokenCookie(c *gin.Context, token string, expiresAt time.Time) {
+	maxAge := int(time.Until(expiresAt).Seconds())
 	cookie := &http.Cookie{
-		Name:     "auth_token",
+		Name:     "refresh_token",
 		Value:    token,
 		Path:     "/",
-		MaxAge:   defaultExpiryMins * 60,
+		MaxAge:   maxAge,
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode, // Allow cross-site cookies
@@ -19,10 +22,10 @@ func SetAuthCookie(c *gin.Context, token string) {
 	http.SetCookie(c.Writer, cookie)
 }
 
-// ClearAuthCookie removes the authentication cookie
-func ClearAuthCookie(c *gin.Context) {
+// ClearRefreshTokenCookie removes the refresh token cookie
+func ClearRefreshTokenCookie(c *gin.Context) {
 	cookie := &http.Cookie{
-		Name:     "auth_token",
+		Name:     "refresh_token",
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1, // Delete cookie
