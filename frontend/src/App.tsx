@@ -12,6 +12,7 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AddProduct = lazy(() => import('./pages/admin/AddProduct'));
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
 const Checkout = lazy(() => import('./pages/Checkout.tsx'));
@@ -56,6 +57,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AddProduct />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/products"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminProducts />
                   </ProtectedRoute>
                 }
               />
