@@ -1,9 +1,7 @@
 /**
  * Currency and number formatting utilities
  */
-
-const CURRENCY_LOCALE = 'pt-BR';
-const CURRENCY_CODE = 'BRL';
+import { APP_LOCALE, CURRENCY_CODE } from '../constants/app';
 
 /**
  * Formats a number as Brazilian Real (BRL) currency
@@ -11,7 +9,7 @@ const CURRENCY_CODE = 'BRL';
  * @returns Formatted currency string
  */
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat(CURRENCY_LOCALE, {
+  return new Intl.NumberFormat(APP_LOCALE, {
     style: 'currency',
     currency: CURRENCY_CODE,
   }).format(value);
@@ -23,5 +21,5 @@ export function formatCurrency(value: number): string {
  * @returns Formatted number string
  */
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat(CURRENCY_LOCALE).format(value);
+  return new Intl.NumberFormat(APP_LOCALE).format(value);
 }
