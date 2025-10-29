@@ -77,6 +77,7 @@ const Navbar: React.FC = () => {
                         onRemove={removeItem}
                         isRemoving={isRemovingItem(item.id)}
                         compact
+                        showQuantityControls
                       />
                     ))
                   ) : (

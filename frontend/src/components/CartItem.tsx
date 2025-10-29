@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import TrashIcon from './TrashIcon';
 import { formatCurrency } from '../utils/format';
 import { PLACEHOLDER_IMAGE } from '../constants/app';
 import { cn } from '../utils/cn';
 import type { CartItem as CartItemType } from '../types/cart';
+import { useCartItemQuantity } from '../hooks/useCartItemQuantity';
 
 interface CartItemProps {
   item: CartItemType;
@@ -11,6 +12,7 @@ interface CartItemProps {
   isRemoving?: boolean;
   showRemoveButton?: boolean;
   compact?: boolean;
+  showQuantityControls?: boolean;
 }
 
 const CartItem: React.FC<CartItemProps> = ({ 
@@ -18,14 +20,33 @@ const CartItem: React.FC<CartItemProps> = ({
   onRemove, 
   isRemoving = false,
   showRemoveButton = true,
-  compact = false 
+  compact = false,
+  showQuantityControls = false
 }) => {
+  const { quantity, increment, decrement, error } = useCartItemQuantity({
+    itemId: item.id,
+    initialQuantity: item.quantity,
+  });
+
   const imageSize = compact ? 'h-12 w-12' : 'h-16 w-16';
   const textSize = compact ? 'text-xs' : 'text-sm';
   const padding = compact ? 'p-3' : 'py-4';
+  const isMinQuantity = quantity <= 1;
+
+  // Shared button classes for quantity controls
+  const quantityButtonBase = 'h-6 w-6 rounded border flex items-center justify-center font-medium transition-colors';
+  const quantityButtonActive = 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400';
+  const quantityButtonDisabled = 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed';
 
   return (
-    <div className={cn('flex gap-3 items-center', padding)}>
+    <div className={cn('flex flex-col gap-2', padding)}>
+      {error && (
+        <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+          {error}
+        </div>
+      )}
+      
+      <div className="flex gap-3 items-center">
       <img
         src={item.product?.image_url || PLACEHOLDER_IMAGE}
         alt={item.product?.name || 'Product image'}
@@ -39,9 +60,40 @@ const CartItem: React.FC<CartItemProps> = ({
         <p className={cn(textSize, 'font-medium text-gray-900 truncate')}>
           {item.product?.name || 'Product'}
         </p>
-        <p className={cn(textSize, 'text-gray-600')}>
-          Qty: {item.quantity}
-        </p>
+        
+        {showQuantityControls ? (
+          <div className="flex items-center gap-2 mt-1">
+            <button
+              type="button"
+              onClick={decrement}
+              disabled={isMinQuantity}
+              className={cn(
+                quantityButtonBase,
+                isMinQuantity ? quantityButtonDisabled : quantityButtonActive
+              )}
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+            
+            <span className="min-w-[2rem] text-center font-medium text-gray-900">
+              {quantity}
+            </span>
+            
+            <button
+              type="button"
+              onClick={increment}
+              className={cn(quantityButtonBase, quantityButtonActive)}
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <p className={cn(textSize, 'text-gray-600')}>
+            Qty: {quantity}
+          </p>
+        )}
       </div>
       
       <div className="flex items-center gap-2">
@@ -67,8 +119,10 @@ const CartItem: React.FC<CartItemProps> = ({
           </button>
         )}
       </div>
+      </div>
     </div>
   );
 };
 
-export default CartItem;
+// Memoize to prevent unnecessary re-renders when parent updates
+export default memo(CartItem);

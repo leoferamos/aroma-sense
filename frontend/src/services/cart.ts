@@ -18,3 +18,10 @@ export async function removeItem(itemId: number): Promise<CartResponse> {
   const response = await api.delete<CartResponse>(`/cart/items/${itemId}`);
   return response.data;
 }
+
+export async function updateItemQuantity(itemId: number, quantity: number): Promise<CartResponse> {
+  const response = await api.patch<CartResponse>(`/cart/items/${itemId}`, {
+    quantity,
+  });
+  return response.data;
+}

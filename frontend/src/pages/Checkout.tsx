@@ -227,6 +227,7 @@ const Checkout: React.FC = () => {
                       item={item}
                       onRemove={removeItem}
                       isRemoving={isRemovingItem(item.id)}
+                        showQuantityControls={true}
                     />
                   ))}
                 </ul>

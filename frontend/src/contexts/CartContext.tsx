@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import type { CartResponse } from '../types/cart';
-import { addToCart as svcAddToCart, getCart as svcGetCart, removeItem as svcRemoveItem } from '../services/cart';
+import { addToCart as svcAddToCart, getCart as svcGetCart, removeItem as svcRemoveItem, updateItemQuantity as svcUpdateItemQuantity } from '../services/cart';
 import { useAuth } from './AuthContext';
 
 interface CartContextValue {
@@ -13,6 +13,7 @@ interface CartContextValue {
   addItem: (productId: number, quantity?: number) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
   isRemovingItem: (itemId: number) => boolean;
+  updateItemQuantity: (itemId: number, quantity: number) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -91,6 +92,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isRemovingItem = useCallback((itemId: number) => removingItemIds.has(itemId), [removingItemIds]);
 
+  const updateItemQuantity = useCallback(async (itemId: number, quantity: number) => {
+    try {
+      const data = await svcUpdateItemQuantity(itemId, quantity);
+      setCart(data);
+    } catch (err: unknown) {
+      if (isAxiosError(err)) {
+        const errorMsg = err.response?.data?.error || 'Failed to update quantity';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      } else if (err instanceof Error) {
+        setError(err.message);
+        throw err;
+      } else {
+        const errorMsg = 'Failed to update quantity';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     // Fetch cart on mount or when auth changes
     refresh();
@@ -99,8 +120,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const itemCount = useMemo(() => cart?.item_count ?? 0, [cart]);
 
   const value = useMemo(
-    () => ({ cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem }),
-    [cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem]
+    () => ({ cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem, updateItemQuantity }),
+    [cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem, updateItemQuantity]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
