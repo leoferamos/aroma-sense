@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { formatCurrency } from '../utils/format';
-import { PLACEHOLDER_IMAGE, MAX_CART_BADGE_COUNT, LOGO_PATH } from '../constants/app';
+import { MAX_CART_BADGE_COUNT, LOGO_PATH } from '../constants/app';
+import CartItem from './CartItem';
 
 const Navbar: React.FC = () => {
-  const { itemCount, cart } = useCart();
+  const { itemCount, cart, removeItem, isRemovingItem } = useCart();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
@@ -67,28 +68,16 @@ const Navbar: React.FC = () => {
                 <div className="p-4 border-b border-gray-100">
                   <h3 className="text-sm font-semibold text-gray-900">Cart</h3>
                 </div>
-                <div className="max-h-80 overflow-auto divide-y">
+                <div className="max-h-80 overflow-auto divide-y divide-gray-100">
                   {cart && cart.items.length > 0 ? (
                     cart.items.map((item) => (
-                      <div key={item.id} className="p-4 flex gap-3 items-center">
-                        <img
-                          src={item.product?.image_url || PLACEHOLDER_IMAGE}
-                          alt={item.product?.name || 'Product'}
-                          className="h-12 w-12 object-contain bg-gray-50 rounded"
-                          onError={(e) => { 
-                            (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE;
-                          }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {item.product?.name || 'Product'}
-                          </p>
-                          <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                        </div>
-                        <div className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                          {formatCurrency(item.total)}
-                        </div>
-                      </div>
+                      <CartItem
+                        key={item.id}
+                        item={item}
+                        onRemove={removeItem}
+                        isRemoving={isRemovingItem(item.id)}
+                        compact
+                      />
                     ))
                   ) : (
                     <div className="p-6 text-center text-gray-500 text-sm">Your cart is empty</div>

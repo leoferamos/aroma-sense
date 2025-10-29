@@ -13,3 +13,8 @@ export async function addToCart(productId: number, quantity = 1): Promise<CartRe
   });
   return response.data;
 }
+
+export async function removeItem(itemId: number): Promise<CartResponse> {
+  const response = await api.delete<CartResponse>(`/cart/items/${itemId}`);
+  return response.data;
+}

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import type { CartResponse } from '../types/cart';
-import { addToCart as svcAddToCart, getCart as svcGetCart } from '../services/cart';
+import { addToCart as svcAddToCart, getCart as svcGetCart, removeItem as svcRemoveItem } from '../services/cart';
 import { useAuth } from './AuthContext';
 
 interface CartContextValue {
@@ -11,6 +11,8 @@ interface CartContextValue {
   error: string | null;
   refresh: () => Promise<void>;
   addItem: (productId: number, quantity?: number) => Promise<void>;
+  removeItem: (itemId: number) => Promise<void>;
+  isRemovingItem: (itemId: number) => boolean;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -20,6 +22,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removingItemIds, setRemovingItemIds] = useState<Set<number>>(new Set());
 
   const refresh = useCallback(async () => {
     if (!isAuthenticated) {
@@ -63,6 +66,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const removeItem = useCallback(async (itemId: number) => {
+    try {
+      setRemovingItemIds(prev => new Set(prev).add(itemId));
+      setError(null);
+      const data = await svcRemoveItem(itemId);
+      setCart(data);
+    } catch (err: unknown) {
+      if (isAxiosError(err)) {
+        setError(err.response?.data?.error || 'Failed to remove item');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to remove item');
+      }
+    } finally {
+      setRemovingItemIds(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
+    }
+  }, []);
+
+  const isRemovingItem = useCallback((itemId: number) => removingItemIds.has(itemId), [removingItemIds]);
+
   useEffect(() => {
     // Fetch cart on mount or when auth changes
     refresh();
@@ -71,8 +99,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const itemCount = useMemo(() => cart?.item_count ?? 0, [cart]);
 
   const value = useMemo(
-    () => ({ cart, itemCount, loading, error, refresh, addItem }),
-    [cart, itemCount, loading, error, refresh, addItem]
+    () => ({ cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem }),
+    [cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -3,14 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
+import CartItem from '../components/CartItem';
 import { useCart } from '../contexts/CartContext';
 import { formatCurrency } from '../utils/format';
-import { PLACEHOLDER_IMAGE } from '../constants/app';
 import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../hooks/useCheckoutValidation';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  const { cart, loading } = useCart();
+  const { cart, loading, removeItem, error, isRemovingItem } = useCart();
 
   const [address, setAddress] = useState<AddressForm>({
     fullName: '',
@@ -212,20 +212,22 @@ const Checkout: React.FC = () => {
             <aside className="lg:col-span-1">
               <div className="bg-white shadow rounded-lg p-6 sticky top-24">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Order summary</h2>
+                
+                {/* Error display */}
+                {error && (
+                  <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+                    {error}
+                  </div>
+                )}
+                
                 <ul className="divide-y divide-gray-200 mb-4">
                   {cart!.items.map((item) => (
-                    <li key={item.id} className="py-4 flex gap-4 items-center">
-                      <img
-                        src={item.product?.image_url || PLACEHOLDER_IMAGE}
-                        alt={item.product?.name || 'Product image'}
-                        className="h-16 w-16 object-contain rounded bg-white border border-gray-200 p-1"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.product?.name || 'Product'}</p>
-                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">{formatCurrency(item.total)}</div>
-                    </li>
+                    <CartItem
+                      key={item.id}
+                      item={item}
+                      onRemove={removeItem}
+                      isRemoving={isRemovingItem(item.id)}
+                    />
                   ))}
                 </ul>
                 <div className="flex justify-between text-gray-700">
