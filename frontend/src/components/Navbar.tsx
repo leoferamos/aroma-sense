@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../utils/format';
 import { MAX_CART_BADGE_COUNT, LOGO_PATH } from '../constants/app';
 import CartItem from './CartItem';
+import UserMenu from './UserMenu';
 
 const Navbar: React.FC = () => {
   const { itemCount, cart, removeItem, isRemovingItem } = useCart();
-  const [open, setOpen] = useState(false);
+  const { role, isAuthenticated, logout } = useAuth();
+  const [open, setOpen] = useState(false); // cart dropdown
+  const [userMenuOpen, setUserMenuOpen] = useState(false); // hamburger/user menu
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
@@ -15,11 +19,14 @@ const Navbar: React.FC = () => {
     const onClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
+        setUserMenuOpen(false);
       }
     };
-    if (open) document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [open]);
+    if (open || userMenuOpen) {
+      document.addEventListener('mousedown', onClickOutside);
+      return () => document.removeEventListener('mousedown', onClickOutside);
+    }
+  }, [open, userMenuOpen]);
 
   const badgeCount = itemCount > MAX_CART_BADGE_COUNT ? `${MAX_CART_BADGE_COUNT}+` : itemCount;
 
@@ -32,14 +39,17 @@ const Navbar: React.FC = () => {
             <img src={LOGO_PATH} alt="Aroma Sense" className="h-10 w-auto" />
           </Link>
 
-          {/* Right side: Hamburger Menu + Cart */}
+          {/* Right side: User Menu + Cart */}
           <div className="flex items-center gap-4 relative" ref={dropdownRef}>
             {/* Cart Icon */}
             <button
               type="button"
               aria-label="Open cart"
               className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors"
-              onClick={() => setOpen((v) => !v)}
+              onClick={() => {
+                setOpen((v) => !v);
+                setUserMenuOpen(false); // ensure menu closes when opening cart
+              }}
             >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -102,11 +112,15 @@ const Navbar: React.FC = () => {
               </div>
             )}
 
-            {/* Hamburger Menu */}
+            {/* Hamburger Menu*/}
             <button
               type="button"
               aria-label="Open menu"
               className="p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              onClick={() => {
+                setUserMenuOpen((v) => !v);
+                setOpen(false); // close cart if open
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -123,6 +137,15 @@ const Navbar: React.FC = () => {
                 />
               </svg>
             </button>
+
+            <UserMenu
+              open={userMenuOpen}
+              role={role}
+              isAuthenticated={isAuthenticated}
+              onClose={() => setUserMenuOpen(false)}
+              onLogout={() => logout()}
+              onSignIn={() => navigate('/login')}
+            />
           </div>
         </div>
       </div>
