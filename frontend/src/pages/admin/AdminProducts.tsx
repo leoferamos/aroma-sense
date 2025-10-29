@@ -1,22 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useProducts } from '../../hooks/useProducts';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorState from '../../components/ErrorState';
 import AdminProductCard from '../../components/AdminProductCard';
 import type { Product } from '../../types/product';
 
 const AdminProducts: React.FC = () => {
-  const { products, loading, error } = useProducts();
+  const { products, loading, error, refetch } = useProducts();
 
   const handleEdit = (product: Product) => {
     // Placeholder for future edit flow
-    // Idea: navigate to /admin/products/:id/edit when implemented
     console.log('Edit product', product.id);
     alert(`Edit product: ${product.name}`);
   };
 
   const handleDelete = (product: Product) => {
     // Placeholder for future delete flow
-    // Idea: confirm and call DELETE /admin/products/:id then refresh list
     console.log('Delete product', product.id);
     alert(`Delete product: ${product.name}`);
   };
@@ -50,42 +50,11 @@ const AdminProducts: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-gray-600">Loading products...</p>
-            </div>
-          </div>
-        )}
+        {loading && <LoadingSpinner message="Loading products..." />}
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <svg
-              className="w-12 h-12 text-red-500 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <h3 className="text-lg font-semibold text-red-900 mb-2">
-              Failed to load products
-            </h3>
-            <p className="text-red-700">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState message={error} onRetry={refetch} />
         )}
 
         {/* Products Grid */}

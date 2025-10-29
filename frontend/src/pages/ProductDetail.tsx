@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import NotFound from './NotFound';
+import ErrorState from '../components/ErrorState';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useProducts } from '../hooks/useProducts';
 import { useCart } from '../contexts/CartContext';
@@ -44,14 +45,21 @@ const ProductDetail: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-gray-600">Loading product...</div>
+          <LoadingSpinner message="Loading product..." />
         </main>
       </div>
     );
   }
 
   if (error || !product) {
-    return <NotFound />;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <ErrorState message={error || 'Product not found.'} />
+        </main>
+      </div>
+    );
   }
 
   return (

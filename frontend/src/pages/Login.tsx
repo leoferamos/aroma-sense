@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
+import ErrorState from '../components/ErrorState';
 import WordGrid from '../components/WordGrid';
 import { useLoginValidation } from '../hooks/useLoginValidation';
 import { messages } from '../constants/messages';
@@ -119,8 +120,8 @@ const Login: React.FC = () => {
             >
               {loading ? "Logging in..." : messages.login}
             </button>
-            {error && <FormError message={error} />}
-            {generalError && <FormError message={generalError} />}
+            {error && <ErrorState message={error} />}
+            {generalError && <ErrorState message={generalError} />}
           </form>
 
           <div className="mt-6 text-gray-700 text-base text-center">

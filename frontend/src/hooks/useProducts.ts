@@ -8,28 +8,29 @@ export function useProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getProducts();
-        setProducts(data);
-      } catch (err: unknown) {
-        if (isAxiosError(err)) {
-          setError(err.response?.data?.error || "Failed to load products");
-        } else if (err instanceof Error) {
-          setError(err.message || "Failed to load products");
-        } else {
-          setError("Failed to load products");
-        }
-      } finally {
-        setLoading(false);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getProducts();
+      setProducts(data);
+    } catch (err: unknown) {
+      if (isAxiosError(err)) {
+        setError(err.response?.data?.error || "Failed to load products");
+      } else if (err instanceof Error) {
+        setError(err.message || "Failed to load products");
+      } else {
+        setError("Failed to load products");
       }
+    } finally {
+      setLoading(false);
     }
+  };
 
+  // Fetch on mount
+  useEffect(() => {
     fetchProducts();
   }, []);
 
-  return { products, loading, error };
+  return { products, loading, error, refetch: fetchProducts };
 }

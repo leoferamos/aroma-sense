@@ -6,6 +6,8 @@ import FormError from '../components/FormError';
 import CartItem from '../components/CartItem';
 import { useCart } from '../contexts/CartContext';
 import { formatCurrency } from '../utils/format';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorState from '../components/ErrorState';
 import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../hooks/useCheckoutValidation';
 
 const Checkout: React.FC = () => {
@@ -59,7 +61,7 @@ const Checkout: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
         {loading ? (
-          <div className="text-gray-600">Loading your cart...</div>
+          <LoadingSpinner message="Loading your cart..." />
         ) : cartIsEmpty ? (
           <div className="bg-white shadow rounded-lg p-8 text-center">
             <p className="text-gray-700 mb-4">Your cart is empty.</p>
@@ -215,9 +217,7 @@ const Checkout: React.FC = () => {
                 
                 {/* Error display */}
                 {error && (
-                  <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
-                    {error}
-                  </div>
+                  <ErrorState message={error} />
                 )}
                 
                 <ul className="divide-y divide-gray-200 mb-4">

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ProductForm from "../../components/ProductForm";
 import { useProductFormValidation } from "../../hooks/useProductFormValidation";
 import { useCreateProduct } from "../../hooks/useCreateProduct";
+import ErrorState from '../../components/ErrorState';
 import type { CreateProductFormData } from "../../types/product";
 import type { ProductFormTouched } from "../../hooks/useProductFormValidation";
 
@@ -106,6 +107,7 @@ const AddProduct: React.FC = () => {
             </div>
           )}
 
+          {error && <ErrorState message={error} />}
           <ProductForm
             form={form}
             setForm={setForm}
@@ -114,7 +116,7 @@ const AddProduct: React.FC = () => {
             errors={errors}
             onSubmit={handleSubmit}
             loading={loading}
-            error={error}
+            error={undefined}
           />
         </div>
       </main>

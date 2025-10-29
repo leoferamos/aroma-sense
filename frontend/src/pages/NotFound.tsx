@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PublicNavbar from '../components/PublicNavbar';
 import notFoundImage from '../assets/images/404.png';
+import ErrorState from '../components/ErrorState';
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
@@ -25,13 +26,7 @@ const NotFound: React.FC = () => {
           </div>
 
           {/* Error Message */}
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Oops! Page Not Found
-          </h1>
-          
-          <p className="text-lg md:text-xl text-gray-600 mb-8">
-            Looks like this page doesn't exist or has been moved.
-          </p>
+          <ErrorState message="Oops! Page Not Found. Looks like this page doesn't exist or has been moved." />
 
           {/* Go Home Button */}
           <button

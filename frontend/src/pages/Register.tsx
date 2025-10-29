@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
+import ErrorState from '../components/ErrorState';
 import WordGrid from '../components/WordGrid';
 import { useRegisterValidation } from '../hooks/useRegisterValidation';
 import { messages } from '../constants/messages';
@@ -178,7 +179,7 @@ const Register: React.FC = () => {
               </label>
             </div>
             <FormError message={touchedPrivacy && !agreePrivacy ? 'Você precisa concordar com a política de privacidade.' : ''} />
-            <FormError message={errors.general || error} />
+            {errors.general || error ? <ErrorState message={errors.general || error} /> : null}
             {success && <span className="text-green-600 text-sm mt-2">{success}</span>}
             <button
               type="submit"
