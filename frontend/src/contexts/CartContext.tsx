@@ -96,6 +96,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = await svcUpdateItemQuantity(itemId, quantity);
       setCart(data);
+      setError(null); // Clear error on success
     } catch (err: unknown) {
       if (isAxiosError(err)) {
         const errorMsg = err.response?.data?.error || 'Failed to update quantity';

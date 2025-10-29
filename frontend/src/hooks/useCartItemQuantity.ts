@@ -17,12 +17,12 @@ interface UseCartItemQuantityReturn {
 }
 
 /**
- * Hook para gerenciar quantidade de item no carrinho com:
- * - Optimistic UI (atualização imediata na interface)
- * - Debouncing (aguarda X ms antes de enviar requisição)
- * - Rollback automático em caso de erro
+ * Hook to manage cart item quantity with:
+ * - Optimistic UI (immediate interface update)
+ * - Debouncing (waits X ms before sending request)
+ * - Automatic rollback on error
  * 
- * Evita múltiplas requisições quando o usuário clica rapidamente
+ * Prevents multiple requests when user clicks rapidly
  */
 export function useCartItemQuantity({
   itemId,
@@ -31,24 +31,24 @@ export function useCartItemQuantity({
 }: UseCartItemQuantityOptions): UseCartItemQuantityReturn {
   const { updateItemQuantity } = useCart();
   
-  // Estado local (optimistic)
+  // Local state (optimistic)
   const [quantity, setQuantity] = useState(initialQuantity);
   const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Refs para controle de debounce
+  // Refs for debounce control
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousQuantityRef = useRef(initialQuantity);
   const lastSyncedQuantityRef = useRef(initialQuantity);
 
-  // Atualiza quando a quantidade inicial mudar (ex: refresh do cart)
+  // Update when initial quantity changes (e.g., cart refresh)
   useEffect(() => {
     setQuantity(initialQuantity);
     lastSyncedQuantityRef.current = initialQuantity;
     previousQuantityRef.current = initialQuantity;
   }, [initialQuantity]);
 
-  // Cleanup do timer ao desmontar
+  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
@@ -57,16 +57,16 @@ export function useCartItemQuantity({
     };
   }, []);
 
-  // Função para sincronizar com backend (com debounce)
+  // Function to sync with backend (with debounce)
   const syncQuantity = useCallback((newQuantity: number) => {
-    // Limpa timer anterior
+    // Clear previous timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Cria novo timer
+    // Create new timer
     debounceTimerRef.current = setTimeout(async () => {
-      // Se quantidade não mudou em relação ao último sync, ignora
+      // If quantity hasn't changed from last sync, ignore
       if (newQuantity === lastSyncedQuantityRef.current) {
         return;
       }
@@ -80,7 +80,7 @@ export function useCartItemQuantity({
         previousQuantityRef.current = newQuantity;
         setError(null); 
       } catch (err) {
-        // Rollback para quantidade anterior
+        // Rollback to previous quantity
         setQuantity(previousQuantityRef.current);
         setError(err instanceof Error ? err.message : 'Failed to update quantity');
       } finally {
@@ -101,7 +101,7 @@ export function useCartItemQuantity({
   const decrement = useCallback(() => {
     setError(null); // Clear error on new interaction
     setQuantity(prev => {
-      // Não permite quantidade menor que 1
+      // Don't allow quantity less than 1
       if (prev <= 1) return prev;
       const newQty = prev - 1;
       syncQuantity(newQty);
@@ -110,7 +110,7 @@ export function useCartItemQuantity({
   }, [syncQuantity]);
 
   const setQuantityManual = useCallback((qty: number) => {
-    if (qty < 1) return; // Valida quantidade mínima
+    if (qty < 1) return; // Validate minimum quantity
     setError(null); // Clear error on new interaction
     setQuantity(qty);
     syncQuantity(qty);
