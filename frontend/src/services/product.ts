@@ -1,9 +1,3 @@
-/**
- * Deletes a product by id
- */
-export async function deleteProduct(id: number): Promise<void> {
-  await api.delete(`/admin/products/${id}`);
-}
 import api from "./api";
 import type { Product, CreateProductFormData } from "../types/product";
 
@@ -54,4 +48,36 @@ export async function createProduct(
   });
   
   return response.data;
+}
+
+/**
+ * Updates an existing product
+ * Sends JSON payload to PATCH /admin/products/:id
+ * Note: Image updates are not supported yet and will be handled in the future
+ */
+export async function updateProduct(
+  id: number,
+  formData: CreateProductFormData
+): Promise<Product> {
+  const payload = {
+    name: formData.name,
+    brand: formData.brand,
+    description: formData.description,
+    category: formData.category,
+    weight: formData.weight,
+    price: formData.price,
+    stock_quantity: Math.floor(formData.stock_quantity),
+    notes: formData.notes,
+  };
+
+  const response = await api.patch<Product>(`/admin/products/${id}`, payload);
+  
+  return response.data;
+}
+
+/**
+ * Deletes a product by id
+ */
+export async function deleteProduct(id: number): Promise<void> {
+  await api.delete(`/admin/products/${id}`);
 }

@@ -13,6 +13,10 @@ interface ProductFormProps {
   onSubmit: (e: React.FormEvent) => void;
   loading: boolean;
   error?: string;
+  submitButtonText?: string;
+  loadingText?: string;
+  isEditMode?: boolean;
+  currentImageUrl?: string;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -24,6 +28,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
   onSubmit,
   loading,
   error,
+  submitButtonText = "Create Product",
+  loadingText = "Creating Product...",
+  isEditMode = false,
+  currentImageUrl,
 }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
@@ -37,7 +45,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const numValue = value === "" ? 0 : parseFloat(value);
+    const normalizedValue = value.replace(',', '.');
+    const numValue = normalizedValue === "" ? 0 : parseFloat(normalizedValue);
     setForm({ ...form, [name]: isNaN(numValue) ? 0 : numValue });
   };
 
@@ -249,31 +258,46 @@ const ProductForm: React.FC<ProductFormProps> = ({
       </div>
 
       {/* Image Upload */}
-      <div>
-        <label htmlFor="image" className="text-base font-normal text-gray-800 block mb-2">
-          Product Image
-        </label>
-        <input
-          type="file"
-          id="image"
-          name="image"
-          accept="image/jpeg,image/png"
-          onChange={handleImageChange}
-          onBlur={handleBlur}
-          className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-          required
-        />
-        {imagePreview && (
-          <div className="mt-4">
+      {!isEditMode ? (
+        <div>
+          <label htmlFor="image" className="text-base font-normal text-gray-800 block mb-2">
+            Product Image
+          </label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/jpeg,image/png"
+            onChange={handleImageChange}
+            onBlur={handleBlur}
+            className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            required
+          />
+          {imagePreview && (
+            <div className="mt-4">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-40 h-40 object-cover rounded-lg border border-gray-300"
+              />
+            </div>
+          )}
+          <FormError message={errors.image} />
+        </div>
+      ) : (
+        currentImageUrl && (
+          <div>
+            <label className="text-base font-normal text-gray-800 block mb-2">
+              Image
+            </label>
             <img
-              src={imagePreview}
-              alt="Preview"
+              src={currentImageUrl}
+              alt="Product"
               className="w-40 h-40 object-cover rounded-lg border border-gray-300"
             />
           </div>
-        )}
-        <FormError message={errors.image} />
-      </div>
+        )
+      )}
 
       {/* Submit Button */}
       <button
@@ -281,7 +305,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         disabled={loading}
         className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        {loading ? "Creating Product..." : "Create Product"}
+        {loading ? loadingText : submitButtonText}
       </button>
     </form>
   );

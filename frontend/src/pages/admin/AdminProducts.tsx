@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useProducts } from '../../hooks/useProducts';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorState from '../../components/ErrorState';
@@ -11,6 +11,7 @@ import { deleteProduct } from '../../services/product';
 
 const AdminProducts: React.FC = () => {
   const { products, loading, error, refetch } = useProducts();
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [deleting, setDeleting] = React.useState(false);
@@ -19,9 +20,7 @@ const AdminProducts: React.FC = () => {
   const [deleteError, setDeleteError] = React.useState<string | null>(null);
 
   const handleEdit = (product: Product) => {
-    // Placeholder for future edit flow
-    console.log('Edit product', product.id);
-    alert(`Edit product: ${product.name}`);
+    navigate(`/admin/products/${product.id}/edit`);
   };
 
   const handleDelete = (product: Product) => {

@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { messages } from "../constants/messages";
-import type {
-  CreateProductFormData,
-  ProductFormErrors,
-} from "../types/product";
+import type { CreateProductFormData, ProductFormErrors } from "../types/product";
 
 export interface ProductFormTouched {
   name: boolean;
@@ -17,10 +14,17 @@ export interface ProductFormTouched {
   image: boolean;
 }
 
-export function useProductFormValidation(
-  form: CreateProductFormData,
-  touched: ProductFormTouched
-) {
+interface UseProductFormValidationProps {
+  form: CreateProductFormData;
+  touched: ProductFormTouched;
+  isEditMode?: boolean;
+}
+
+export function useProductFormValidation({
+  form,
+  touched,
+  isEditMode = false,
+}: UseProductFormValidationProps) {
   const [errors, setErrors] = useState<ProductFormErrors>({});
 
   useEffect(() => {
@@ -103,9 +107,9 @@ export function useProductFormValidation(
 
     // Image validation
     if (touched.image) {
-      if (!form.image) {
+      if (!isEditMode && !form.image) {
         newErrors.image = messages.productImageRequired;
-      } else {
+      } else if (form.image) {
         const validTypes = ["image/jpeg", "image/png"];
         if (!validTypes.includes(form.image.type)) {
           newErrors.image = messages.productImageTypeInvalid;
@@ -116,7 +120,7 @@ export function useProductFormValidation(
     }
 
     setErrors(newErrors);
-  }, [form, touched]);
+  }, [form, touched, isEditMode]);
 
   const isValid = Object.keys(errors).length === 0;
 

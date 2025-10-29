@@ -33,7 +33,11 @@ const AddProduct: React.FC = () => {
     image: false,
   });
 
-  const { errors, isValid } = useProductFormValidation(form, touched);
+  const { errors, isValid } = useProductFormValidation({
+    form,
+    touched,
+    isEditMode: false,
+  });
   const { submitProduct, loading, error, success } = useCreateProduct();
 
   const handleSubmit = async (e: React.FormEvent) => {

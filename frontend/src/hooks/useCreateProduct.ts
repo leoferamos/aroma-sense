@@ -1,66 +1,33 @@
-import { useState } from "react";
-import { isAxiosError } from "axios";
 import { createProduct } from "../services/product";
 import { messages } from "../constants/messages";
-import type { CreateProductFormData, Product } from "../types/product";
+import { useProductMutation } from "./useProductMutation";
+import type { CreateProductFormData } from "../types/product";
 
 export function useCreateProduct() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [createdProduct, setCreatedProduct] = useState<Product | null>(null);
-
-  async function submitProduct(data: CreateProductFormData) {
-    setLoading(true);
-    setError("");
-    setSuccess(false);
-    setCreatedProduct(null);
-
-    try {
-      const product = await createProduct(data);
-      setCreatedProduct(product);
-      setSuccess(true);
-      return product;
-    } catch (err) {
-      if (isAxiosError<{ error: string }>(err)) {
-        const errorMsg = err.response?.data?.error || "";
-        
-        // Handle specific error cases from backend
+  const { mutate, loading, error, success, product, reset } = useProductMutation<CreateProductFormData>(
+    createProduct,
+    {
+      onError: (errorMsg) => {
         if (errorMsg.toLowerCase().includes("unauthorized")) {
-          setError(messages.productCreateUnauthorized);
+          return messages.productCreateUnauthorized;
         } else if (errorMsg.toLowerCase().includes("invalid image")) {
-          setError(messages.productCreateInvalidImage);
+          return messages.productCreateInvalidImage;
         } else if (errorMsg.toLowerCase().includes("image too large")) {
-          setError(messages.productCreateImageTooLarge);
+          return messages.productCreateImageTooLarge;
         } else if (errorMsg.toLowerCase().includes("missing field")) {
-          setError(messages.productCreateMissingFields);
-        } else {
-          setError(errorMsg || messages.productCreateError);
+          return messages.productCreateMissingFields;
         }
-      } else if (err instanceof Error) {
-        setError(err.message || messages.productCreateError);
-      } else {
-        setError(messages.productCreateUnexpectedError);
-      }
-      return null;
-    } finally {
-      setLoading(false);
+        return errorMsg || messages.productCreateError;
+      },
     }
-  }
-
-  function reset() {
-    setLoading(false);
-    setError("");
-    setSuccess(false);
-    setCreatedProduct(null);
-  }
+  );
 
   return {
-    submitProduct,
+    submitProduct: mutate,
     loading,
     error,
     success,
-    createdProduct,
+    createdProduct: product,
     reset,
   };
 }
