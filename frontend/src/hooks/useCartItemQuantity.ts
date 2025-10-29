@@ -15,15 +15,6 @@ interface UseCartItemQuantityReturn {
   isSyncing: boolean;
   error: string | null;
 }
-
-/**
- * Hook to manage cart item quantity with:
- * - Optimistic UI (immediate interface update)
- * - Debouncing (waits X ms before sending request)
- * - Automatic rollback on error
- * 
- * Prevents multiple requests when user clicks rapidly
- */
 export function useCartItemQuantity({
   itemId,
   initialQuantity,
@@ -31,7 +22,7 @@ export function useCartItemQuantity({
 }: UseCartItemQuantityOptions): UseCartItemQuantityReturn {
   const { updateItemQuantity } = useCart();
   
-  // Local state (optimistic)
+  // Local state
   const [quantity, setQuantity] = useState(initialQuantity);
   const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +32,7 @@ export function useCartItemQuantity({
   const previousQuantityRef = useRef(initialQuantity);
   const lastSyncedQuantityRef = useRef(initialQuantity);
 
-  // Update when initial quantity changes (e.g., cart refresh)
+  // Update when initial quantity changes
   useEffect(() => {
     setQuantity(initialQuantity);
     lastSyncedQuantityRef.current = initialQuantity;
@@ -57,7 +48,6 @@ export function useCartItemQuantity({
     };
   }, []);
 
-  // Function to sync with backend (with debounce)
   const syncQuantity = useCallback((newQuantity: number) => {
     // Clear previous timer
     if (debounceTimerRef.current) {
@@ -66,7 +56,6 @@ export function useCartItemQuantity({
 
     // Create new timer
     debounceTimerRef.current = setTimeout(async () => {
-      // If quantity hasn't changed from last sync, ignore
       if (newQuantity === lastSyncedQuantityRef.current) {
         return;
       }
