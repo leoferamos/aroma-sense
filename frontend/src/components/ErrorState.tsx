@@ -22,10 +22,7 @@ const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry, className }) 
         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>
-    <h3 className="text-lg font-semibold text-red-900 mb-2">
-      Failed to load products
-    </h3>
-    <p className="text-red-700">{message}</p>
+    <p className="text-red-700 font-medium">{message}</p>
     {onRetry && (
       <button
         onClick={onRetry}
