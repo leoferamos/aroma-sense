@@ -16,3 +16,29 @@ export interface Product {
 export interface ProductsResponse {
   products: Product[];
 }
+
+// Form data for creating a new product
+export interface CreateProductFormData {
+  name: string;
+  brand: string;
+  weight: number;
+  description: string;
+  price: number;
+  category: string;
+  notes: string[];
+  stock_quantity: number;
+  image: File | null;
+}
+
+// Validation errors for the product form
+export interface ProductFormErrors {
+  name?: string;
+  brand?: string;
+  weight?: string;
+  description?: string;
+  price?: string;
+  category?: string;
+  notes?: string;
+  stock_quantity?: string;
+  image?: string;
+}
