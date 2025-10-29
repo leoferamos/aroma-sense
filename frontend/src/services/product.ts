@@ -1,3 +1,9 @@
+/**
+ * Deletes a product by id
+ */
+export async function deleteProduct(id: number): Promise<void> {
+  await api.delete(`/admin/products/${id}`);
+}
 import api from "./api";
 import type { Product, CreateProductFormData } from "../types/product";
 
@@ -31,7 +37,7 @@ export async function createProduct(
   data.append("price", formData.price.toString());
   data.append("stock_quantity", Math.floor(formData.stock_quantity).toString());
   
-  // Add notes as separate form fields (backend expects []string)
+  // Add notes as separate form fields
   formData.notes.forEach((note) => {
     data.append("notes", note);
   });

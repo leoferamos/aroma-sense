@@ -5,9 +5,18 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorState from '../../components/ErrorState';
 import AdminProductCard from '../../components/AdminProductCard';
 import type { Product } from '../../types/product';
+import ConfirmModal from '../../components/ConfirmModal';
+import { deleteProduct } from '../../services/product';
+
 
 const AdminProducts: React.FC = () => {
   const { products, loading, error, refetch } = useProducts();
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
+  const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
+  const [fadeOut, setFadeOut] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState<string | null>(null);
 
   const handleEdit = (product: Product) => {
     // Placeholder for future edit flow
@@ -16,10 +25,45 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleDelete = (product: Product) => {
-    // Placeholder for future delete flow
-    console.log('Delete product', product.id);
-    alert(`Delete product: ${product.name}`);
+    setSelectedProduct(product);
+    setModalOpen(true);
+    setDeleteError(null);
   };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedProduct) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteProduct(selectedProduct.id);
+      setSuccessMsg('Product deleted successfully.');
+      setFadeOut(false);
+      setModalOpen(false);
+      setSelectedProduct(null);
+      await refetch();
+    } catch (err: any) {
+      setDeleteError(err?.response?.data?.error || err?.message || 'Failed to delete product.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedProduct(null);
+    setDeleteError(null);
+  };
+
+  React.useEffect(() => {
+    if (!successMsg) return;
+    setFadeOut(false);
+    const fadeTimer = setTimeout(() => setFadeOut(true), 2300);
+    const removeTimer = setTimeout(() => setSuccessMsg(null), 3000);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, [successMsg]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -57,6 +101,24 @@ const AdminProducts: React.FC = () => {
           <ErrorState message={error} onRetry={refetch} />
         )}
 
+        {/* Success message */}
+        {successMsg && (
+          <div
+            className={`mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-green-700 text-center font-medium transition-opacity duration-700 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
+            aria-live="polite"
+          >
+            {successMsg}
+          </div>
+        )}
+        {/* Delete error */}
+        {deleteError && (
+          <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700 text-center font-medium">
+            {deleteError}
+            <button className="ml-4 text-red-800 underline" onClick={() => setDeleteError(null)}>
+              Dismiss
+            </button>
+          </div>
+        )}
         {/* Products Grid */}
         {!loading && !error && Array.isArray(products) && (
           <>
@@ -105,6 +167,18 @@ const AdminProducts: React.FC = () => {
             )}
           </>
         )}
+
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          open={modalOpen}
+          title="Delete Product"
+          description={selectedProduct ? `Are you sure you want to delete "${selectedProduct.name}"? This action cannot be undone.` : ''}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCloseModal}
+          loading={deleting}
+        />
       </main>
     </div>
   );
