@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
@@ -43,7 +44,7 @@ func NewProductHandler(s service.ProductService) *ProductHandler {
 // @Security     BearerAuth
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var form dto.ProductFormDTO
-	if err := c.ShouldBind(&form); err != nil {
+	if err := c.ShouldBindWith(&form, binding.FormMultipart); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
