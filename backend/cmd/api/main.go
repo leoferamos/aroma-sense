@@ -41,7 +41,7 @@ func main() {
 	// Initialize all modules with proper dependency injection
 	handlers := bootstrap.InitializeApp(db.DB, storageClient)
 
-	r := router.SetupRouter(handlers.UserHandler, handlers.ProductHandler, handlers.CartHandler)
+	r := router.SetupRouter(handlers.UserHandler, handlers.ProductHandler, handlers.CartHandler, handlers.OrderHandler)
 
 	// Swagger docs route
 	if os.Getenv("ENABLE_SWAGGER") == "true" {
