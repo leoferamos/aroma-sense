@@ -24,7 +24,6 @@ func NewCartHandler(cartService service.CartService) *CartHandler {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string  true  "Bearer JWT token"
 // @Success      200  {object}  dto.CartResponse  "User's cart with items and totals"
 // @Failure      401  {object}  dto.ErrorResponse  "Unauthorized"
 // @Failure      404  {object}  dto.ErrorResponse  "Cart not found"
@@ -61,7 +60,6 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string                true   "Bearer JWT token"
 // @Param        request        body    dto.AddToCartRequest  true   "Product ID and quantity to add"
 // @Success      200  {object}  dto.CartResponse    "Updated cart with new item"
 // @Failure      400  {object}  dto.ErrorResponse   "Invalid request body or insufficient stock"
@@ -117,7 +115,6 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string                       true   "Bearer JWT token"
 // @Param        itemId         path    int                          true   "Cart item ID"
 // @Param        request        body    dto.UpdateCartItemRequest    true   "New quantity (0 to remove item)"
 // @Success      200  {object}  dto.CartResponse    "Updated cart"
@@ -187,7 +184,6 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string  true   "Bearer JWT token"
 // @Param        itemId         path    int     true   "Cart item ID"
 // @Success      200  {object}  dto.CartResponse    "Updated cart after item removal"
 // @Failure      400  {object}  dto.ErrorResponse   "Invalid item ID"
@@ -240,7 +236,6 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string  true   "Bearer JWT token"
 // @Success      200  {object}  dto.CartResponse    "Empty cart after clearing all items"
 // @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
 // @Failure      404  {object}  dto.ErrorResponse   "Cart not found"

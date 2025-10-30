@@ -23,7 +23,6 @@ func NewOrderHandler(orderService service.OrderService) *OrderHandler {
 // @Tags         orders
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string  true  "Bearer JWT token"
 // @Param        order  body  dto.CreateOrderFromCartRequest  true  "Order data (shipping address, payment method)"
 // @Success      201  {object}  dto.OrderResponse      "Order created successfully"
 // @Failure      400  {object}  dto.ErrorResponse      "Invalid request data or empty cart"
