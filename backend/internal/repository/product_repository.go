@@ -14,12 +14,6 @@ type ProductRepository interface {
 	Delete(id uint) error
 	DecrementStock(productID uint, quantity int) error
 }
-// DecrementStock decreases the stock quantity of a product
-func (r *productRepository) DecrementStock(productID uint, quantity int) error {
-	return r.db.Model(&model.Product{}).
-		Where("id = ? AND stock_quantity >= ?", productID, quantity).
-		UpdateColumn("stock_quantity", gorm.Expr("stock_quantity - ?", quantity)).Error
-}
 
 type productRepository struct {
 	db *gorm.DB
@@ -81,4 +75,11 @@ func (r *productRepository) Update(product *model.Product) error {
 // Delete removes a product from the database by its ID
 func (r *productRepository) Delete(id uint) error {
 	return r.db.Delete(&model.Product{}, id).Error
+}
+
+// DecrementStock decreases the stock quantity of a product
+func (r *productRepository) DecrementStock(productID uint, quantity int) error {
+	return r.db.Model(&model.Product{}).
+		Where("id = ? AND stock_quantity >= ?", productID, quantity).
+		UpdateColumn("stock_quantity", gorm.Expr("stock_quantity - ?", quantity)).Error
 }
