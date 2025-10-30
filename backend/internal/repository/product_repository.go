@@ -12,6 +12,13 @@ type ProductRepository interface {
 	FindByID(id uint) (model.Product, error)
 	Update(product *model.Product) error
 	Delete(id uint) error
+	DecrementStock(productID uint, quantity int) error
+}
+// DecrementStock decreases the stock quantity of a product
+func (r *productRepository) DecrementStock(productID uint, quantity int) error {
+	return r.db.Model(&model.Product{}).
+		Where("id = ? AND stock_quantity >= ?", productID, quantity).
+		UpdateColumn("stock_quantity", gorm.Expr("stock_quantity - ?", quantity)).Error
 }
 
 type productRepository struct {
@@ -22,6 +29,7 @@ func NewProductRepository(db *gorm.DB) ProductRepository {
 	return &productRepository{db: db}
 }
 
+// Create inserts a new product into the database
 func (r *productRepository) Create(input dto.ProductFormDTO, imageURL string) error {
 	notes := ""
 	if len(input.Notes) > 0 {
@@ -47,6 +55,7 @@ func (r *productRepository) Create(input dto.ProductFormDTO, imageURL string) er
 	return r.db.Create(&product).Error
 }
 
+// FindAll retrieves all products, limited by the specified number
 func (r *productRepository) FindAll(limit int) ([]model.Product, error) {
 	var products []model.Product
 	query := r.db.Order("created_at desc")
