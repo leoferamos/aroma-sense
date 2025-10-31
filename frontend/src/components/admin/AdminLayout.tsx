@@ -69,7 +69,6 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
                   <span className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm text-gray-700">
                     {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
                   </span>
-                  <span className="hidden sm:inline text-sm text-gray-700">{user?.email ?? 'User'}</span>
                 </button>
 
                 {userMenuOpen && (
