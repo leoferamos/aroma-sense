@@ -26,7 +26,6 @@ func NewProductHandler(s service.ProductService) *ProductHandler {
 // @Tags         admin
 // @Accept       multipart/form-data
 // @Produce      json
-// @Param        Authorization  header  string  true  "Bearer JWT token"
 // @Param        name           formData  string   true   "Product name"
 // @Param        brand          formData  string   true   "Product brand"
 // @Param        weight         formData  number   true   "Product weight in ml"
@@ -94,7 +93,6 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string  true  "Bearer JWT token"
 // @Param        id             path    int     true  "Product ID"
 // @Success      200  {object}  dto.ProductResponse  "Product details"
 // @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
@@ -185,7 +183,6 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string                      true  "Bearer JWT token"
 // @Param        id             path    int                         true  "Product ID"
 // @Param        product        body    dto.UpdateProductRequest    true  "Product update data"
 // @Success      200  {object}  dto.MessageResponse  "Product updated successfully"
@@ -224,7 +221,6 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 // @Tags         admin
 // @Accept       json
 // @Produce      json
-// @Param        Authorization  header  string  true  "Bearer JWT token"
 // @Param        id             path    int     true  "Product ID"
 // @Success      200  {object}  dto.MessageResponse  "Product deleted successfully"
 // @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"

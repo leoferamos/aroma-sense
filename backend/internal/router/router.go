@@ -10,7 +10,7 @@ import (
 )
 
 // SetupRouter initializes the Gin router with all routes
-func SetupRouter(userHandler *handler.UserHandler, productHandler *handler.ProductHandler, cartHandler *handler.CartHandler) *gin.Engine {
+func SetupRouter(userHandler *handler.UserHandler, productHandler *handler.ProductHandler, cartHandler *handler.CartHandler, orderHandler *handler.OrderHandler) *gin.Engine {
 	r := gin.Default()
 
 	// CORS setup: read allowed origins from env
@@ -32,6 +32,7 @@ func SetupRouter(userHandler *handler.UserHandler, productHandler *handler.Produ
 	AdminRoutes(r, userHandler, productHandler)
 	ProductRoutes(r, productHandler)
 	CartRoutes(r, cartHandler)
+	OrderRoutes(r, orderHandler)
 
 	return r
 }
