@@ -15,7 +15,7 @@ interface AdminProductCardProps {
 const AdminProductCard: React.FC<AdminProductCardProps> = ({ product, onEdit, onDelete }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div className="relative h-48 bg-gray-50 flex items-center justify-center p-3">
+  <div className="relative h-48 bg-white flex items-center justify-center p-3">
         <img
           src={product.image_url || PLACEHOLDER_IMAGE}
           alt={product.name}
