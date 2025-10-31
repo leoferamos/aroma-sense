@@ -8,7 +8,7 @@ import { useUpdateProduct } from "../../hooks/useUpdateProduct";
 import { getProductById } from "../../services/product";
 import type { CreateProductFormData, Product } from "../../types/product";
 import type { ProductFormTouched } from "../../hooks/useProductFormValidation";
-
+import AdminLayout from '../../components/admin/AdminLayout';
 const EditProduct: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -68,8 +68,9 @@ const EditProduct: React.FC = () => {
           stock_quantity: data.stock_quantity,
           image: null,
         });
-      } catch (err: any) {
-        setLoadError(err?.response?.data?.error || err?.message || "Failed to load product.");
+      } catch (err: unknown) {
+        const e = err as { response?: { data?: { error?: string } }; message?: string };
+        setLoadError(e?.response?.data?.error || e?.message || "Failed to load product.");
       } finally {
         setLoadingProduct(false);
       }
@@ -112,78 +113,42 @@ const EditProduct: React.FC = () => {
 
   if (loadingProduct) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="Aroma Sense" className="h-8" />
-                <h1 className="text-lg font-semibold text-gray-900">
-                  Edit Product
-                </h1>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <AdminLayout title="Edit Product">
+        <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <LoadingSpinner message="Loading product..." />
-        </main>
-      </div>
+        </div>
+      </AdminLayout>
     );
   }
 
   if (loadError || !product) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="Aroma Sense" className="h-8" />
-                <h1 className="text-lg font-semibold text-gray-900">
-                  Edit Product
-                </h1>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <AdminLayout title="Edit Product">
+        <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <ErrorState
             message={loadError || "Product not found."}
             onRetry={() => navigate("/admin/products")}
           />
-        </main>
-      </div>
+        </div>
+      </AdminLayout>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Aroma Sense" className="h-8" />
-              <h1 className="text-lg font-semibold text-gray-900">
-                Edit Product
-              </h1>
-            </div>
-            <button
-              onClick={() => navigate("/admin/products")}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              ← Back to Products
-            </button>
-          </div>
-        </div>
-      </nav>
+  const actions = (
+    <button
+      onClick={() => navigate('/admin/products')}
+      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      ← Back to Products
+    </button>
+  );
 
-      <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  return (
+    <AdminLayout title="Edit Product" actions={actions}>
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Edit Product Details
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900">Edit Product Details</h2>
             <p className="text-gray-500 text-sm mt-1">Update the information below</p>
           </div>
 
@@ -213,8 +178,8 @@ const EditProduct: React.FC = () => {
             currentImageUrl={product?.image_url}
           />
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

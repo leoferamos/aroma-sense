@@ -6,6 +6,7 @@ import { useCreateProduct } from "../../hooks/useCreateProduct";
 import ErrorState from '../../components/ErrorState';
 import type { CreateProductFormData } from "../../types/product";
 import type { ProductFormTouched } from "../../hooks/useProductFormValidation";
+import AdminLayout from '../../components/admin/AdminLayout';
 
 const AddProduct: React.FC = () => {
   const navigate = useNavigate();
@@ -72,33 +73,21 @@ const AddProduct: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Aroma Sense" className="h-8" />
-              <h1 className="text-lg font-semibold text-gray-900">
-                Add New Product
-              </h1>
-            </div>
-            <button
-              onClick={() => navigate("/admin/dashboard")}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-        </div>
-      </nav>
+  const actions = (
+    <button
+      onClick={() => navigate('/admin/dashboard')}
+      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      ← Back to Dashboard
+    </button>
+  );
 
-      <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  return (
+    <AdminLayout title="Add Product" actions={actions}>
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Product Details
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900">Product Details</h2>
             <p className="text-gray-500 text-sm mt-1">Fill in the information below</p>
           </div>
 
@@ -123,8 +112,8 @@ const AddProduct: React.FC = () => {
             error={undefined}
           />
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 
