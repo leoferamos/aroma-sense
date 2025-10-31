@@ -38,8 +38,9 @@ async function refreshAccessToken(): Promise<string | null> {
     const newToken = data.access_token as string;
     setAccessToken(newToken);
     return newToken;
-  } catch (error) {
+  } catch (err: unknown) {
     // Refresh failed
+  console.debug('refreshAccessToken error', err);
     setAccessToken(null);
     return null;
   }

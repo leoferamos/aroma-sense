@@ -7,7 +7,8 @@ import (
 )
 
 // AdminRoutes sets up the admin-related routes
-func AdminRoutes(r *gin.Engine, userHandler *handler.UserHandler, productHandler *handler.ProductHandler) {
+func AdminRoutes(r *gin.Engine, userHandler *handler.UserHandler,
+	productHandler *handler.ProductHandler, orderHandler *handler.OrderHandler) {
 	adminGroup := r.Group("/admin")
 	adminGroup.Use(auth.JWTAuthMiddleware(), auth.AdminOnly())
 	{
@@ -15,5 +16,6 @@ func AdminRoutes(r *gin.Engine, userHandler *handler.UserHandler, productHandler
 		adminGroup.GET("/products/:id", productHandler.GetProduct)
 		adminGroup.PATCH("/products/:id", productHandler.UpdateProduct)
 		adminGroup.DELETE("/products/:id", productHandler.DeleteProduct)
+		adminGroup.GET("/orders", orderHandler.ListOrders)
 	}
 }

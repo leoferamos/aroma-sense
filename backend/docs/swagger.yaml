@@ -11,6 +11,37 @@ definitions:
     - product_id
     - quantity
     type: object
+  dto.AdminOrderItem:
+    properties:
+      created_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      status:
+        example: pending
+        type: string
+      total_amount:
+        example: 123.45
+        type: number
+      user_id:
+        example: uuid
+        type: string
+    type: object
+  dto.AdminOrdersResponse:
+    properties:
+      meta:
+        properties:
+          pagination:
+            $ref: '#/definitions/dto.PaginationMeta'
+          stats:
+            $ref: '#/definitions/dto.StatsMeta'
+        type: object
+      orders:
+        items:
+          $ref: '#/definitions/dto.AdminOrderItem'
+        type: array
+    type: object
   dto.CartItemResponse:
     properties:
       cart_id:
@@ -122,8 +153,6 @@ definitions:
         type: integer
       price_at_purchase:
         type: number
-      product:
-        $ref: '#/definitions/dto.ProductResponse'
       product_id:
         type: integer
       quantity:
@@ -155,6 +184,21 @@ definitions:
         type: string
       user_id:
         type: string
+    type: object
+  dto.PaginationMeta:
+    properties:
+      page:
+        example: 1
+        type: integer
+      per_page:
+        example: 25
+        type: integer
+      total_count:
+        example: 247
+        type: integer
+      total_pages:
+        example: 10
+        type: integer
     type: object
   dto.ProductResponse:
     description: Product information returned by the API
@@ -194,6 +238,15 @@ definitions:
         type: string
       weight:
         example: 100
+        type: number
+    type: object
+  dto.StatsMeta:
+    properties:
+      average_order_value:
+        example: 49.95
+        type: number
+      total_revenue:
+        example: 12345.67
         type: number
     type: object
   dto.UpdateCartItemRequest:
@@ -261,6 +314,53 @@ info:
   title: Aroma Sense API
   version: "1.0"
 paths:
+  /admin/orders:
+    get:
+      consumes:
+      - application/json
+      description: Returns paginated list of orders with optional filters (status,
+        date range)
+      parameters:
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Page number (1-based)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AdminOrdersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List all orders (admin)
+      tags:
+      - admin
   /admin/products:
     post:
       consumes:

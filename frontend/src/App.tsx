@@ -14,6 +14,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AddProduct = lazy(() => import('./pages/admin/AddProduct'));
 const EditProduct = lazy(() => import('./pages/admin/EditProduct'));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
 const Checkout = lazy(() => import('./pages/Checkout.tsx'));
@@ -74,6 +75,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminProducts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminOrders />
                   </ProtectedRoute>
                 }
               />

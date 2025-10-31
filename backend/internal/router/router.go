@@ -29,7 +29,7 @@ func SetupRouter(userHandler *handler.UserHandler, productHandler *handler.Produ
 
 	// Register domain routes
 	UserRoutes(r, userHandler)
-	AdminRoutes(r, userHandler, productHandler)
+	AdminRoutes(r, userHandler, productHandler, orderHandler)
 	ProductRoutes(r, productHandler)
 	CartRoutes(r, cartHandler)
 	OrderRoutes(r, orderHandler)

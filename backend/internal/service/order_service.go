@@ -12,6 +12,7 @@ import (
 
 type OrderService interface {
 	CreateOrderFromCart(userID string, req *dto.CreateOrderFromCartRequest) (*dto.OrderResponse, error)
+	AdminListOrders(status *string, startDate *time.Time, endDate *time.Time, page int, perPage int) (*dto.AdminOrdersResponse, error)
 }
 
 type orderService struct {
@@ -100,4 +101,48 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		CreatedAt:       order.CreatedAt,
 		UpdatedAt:       order.UpdatedAt,
 	}, nil
+}
+
+// AdminListOrders returns orders for admin listing with pagination and stats
+func (s *orderService) AdminListOrders(status *string, startDate *time.Time, endDate *time.Time, page int, perPage int) (*dto.AdminOrdersResponse, error) {
+	orders, totalCount, totalRevenue, err := s.orderRepo.ListOrders(status, startDate, endDate, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map to DTOs
+	var items []dto.AdminOrderItem
+	for _, o := range orders {
+		items = append(items, dto.AdminOrderItem{
+			ID:          o.ID,
+			UserID:      o.UserID,
+			TotalAmount: o.TotalAmount,
+			Status:      string(o.Status),
+			CreatedAt:   o.CreatedAt,
+		})
+	}
+
+	totalPages := 0
+	if perPage > 0 {
+		totalPages = int((totalCount + int64(perPage) - 1) / int64(perPage))
+	}
+
+	resp := &dto.AdminOrdersResponse{}
+	resp.Orders = items
+	resp.Meta.Pagination = dto.PaginationMeta{
+		Page:       page,
+		PerPage:    perPage,
+		TotalPages: totalPages,
+		TotalCount: int(totalCount),
+	}
+	avg := 0.0
+	if totalCount > 0 {
+		avg = totalRevenue / float64(totalCount)
+	}
+	resp.Meta.Stats = dto.StatsMeta{
+		TotalRevenue:      totalRevenue,
+		AverageOrderValue: avg,
+	}
+
+	return resp, nil
 }
