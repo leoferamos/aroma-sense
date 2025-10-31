@@ -33,11 +33,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
       className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden group"
     >
       {/* Image Container */}
-      <div className="relative h-64 bg-gray-50 overflow-hidden flex items-center justify-center p-4">
+      <div className="relative h-64 bg-white overflow-hidden flex items-center justify-center p-4">
         <img
           src={product.image_url || PLACEHOLDER_IMAGE}
           alt={product.name}
-          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 bg-white"
           onError={(e) => {
             e.currentTarget.src = PLACEHOLDER_IMAGE;
           }}
