@@ -31,15 +31,10 @@ func NewCartHandler(cartService service.CartService) *CartHandler {
 // @Router       /cart [get]
 // @Security     BearerAuth
 func (h *CartHandler) GetCart(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
-		return
-	}
 
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+	userIDStr := c.GetString("userID")
+	if userIDStr == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
 		return
 	}
 
@@ -70,15 +65,10 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // @Router       /cart [post]
 // @Security     BearerAuth
 func (h *CartHandler) AddItem(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
-		return
-	}
 
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+	userIDStr := c.GetString("userID")
+	if userIDStr == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
 		return
 	}
 
@@ -126,15 +116,10 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 // @Router       /cart/items/{itemId} [patch]
 // @Security     BearerAuth
 func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
-		return
-	}
 
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+	userIDStr := c.GetString("userID")
+	if userIDStr == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
 		return
 	}
 
@@ -193,15 +178,10 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 // @Router       /cart/items/{itemId} [delete]
 // @Security     BearerAuth
 func (h *CartHandler) RemoveItem(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
-		return
-	}
 
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+	userIDStr := c.GetString("userID")
+	if userIDStr == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
 		return
 	}
 
@@ -243,15 +223,10 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 // @Router       /cart [delete]
 // @Security     BearerAuth
 func (h *CartHandler) ClearCart(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
-		return
-	}
 
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid user ID"})
+	userIDStr := c.GetString("userID")
+	if userIDStr == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
 		return
 	}
 
