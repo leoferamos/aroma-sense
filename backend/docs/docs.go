@@ -18,6 +18,78 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns paginated list of orders with optional filters (status, date range)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "List all orders (admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (1-based)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AdminOrdersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/products": {
             "post": {
                 "security": [
@@ -891,6 +963,52 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.AdminOrderItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "type": "string",
+                    "example": "pending"
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 123.45
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "uuid"
+                }
+            }
+        },
+        "dto.AdminOrdersResponse": {
+            "type": "object",
+            "properties": {
+                "meta": {
+                    "type": "object",
+                    "properties": {
+                        "pagination": {
+                            "$ref": "#/definitions/dto.PaginationMeta"
+                        },
+                        "stats": {
+                            "$ref": "#/definitions/dto.StatsMeta"
+                        }
+                    }
+                },
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AdminOrderItem"
+                    }
+                }
+            }
+        },
         "dto.CartItemResponse": {
             "type": "object",
             "properties": {
@@ -1053,9 +1171,6 @@ const docTemplate = `{
                 "price_at_purchase": {
                     "type": "number"
                 },
-                "product": {
-                    "$ref": "#/definitions/dto.ProductResponse"
-                },
                 "product_id": {
                     "type": "integer"
                 },
@@ -1102,6 +1217,27 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.PaginationMeta": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "per_page": {
+                    "type": "integer",
+                    "example": 25
+                },
+                "total_count": {
+                    "type": "integer",
+                    "example": 247
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 10
                 }
             }
         },
@@ -1156,6 +1292,19 @@ const docTemplate = `{
                 "weight": {
                     "type": "number",
                     "example": 100
+                }
+            }
+        },
+        "dto.StatsMeta": {
+            "type": "object",
+            "properties": {
+                "average_order_value": {
+                    "type": "number",
+                    "example": 49.95
+                },
+                "total_revenue": {
+                    "type": "number",
+                    "example": 12345.67
                 }
             }
         },
