@@ -36,7 +36,7 @@ func (h *OrderHandler) CreateOrderFromCart(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("user_id")
+	userID := c.GetString("userID")
 	if userID == "" {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
 		return
