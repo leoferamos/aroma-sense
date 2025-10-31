@@ -1,10 +1,10 @@
 import React from 'react';
-import type { Product } from '../types/product';
-import { PLACEHOLDER_IMAGE } from '../constants/app';
-import { formatCurrency } from '../utils/format';
-import { cn } from '../utils/cn';
-import TrashIcon from './TrashIcon';
-import PencilIcon from './PencilIcon';
+import type { Product } from '../../types/product';
+import { PLACEHOLDER_IMAGE } from '../../constants/app';
+import { formatCurrency } from '../../utils/format';
+import { cn } from '../../utils/cn';
+import TrashIcon from '../TrashIcon';
+import PencilIcon from '../PencilIcon';
 
 interface AdminProductCardProps {
   product: Product;
