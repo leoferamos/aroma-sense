@@ -159,13 +159,18 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 	for _, o := range orders {
 		items := make([]dto.OrderItemResponse, len(o.Items))
 		for i, it := range o.Items {
-			items[i] = dto.OrderItemResponse{
+			item := dto.OrderItemResponse{
 				ID:              it.ID,
 				ProductID:       it.ProductID,
 				Quantity:        it.Quantity,
 				PriceAtPurchase: it.PriceAtPurchase,
 				Subtotal:        it.Subtotal,
 			}
+			if it.Product != nil {
+				item.ProductName = it.Product.Name
+				item.ProductImageURL = it.Product.ImageURL
+			}
+			items[i] = item
 		}
 
 		resp = append(resp, dto.OrderResponse{
