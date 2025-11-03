@@ -13,6 +13,7 @@ import (
 type OrderService interface {
 	CreateOrderFromCart(userID string, req *dto.CreateOrderFromCartRequest) (*dto.OrderResponse, error)
 	AdminListOrders(status *string, startDate *time.Time, endDate *time.Time, page int, perPage int) (*dto.AdminOrdersResponse, error)
+	GetOrdersByUser(userID string) ([]dto.OrderResponse, error)
 }
 
 type orderService struct {
@@ -142,6 +143,48 @@ func (s *orderService) AdminListOrders(status *string, startDate *time.Time, end
 	resp.Meta.Stats = dto.StatsMeta{
 		TotalRevenue:      totalRevenue,
 		AverageOrderValue: avg,
+	}
+
+	return resp, nil
+}
+
+// GetOrdersByUser returns the orders for a given user
+func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, error) {
+	orders, err := s.orderRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp []dto.OrderResponse
+	for _, o := range orders {
+		items := make([]dto.OrderItemResponse, len(o.Items))
+		for i, it := range o.Items {
+			item := dto.OrderItemResponse{
+				ID:              it.ID,
+				ProductID:       it.ProductID,
+				Quantity:        it.Quantity,
+				PriceAtPurchase: it.PriceAtPurchase,
+				Subtotal:        it.Subtotal,
+			}
+			if it.Product != nil {
+				item.ProductName = it.Product.Name
+				item.ProductImageURL = it.Product.ImageURL
+			}
+			items[i] = item
+		}
+
+		resp = append(resp, dto.OrderResponse{
+			ID:              o.ID,
+			UserID:          o.UserID,
+			TotalAmount:     o.TotalAmount,
+			Status:          string(o.Status),
+			ShippingAddress: o.ShippingAddress,
+			PaymentMethod:   string(o.PaymentMethod),
+			Items:           items,
+			ItemCount:       len(items),
+			CreatedAt:       o.CreatedAt,
+			UpdatedAt:       o.UpdatedAt,
+		})
 	}
 
 	return resp, nil

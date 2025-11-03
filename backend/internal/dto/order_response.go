@@ -20,6 +20,8 @@ type OrderResponse struct {
 type OrderItemResponse struct {
 	ID              uint    `json:"id"`
 	ProductID       uint    `json:"product_id"`
+	ProductName     string  `json:"product_name,omitempty"`
+	ProductImageURL string  `json:"product_image_url,omitempty"`
 	Quantity        int     `json:"quantity"`
 	PriceAtPurchase float64 `json:"price_at_purchase"`
 	Subtotal        float64 `json:"subtotal"`
