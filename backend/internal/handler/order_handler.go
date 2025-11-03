@@ -142,3 +142,30 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resp)
 }
+
+// ListUserOrders returns the list of orders for the authenticated user
+// @Summary      List user's orders
+// @Description  Returns the list of orders for the authenticated user
+// @Tags         orders
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}   dto.OrderResponse
+// @Failure      401  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /orders [get]
+// @Security     BearerAuth
+func (h *OrderHandler) ListUserOrders(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+
+	orders, err := h.orderService.GetOrdersByUser(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to fetch orders"})
+		return
+	}
+
+	c.JSON(http.StatusOK, orders)
+}
