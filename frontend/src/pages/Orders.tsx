@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorState from '../components/ErrorState';
 import { getUserOrders } from '../services/order';
 import type { OrderResponse } from '../types/order';
-import OrderList from '../components/OrderList';
 import OrderDetail from '../components/OrderDetail';
 
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -29,28 +30,33 @@ const OrdersPage: React.FC = () => {
     return () => { mounted = false; };
   }, []);
 
-  const selectedOrder = orders.find((o) => o.id === selectedOrderId) ?? null;
+  // render all orders as full cards (single-column)
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <h1 className="text-2xl font-semibold mb-6">My Orders</h1>
-      {loading && <div className="text-gray-600">Loading...</div>}
-      {error && <div className="text-red-500">{error}</div>}
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
 
-      {!loading && !error && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <OrderList orders={orders} onSelect={(id) => setSelectedOrderId((prev) => (prev === id ? null : id))} />
-          </div>
-          <div className="lg:col-span-2">
-            {selectedOrder ? (
-              <OrderDetail order={selectedOrder} />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-2xl font-semibold mb-6">My Orders</h1>
+
+        {loading && <LoadingSpinner message="Loading orders..." />}
+        {error && <ErrorState message={error} onRetry={() => window.location.reload()} />}
+
+        {!loading && !error && (
+          <div className="space-y-6">
+            {orders.length === 0 ? (
+              <div className="p-6 bg-white rounded shadow-sm text-center">
+                <h2 className="text-lg font-semibold">You have no orders yet</h2>
+                <p className="text-sm text-gray-500 mt-2">Browse products and place your first order.</p>
+              </div>
             ) : (
-              <div className="p-6 bg-white rounded shadow-sm">Select an order to view details</div>
+              orders.map((o) => (
+                <OrderDetail key={o.id} order={o} />
+              ))
             )}
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 };
