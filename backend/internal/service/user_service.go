@@ -91,9 +91,7 @@ func (s *userService) Login(input dto.LoginRequest) (string, string, *model.User
 
 	// Save refresh token hash in DB
 	refreshTokenHash := auth.HashRefreshToken(refreshToken)
-	user.RefreshTokenHash = &refreshTokenHash
-	user.RefreshTokenExpiresAt = &expiresAt
-	if err := s.repo.Update(user); err != nil {
+	if err := s.repo.UpdateRefreshToken(user.ID, &refreshTokenHash, &expiresAt); err != nil {
 		return "", "", nil, errors.New("failed to save refresh token")
 	}
 
@@ -136,9 +134,7 @@ func (s *userService) RefreshAccessToken(refreshToken string) (string, string, *
 		return "", "", nil, errors.New("failed to generate refresh token")
 	}
 	newHash := auth.HashRefreshToken(newRefreshToken)
-	user.RefreshTokenHash = &newHash
-	user.RefreshTokenExpiresAt = &newExpiresAt
-	if err := s.repo.Update(user); err != nil {
+	if err := s.repo.UpdateRefreshToken(user.ID, &newHash, &newExpiresAt); err != nil {
 		return "", "", nil, errors.New("failed to save refresh token")
 	}
 
@@ -162,7 +158,5 @@ func (s *userService) InvalidateRefreshToken(refreshToken string) error {
 	if subtle.ConstantTimeCompare([]byte(*user.RefreshTokenHash), []byte(hash)) != 1 {
 		return errors.New("invalid refresh token")
 	}
-	user.RefreshTokenHash = nil
-	user.RefreshTokenExpiresAt = nil
-	return s.repo.Update(user)
+	return s.repo.UpdateRefreshToken(user.ID, nil, nil)
 }
