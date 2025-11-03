@@ -1,6 +1,7 @@
 package service
 
 import (
+	"crypto/subtle"
 	"errors"
 	"time"
 
@@ -110,6 +111,14 @@ func (s *userService) RefreshAccessToken(refreshToken string) (string, string, *
 		return "", "", nil, errors.New("invalid refresh token")
 	}
 
+	// Constant-time double-check to mitigate timing attacks
+	if user.RefreshTokenHash == nil {
+		return "", "", nil, errors.New("invalid refresh token")
+	}
+	if subtle.ConstantTimeCompare([]byte(*user.RefreshTokenHash), []byte(refreshTokenHash)) != 1 {
+		return "", "", nil, errors.New("invalid refresh token")
+	}
+
 	// Check if refresh token is expired
 	if user.RefreshTokenExpiresAt == nil || user.RefreshTokenExpiresAt.Before(time.Now()) {
 		return "", "", nil, errors.New("refresh token expired")
@@ -145,6 +154,13 @@ func (s *userService) InvalidateRefreshToken(refreshToken string) error {
 	user, err := s.repo.FindByRefreshTokenHash(hash)
 	if err != nil {
 		return err
+	}
+	// constant-time double-check before invalidating
+	if user.RefreshTokenHash == nil {
+		return errors.New("invalid refresh token")
+	}
+	if subtle.ConstantTimeCompare([]byte(*user.RefreshTokenHash), []byte(hash)) != 1 {
+		return errors.New("invalid refresh token")
 	}
 	user.RefreshTokenHash = nil
 	user.RefreshTokenExpiresAt = nil
