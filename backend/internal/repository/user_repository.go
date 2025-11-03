@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"gorm.io/gorm"
 )
@@ -39,7 +41,7 @@ func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 // FindByRefreshTokenHash retrieves a user by refresh token hash
 func (r *userRepository) FindByRefreshTokenHash(hash string) (*model.User, error) {
 	var user model.User
-	if err := r.db.Where("refresh_token_hash = ?", hash).First(&user).Error; err != nil {
+	if err := r.db.Select("id, refresh_token_hash, refresh_token_expires_at").Where("refresh_token_hash = ? AND refresh_token_expires_at > ?", hash, time.Now()).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
