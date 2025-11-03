@@ -358,7 +358,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: List all orders (admin)
+      summary: List all orders
       tags:
       - admin
   /admin/products:
@@ -747,6 +747,32 @@ paths:
       tags:
       - cart
   /orders:
+    get:
+      consumes:
+      - application/json
+      description: Returns the list of orders for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.OrderResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List user's orders
+      tags:
+      - orders
     post:
       consumes:
       - application/json
