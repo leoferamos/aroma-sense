@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import WordGrid from './WordGrid';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LegalPageLayoutProps {
   title: string;
@@ -9,6 +10,9 @@ interface LegalPageLayoutProps {
 }
 
 const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({ title, lastUpdate, children }) => {
+  const { isAuthenticated } = useAuth();
+  const backTo = isAuthenticated ? '/products' : '/register';
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <div className="hidden md:flex md:w-1/2 items-center justify-center relative" style={{ background: '#EAECEF' }}>
@@ -27,7 +31,7 @@ const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({ title, lastUpdate, ch
         <div className="w-full max-w-3xl px-4 md:px-8 py-8 md:py-12 rounded-lg shadow-md">
           <div className="relative mb-6">
             <Link 
-              to="/register" 
+              to={backTo} 
               className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <svg 
