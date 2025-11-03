@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -41,8 +42,12 @@ const App: React.FC = () => {
             <ErrorBoundary>
             <Routes>
               {/* Public routes */}
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
+              {/* Redirect authenticated users away from register/login at the router level */}
+              <Route
+                path="/register"
+                element={<GuestRoute><Register /></GuestRoute>}
+              />
+              <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               
@@ -131,6 +136,29 @@ const App: React.FC = () => {
       </AuthProvider>
     </BrowserRouter>
   );
+};
+
+const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isReady, role } = useAuth();
+
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    // redirect based on role
+    if (role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/products" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 export default App;
