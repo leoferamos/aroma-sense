@@ -852,9 +852,43 @@ paths:
       - application/json
       responses:
         "200":
-          description: Search results envelope (when query is present)
+          description: |
+            When `query` is present: returns a search envelope {items,total,page,limit}.
+            When `query` is absent: returns an array with the latest products.
           schema:
             $ref: '#/definitions/dto.ProductListResponse'
+          examples:
+            application/json:
+              items:
+                - id: 1
+                  name: "Sauvage"
+                  brand: "Dior"
+                  weight: 100
+                  description: "A fresh and woody fragrance"
+                  price: 299.99
+                  image_url: "https://example.com/image.jpg"
+                  category: "Eau de Parfum"
+                  notes: "bergamot, pepper, ambroxan"
+                  stock_quantity: 50
+                  created_at: "2025-09-28T10:00:00Z"
+                  updated_at: "2025-09-28T10:00:00Z"
+              total: 1
+              page: 1
+              limit: 10
+          x-latest-example:
+            application/json:
+              - id: 1
+                name: "Sauvage"
+                brand: "Dior"
+                weight: 100
+                description: "A fresh and woody fragrance"
+                price: 299.99
+                image_url: "https://example.com/image.jpg"
+                category: "Eau de Parfum"
+                notes: "bergamot, pepper, ambroxan"
+                stock_quantity: 50
+                created_at: "2025-09-28T10:00:00Z"
+                updated_at: "2025-09-28T10:00:00Z"
         "400":
           description: Invalid request parameters
           schema:
