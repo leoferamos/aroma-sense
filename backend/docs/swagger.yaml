@@ -155,6 +155,10 @@ definitions:
         type: number
       product_id:
         type: integer
+      product_image_url:
+        type: string
+      product_name:
+        type: string
       quantity:
         type: integer
       subtotal:
@@ -198,6 +202,19 @@ definitions:
         type: integer
       total_pages:
         example: 10
+        type: integer
+    type: object
+  dto.ProductListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.ProductResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
         type: integer
     type: object
   dto.ProductResponse:
@@ -809,32 +826,44 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieves a list of the latest products with optional limit (Public
-        endpoint)
+      description: If `query` is provided, returns a paginated search envelope; otherwise
+        returns the latest products (backwards-compatible).
       parameters:
+      - description: Search term (websearch syntax)
+        in: query
+        name: query
+        type: string
+      - default: 1
+        description: Page number (1-based)
+        in: query
+        name: page
+        type: integer
       - default: 10
-        description: Maximum number of products to return
+        description: Items per page (default 10, max 100)
         in: query
         name: limit
         type: integer
+      - default: relevance
+        description: 'Sort order: relevance|latest'
+        in: query
+        name: sort
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: List of latest products
+          description: Search results envelope (when query is present)
           schema:
-            items:
-              $ref: '#/definitions/dto.ProductResponse'
-            type: array
+            $ref: '#/definitions/dto.ProductListResponse'
         "400":
-          description: Invalid limit parameter
+          description: Invalid request parameters
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: List latest products
+      summary: List or search products
       tags:
       - products
   /products/{id}:

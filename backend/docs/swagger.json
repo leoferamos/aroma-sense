@@ -768,7 +768,7 @@
         },
         "/products": {
             "get": {
-                "description": "Retrieves a list of the latest products with optional limit (Public endpoint)",
+                "description": "If `query` is provided, returns a paginated search envelope; otherwise returns the latest products (backwards-compatible).",
                 "consumes": [
                     "application/json"
                 ],
@@ -778,28 +778,45 @@
                 "tags": [
                     "products"
                 ],
-                "summary": "List latest products",
+                "summary": "List or search products",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search term (websearch syntax)",
+                        "name": "query",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number (1-based)",
+                        "name": "page",
+                        "in": "query"
+                    },
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "Maximum number of products to return",
+                        "description": "Items per page (default 10, max 100)",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "relevance",
+                        "description": "Sort order: relevance|latest",
+                        "name": "sort",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of latest products",
+                        "description": "Search results envelope (when query is present)",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ProductResponse"
-                            }
+                            "$ref": "#/definitions/dto.ProductListResponse"
                         }
                     },
                     "400": {
-                        "description": "Invalid limit parameter",
+                        "description": "Invalid request parameters",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1209,6 +1226,12 @@
                 "product_id": {
                     "type": "integer"
                 },
+                "product_image_url": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                },
                 "quantity": {
                     "type": "integer"
                 },
@@ -1273,6 +1296,26 @@
                 "total_pages": {
                     "type": "integer",
                     "example": 10
+                }
+            }
+        },
+        "dto.ProductListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProductResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
