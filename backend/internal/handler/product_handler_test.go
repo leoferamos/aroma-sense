@@ -45,6 +45,31 @@ func (m *MockProductService) GetLatestProducts(ctx context.Context, limit int) (
 	return args.Get(0).([]dto.ProductResponse), args.Error(1)
 }
 
+func (m *MockProductService) SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error) {
+	args := m.Called(ctx, query, page, limit, sort)
+
+	var items []dto.ProductResponse
+	if v := args.Get(0); v != nil {
+		items = v.([]dto.ProductResponse)
+	} else {
+		items = []dto.ProductResponse{}
+	}
+
+	total := 0
+	if len(args) > 1 {
+		if v, ok := args.Get(1).(int); ok {
+			total = v
+		}
+	}
+
+	var err error
+	if len(args) > 2 {
+		err = args.Error(2)
+	}
+
+	return items, total, err
+}
+
 func (m *MockProductService) UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error {
 	args := m.Called(ctx, id, input)
 	return args.Error(0)
