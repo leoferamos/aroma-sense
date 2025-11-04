@@ -19,6 +19,7 @@ type ProductService interface {
 	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
 	GetProductByID(ctx context.Context, id uint) (dto.ProductResponse, error)
 	GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error)
+	SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error)
 	UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error
 	DeleteProduct(ctx context.Context, id uint) error
 }
@@ -177,4 +178,46 @@ func (s *productService) DeleteProduct(ctx context.Context, id uint) error {
 		return fmt.Errorf("product not found: %w", err)
 	}
 	return s.repo.Delete(id)
+}
+
+// SearchProducts performs a product search with pagination and sorting.
+func (s *productService) SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	// Enforce sensible limits (defense in depth)
+	const maxLimit = 100
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
+	offset := (page - 1) * limit
+
+	products, total, err := s.repo.SearchProducts(ctx, query, limit, offset, sort)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to search products: %w", err)
+	}
+
+	var resp []dto.ProductResponse
+	for _, p := range products {
+		resp = append(resp, dto.ProductResponse{
+			ID:            p.ID,
+			Name:          p.Name,
+			Brand:         p.Brand,
+			Weight:        p.Weight,
+			Description:   p.Description,
+			Price:         p.Price,
+			ImageURL:      p.ImageURL,
+			Category:      p.Category,
+			Notes:         p.Notes,
+			StockQuantity: p.StockQuantity,
+			CreatedAt:     p.CreatedAt,
+			UpdatedAt:     p.UpdatedAt,
+		})
+	}
+
+	return resp, total, nil
 }

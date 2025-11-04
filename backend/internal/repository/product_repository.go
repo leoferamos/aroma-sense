@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"gorm.io/gorm"
@@ -10,6 +12,7 @@ type ProductRepository interface {
 	Create(input dto.ProductFormDTO, imageURL string) error
 	FindAll(limit int) ([]model.Product, error)
 	FindByID(id uint) (model.Product, error)
+	SearchProducts(ctx context.Context, query string, limit int, offset int, sort string) ([]model.Product, int, error)
 	Update(product *model.Product) error
 	Delete(id uint) error
 	DecrementStock(productID uint, quantity int) error
@@ -82,4 +85,47 @@ func (r *productRepository) DecrementStock(productID uint, quantity int) error {
 	return r.db.Model(&model.Product{}).
 		Where("id = ? AND stock_quantity >= ?", productID, quantity).
 		UpdateColumn("stock_quantity", gorm.Expr("stock_quantity - ?", quantity)).Error
+}
+
+// SearchProducts performs a search with pagination and sort.
+func (r *productRepository) SearchProducts(ctx context.Context, query string, limit int, offset int, sort string) ([]model.Product, int, error) {
+	var products []model.Product
+
+	// Build SQL depending on sort preference
+	var selectSQL string
+	var args []interface{}
+
+	if sort == "latest" {
+		selectSQL = `
+		SELECT p.*
+		FROM products p
+		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))
+		ORDER BY p.created_at DESC
+		LIMIT ? OFFSET ?
+		`
+		args = []interface{}{query, limit, offset}
+	} else {
+		// relevance (default)
+		selectSQL = `
+		SELECT p.*
+		FROM products p
+		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))
+		ORDER BY ts_rank_cd(p.search_vector, websearch_to_tsquery('portuguese', unaccent(?))) DESC, p.created_at DESC
+		LIMIT ? OFFSET ?
+		`
+		args = []interface{}{query, query, limit, offset}
+	}
+
+	if err := r.db.WithContext(ctx).Raw(selectSQL, args...).Scan(&products).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Count total matches
+	var total int64
+	countSQL := `SELECT COUNT(*) FROM products p WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))`
+	if err := r.db.WithContext(ctx).Raw(countSQL, query).Scan(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return products, int(total), nil
 }
