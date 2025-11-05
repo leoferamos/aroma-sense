@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import type { Product } from '../types/product';
 import { formatCurrency } from '../utils/format';
 import { cn } from '../utils/cn';
@@ -11,11 +11,6 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
-  const navigate = useNavigate();
-
-  const handleCardClick = () => {
-    navigate(`/products/${product.id}`);
-  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation when clicking "Add to Cart"
@@ -28,57 +23,63 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   const isLowStock = product.stock_quantity > 0 && product.stock_quantity < LOW_STOCK_THRESHOLD;
 
   return (
-    <div
-      onClick={handleCardClick}
-      className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden group"
-    >
-      {/* Image Container */}
-      <div className="relative h-64 bg-white overflow-hidden flex items-center justify-center p-4">
-        <img
-          src={product.image_url || PLACEHOLDER_IMAGE}
-          alt={product.name}
-          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 bg-white"
-          onError={(e) => {
-            e.currentTarget.src = PLACEHOLDER_IMAGE;
-          }}
-        />
-        {isOutOfStock && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">Out of Stock</span>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {/* Brand */}
-        <p className="text-sm text-gray-500 font-medium mb-1">{product.brand}</p>
-
-        {/* Product Name */}
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem]">
-          {product.name}
-        </h3>
-
-        {/* Category & Weight */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-          <span>{product.category}</span>
-          <span>•</span>
-          <span>{product.weight}ml</span>
-        </div>
-
-        {/* Price */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-2xl font-bold text-blue-600">
-            {formatCurrency(product.price)}
-          </span>
-          {isLowStock && (
-            <span className="text-xs text-orange-600 font-medium">
-              Only {product.stock_quantity} left
-            </span>
+    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
+      {/* Clickable area*/}
+      <Link
+        to={`/products/${product.id}`}
+        aria-label={`View details for ${product.name}`}
+        className="block cursor-pointer"
+      >
+        {/* Image Container */}
+        <div className="relative h-64 bg-white overflow-hidden flex items-center justify-center p-4">
+          <img
+            src={product.image_url || PLACEHOLDER_IMAGE}
+            alt={product.name}
+            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 bg-white"
+            onError={(e) => {
+              e.currentTarget.src = PLACEHOLDER_IMAGE;
+            }}
+          />
+          {isOutOfStock && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">Out of Stock</span>
+            </div>
           )}
         </div>
 
-        {/* Add to Cart Button */}
+        {/* Content */}
+        <div className="px-4 pb-2">
+          {/* Brand */}
+          <p className="text-sm text-gray-500 font-medium mb-1">{product.brand}</p>
+
+          {/* Product Name */}
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem]">
+            {product.name}
+          </h3>
+
+          {/* Category & Weight */}
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+            <span>{product.category}</span>
+            <span>•</span>
+            <span>{product.weight}ml</span>
+          </div>
+
+          {/* Price */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-2xl font-bold text-blue-600">
+              {formatCurrency(product.price)}
+            </span>
+            {isLowStock && (
+              <span className="text-xs text-orange-600 font-medium">
+                Only {product.stock_quantity} left
+              </span>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      {/* Actions */}
+      <div className="px-4 pb-4">
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}

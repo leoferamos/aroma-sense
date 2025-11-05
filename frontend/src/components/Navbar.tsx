@@ -28,14 +28,6 @@ const Navbar: React.FC = () => {
 
     const q = navQuery.trim();
 
-    // If input cleared, remove q from URL (navigate to /products)
-    if (q === '') {
-      const hasQ = new URLSearchParams(location.search).has('q');
-      if (hasQ || location.pathname !== '/products') {
-        navigate('/products');
-      }
-      return;
-    }
 
     // Require min length to avoid noisy requests
     if (q.length < 2) return;
