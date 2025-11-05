@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import { useProducts } from '../hooks/useProducts';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
 import type { Product } from '../types/product';
 import { useCart } from '../contexts/CartContext';
+import Pagination from '../components/Pagination';
+import { useProductSearch } from '../hooks/useProductSearch';
+import { listProducts } from '../services/product';
+import ProductCardSkeleton from '../components/ProductCardSkeleton';
+import { useSearchParams } from 'react-router-dom';
 
 const Products: React.FC = () => {
-  const { products, loading, error, refetch } = useProducts();
+  const [suggestions, setSuggestions] = useState<Product[] | null>(null);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching } = useProductSearch({ limit: 12, debounceMs: 600 });
+  const [searchParams] = useSearchParams();
   const { addItem } = useCart();
 
   const handleAddToCart = async (product: Product) => {
@@ -19,33 +26,77 @@ const Products: React.FC = () => {
     }
   };
 
+  // Sync state from URL
+  useEffect(() => {
+    const q = searchParams.get('q') ?? '';
+    const p = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1);
+  if (q !== query) { setQuery(q); }
+  if (p !== page) { setPage(p); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Load suggestions when user searched (>=2 chars) and got 0 results
+  useEffect(() => {
+    const resultsLen = Array.isArray(results) ? results.length : 0;
+    const needSuggestions = query.trim().length >= 2 && !isLoading && resultsLen === 0;
+    if (!needSuggestions) {
+      setSuggestions(null);
+      return;
+    }
+    let active = true;
+    setLoadingSuggestions(true);
+    listProducts({ limit: 8 })
+      .then((data) => {
+        if (!active) return;
+        setSuggestions(data);
+      })
+      .catch(() => {
+        if (!active) return;
+        setSuggestions([]);
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoadingSuggestions(false);
+      });
+    return () => { active = false; };
+  }, [query, isLoading, Array.isArray(results) ? results.length : 0]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {(() => {
+          return null;
+        })()}
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Discover Our Fragrances
-          </h1>
-          <p className="text-gray-600">
-            Explore our curated collection of premium perfumes
-          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Products</h1>
+          <p className="text-gray-600">Find your favorite fragrance</p>
         </div>
 
         {/* Loading State */}
-        {loading && <LoadingSpinner message="Loading products..." />}
-
-        {/* Error State */}
-        {error && (
-          <ErrorState message={error} onRetry={refetch} />
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" aria-live="polite">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
         )}
 
+        {/* Error State */}
+        {error && <ErrorState message={error} onRetry={submitNow} />}
+
         {/* Products Grid */}
-        {!loading && !error && Array.isArray(products) && (
+        {!isLoading && !error && (
           <>
-            {products.length === 0 ? (
+            {(() => {
+              const safeResults = Array.isArray(results)
+                ? results.filter((p) => p && typeof (p as any).id === 'number')
+                : [];
+              const showEmpty = safeResults.length === 0;
+              return showEmpty;
+            })() ? (
               <div className="text-center py-20">
                 <svg
                   className="w-16 h-16 text-gray-400 mx-auto mb-4"
@@ -60,24 +111,57 @@ const Products: React.FC = () => {
                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
                   />
                 </svg>
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  No products available
-                </h3>
-                <p className="text-gray-500">
-                  Check back soon for new fragrances!
-                </p>
+                {query.trim().length >= 2 ? (
+                  <>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Unfortunately, we couldn’t find “{query.trim()}”.</h3>
+                    <p className="text-gray-500">However, check these products:</p>
+                    <div className="mt-8">
+                      {loadingSuggestions ? (
+                        <LoadingSpinner message="Loading suggestions..." />
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                          {((Array.isArray(suggestions) ? suggestions : [])
+                            .filter((p) => p && typeof (p as any).id === 'number')
+                          ).map((p) => (
+                            <ProductCard key={(p as any).id} product={p as any} onAddToCart={handleAddToCart} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">No products available</h3>
+                    <p className="text-gray-500">Check back soon for new fragrances!</p>
+                  </>
+                )}
               </div>
             ) : (
               <>
-                <div className="mb-4">
+                <div className="mb-4" aria-live="polite">
                   <p className="text-gray-600">
-                    Showing <span className="font-semibold">{products.length}</span>{' '}
-                    {products.length === 1 ? 'product' : 'products'}
+                    {isSearching && query.trim().length >= 2 ? (
+                      <>
+                        Results for <span className="font-semibold">“{query.trim()}”</span>: <span className="font-semibold">{total}</span>
+                      </>
+                    ) : (
+                      (() => {
+                        const safeResults = Array.isArray(results)
+                          ? results.filter((p) => p && typeof (p as any).id === 'number')
+                          : [];
+                        return <>
+                          Showing <span className="font-semibold">{safeResults.length}</span> {safeResults.length === 1 ? 'product' : 'products'}
+                        </>;
+                      })()
+                    )}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {products.map((product) => (
+                  {(Array.isArray(results)
+                    ? results.filter((p) => p && typeof (p as any).id === 'number')
+                    : []
+                  ).map((product: any) => (
                     <ProductCard
                       key={product.id}
                       product={product}
@@ -85,6 +169,15 @@ const Products: React.FC = () => {
                     />
                   ))}
                 </div>
+
+                {isSearching && Number(total) > Number(limit) && (
+                  <Pagination
+                    page={Number(page) || 1}
+                    pageSize={Number(limit) || 12}
+                    total={Number(total) || 0}
+                    onPageChange={setPage}
+                  />
+                )}
               </>
             )}
           </>

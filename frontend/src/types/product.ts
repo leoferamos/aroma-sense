@@ -17,6 +17,13 @@ export interface ProductsResponse {
   products: Product[];
 }
 
+export interface SearchResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 // Form data for creating a new product
 export interface CreateProductFormData {
   name: string;

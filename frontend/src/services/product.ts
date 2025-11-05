@@ -1,5 +1,5 @@
 import api from "./api";
-import type { Product, CreateProductFormData } from "../types/product";
+import type { Product, CreateProductFormData, SearchResponse } from "../types/product";
 
 export async function getProducts(): Promise<Product[]> {
   const response = await api.get<Product[]>("/products");
@@ -80,4 +80,33 @@ export async function updateProduct(
  */
 export async function deleteProduct(id: number): Promise<void> {
   await api.delete(`/admin/products/${id}`);
+}
+
+// Searches products when `query` is provided. Returns a paginated envelope
+export async function searchProducts(params: {
+  query: string;
+  page?: number;
+  limit?: number;
+  sort?: "relevance" | "latest";
+  signal?: AbortSignal;
+}): Promise<SearchResponse<Product>> {
+  const { query, page = 1, limit = 10, sort = "relevance", signal } = params;
+  const response = await api.get<SearchResponse<Product>>("/products", {
+    params: { query, page, limit, sort },
+    signal,
+  });
+  return response.data;
+}
+
+// Lists latest products when `query` is absent.
+export async function listProducts(params?: {
+  limit?: number;
+  signal?: AbortSignal;
+}): Promise<Product[]> {
+  const { limit = 10, signal } = params || {};
+  const response = await api.get<Product[]>("/products", {
+    params: { limit },
+    signal,
+  });
+  return response.data;
 }

@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../utils/format';
 import { MAX_CART_BADGE_COUNT, LOGO_PATH } from '../constants/app';
 import CartItem from './CartItem';
 import UserMenu from './UserMenu';
+import SearchBar from './SearchBar';
 
 const Navbar: React.FC = () => {
   const { itemCount, cart, removeItem, isRemovingItem } = useCart();
@@ -14,6 +15,51 @@ const Navbar: React.FC = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false); // hamburger/user menu
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [navQuery, setNavQuery] = useState<string>("");
+
+  // Debounced URL navigation for live search (2+ chars). Empty clears query.
+  const debounceRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+
+    const q = navQuery.trim();
+
+    // If input cleared, remove q from URL (navigate to /products)
+    if (q === '') {
+      const hasQ = new URLSearchParams(location.search).has('q');
+      if (hasQ || location.pathname !== '/products') {
+        navigate('/products');
+      }
+      return;
+    }
+
+    // Require min length to avoid noisy requests
+    if (q.length < 2) return;
+
+    debounceRef.current = window.setTimeout(() => {
+      const target = `/products?q=${encodeURIComponent(q)}&page=1`;
+      const current = `${location.pathname}${location.search}`;
+      if (current !== target) {
+        navigate(target);
+      }
+    }, 600);
+
+    return () => {
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+    };
+  }, [navQuery, location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    const sp = new URLSearchParams(location.search);
+    setNavQuery(sp.get('q') ?? '');
+  }, [location.search]);
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
@@ -33,11 +79,31 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 gap-4">
           {/* Logo */}
           <Link to="/products" className="flex items-center">
             <img src={LOGO_PATH} alt="Aroma Sense" className="h-10 w-auto" />
           </Link>
+
+          {/* Search (center) */}
+          <div className="hidden md:block flex-1 max-w-2xl">
+            <SearchBar
+              value={navQuery}
+              onChange={setNavQuery}
+              onSubmit={() => {
+                const q = navQuery.trim();
+                if (q.length >= 2) {
+                  navigate(`/products?q=${encodeURIComponent(q)}&page=1`);
+                } else {
+                  navigate('/products');
+                }
+              }}
+              onClear={() => {
+                setNavQuery('');
+                navigate('/products');
+              }}
+            />
+          </div>
 
           {/* Right side: User Menu + Cart */}
           <div className="flex items-center gap-4 relative" ref={dropdownRef}>
@@ -147,6 +213,25 @@ const Navbar: React.FC = () => {
               onSignIn={() => navigate('/login')}
             />
           </div>
+        </div>
+        {/* Mobile search */}
+        <div className="block md:hidden py-2">
+          <SearchBar
+            value={navQuery}
+            onChange={setNavQuery}
+            onSubmit={() => {
+              const q = navQuery.trim();
+              if (q.length >= 2) {
+                navigate(`/products?q=${encodeURIComponent(q)}&page=1`);
+              } else {
+                navigate('/products');
+              }
+            }}
+            onClear={() => {
+              setNavQuery('');
+              navigate('/products');
+            }}
+          />
         </div>
       </div>
     </nav>
