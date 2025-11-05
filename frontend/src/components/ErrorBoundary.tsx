@@ -23,6 +23,22 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
           <div className="bg-white shadow rounded-lg p-8 text-center max-w-md">
             <h1 className="text-xl font-semibold text-gray-900">Something went wrong.</h1>
             <p className="mt-2 text-gray-600">Please refresh the page or try again later.</p>
+            <div className="mt-6 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => this.setState({ hasError: false })}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+              <button
+                type="button"
+                onClick={() => { window.location.assign('/products'); }}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-800 hover:bg-gray-50 transition-colors"
+              >
+                Go to Products
+              </button>
+            </div>
           </div>
         </div>
       );
