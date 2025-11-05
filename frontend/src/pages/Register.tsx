@@ -158,11 +158,11 @@ const Register: React.FC = () => {
                 className="mt-1 w-4 h-4"
               />
               <label htmlFor="agreeTerms" className="text-sm text-gray-700">
-                Concordo com os{' '}
-                <Link to="/terms" className="underline text-blue-600">Termos de Uso</Link>
+                I agree to the{' '}
+                <Link to="/terms" className="underline text-blue-600">Terms of Service</Link>
               </label>
             </div>
-            <FormError message={touchedAgree && !agreeTerms ? 'Você precisa concordar com os termos de uso.' : ''} />
+            <FormError message={touchedAgree && !agreeTerms ? 'You must agree to the terms of service.' : ''} />
 
             <div className="flex items-start gap-3">
               <input
@@ -174,11 +174,11 @@ const Register: React.FC = () => {
                 className="mt-1 w-4 h-4"
               />
               <label htmlFor="agreePrivacy" className="text-sm text-gray-700">
-                Concordo com a{' '}
-                <Link to="/privacy" className="underline text-blue-600">Política de Privacidade</Link>
+                I agree to the{' '}
+                <Link to="/privacy" className="underline text-blue-600">Privacy Policy</Link>
               </label>
             </div>
-            <FormError message={touchedPrivacy && !agreePrivacy ? 'Você precisa concordar com a política de privacidade.' : ''} />
+            <FormError message={touchedPrivacy && !agreePrivacy ? 'You must agree to the privacy policy.' : ''} />
             {errors.general || error ? <ErrorState message={errors.general || error} /> : null}
             {success && <span className="text-green-600 text-sm mt-2">{success}</span>}
             <button
