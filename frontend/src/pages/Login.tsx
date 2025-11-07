@@ -95,6 +95,12 @@ const Login: React.FC = () => {
             />
             <FormError message={errors.password} />
 
+               <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                Forgot your password?
+              </Link>
+            </div>
+
             <button
               type="submit"
               className={`w-full text-white text-lg font-medium py-3 rounded-full mt-2 transition-colors ${
