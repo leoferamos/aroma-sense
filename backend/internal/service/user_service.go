@@ -9,6 +9,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	"github.com/leoferamos/aroma-sense/internal/validation"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -32,6 +33,9 @@ func NewUserService(repo repository.UserRepository, cartService CartService) Use
 
 // RegisterUser handles the business logic for user registration
 func (s *userService) RegisterUser(input dto.CreateUserRequest) error {
+	if err := validation.ValidatePassword(input.Password, input.Email); err != nil {
+		return err
+	}
 	// Check if email already exists
 	if _, err := s.repo.FindByEmail(input.Email); err == nil {
 		return errors.New("email already registered")

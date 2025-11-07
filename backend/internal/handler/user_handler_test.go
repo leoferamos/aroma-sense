@@ -85,7 +85,7 @@ func TestRegisterUser(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupUserRouter()
-		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "password123"}
+		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "StrongPass1"}
 
 		mockService.On("RegisterUser", payload).Return(nil)
 
@@ -98,7 +98,7 @@ func TestRegisterUser(t *testing.T) {
 
 	t.Run("Email Exists", func(t *testing.T) {
 		router, mockService := setupUserRouter()
-		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "password123"}
+		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "StrongPass1"}
 
 		mockService.On("RegisterUser", payload).Return(errors.New("email already registered"))
 
@@ -121,7 +121,7 @@ func TestLoginUser(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupUserRouter()
-		payload := dto.LoginRequest{Email: "test@example.com", Password: "password123"}
+		payload := dto.LoginRequest{Email: "test@example.com", Password: "StrongPass1"}
 		expiresAt := time.Now().Add(7 * 24 * time.Hour)
 		user := &model.User{
 			PublicID:              "uuid",
@@ -159,7 +159,7 @@ func TestLoginUser(t *testing.T) {
 		router, mockService := setupUserRouter()
 		payload := dto.LoginRequest{Email: "test@example.com", Password: "wrongpassword"}
 
-	mockService.On("Login", payload).Return("", "", (*model.User)(nil), errors.New("invalid credentials"))
+		mockService.On("Login", payload).Return("", "", (*model.User)(nil), errors.New("invalid credentials"))
 
 		w := performRequest(t, router, "POST", "/users/login", payload)
 
