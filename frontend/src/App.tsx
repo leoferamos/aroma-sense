@@ -5,12 +5,12 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
-
 // Lazy load pages for better performance
 const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AddProduct = lazy(() => import('./pages/admin/AddProduct'));
 const EditProduct = lazy(() => import('./pages/admin/EditProduct'));
@@ -48,6 +48,7 @@ const App: React.FC = () => {
                 element={<GuestRoute><Register /></GuestRoute>}
               />
               <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               
