@@ -33,9 +33,12 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 
 	// Initialize email service
 	smtpConfig := email.LoadSMTPConfigFromEnv()
+	if err := smtpConfig.Validate(); err != nil {
+		panic("SMTP configuration error: " + err.Error())
+	}
 	emailService, err := email.NewSMTPEmailService(smtpConfig)
 	if err != nil {
-		emailService = nil
+		panic("Failed to initialize email service: " + err.Error())
 	}
 
 	// Initialize services in dependency order
