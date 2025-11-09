@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/validation"
 	"github.com/leoferamos/aroma-sense/utils"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 const (
@@ -49,11 +47,7 @@ func (s *passwordResetService) RequestReset(email string) error {
 	// Check if user exists
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		// User doesn't exist
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil
-		}
-		return fmt.Errorf("failed to check user: %w", err)
+		return nil
 	}
 
 	// Generate 6-digit OTP code
@@ -96,25 +90,19 @@ func (s *passwordResetService) ConfirmReset(email, code, newPassword string) err
 	// Find valid token
 	token, err := s.resetTokenRepo.FindByEmailAndCode(email, code)
 	if err != nil {
-		// Token not found or expired
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("invalid or expired reset code")
-		}
-		return fmt.Errorf("failed to validate reset token: %w", err)
+		// Generic error message
+		return fmt.Errorf("invalid or expired reset code")
 	}
 
 	// Double-check expiration
 	if token.IsExpired() {
-		return errors.New("invalid or expired reset code")
+		return fmt.Errorf("invalid or expired reset code")
 	}
 
 	// Find user
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("invalid or expired reset code")
-		}
-		return fmt.Errorf("failed to find user: %w", err)
+		return fmt.Errorf("invalid or expired reset code")
 	}
 
 	// Hash new password
