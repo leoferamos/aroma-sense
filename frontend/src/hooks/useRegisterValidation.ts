@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { messages } from '../constants/messages';
+import { usePasswordValidation } from './usePasswordValidation';
 
 export interface RegisterForm {
   email: string;
@@ -27,9 +28,13 @@ export function useRegisterValidation(form: RegisterForm, touched: RegisterTouch
     repeatPassword: '',
     general: '',
   });
+  
+  const { validatePassword, validatePasswordConfirmation } = usePasswordValidation();
 
   useEffect(() => {
     const newErrors: RegisterErrors = { email: '', password: '', repeatPassword: '', general: '' };
+    
+    // Email validation
     if (touched.email) {
       if (!form.email) {
         newErrors.email = messages.emailRequired;
@@ -37,28 +42,19 @@ export function useRegisterValidation(form: RegisterForm, touched: RegisterTouch
         newErrors.email = messages.emailInvalid;
       }
     }
-    if (touched.password) {
-      if (!form.password) {
-        newErrors.password = messages.passwordRequired;
-      } else if (form.password.length < 8) {
-        newErrors.password = messages.passwordMinLength;
-      } else if (!/[A-Z]/.test(form.password)) {
-        newErrors.password = messages.passwordUppercase;
-      } else if (!/[0-9]/.test(form.password)) {
-        newErrors.password = messages.passwordNumber;
-      } else if (!/[!@#$%^&*(),.?":{}|<>[\]/'_;+=-]/.test(form.password)) {
-        newErrors.password = messages.passwordSymbol;
-      }
-    }
-    if (touched.repeatPassword) {
-      if (!form.repeatPassword) {
-        newErrors.repeatPassword = messages.repeatPasswordRequired;
-      } else if (form.repeatPassword !== form.password) {
-        newErrors.repeatPassword = messages.passwordsDoNotMatch;
-      }
-    }
+    
+    // Password validation
+    newErrors.password = validatePassword(form.password, touched.password);
+    
+    // Password confirmation validation
+    newErrors.repeatPassword = validatePasswordConfirmation(
+      form.password,
+      form.repeatPassword,
+      touched.repeatPassword
+    );
+    
     setErrors(newErrors);
-  }, [form, touched]);
+  }, [form, touched, validatePassword, validatePasswordConfirmation]);
 
   return errors;
 }

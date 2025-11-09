@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { requestPasswordReset, confirmPasswordReset } from '../services/auth';
 
 interface UseForgotPasswordReturn {
-  requestPasswordReset: (email: string) => Promise<void>;
+  requestReset: (email: string) => Promise<boolean>;
+  confirmReset: (email: string, code: string, newPassword: string) => Promise<boolean>;
   loading: boolean;
   error: string | null;
   success: string | null;
@@ -12,34 +14,43 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const requestPasswordReset = async (email: string) => {
+  const requestReset = async (email: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      // endpoint placeholder — replace with real endpoint later
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!res.ok) {
-        const payload = await res.json().catch(() => ({}));
-        throw new Error(payload?.message || 'Failed to request password reset.');
-      }
-
-      setSuccess('If the email exists in our system, you will receive instructions to reset your password.');
+      const response = await requestPasswordReset(email);
+      setSuccess(response.message);
+      return true;
     } catch (err: any) {
-      setError(err?.message || 'Unknown error. Please try again later.');
+      setError(err?.response?.data?.error || 'Failed to request password reset. Please try again.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmReset = async (email: string, code: string, newPassword: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await confirmPasswordReset(email, code, newPassword);
+      setSuccess(response.message);
+      return true;
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Invalid or expired code. Please try again.');
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
   return {
-    requestPasswordReset,
+    requestReset,
+    confirmReset,
     loading,
     error,
     success,
