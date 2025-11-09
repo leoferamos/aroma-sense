@@ -80,7 +80,7 @@ func (s *passwordResetService) RequestReset(email string) error {
 
 	// Send email with code
 	if err := s.emailService.SendPasswordResetCode(user.Email, code); err != nil {
-		fmt.Printf("Failed to send reset email to %s: %v\n", email, err)
+		return fmt.Errorf("failed to send reset email: %w", err)
 	}
 
 	return nil
