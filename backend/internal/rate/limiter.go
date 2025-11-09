@@ -2,6 +2,8 @@ package rate
 
 import (
 	"context"
+	"fmt"
+	"sort"
 	"sync"
 	"time"
 )
@@ -24,24 +26,24 @@ func NewInMemory() *InMemorySlidingWindow {
 
 // Allow implements RateLimiter using a timestamp slice per bucket.
 func (l *InMemorySlidingWindow) Allow(ctx context.Context, bucket string, limit int, window time.Duration) (bool, int, time.Time, error) {
+	if err := ctx.Err(); err != nil {
+		return false, 0, time.Time{}, err
+	}
+	if limit <= 0 || window <= 0 {
+		return false, 0, time.Time{}, fmt.Errorf("invalid params: limit=%d window=%s", limit, window)
+	}
+
 	now := time.Now()
+	cutoff := now.Add(-window)
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
-
 	arr := l.hits[bucket]
-	cutoff := now.Add(-window)
-	// drop old entries
-	j := 0
-	for ; j < len(arr); j++ {
-		if arr[j].After(cutoff) {
-			break
-		}
-	}
-	if j > 0 {
-		arr = arr[j:]
-	} else if len(arr) > 0 && arr[0].Before(cutoff) {
-		arr = nil
+
+	// binary search for first valid
+	idx := sort.Search(len(arr), func(i int) bool { return arr[i].After(cutoff) })
+	if idx > 0 {
+		arr = arr[idx:]
 	}
 
 	if len(arr) >= limit {
@@ -52,6 +54,7 @@ func (l *InMemorySlidingWindow) Allow(ctx context.Context, bucket string, limit 
 
 	arr = append(arr, now)
 	l.hits[bucket] = arr
+
 	remaining := limit - len(arr)
 	reset := arr[0].Add(window)
 	return true, remaining, reset, nil

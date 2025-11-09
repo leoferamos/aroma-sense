@@ -6,11 +6,11 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/leoferamos/aroma-sense/internal/handler"
+	"github.com/leoferamos/aroma-sense/internal/bootstrap"
 )
 
 // SetupRouter initializes the Gin router with all routes
-func SetupRouter(userHandler *handler.UserHandler, productHandler *handler.ProductHandler, cartHandler *handler.CartHandler, orderHandler *handler.OrderHandler) *gin.Engine {
+func SetupRouter(handlers *bootstrap.AppHandlers) *gin.Engine {
 	r := gin.Default()
 
 	// CORS setup: read allowed origins from env
@@ -28,11 +28,11 @@ func SetupRouter(userHandler *handler.UserHandler, productHandler *handler.Produ
 	})
 
 	// Register domain routes
-	UserRoutes(r, userHandler)
-	AdminRoutes(r, userHandler, productHandler, orderHandler)
-	ProductRoutes(r, productHandler)
-	CartRoutes(r, cartHandler)
-	OrderRoutes(r, orderHandler)
+	UserRoutes(r, handlers.UserHandler, handlers.PasswordResetHandler)
+	AdminRoutes(r, handlers.UserHandler, handlers.ProductHandler, handlers.OrderHandler)
+	ProductRoutes(r, handlers.ProductHandler)
+	CartRoutes(r, handlers.CartHandler)
+	OrderRoutes(r, handlers.OrderHandler)
 
 	return r
 }
