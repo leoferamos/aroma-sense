@@ -21,10 +21,7 @@ const (
 
 // PasswordResetService defines the interface for password reset operations
 type PasswordResetService interface {
-	// RequestReset generates a code and sends it via email
 	RequestReset(email string) error
-
-	// ConfirmReset validates the code and resets the password
 	ConfirmReset(email, code, newPassword string) error
 }
 
@@ -56,7 +53,6 @@ func (s *passwordResetService) RequestReset(email string) error {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil
 		}
-		// Other errors
 		return fmt.Errorf("failed to check user: %w", err)
 	}
 
@@ -97,7 +93,7 @@ func (s *passwordResetService) ConfirmReset(email, code, newPassword string) err
 		return err
 	}
 
-	// Find valid (non-expired) token
+	// Find valid token
 	token, err := s.resetTokenRepo.FindByEmailAndCode(email, code)
 	if err != nil {
 		// Token not found or expired
@@ -135,7 +131,6 @@ func (s *passwordResetService) ConfirmReset(email, code, newPassword string) err
 
 	// Delete used token
 	if err := s.resetTokenRepo.DeleteByEmail(email); err != nil {
-		// Log but don't fail
 		fmt.Printf("Failed to delete used reset token for %s: %v\n", email, err)
 	}
 
