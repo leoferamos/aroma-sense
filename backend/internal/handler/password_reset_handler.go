@@ -1,25 +1,34 @@
 package handler
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
 type PasswordResetHandler struct {
 	resetService service.PasswordResetService
+	rateLimiter  rate.RateLimiter
 }
 
 // NewPasswordResetHandler creates a new instance of PasswordResetHandler
-func NewPasswordResetHandler(s service.PasswordResetService) *PasswordResetHandler {
-	return &PasswordResetHandler{resetService: s}
+func NewPasswordResetHandler(s service.PasswordResetService, limiter rate.RateLimiter) *PasswordResetHandler {
+	return &PasswordResetHandler{
+		resetService: s,
+		rateLimiter:  limiter,
+	}
 }
 
 // RequestReset handles password reset requests.
 // Always returns success to prevent email enumeration attacks.
+// Rate limited to 3 requests per email per hour.
 //
 // @Summary      Request password reset
 // @Description  Sends a 6-digit code to the user's email if it exists. Always returns success to avoid revealing whether the email is registered.
@@ -29,6 +38,7 @@ func NewPasswordResetHandler(s service.PasswordResetService) *PasswordResetHandl
 // @Param        input  body  dto.ResetPasswordRequestRequest  true  "Email address"
 // @Success      200  {object}  dto.MessageResponse  "If the email exists, a reset code has been sent"
 // @Failure      400  {object}  dto.ErrorResponse    "Invalid request (missing or malformed email)"
+// @Failure      429  {object}  dto.ErrorResponse    "Rate limit exceeded"
 // @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
 // @Router       /users/reset/request [post]
 func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
@@ -40,6 +50,28 @@ func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 
 	// Normalize email
 	input.Email = strings.TrimSpace(strings.ToLower(input.Email))
+
+	// Apply rate limiting: 3 requests per email per hour
+	ctx := context.Background()
+	bucket := fmt.Sprintf("reset_request:%s", input.Email)
+	allowed, remaining, resetAt, err := h.rateLimiter.Allow(ctx, bucket, 3, time.Hour)
+
+	// Add rate limit headers
+	c.Header("X-RateLimit-Limit", "3")
+	c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
+	c.Header("X-RateLimit-Reset", resetAt.Format(time.RFC3339))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to process request"})
+		return
+	}
+
+	if !allowed {
+		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{
+			Error: "Too many reset requests. Please try again later.",
+		})
+		return
+	}
 
 	// Call service
 	if err := h.resetService.RequestReset(input.Email); err != nil {
@@ -56,6 +88,7 @@ func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 
 // ConfirmReset handles password reset confirmation with code.
 // Validates the code and resets the password if valid.
+// Rate limited to 10 attempts per IP per hour.
 //
 // @Summary      Confirm password reset
 // @Description  Validates the reset code and updates the user's password. Returns generic errors to avoid revealing whether email/code exists.
@@ -65,6 +98,7 @@ func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 // @Param        input  body  dto.ResetPasswordConfirmRequest  true  "Reset confirmation data"
 // @Success      200  {object}  dto.MessageResponse  "Password reset successfully"
 // @Failure      400  {object}  dto.ErrorResponse    "Invalid request, invalid/expired code, or weak password"
+// @Failure      429  {object}  dto.ErrorResponse    "Rate limit exceeded"
 // @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
 // @Router       /users/reset/confirm [post]
 func (h *PasswordResetHandler) ConfirmReset(c *gin.Context) {
@@ -81,6 +115,29 @@ func (h *PasswordResetHandler) ConfirmReset(c *gin.Context) {
 	// Validate code format
 	if len(input.Code) != 6 {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid or expired reset code"})
+		return
+	}
+
+	// Apply rate limiting: 10 attempts per IP per hour
+	ctx := context.Background()
+	clientIP := c.ClientIP()
+	bucket := fmt.Sprintf("reset_confirm:%s", clientIP)
+	allowed, remaining, resetAt, err := h.rateLimiter.Allow(ctx, bucket, 10, time.Hour)
+
+	// Add rate limit headers
+	c.Header("X-RateLimit-Limit", "10")
+	c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
+	c.Header("X-RateLimit-Reset", resetAt.Format(time.RFC3339))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to process request"})
+		return
+	}
+
+	if !allowed {
+		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{
+			Error: "Too many confirmation attempts. Please try again later.",
+		})
 		return
 	}
 
