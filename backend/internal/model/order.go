@@ -25,16 +25,22 @@ const (
 
 // Order represents a customer order.
 type Order struct {
-	ID              uint          `gorm:"primaryKey" json:"id"`
-	UserID          string        `gorm:"size:255;not null;index" json:"user_id"`
-	User            *User         `gorm:"foreignKey:UserID;references:PublicID" json:"user,omitempty"`
-	TotalAmount     float64       `gorm:"type:decimal(10,2);not null" json:"total_amount"`
-	Status          OrderStatus   `gorm:"type:varchar(20);not null;default:'pending';index" json:"status"`
-	ShippingAddress string        `gorm:"type:text;not null" json:"shipping_address"`
-	PaymentMethod   PaymentMethod `gorm:"type:varchar(20);not null" json:"payment_method"`
-	Items           []OrderItem   `gorm:"foreignKey:OrderID" json:"items"`
-	CreatedAt       time.Time     `gorm:"autoCreateTime;index" json:"created_at"`
-	UpdatedAt       time.Time     `gorm:"autoUpdateTime" json:"updated_at"`
+	ID                        uint          `gorm:"primaryKey" json:"id"`
+	UserID                    string        `gorm:"size:255;not null;index" json:"user_id"`
+	User                      *User         `gorm:"foreignKey:UserID;references:PublicID" json:"user,omitempty"`
+	TotalAmount               float64       `gorm:"type:decimal(10,2);not null" json:"total_amount"`
+	Status                    OrderStatus   `gorm:"type:varchar(20);not null;default:'pending';index" json:"status"`
+	ShippingAddress           string        `gorm:"type:text;not null" json:"shipping_address"`
+	PaymentMethod             PaymentMethod `gorm:"type:varchar(20);not null" json:"payment_method"`
+	ShippingPrice             float64       `gorm:"type:decimal(10,2);not null;default:0" json:"shipping_price"`
+	ShippingCarrier           string        `gorm:"type:varchar(100)" json:"shipping_carrier,omitempty"`
+	ShippingServiceCode       string        `gorm:"type:varchar(100)" json:"shipping_service_code,omitempty"`
+	ShippingEstimatedDelivery *time.Time    `json:"shipping_estimated_delivery,omitempty"`
+	ShippingTracking          string        `gorm:"type:varchar(255)" json:"shipping_tracking,omitempty"`
+	ShippingStatus            string        `gorm:"type:varchar(50)" json:"shipping_status,omitempty"`
+	Items                     []OrderItem   `gorm:"foreignKey:OrderID" json:"items"`
+	CreatedAt                 time.Time     `gorm:"autoCreateTime;index" json:"created_at"`
+	UpdatedAt                 time.Time     `gorm:"autoUpdateTime" json:"updated_at"`
 }
 
 // OrderItem represents an item in an order.
@@ -49,4 +55,3 @@ type OrderItem struct {
 	CreatedAt       time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
-
