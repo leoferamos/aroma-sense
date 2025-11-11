@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"github.com/leoferamos/aroma-sense/internal/email"
 	"github.com/leoferamos/aroma-sense/internal/handler"
+	shippingprovider "github.com/leoferamos/aroma-sense/internal/integrations/shipping"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/service"
@@ -17,6 +18,7 @@ type AppHandlers struct {
 	CartHandler          *handler.CartHandler
 	OrderHandler         *handler.OrderHandler
 	PasswordResetHandler *handler.PasswordResetHandler
+	ShippingHandler      *handler.ShippingHandler
 }
 
 // InitializeApp initializes all modules with proper dependency injection
@@ -48,11 +50,20 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 	orderService := service.NewOrderService(orderRepo, cartRepo, productRepo)
 	passwordResetService := service.NewPasswordResetService(resetTokenRepo, userRepo, emailService)
 
+	// Initialize shipping provider and service
+	var shippingProvider service.ShippingProvider
+	if p := shippingprovider.NewProviderFromEnv(); p != nil {
+		shippingProvider = p
+	}
+	originCEP := shippingprovider.OriginCEPFromEnv()
+	shippingService := service.NewShippingService(cartRepo, shippingProvider, originCEP)
+
 	// Initialize handlers
 	userHandler := handler.NewUserHandler(userService)
 	productHandler := handler.NewProductHandler(productService)
 	cartHandler := handler.NewCartHandler(cartService)
 	orderHandler := handler.NewOrderHandler(orderService)
+	shippingHandler := handler.NewShippingHandler(shippingService)
 	passwordResetHandler := handler.NewPasswordResetHandler(passwordResetService, rateLimiter)
 
 	return &AppHandlers{
@@ -61,5 +72,6 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 		CartHandler:          cartHandler,
 		OrderHandler:         orderHandler,
 		PasswordResetHandler: passwordResetHandler,
+		ShippingHandler:      shippingHandler,
 	}
 }
