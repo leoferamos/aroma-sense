@@ -52,11 +52,14 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 
 	// Initialize shipping provider and service
 	var shippingProvider service.ShippingProvider
-	if p := shippingprovider.NewProviderFromEnv(); p != nil {
-		shippingProvider = p
+	var shippingService service.ShippingService
+	if cfg, err := shippingprovider.LoadShippingConfigFromEnv(); err == nil {
+		if cli, err := shippingprovider.NewClient(cfg); err == nil {
+			provider := shippingprovider.NewProvider(cli).WithQuotesPath(cfg.QuotesPath)
+			shippingProvider = provider
+			shippingService = service.NewShippingService(cartRepo, shippingProvider, cfg.OriginCEP)
+		}
 	}
-	originCEP := shippingprovider.OriginCEPFromEnv()
-	shippingService := service.NewShippingService(cartRepo, shippingProvider, originCEP)
 
 	// Initialize handlers
 	userHandler := handler.NewUserHandler(userService)
