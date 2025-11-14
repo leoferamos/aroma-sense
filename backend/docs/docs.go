@@ -880,6 +880,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/shipping/options": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a list of shipping options (carrier, service code, price, ETA) for the current cart.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shipping"
+                ],
+                "summary": "List shipping options",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination postal code (CEP)",
+                        "name": "postal_code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ShippingOption"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/login": {
             "post": {
                 "description": "Authenticates a user and returns a JWT token and user info.",
@@ -1252,6 +1307,9 @@ const docTemplate = `{
                 "shipping_address": {
                     "type": "string",
                     "example": "Rua Example, 123, São Paulo - SP, 01234-567"
+                },
+                "shipping_selection": {
+                    "$ref": "#/definitions/dto.ShippingSelection"
                 }
             }
         },
@@ -1372,6 +1430,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "shipping_address": {
+                    "type": "string"
+                },
+                "shipping_carrier": {
+                    "type": "string"
+                },
+                "shipping_estimated_delivery": {
+                    "type": "string"
+                },
+                "shipping_price": {
+                    "type": "number"
+                },
+                "shipping_service_code": {
+                    "type": "string"
+                },
+                "shipping_status": {
+                    "type": "string"
+                },
+                "shipping_tracking": {
                     "type": "string"
                 },
                 "status": {
@@ -1515,6 +1591,53 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "example": "user@example.com"
+                }
+            }
+        },
+        "dto.ShippingOption": {
+            "type": "object",
+            "properties": {
+                "carrier": {
+                    "type": "string"
+                },
+                "estimated_days": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "service_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ShippingSelection": {
+            "type": "object",
+            "required": [
+                "carrier",
+                "price",
+                "service_code"
+            ],
+            "properties": {
+                "carrier": {
+                    "type": "string",
+                    "example": "Correios"
+                },
+                "estimated_days": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "price": {
+                    "type": "number",
+                    "example": 24.9
+                },
+                "quote_id": {
+                    "type": "string",
+                    "example": "q_abc123"
+                },
+                "service_code": {
+                    "type": "string",
+                    "example": "SEDEX"
                 }
             }
         },

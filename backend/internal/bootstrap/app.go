@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"github.com/leoferamos/aroma-sense/internal/email"
 	"github.com/leoferamos/aroma-sense/internal/handler"
+	shippingprovider "github.com/leoferamos/aroma-sense/internal/integrations/shipping"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/service"
@@ -17,6 +18,7 @@ type AppHandlers struct {
 	CartHandler          *handler.CartHandler
 	OrderHandler         *handler.OrderHandler
 	PasswordResetHandler *handler.PasswordResetHandler
+	ShippingHandler      *handler.ShippingHandler
 }
 
 // InitializeApp initializes all modules with proper dependency injection
@@ -41,11 +43,25 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 		panic("Failed to initialize email service: " + err.Error())
 	}
 
+	// Initialize shipping provider and service
+	var shippingProvider service.ShippingProvider
+	var shippingService service.ShippingService
+	if cfg, err := shippingprovider.LoadShippingConfigFromEnv(); err == nil {
+		if cli, err := shippingprovider.NewClient(cfg); err == nil {
+			provider := shippingprovider.NewProvider(cli).
+				WithQuotesPath(cfg.QuotesPath).
+				WithStaticAuth(cfg.StaticToken, cfg.UserAgent).
+				WithServices(cfg.Services)
+			shippingProvider = provider
+			shippingService = service.NewShippingService(cartRepo, shippingProvider, cfg.OriginCEP)
+		}
+	}
+
 	// Initialize services in dependency order
 	productService := service.NewProductService(productRepo, storageClient)
 	cartService := service.NewCartService(cartRepo, productService)
 	userService := service.NewUserService(userRepo, cartService)
-	orderService := service.NewOrderService(orderRepo, cartRepo, productRepo)
+	orderService := service.NewOrderService(orderRepo, cartRepo, productRepo, shippingService)
 	passwordResetService := service.NewPasswordResetService(resetTokenRepo, userRepo, emailService)
 
 	// Initialize handlers
@@ -53,6 +69,7 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 	productHandler := handler.NewProductHandler(productService)
 	cartHandler := handler.NewCartHandler(cartService)
 	orderHandler := handler.NewOrderHandler(orderService)
+	shippingHandler := handler.NewShippingHandler(shippingService)
 	passwordResetHandler := handler.NewPasswordResetHandler(passwordResetService, rateLimiter)
 
 	return &AppHandlers{
@@ -61,5 +78,6 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 		CartHandler:          cartHandler,
 		OrderHandler:         orderHandler,
 		PasswordResetHandler: passwordResetHandler,
+		ShippingHandler:      shippingHandler,
 	}
 }

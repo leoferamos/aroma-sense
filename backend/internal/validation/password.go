@@ -18,10 +18,10 @@ const MinPasswordLen = 8
 func ValidatePassword(pw, email string) error {
 	pw = strings.TrimSpace(pw)
 	if len(pw) < MinPasswordLen {
-		return errors.New("Password must be at least 8 characters long")
+		return errors.New("password must be at least 8 characters long")
 	}
 	if !reLower.MatchString(pw) || !reUpper.MatchString(pw) || !reDigit.MatchString(pw) {
-		return errors.New("Password must contain at least one lowercase letter, one uppercase letter, and one digit")
+		return errors.New("password must contain at least one lowercase letter, one uppercase letter, and one digit")
 	}
 	return nil
 }

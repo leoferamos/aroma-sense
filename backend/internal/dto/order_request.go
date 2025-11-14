@@ -2,8 +2,9 @@ package dto
 
 // CreateOrderFromCartRequest represents the payload for creating an order from the entire cart
 type CreateOrderFromCartRequest struct {
-	ShippingAddress string `json:"shipping_address" binding:"required" example:"Rua Example, 123, São Paulo - SP, 01234-567"`
-	PaymentMethod   string `json:"payment_method" binding:"required,oneof=credit_card debit_card pix boleto" example:"pix"`
+	ShippingAddress   string             `json:"shipping_address" binding:"required" example:"Rua Example, 123, São Paulo - SP, 01234-567"`
+	PaymentMethod     string             `json:"payment_method" binding:"required,oneof=credit_card debit_card pix boleto" example:"pix"`
+	ShippingSelection *ShippingSelection `json:"shipping_selection,omitempty"`
 }
 
 // CreateOrderDirectRequest represents the payload for buying a single product directly
@@ -14,10 +15,16 @@ type CreateOrderDirectRequest struct {
 	PaymentMethod   string `json:"payment_method" binding:"required,oneof=credit_card debit_card pix boleto" example:"pix"`
 }
 
-// UpdateOrderStatusRequest represents the payload for updating order status 
+// UpdateOrderStatusRequest represents the payload for updating order status
 type UpdateOrderStatusRequest struct {
 	Status string `json:"status" binding:"required,oneof=pending processing shipped delivered cancelled" example:"processing"`
 }
 
-
-
+// ShippingSelection represents the client's chosen shipping option.
+type ShippingSelection struct {
+	Carrier       string  `json:"carrier" binding:"required" example:"Correios"`
+	ServiceCode   string  `json:"service_code" binding:"required" example:"SEDEX"`
+	Price         float64 `json:"price" binding:"required" example:"24.90"`
+	EstimatedDays int     `json:"estimated_days" example:"2"`
+	QuoteID       string  `json:"quote_id,omitempty" example:"q_abc123"`
+}

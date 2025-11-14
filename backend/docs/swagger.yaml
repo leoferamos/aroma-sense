@@ -95,6 +95,8 @@ definitions:
       shipping_address:
         example: Rua Example, 123, São Paulo - SP, 01234-567
         type: string
+      shipping_selection:
+        $ref: '#/definitions/dto.ShippingSelection'
     required:
     - payment_method
     - shipping_address
@@ -179,6 +181,18 @@ definitions:
       payment_method:
         type: string
       shipping_address:
+        type: string
+      shipping_carrier:
+        type: string
+      shipping_estimated_delivery:
+        type: string
+      shipping_price:
+        type: number
+      shipping_service_code:
+        type: string
+      shipping_status:
+        type: string
+      shipping_tracking:
         type: string
       status:
         type: string
@@ -281,6 +295,39 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  dto.ShippingOption:
+    properties:
+      carrier:
+        type: string
+      estimated_days:
+        type: integer
+      price:
+        type: number
+      service_code:
+        type: string
+    type: object
+  dto.ShippingSelection:
+    properties:
+      carrier:
+        example: Correios
+        type: string
+      estimated_days:
+        example: 2
+        type: integer
+      price:
+        example: 24.9
+        type: number
+      quote_id:
+        example: q_abc123
+        type: string
+      service_code:
+        example: SEDEX
+        type: string
+    required:
+    - carrier
+    - price
+    - service_code
     type: object
   dto.StatsMeta:
     properties:
@@ -920,6 +967,42 @@ paths:
       summary: Get product by ID
       tags:
       - products
+  /shipping/options:
+    get:
+      description: Returns a list of shipping options (carrier, service code, price,
+        ETA) for the current cart.
+      parameters:
+      - description: Destination postal code (CEP)
+        in: query
+        name: postal_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ShippingOption'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List shipping options
+      tags:
+      - shipping
   /users/login:
     post:
       consumes:
