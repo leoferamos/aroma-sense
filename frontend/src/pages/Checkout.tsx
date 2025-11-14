@@ -9,6 +9,9 @@ import { formatCurrency } from '../utils/format';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
 import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../hooks/useCheckoutValidation';
+import useShippingOptions from '../hooks/useShippingOptions';
+import type { ShippingOption } from '../types/shipping';
+import { createOrder, type OrderCreateRequest } from '../services/order';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
@@ -34,24 +37,47 @@ const Checkout: React.FC = () => {
   const { errors, validateAll, setErrors } = useCheckoutValidation();
   const [submitting, setSubmitting] = useState(false);
   const cartIsEmpty = useMemo(() => !cart || cart.items.length === 0, [cart]);
+  const { options: shippingOptions, loading: shippingLoading, error: shippingError } = useShippingOptions(address.postalCode);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
 
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (cartIsEmpty) return;
   if (!validateAll(address, payment)) return;
+    if (!selectedShipping) {
+      setErrors((prev) => ({ ...prev, postalCode: prev.postalCode || 'Select a shipping option' }));
+      return;
+    }
     setSubmitting(true);
-    // Simulate success and redirect to confirmation screen
-    setTimeout(() => {
+    try {
+      const shipping_address = `${address.address1}${address.address2 ? ', ' + address.address2 : ''}, ${address.city} - ${address.state}, ${address.postalCode}`;
+      const payload: OrderCreateRequest = {
+        payment_method: 'pix',
+        shipping_address,
+        shipping_selection: {
+          carrier: selectedShipping.carrier,
+          service_code: selectedShipping.service_code,
+          price: selectedShipping.price,
+          estimated_days: selectedShipping.estimated_days,
+          quote_id: null,
+        },
+      };
+      const order = await createOrder(payload);
       navigate('/order-confirmation', {
         replace: true,
         state: {
-          orderTotal: cart?.total ?? 0,
-          itemsCount: cart?.item_count ?? 0,
+          orderTotal: order.total_amount,
+          itemsCount: order.item_count,
           customerName: address.fullName,
         },
       });
-    }, 600);
+    } catch (err) {
+      console.error('Failed to create order', err);
+      setErrors((prev) => ({ ...prev, address1: 'Failed to create order. Please try again.' }));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -147,6 +173,39 @@ const Checkout: React.FC = () => {
                 </div>
               </section>
 
+              {/* Shipping options */}
+              <section className="bg-white shadow rounded-lg p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Shipping</h2>
+                <p className="text-sm text-gray-600 mb-4">Enter your postal code to see available options.</p>
+                {shippingError && <ErrorState message={shippingError} />}
+                {shippingLoading && <LoadingSpinner message="Loading shipping options..." />}
+                {!shippingLoading && shippingOptions.length > 0 && (
+                  <div className="space-y-2">
+                    {shippingOptions.map((opt, idx) => (
+                      <label key={`${opt.carrier}-${opt.service_code}-${idx}`} className={`flex items-center justify-between border rounded-md p-3 cursor-pointer ${selectedShipping === opt ? 'border-blue-500 ring-1 ring-blue-300' : 'border-gray-200'}`}>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="shippingOption"
+                            value={`${opt.carrier}:${opt.service_code}`}
+                            checked={selectedShipping?.carrier === opt.carrier && selectedShipping?.service_code === opt.service_code}
+                            onChange={() => setSelectedShipping(opt)}
+                          />
+                          <div>
+                            <div className="font-medium text-gray-900">{opt.carrier} — {opt.service_code}</div>
+                            <div className="text-sm text-gray-600">ETA: {opt.estimated_days} day{opt.estimated_days === 1 ? '' : 's'}</div>
+                          </div>
+                        </div>
+                        <div className="font-semibold">{formatCurrency(opt.price)}</div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {!shippingLoading && shippingOptions.length === 0 && address.postalCode && address.postalCode.replace(/\D/g, '').length >= 8 && (
+                  <p className="text-sm text-gray-600">No shipping options for this postal code.</p>
+                )}
+              </section>
+
               {/* Payment */}
               <section className="bg-white shadow rounded-lg p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment</h2>
@@ -200,8 +259,8 @@ const Checkout: React.FC = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={submitting || cartIsEmpty}
-                  aria-disabled={submitting || cartIsEmpty}
+                  disabled={submitting || cartIsEmpty || !selectedShipping}
+                  aria-disabled={submitting || cartIsEmpty || !selectedShipping}
                   aria-busy={submitting}
                   className={`inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-3 text-white font-medium shadow hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
@@ -234,6 +293,14 @@ const Checkout: React.FC = () => {
                 <div className="flex justify-between text-gray-700">
                   <span>Subtotal</span>
                   <span className="font-semibold">{formatCurrency(cart!.total)}</span>
+                </div>
+                <div className="flex justify-between text-gray-700 mt-2">
+                  <span>Shipping</span>
+                  <span className="font-semibold">{selectedShipping ? formatCurrency(selectedShipping.price) : '-'}</span>
+                </div>
+                <div className="flex justify-between text-gray-900 mt-2 border-t pt-2">
+                  <span>Total</span>
+                  <span className="font-bold">{formatCurrency(cart!.total + (selectedShipping?.price ?? 0))}</span>
                 </div>
               </div>
             </aside>

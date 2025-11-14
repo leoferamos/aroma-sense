@@ -6,4 +6,21 @@ export async function getUserOrders(): Promise<OrderResponse[]> {
   return res.data;
 }
 
-export default { getUserOrders };
+export interface OrderCreateRequest {
+  payment_method: string;
+  shipping_address: string;
+  shipping_selection: {
+    carrier: string;
+    service_code: string;
+    price: number;
+    estimated_days: number;
+    quote_id?: string | null;
+  };
+}
+
+export async function createOrder(payload: OrderCreateRequest): Promise<OrderResponse> {
+  const res = await api.post<OrderResponse>('/orders', payload);
+  return res.data;
+}
+
+export default { getUserOrders, createOrder };
