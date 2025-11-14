@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global background: very light blue for the whole site */
+@layer base {
+	html, body, #root {
+		@apply bg-sky-50;
+		min-height: 100vh;
+	}
+}
+
 /* Custom responsive adjustments */
 @media (min-width: 1280px) and (max-width: 1700px) {
 	/* Slightly reduce fragrance image and nudge right for screens (1280-1700px) */

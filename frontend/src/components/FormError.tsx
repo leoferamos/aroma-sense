@@ -13,7 +13,7 @@ interface FormErrorProps {
  */
 const FormError: React.FC<FormErrorProps> = ({ message }) => {
   if (!message) return null;
-  return <span className="text-sm text-red-500 mt-1">{message}</span>;
+  return <span className="text-xs text-red-600 font-medium mt-1 block">{message}</span>;
 };
 
 export default FormError;

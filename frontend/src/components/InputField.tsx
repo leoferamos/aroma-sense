@@ -52,7 +52,7 @@ const InputField: React.FC<InputFieldProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-  <label htmlFor={name} className="text-base font-normal text-gray-800">{label}</label>
+      <label htmlFor={name} className="text-sm font-medium text-gray-700">{label}</label>
       <div className="relative">
         <input
           type={type}
@@ -61,14 +61,14 @@ const InputField: React.FC<InputFieldProps> = ({
           value={value}
           onChange={onChange}
           {...(onBlur ? { onBlur } : {})}
-          className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 pr-10"
+          className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-gray-50 hover:bg-white"
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
         />
         {rightIcon && (
           <span
-            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600 select-none transition-colors duration-200"
             onMouseDown={onRightIconMouseDown}
             onMouseUp={onRightIconMouseUp}
             onMouseLeave={onRightIconMouseLeave}

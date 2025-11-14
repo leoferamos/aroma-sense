@@ -69,11 +69,11 @@ const Navbar: React.FC = () => {
   const badgeCount = itemCount > MAX_CART_BADGE_COUNT ? `${MAX_CART_BADGE_COUNT}+` : itemCount;
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
           {/* Logo */}
-          <Link to="/products" className="flex items-center">
+          <Link to="/products" className="flex items-center flex-shrink-0">
             <img src={LOGO_PATH} alt="Aroma Sense" className="h-10 w-auto" />
           </Link>
 
@@ -98,33 +98,33 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Right side: User Menu + Cart */}
-          <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+          <div className="flex items-center gap-2 relative" ref={dropdownRef}>
             {/* Cart Icon */}
             <button
               type="button"
               aria-label="Open cart"
-              className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              className="relative p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 transition-all duration-200 rounded-lg"
               onClick={() => {
                 setOpen((v) => !v);
                 setUserMenuOpen(false); // ensure menu closes when opening cart
               }}
             >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                  />
-                </svg>
-                {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                />
+              </svg>
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                   {badgeCount}
                 </span>
               )}
@@ -132,9 +132,9 @@ const Navbar: React.FC = () => {
 
             {/* Dropdown */}
             {open && (
-              <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden">
+              <div className="absolute right-0 top-12 w-96 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="p-4 border-b border-gray-100">
-                  <h3 className="text-sm font-semibold text-gray-900">Cart</h3>
+                  <h3 className="text-sm font-semibold text-gray-900">Shopping Cart</h3>
                 </div>
                 <div className="max-h-80 overflow-auto divide-y divide-gray-100">
                   {cart && cart.items.length > 0 ? (
@@ -162,7 +162,7 @@ const Navbar: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => { setOpen(false); navigate('/checkout'); }}
-                    className="w-full py-2.5 px-4 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    className="w-full py-2.5 px-4 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200"
                   >
                     Go to Checkout
                   </button>
@@ -174,7 +174,7 @@ const Navbar: React.FC = () => {
             <button
               type="button"
               aria-label="Open menu"
-              className="p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              className="p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 transition-all duration-200 rounded-lg"
               onClick={() => {
                 setUserMenuOpen((v) => !v);
                 setOpen(false); // close cart if open
