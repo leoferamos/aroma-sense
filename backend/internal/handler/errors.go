@@ -14,7 +14,7 @@ var errorMapping = map[error]struct {
 }{
 	service.ErrUnauthorized:        {Status: http.StatusUnauthorized, Message: "unauthorized"},
 	service.ErrCartEmpty:           {Status: http.StatusBadRequest, Message: "cart is empty"},
-	service.ErrInvalidPostalCode:   {Status: http.StatusBadRequest, Message: "invalid postal code"},
+	service.ErrInvalidPostalCode:   {Status: http.StatusBadRequest, Message: "invalid postal_code"},
 	service.ErrOriginNotConfigured: {Status: http.StatusInternalServerError, Message: "shipping origin not configured"},
 	service.ErrProviderUnavailable: {Status: http.StatusServiceUnavailable, Message: "shipping temporarily unavailable"},
 	service.ErrNoOptions:           {Status: http.StatusServiceUnavailable, Message: "no shipping options available"},
