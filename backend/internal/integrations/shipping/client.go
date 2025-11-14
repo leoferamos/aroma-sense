@@ -1,91 +1,59 @@
 package shipping
 
 import (
-	"context"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
-	"net/url"
+	"path"
 	"strings"
-	"sync"
 	"time"
 )
 
-// Client handles auth and HTTP calls to a shipping API using client credentials.
+// Client handles HTTP calls to the external shipping provider API.
 type Client struct {
-	httpClient   *http.Client
-	baseURL      string
-	tokenURL     string
-	clientID     string
-	clientSecret string
-
-	mu          sync.Mutex
-	accessToken string
-	expiresAt   time.Time
+	httpClient *http.Client
+	baseURL    string
 }
 
 // NewClient builds a Client from explicit Config.
 func NewClient(cfg Config) (*Client, error) {
-	if cfg.BaseURL == "" || cfg.TokenURL == "" || cfg.ClientID == "" || cfg.ClientSecret == "" {
-		return nil, errors.New("shipping provider config not fully set")
+	if cfg.BaseURL == "" {
+		return nil, errors.New("shipping provider base URL not set")
 	}
 	timeout := cfg.Timeout
 	if timeout <= 0 {
 		timeout = 15 * time.Second
 	}
 	return &Client{
-		httpClient:   &http.Client{Timeout: timeout},
-		baseURL:      cfg.BaseURL,
-		tokenURL:     cfg.TokenURL,
-		clientID:     cfg.ClientID,
-		clientSecret: cfg.ClientSecret,
+		httpClient: &http.Client{Timeout: timeout},
+		baseURL:    cfg.BaseURL,
 	}, nil
 }
 
-type tokenResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
-	TokenType   string `json:"token_type"`
+// NewJSONRequest creates an HTTP request with JSON body.
+func (c *Client) NewJSONRequest(method, relPath string, body any) (*http.Request, error) {
+	var rdr *bytes.Reader
+	if body != nil {
+		b, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		rdr = bytes.NewReader(b)
+	} else {
+		rdr = bytes.NewReader(nil)
+	}
+	url := strings.TrimRight(c.baseURL, "/") + path.Clean(relPath)
+	req, err := http.NewRequest(method, url, rdr)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	return req, nil
 }
 
-func (c *Client) getToken(ctx context.Context) (string, error) {
-	c.mu.Lock()
-	if c.accessToken != "" && time.Now().Before(c.expiresAt.Add(-30*time.Second)) {
-		tok := c.accessToken
-		c.mu.Unlock()
-		return tok, nil
-	}
-	c.mu.Unlock()
-
-	form := url.Values{}
-	form.Set("grant_type", "client_credentials")
-	form.Set("client_id", c.clientID)
-	form.Set("client_secret", c.clientSecret)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.tokenURL, strings.NewReader(form.Encode()))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return "", errors.New("shipping token request failed: " + resp.Status)
-	}
-	var tr tokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tr); err != nil {
-		return "", err
-	}
-	if tr.AccessToken == "" {
-		return "", errors.New("shipping empty access_token")
-	}
-	c.mu.Lock()
-	c.accessToken = tr.AccessToken
-	c.expiresAt = time.Now().Add(time.Duration(tr.ExpiresIn) * time.Second)
-	c.mu.Unlock()
-	return tr.AccessToken, nil
+// Do executes the given HTTP request.
+func (c *Client) Do(req *http.Request) (*http.Response, error) {
+	return c.httpClient.Do(req)
 }
