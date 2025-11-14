@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	"github.com/leoferamos/aroma-sense/internal/validation"
 )
 
 type OrderService interface {
@@ -20,10 +22,11 @@ type orderService struct {
 	orderRepo   repository.OrderRepository
 	cartRepo    repository.CartRepository
 	productRepo repository.ProductRepository
+	shippingSvc ShippingService
 }
 
-func NewOrderService(orderRepo repository.OrderRepository, cartRepo repository.CartRepository, productRepo repository.ProductRepository) OrderService {
-	return &orderService{orderRepo, cartRepo, productRepo}
+func NewOrderService(orderRepo repository.OrderRepository, cartRepo repository.CartRepository, productRepo repository.ProductRepository, shippingSvc ShippingService) OrderService {
+	return &orderService{orderRepo: orderRepo, cartRepo: cartRepo, productRepo: productRepo, shippingSvc: shippingSvc}
 }
 
 func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFromCartRequest) (*dto.OrderResponse, error) {
@@ -52,6 +55,7 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		total += itemSubtotal
 	}
 
+	// Initialize order
 	order := &model.Order{
 		UserID:          userID,
 		TotalAmount:     total,
@@ -61,6 +65,45 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		Items:           orderItems,
 		CreatedAt:       time.Now(),
 		UpdatedAt:       time.Now(),
+	}
+
+	// Validate shipping selection against fresh quotes and persist shipping fields
+	if req.ShippingSelection != nil {
+		cep := validation.ExtractCEPFromString(req.ShippingAddress)
+		if cep == "" {
+			return nil, ErrInvalidPostalCode
+		}
+
+		if s.shippingSvc == nil {
+			return nil, ErrProviderUnavailable
+		}
+
+		// Re-quote to validate selection.
+		options, err := s.shippingSvc.CalculateOptions(context.Background(), userID, cep)
+		if err != nil {
+			return nil, err
+		}
+
+		var matched *dto.ShippingOption
+		for i := range options {
+			if options[i].Carrier == req.ShippingSelection.Carrier && options[i].ServiceCode == req.ShippingSelection.ServiceCode {
+				matched = &options[i]
+				break
+			}
+		}
+		if matched == nil {
+			return nil, errors.New("invalid shipping selection")
+		}
+
+		order.ShippingCarrier = matched.Carrier
+		order.ShippingServiceCode = matched.ServiceCode
+		order.ShippingPrice = matched.Price
+		if matched.EstimatedDays > 0 {
+			eta := time.Now().Add(time.Hour * 24 * time.Duration(matched.EstimatedDays))
+			order.ShippingEstimatedDelivery = &eta
+		}
+		// Update order total to include shipping
+		order.TotalAmount += matched.Price
 	}
 
 	if err := s.orderRepo.Create(order); err != nil {
@@ -91,16 +134,20 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		}
 	}
 	return &dto.OrderResponse{
-		ID:              order.ID,
-		UserID:          order.UserID,
-		TotalAmount:     order.TotalAmount,
-		Status:          string(order.Status),
-		ShippingAddress: order.ShippingAddress,
-		PaymentMethod:   string(order.PaymentMethod),
-		Items:           items,
-		ItemCount:       len(order.Items),
-		CreatedAt:       order.CreatedAt,
-		UpdatedAt:       order.UpdatedAt,
+		ID:                        order.ID,
+		UserID:                    order.UserID,
+		TotalAmount:               order.TotalAmount,
+		Status:                    string(order.Status),
+		ShippingAddress:           order.ShippingAddress,
+		PaymentMethod:             string(order.PaymentMethod),
+		ShippingPrice:             order.ShippingPrice,
+		ShippingCarrier:           order.ShippingCarrier,
+		ShippingServiceCode:       order.ShippingServiceCode,
+		ShippingEstimatedDelivery: order.ShippingEstimatedDelivery,
+		Items:                     items,
+		ItemCount:                 len(order.Items),
+		CreatedAt:                 order.CreatedAt,
+		UpdatedAt:                 order.UpdatedAt,
 	}, nil
 }
 
@@ -174,16 +221,22 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 		}
 
 		resp = append(resp, dto.OrderResponse{
-			ID:              o.ID,
-			UserID:          o.UserID,
-			TotalAmount:     o.TotalAmount,
-			Status:          string(o.Status),
-			ShippingAddress: o.ShippingAddress,
-			PaymentMethod:   string(o.PaymentMethod),
-			Items:           items,
-			ItemCount:       len(items),
-			CreatedAt:       o.CreatedAt,
-			UpdatedAt:       o.UpdatedAt,
+			ID:                        o.ID,
+			UserID:                    o.UserID,
+			TotalAmount:               o.TotalAmount,
+			Status:                    string(o.Status),
+			ShippingAddress:           o.ShippingAddress,
+			PaymentMethod:             string(o.PaymentMethod),
+			ShippingPrice:             o.ShippingPrice,
+			ShippingCarrier:           o.ShippingCarrier,
+			ShippingServiceCode:       o.ShippingServiceCode,
+			ShippingEstimatedDelivery: o.ShippingEstimatedDelivery,
+			ShippingTracking:          o.ShippingTracking,
+			ShippingStatus:            o.ShippingStatus,
+			Items:                     items,
+			ItemCount:                 len(items),
+			CreatedAt:                 o.CreatedAt,
+			UpdatedAt:                 o.UpdatedAt,
 		})
 	}
 
