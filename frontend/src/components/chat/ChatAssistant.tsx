@@ -34,6 +34,14 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
         scrollToBottom();
     }, [messages]);
 
+
+    useEffect(() => {
+        if (isOpen) {
+            const t = setTimeout(() => scrollToBottom(), 50);
+            return () => clearTimeout(t);
+        }
+    }, [isOpen]);
+
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -73,14 +81,18 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
         <>
             {/* Overlay */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 z-30 animate-in fade-in"
+                className="fixed inset-0 bg-black/50 z-30 animate-in fade-in"
                 onClick={onClose}
             />
 
-            {/* Chat Panel */}
-            <div className="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-40 animate-in slide-in-from-right flex flex-col">
+            {/* Chat Panel (bottom sheet on mobile, side panel on desktop) */}
+            <div
+                className={cn(
+                    "fixed inset-x-0 bottom-0 md:inset-y-0 md:right-0 md:left-auto w-full md:w-96 h-[70dvh] md:h-[100dvh] bg-white shadow-2xl z-40 animate-in md:slide-in-from-right slide-in-from-bottom flex flex-col overflow-hidden min-h-0 rounded-t-2xl md:rounded-none border-t md:border-t-0"
+                )}
+            >
                 {/* Header */}
-                <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-tl-lg">
+                <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 pt-[calc(theme(spacing.4)+env(safe-area-inset-top))] md:pt-4 rounded-t-2xl md:rounded-tl-lg">
                     <div className="flex items-center gap-3">
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
@@ -99,7 +111,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Messages Container */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 scroll-pb-24 overscroll-contain">
                     {messages.map((message) => (
                         <div
                             key={message.id}
@@ -110,7 +122,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                         >
                             <div
                                 className={cn(
-                                    'max-w-xs px-4 py-2 rounded-lg',
+                                    'max-w-[80%] sm:max-w-xs px-4 py-2 rounded-lg',
                                     message.sender === 'user'
                                         ? 'bg-blue-600 text-white rounded-br-none'
                                         : 'bg-gray-200 text-gray-900 rounded-bl-none'
@@ -143,7 +155,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                 {/* Input Area */}
                 <form
                     onSubmit={handleSendMessage}
-                    className="border-t border-gray-200 p-4 bg-gray-50"
+                    className="border-t border-gray-200 p-4 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] bg-gray-50"
                 >
                     <div className="flex gap-2">
                         <input
@@ -151,7 +163,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             placeholder="Type your message..."
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[15px]"
                             disabled={isLoading}
                         />
                         <button
