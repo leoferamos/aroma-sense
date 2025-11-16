@@ -10,15 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
 type ProductHandler struct {
 	productService service.ProductService
+	reviewService  service.ReviewService
+	userRepo       repository.UserRepository
 }
 
-func NewProductHandler(s service.ProductService) *ProductHandler {
-	return &ProductHandler{productService: s}
+func NewProductHandler(ps service.ProductService, rs service.ReviewService, ur repository.UserRepository) *ProductHandler {
+	return &ProductHandler{productService: ps, reviewService: rs, userRepo: ur}
 }
 
 // CreateProduct handles admin product creation
@@ -228,6 +231,24 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
+	}
+
+	// Check if user can review this product
+	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userRepo != nil {
+		publicID := rawUserID.(string)
+		if userModel, err := h.userRepo.FindByPublicID(publicID); err == nil {
+			can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, product.ID)
+			if can && canErr == nil {
+				trueVal := true
+				product.CanReview = &trueVal
+			} else if canErr == nil {
+				falseVal := false
+				product.CanReview = &falseVal
+				if reason == "profile_incomplete" || reason == "not_delivered" || reason == "already_reviewed" {
+					product.CannotReviewReason = &reason
+				}
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, product)
