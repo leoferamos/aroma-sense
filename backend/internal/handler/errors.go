@@ -18,6 +18,14 @@ var errorMapping = map[error]struct {
 	service.ErrOriginNotConfigured: {Status: http.StatusInternalServerError, Message: "shipping origin not configured"},
 	service.ErrProviderUnavailable: {Status: http.StatusServiceUnavailable, Message: "shipping temporarily unavailable"},
 	service.ErrNoOptions:           {Status: http.StatusServiceUnavailable, Message: "no shipping options available"},
+	// Reviews
+	service.ErrReviewUnauthenticated:   {Status: http.StatusUnauthorized, Message: "unauthenticated"},
+	service.ErrReviewProfileIncomplete: {Status: http.StatusForbidden, Message: "profile_incomplete"},
+	service.ErrReviewNotDelivered:      {Status: http.StatusForbidden, Message: "not_delivered"},
+	service.ErrReviewAlreadyReviewed:   {Status: http.StatusConflict, Message: "already_reviewed"},
+	service.ErrReviewInvalidRating:     {Status: http.StatusBadRequest, Message: "invalid rating"},
+	service.ErrReviewCommentTooLong:    {Status: http.StatusBadRequest, Message: "comment too long"},
+	service.ErrReviewProductNotFound:   {Status: http.StatusNotFound, Message: "product not found"},
 }
 
 // mapServiceError checks if an error matches a known service error and returns the appropriate HTTP mapping.
