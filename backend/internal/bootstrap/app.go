@@ -69,7 +69,7 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 
 	// Initialize handlers
 	userHandler := handler.NewUserHandler(userService)
-	productHandler := handler.NewProductHandler(productService)
+	productHandler := handler.NewProductHandler(productService, reviewService, userRepo)
 	reviewHandler := handler.NewReviewHandler(reviewService, userRepo)
 	cartHandler := handler.NewCartHandler(cartService)
 	orderHandler := handler.NewOrderHandler(orderService)
