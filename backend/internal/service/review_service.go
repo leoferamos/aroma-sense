@@ -12,6 +12,17 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/repository"
 )
 
+// Sentinel errors for review flow to avoid string matching in handlers.
+var (
+	ErrReviewUnauthenticated   = errors.New("unauthenticated")
+	ErrReviewProfileIncomplete = errors.New("profile incomplete")
+	ErrReviewNotDelivered      = errors.New("not delivered")
+	ErrReviewAlreadyReviewed   = errors.New("already reviewed")
+	ErrReviewInvalidRating     = errors.New("invalid rating")
+	ErrReviewCommentTooLong    = errors.New("comment too long")
+	ErrReviewProductNotFound   = errors.New("product not found")
+)
+
 // ReviewService defines business logic for product reviews
 type ReviewService interface {
 	CanUserReview(ctx context.Context, user *model.User, productID uint) (bool, string, error)
@@ -79,19 +90,19 @@ func (s *reviewService) CanUserReview(ctx context.Context, user *model.User, pro
 // CreateReview creates a new product review
 func (s *reviewService) CreateReview(ctx context.Context, user *model.User, productID uint, rating int, comment string) (*model.Review, error) {
 	if user == nil || user.PublicID == "" {
-		return nil, errors.New("unauthenticated")
+		return nil, ErrReviewUnauthenticated
 	}
 	// Validate rating bounds
 	if rating < 1 || rating > 5 {
-		return nil, fmt.Errorf("invalid rating: %d", rating)
+		return nil, fmt.Errorf("%w: %d", ErrReviewInvalidRating, rating)
 	}
 	// Validate comment length (<=500)
 	if len(comment) > 500 {
-		return nil, fmt.Errorf("comment too long: %d", len(comment))
+		return nil, fmt.Errorf("%w: %d", ErrReviewCommentTooLong, len(comment))
 	}
 	// Require display name
 	if user.DisplayName == nil || strings.TrimSpace(*user.DisplayName) == "" {
-		return nil, errors.New("profile_incomplete")
+		return nil, ErrReviewProfileIncomplete
 	}
 	// Check delivered order
 	delivered, err := s.orders.HasUserDeliveredOrderWithProduct(user.PublicID, productID)
@@ -99,7 +110,7 @@ func (s *reviewService) CreateReview(ctx context.Context, user *model.User, prod
 		return nil, fmt.Errorf("failed to verify delivered orders: %w", err)
 	}
 	if !delivered {
-		return nil, errors.New("not_delivered")
+		return nil, ErrReviewNotDelivered
 	}
 	// Prevent duplicate review
 	exists, err := s.reviews.ExistsByProductAndUser(ctx, productID, user.PublicID)
@@ -107,12 +118,12 @@ func (s *reviewService) CreateReview(ctx context.Context, user *model.User, prod
 		return nil, fmt.Errorf("failed to check existing review: %w", err)
 	}
 	if exists {
-		return nil, errors.New("already_reviewed")
+		return nil, ErrReviewAlreadyReviewed
 	}
 
 	// Verify product exists
 	if _, err := s.products.FindByID(productID); err != nil {
-		return nil, fmt.Errorf("product not found: %w", err)
+		return nil, fmt.Errorf("%w: %v", ErrReviewProductNotFound, err)
 	}
 
 	rv := &model.Review{
