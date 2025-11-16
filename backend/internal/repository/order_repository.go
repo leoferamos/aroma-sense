@@ -12,6 +12,7 @@ type OrderRepository interface {
 	FindByID(id uint) (*model.Order, error)
 	FindByUserID(userID string) ([]model.Order, error)
 	ListOrders(status *string, startDate *time.Time, endDate *time.Time, page int, perPage int) ([]model.Order, int64, float64, error)
+	HasUserDeliveredOrderWithProduct(userID string, productID uint) (bool, error)
 }
 
 type orderRepository struct {
@@ -107,4 +108,22 @@ func (r *orderRepository) ListOrders(status *string, startDate *time.Time, endDa
 	}
 
 	return orders, totalCount, totalRevenue, nil
+}
+
+// HasUserDeliveredOrderWithProduct returns true if the user has at least one delivered order containing the given product.
+func (r *orderRepository) HasUserDeliveredOrderWithProduct(userID string, productID uint) (bool, error) {
+	var exists bool
+	raw := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM orders o
+			JOIN order_items oi ON oi.order_id = o.id
+			WHERE o.user_id = ?
+			  AND o.status = 'delivered'
+			  AND oi.product_id = ?
+		)`
+	if err := r.db.Raw(raw, userID, productID).Scan(&exists).Error; err != nil {
+		return false, err
+	}
+	return exists, nil
 }
