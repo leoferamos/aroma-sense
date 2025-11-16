@@ -12,13 +12,12 @@ var errorMapping = map[error]struct {
 	Status  int
 	Message string
 }{
-	service.ErrUnauthorized:        {Status: http.StatusUnauthorized, Message: "unauthorized"},
-	service.ErrCartEmpty:           {Status: http.StatusBadRequest, Message: "cart is empty"},
-	service.ErrInvalidPostalCode:   {Status: http.StatusBadRequest, Message: "invalid postal_code"},
-	service.ErrOriginNotConfigured: {Status: http.StatusInternalServerError, Message: "shipping origin not configured"},
-	service.ErrProviderUnavailable: {Status: http.StatusServiceUnavailable, Message: "shipping temporarily unavailable"},
-	service.ErrNoOptions:           {Status: http.StatusServiceUnavailable, Message: "no shipping options available"},
-	// Reviews
+	service.ErrUnauthorized:            {Status: http.StatusUnauthorized, Message: "unauthorized"},
+	service.ErrCartEmpty:               {Status: http.StatusBadRequest, Message: "cart is empty"},
+	service.ErrInvalidPostalCode:       {Status: http.StatusBadRequest, Message: "invalid postal_code"},
+	service.ErrOriginNotConfigured:     {Status: http.StatusInternalServerError, Message: "shipping origin not configured"},
+	service.ErrProviderUnavailable:     {Status: http.StatusServiceUnavailable, Message: "shipping temporarily unavailable"},
+	service.ErrNoOptions:               {Status: http.StatusServiceUnavailable, Message: "no shipping options available"},
 	service.ErrReviewUnauthenticated:   {Status: http.StatusUnauthorized, Message: "unauthenticated"},
 	service.ErrReviewProfileIncomplete: {Status: http.StatusForbidden, Message: "profile_incomplete"},
 	service.ErrReviewNotDelivered:      {Status: http.StatusForbidden, Message: "not_delivered"},
