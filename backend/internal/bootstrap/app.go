@@ -19,6 +19,7 @@ type AppHandlers struct {
 	OrderHandler         *handler.OrderHandler
 	PasswordResetHandler *handler.PasswordResetHandler
 	ShippingHandler      *handler.ShippingHandler
+	ReviewHandler        *handler.ReviewHandler
 }
 
 // InitializeApp initializes all modules with proper dependency injection
@@ -63,10 +64,13 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 	userService := service.NewUserService(userRepo, cartService)
 	orderService := service.NewOrderService(orderRepo, cartRepo, productRepo, shippingService)
 	passwordResetService := service.NewPasswordResetService(resetTokenRepo, userRepo, emailService)
+	reviewRepo := repository.NewReviewRepository(db)
+	reviewService := service.NewReviewService(reviewRepo, orderRepo, productRepo)
 
 	// Initialize handlers
 	userHandler := handler.NewUserHandler(userService)
 	productHandler := handler.NewProductHandler(productService)
+	reviewHandler := handler.NewReviewHandler(reviewService, userRepo)
 	cartHandler := handler.NewCartHandler(cartService)
 	orderHandler := handler.NewOrderHandler(orderService)
 	shippingHandler := handler.NewShippingHandler(shippingService)
@@ -79,5 +83,6 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 		OrderHandler:         orderHandler,
 		PasswordResetHandler: passwordResetHandler,
 		ShippingHandler:      shippingHandler,
+		ReviewHandler:        reviewHandler,
 	}
 }

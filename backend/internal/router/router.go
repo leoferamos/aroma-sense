@@ -1,12 +1,12 @@
 package router
 
 import (
-	"os"
-	"strings"
+    "os"
+    "strings"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/leoferamos/aroma-sense/internal/bootstrap"
+    "github.com/gin-contrib/cors"
+    "github.com/gin-gonic/gin"
+    "github.com/leoferamos/aroma-sense/internal/bootstrap"
 )
 
 // SetupRouter initializes the Gin router with all routes
@@ -30,7 +30,7 @@ func SetupRouter(handlers *bootstrap.AppHandlers) *gin.Engine {
 	// Register domain routes
 	UserRoutes(r, handlers.UserHandler, handlers.PasswordResetHandler)
 	AdminRoutes(r, handlers.UserHandler, handlers.ProductHandler, handlers.OrderHandler)
-	ProductRoutes(r, handlers.ProductHandler)
+	ProductRoutes(r, handlers.ProductHandler, handlers.ReviewHandler)
 	CartRoutes(r, handlers.CartHandler)
 	OrderRoutes(r, handlers.OrderHandler)
 	ShippingRoutes(r, handlers.ShippingHandler)
