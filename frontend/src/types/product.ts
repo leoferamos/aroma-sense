@@ -11,6 +11,8 @@ export interface Product {
   stock_quantity: number;
   created_at: string;
   updated_at: string;
+  can_review?: boolean;
+  cannot_review_reason?: string;
 }
 
 export interface ProductsResponse {
