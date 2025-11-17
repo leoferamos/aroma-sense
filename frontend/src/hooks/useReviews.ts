@@ -37,6 +37,9 @@ export function useReviews(productId: number, opts?: { initialPage?: number; ini
       setTotal(listResp.total);
       setSummaryState(summaryResp);
     } catch (err: unknown) {
+      if (isAxiosError(err) && (err.code === 'ERR_CANCELED' || err.message?.toLowerCase().includes('canceled'))) {
+        return;
+      }
       if (isAxiosError(err)) {
         setError(err.response?.data?.error || 'Failed to load reviews');
       } else if (err instanceof Error) {

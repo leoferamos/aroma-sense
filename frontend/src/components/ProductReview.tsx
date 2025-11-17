@@ -31,11 +31,6 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
             return;
         }
 
-        if (!comment.trim()) {
-            alert('Please write a comment');
-            return;
-        }
-
         if (canReview === false) {
             alert('You cannot review this product now.');
             return;
@@ -55,7 +50,9 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
 
     return (
         <section className="bg-white shadow rounded-lg p-8 mb-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Rate This Product</h2>
+            {canReview === true && (
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">Rate This Product</h2>
+            )}
 
             {/* Summary and errors */}
             {error && <div className="mb-4 p-3 rounded-md bg-red-50 text-red-700 text-sm">{error}</div>}
@@ -100,6 +97,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
                 </div>
             )}
 
+            {canReview === true && (
             <form onSubmit={handleSubmit} noValidate className="space-y-6">
                 {/* Star Rating */}
                 <div className="space-y-3">
@@ -144,7 +142,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
                 <div className="space-y-2">
                     <label htmlFor="comment" className="block text-sm font-medium text-gray-900">
                         Comment
-                        <span className="text-red-500 ml-1">*</span>
+                        <span className="text-gray-400 ml-1">(optional)</span>
                     </label>
                     <textarea
                         id="comment"
@@ -154,7 +152,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
                         placeholder="Share your experience with this product..."
                         rows={4}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
-                        required
+                        required={false}
                     />
                     <p className="text-xs text-gray-500">
                         {comment.length}/500 characters
@@ -165,11 +163,11 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
                 <div className="flex gap-3">
                     <button
                         type="submit"
-                        disabled={submitting || canReview === false}
-                        aria-disabled={submitting || canReview === false}
+                        disabled={submitting}
+                        aria-disabled={submitting}
                         className={cn(
                             'px-6 py-3 rounded-md font-medium transition-colors',
-                            submitting || canReview === false
+                            submitting
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                         )}
@@ -188,6 +186,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
                     </button>
                 </div>
             </form>
+            )}
 
             {/* Reviews List */}
             <div className="mt-8">
