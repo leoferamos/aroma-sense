@@ -134,6 +134,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview }) =
                         onChange={(e) => setComment(e.target.value)}
                         placeholder="Share your experience with this product..."
                         rows={4}
+                        maxLength={500}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
                         required={false}
                     />
