@@ -50,6 +50,24 @@ func (m *MockUserService) InvalidateRefreshToken(refreshToken string) error {
 	return args.Error(0)
 }
 
+func (m *MockUserService) GetByPublicID(publicID string) (*model.User, error) {
+	args := m.Called(publicID)
+	var user *model.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*model.User)
+	}
+	return user, args.Error(1)
+}
+
+func (m *MockUserService) UpdateDisplayName(publicID string, displayName string) (*model.User, error) {
+	args := m.Called(publicID, displayName)
+	var user *model.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*model.User)
+	}
+	return user, args.Error(1)
+}
+
 // ---- SETUP ROUTER ----
 func setupUserRouter() (*gin.Engine, *MockUserService) {
 	mockService := new(MockUserService)
