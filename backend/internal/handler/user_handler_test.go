@@ -76,9 +76,63 @@ func setupUserRouter() (*gin.Engine, *MockUserService) {
 	router := gin.Default()
 	router.POST("/users/register", userHandler.RegisterUser)
 	router.POST("/users/login", userHandler.LoginUser)
+	router.GET("/users/me", userHandler.GetProfile)
+	router.PATCH("/users/me/profile", userHandler.UpdateProfile)
 
 	return router, mockService
 }
+func TestGetProfile(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	mockService := new(MockUserService)
+	user := &model.User{
+		PublicID:    "uuid",
+		Email:       "test@example.com",
+		Role:        "client",
+		DisplayName: ptr("Test User"),
+		CreatedAt:   time.Now(),
+	}
+	mockService.On("GetByPublicID", "uuid").Return(user, nil)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest("GET", "/users/me", nil)
+	c.Set("userID", "uuid")
+	handler := handler.NewUserHandler(mockService)
+	handler.GetProfile(c)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "Test User")
+	mockService.AssertExpectations(t)
+}
+
+func TestUpdateProfile(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	mockService := new(MockUserService)
+	user := &model.User{
+		PublicID:    "uuid",
+		Email:       "test@example.com",
+		Role:        "client",
+		DisplayName: ptr("Updated Name"),
+		CreatedAt:   time.Now(),
+	}
+	mockService.On("UpdateDisplayName", "uuid", "Updated Name").Return(user, nil)
+
+	payload := dto.UpdateProfileRequest{DisplayName: "Updated Name"}
+	body, _ := json.Marshal(payload)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request, _ = http.NewRequest("PATCH", "/users/me/profile", bytes.NewBuffer(body))
+	c.Request.Header.Set("Content-Type", "application/json")
+	c.Set("userID", "uuid")
+	handler := handler.NewUserHandler(mockService)
+	handler.UpdateProfile(c)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "Updated Name")
+	mockService.AssertExpectations(t)
+}
+
+func ptr(s string) *string { return &s }
 
 func performRequest(t *testing.T, router *gin.Engine, method, url string, payload interface{}) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
