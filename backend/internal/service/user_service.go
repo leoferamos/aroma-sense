@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/subtle"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/auth"
@@ -19,6 +20,8 @@ type UserService interface {
 	Login(input dto.LoginRequest) (accessToken string, refreshToken string, user *model.User, err error)
 	RefreshAccessToken(refreshToken string) (accessToken string, newRefreshToken string, user *model.User, err error)
 	InvalidateRefreshToken(refreshToken string) error
+	GetByPublicID(publicID string) (*model.User, error)
+	UpdateDisplayName(publicID string, displayName string) (*model.User, error)
 }
 
 type userService struct {
@@ -163,4 +166,35 @@ func (s *userService) InvalidateRefreshToken(refreshToken string) error {
 		return errors.New("invalid refresh token")
 	}
 	return s.repo.UpdateRefreshToken(user.ID, nil, nil)
+}
+
+// GetByPublicID returns the user by public id
+func (s *userService) GetByPublicID(publicID string) (*model.User, error) {
+	if publicID == "" {
+		return nil, errors.New("unauthenticated")
+	}
+	return s.repo.FindByPublicID(publicID)
+}
+
+// UpdateDisplayName updates the user's public display name
+func (s *userService) UpdateDisplayName(publicID string, displayName string) (*model.User, error) {
+	if publicID == "" {
+		return nil, errors.New("unauthenticated")
+	}
+	if len(strings.TrimSpace(displayName)) < 2 {
+		return nil, errors.New("display_name too short")
+	}
+	if len(displayName) > 50 {
+		return nil, errors.New("display_name too long")
+	}
+	user, err := s.repo.FindByPublicID(publicID)
+	if err != nil {
+		return nil, err
+	}
+	dn := strings.TrimSpace(displayName)
+	user.DisplayName = &dn
+	if err := s.repo.Update(user); err != nil {
+		return nil, err
+	}
+	return user, nil
 }

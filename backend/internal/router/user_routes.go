@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/handler"
 )
 
@@ -15,5 +16,13 @@ func UserRoutes(r *gin.Engine, userHandler *handler.UserHandler, resetHandler *h
 		userGroup.POST("/logout", userHandler.LogoutUser)
 		userGroup.POST("/reset/request", resetHandler.RequestReset)
 		userGroup.POST("/reset/confirm", resetHandler.ConfirmReset)
+
+		// Authenticated user endpoints
+		authGroup := userGroup.Group("")
+		authGroup.Use(auth.JWTAuthMiddleware())
+		{
+			authGroup.GET("/me", userHandler.GetProfile)
+			authGroup.PATCH("/me/profile", userHandler.UpdateProfile)
+		}
 	}
 }
