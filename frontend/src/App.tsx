@@ -22,6 +22,7 @@ const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
 const Checkout = lazy(() => import('./pages/Checkout.tsx'));
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation.tsx'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -106,6 +107,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <Orders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />

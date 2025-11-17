@@ -26,6 +26,8 @@ interface InputFieldProps {
   placeholder?: string;
   required?: boolean;
   autoComplete?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
   rightIcon?: React.ReactNode;
   onRightIconMouseDown?: () => void;
   onRightIconMouseUp?: () => void;
@@ -45,11 +47,16 @@ const InputField: React.FC<InputFieldProps> = ({
   placeholder,
   required = false,
   autoComplete,
+  disabled = false,
+  readOnly = false,
   rightIcon,
   onRightIconMouseDown,
   onRightIconMouseUp,
   onRightIconMouseLeave,
 }) => {
+  const baseClasses = "w-full px-4 py-2.5 border rounded-lg transition-all duration-200 placeholder-gray-400";
+  const enabledClasses = "border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-gray-50 hover:bg-white";
+  const disabledClasses = "border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed";
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={name} className="text-sm font-medium text-gray-700">{label}</label>
@@ -61,10 +68,12 @@ const InputField: React.FC<InputFieldProps> = ({
           value={value}
           onChange={onChange}
           {...(onBlur ? { onBlur } : {})}
-          className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 bg-gray-50 hover:bg-white"
+          className={`${baseClasses} ${disabled ? disabledClasses : enabledClasses}`}
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
+          disabled={disabled}
+          readOnly={readOnly}
         />
         {rightIcon && (
           <span

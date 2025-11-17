@@ -88,7 +88,12 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview, can
             {canReview === false && (
                 <div className="mb-4 p-3 rounded-md bg-yellow-50 text-yellow-800 text-sm">
                     {cannotReviewReason === 'unauthenticated' && 'Please sign in to review this product.'}
-                    {cannotReviewReason === 'profile_incomplete' && 'Please set your public display name in your profile before reviewing.'}
+                    {cannotReviewReason === 'profile_incomplete' && (
+                        <span>
+                            Please set your public display name in your profile before reviewing.{' '}
+                            <a href="/profile" className="underline font-medium">Go to profile</a>.
+                        </span>
+                    )}
                     {cannotReviewReason === 'not_delivered' && 'You can only review after your order is delivered.'}
                     {cannotReviewReason === 'already_reviewed' && 'You have already reviewed this product.'}
                     {!cannotReviewReason && 'You cannot review this product at this time.'}
