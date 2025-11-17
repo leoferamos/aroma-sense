@@ -44,7 +44,7 @@ Security (optional)
 * <Added rate limiting to auth endpoints>
 
 Deprecations (optional)
-* <Endpoint /v1/legacy marked deprecated;>
+* <Endpoint /v1/legacy marked deprecated>
 
 Migrations (optional)
 * None
