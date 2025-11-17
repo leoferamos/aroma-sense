@@ -181,10 +181,11 @@ func (s *userService) UpdateDisplayName(publicID string, displayName string) (*m
 	if publicID == "" {
 		return nil, errors.New("unauthenticated")
 	}
-	if len(strings.TrimSpace(displayName)) < 2 {
+	trimmed := strings.TrimSpace(displayName)
+	if len(trimmed) < 2 {
 		return nil, errors.New("display_name too short")
 	}
-	if len(displayName) > 50 {
+	if len(trimmed) > 50 {
 		return nil, errors.New("display_name too long")
 	}
 	user, err := s.repo.FindByPublicID(publicID)
