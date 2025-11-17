@@ -185,11 +185,20 @@ func (s *reviewService) GetAverage(ctx context.Context, productID uint) (float64
 
 // DeleteOwnReview allows a user to soft delete their own review
 func (s *reviewService) DeleteOwnReview(ctx context.Context, reviewID string, userID string) error {
+	// Try to get productID for precise cache invalidation
+	var productID uint
+	if pid, err := s.reviews.GetProductIDForUserReview(ctx, reviewID, userID); err == nil {
+		productID = pid
+	}
+
 	if err := s.reviews.SoftDeleteReview(ctx, reviewID, userID); err != nil {
 		return fmt.Errorf("failed to delete review: %w", err)
 	}
-	s.mu.Lock()
-	s.cache = make(map[uint]ratingCacheEntry)
-	s.mu.Unlock()
+
+	if productID != 0 {
+		s.mu.Lock()
+		delete(s.cache, productID)
+		s.mu.Unlock()
+	}
 	return nil
 }
