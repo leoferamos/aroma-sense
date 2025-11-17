@@ -18,8 +18,8 @@ const Profile: React.FC = () => {
       try {
     const data = await getMyProfile();
     if (!mounted) return;
-		setProfile(data);
-		setName(data.display_name ?? '');
+    setProfile(data);
+    setName(data.display_name ?? '');
       } catch (e: any) {
         if (!mounted) return;
         setError(e?.response?.data?.error || 'Failed to load profile');
