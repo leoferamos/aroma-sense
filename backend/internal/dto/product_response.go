@@ -12,6 +12,7 @@ type ProductResponse struct {
 	Description        string    `json:"description" example:"A fresh and woody fragrance"`
 	Price              float64   `json:"price" example:"299.99"`
 	ImageURL           string    `json:"image_url" example:"https://example.com/image.jpg"`
+	ThumbnailURL       string    `json:"thumbnail_url,omitempty" example:"https://example.com/image_thumb.jpg"`
 	Category           string    `json:"category" example:"Eau de Parfum"`
 	Notes              string    `json:"notes" example:"bergamot, pepper, ambroxan"`
 	StockQuantity      int       `json:"stock_quantity" example:"50"`

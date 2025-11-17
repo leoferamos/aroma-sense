@@ -9,7 +9,7 @@ import (
 )
 
 type ProductRepository interface {
-	Create(input dto.ProductFormDTO, imageURL string) error
+	Create(input dto.ProductFormDTO, imageURL string, thumbnailURL string) error
 	FindAll(limit int) ([]model.Product, error)
 	FindByID(id uint) (model.Product, error)
 	SearchProducts(ctx context.Context, query string, limit int, offset int, sort string) ([]model.Product, int, error)
@@ -27,7 +27,7 @@ func NewProductRepository(db *gorm.DB) ProductRepository {
 }
 
 // Create inserts a new product into the database
-func (r *productRepository) Create(input dto.ProductFormDTO, imageURL string) error {
+func (r *productRepository) Create(input dto.ProductFormDTO, imageURL string, thumbnailURL string) error {
 	notes := ""
 	if len(input.Notes) > 0 {
 		notes = input.Notes[0]
@@ -45,6 +45,7 @@ func (r *productRepository) Create(input dto.ProductFormDTO, imageURL string) er
 		Description:   input.Description,
 		Price:         input.Price,
 		ImageURL:      imageURL,
+		ThumbnailURL:  thumbnailURL,
 		Category:      input.Category,
 		Notes:         notes,
 		StockQuantity: input.StockQuantity,

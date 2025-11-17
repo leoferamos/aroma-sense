@@ -70,14 +70,14 @@ func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFor
 		file.Content,
 	)
 
-	// Upload the image to storage
-	imageURL, err := s.storage.UploadImage(ctx, imageName, combinedReader, file.Size, file.ContentType)
+	// Upload the image and thumbnail to storage
+	origURL, thumbURL, err := s.storage.UploadImageWithThumbnail(ctx, imageName, combinedReader, file.Size, file.ContentType, 256, 256)
 	if err != nil {
 		return fmt.Errorf("failed to upload image: %w", err)
 	}
 
 	// Call the repository to save to database
-	return s.repo.Create(input, imageURL)
+	return s.repo.Create(input, origURL, thumbURL)
 }
 
 // GetProductByID retrieves a product by its ID and maps it to a DTO
@@ -95,6 +95,7 @@ func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.Produ
 		Description:   product.Description,
 		Price:         product.Price,
 		ImageURL:      product.ImageURL,
+		ThumbnailURL:  product.ThumbnailURL,
 		Category:      product.Category,
 		Notes:         product.Notes,
 		StockQuantity: product.StockQuantity,
@@ -120,6 +121,7 @@ func (s *productService) GetLatestProducts(ctx context.Context, limit int) ([]dt
 			Description:   p.Description,
 			Price:         p.Price,
 			ImageURL:      p.ImageURL,
+			ThumbnailURL:  p.ThumbnailURL,
 			Category:      p.Category,
 			Notes:         p.Notes,
 			StockQuantity: p.StockQuantity,
@@ -211,6 +213,7 @@ func (s *productService) SearchProducts(ctx context.Context, query string, page 
 			Description:   p.Description,
 			Price:         p.Price,
 			ImageURL:      p.ImageURL,
+			ThumbnailURL:  p.ThumbnailURL,
 			Category:      p.Category,
 			Notes:         p.Notes,
 			StockQuantity: p.StockQuantity,
