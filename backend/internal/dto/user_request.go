@@ -11,3 +11,8 @@ type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email" example:"user@example.com" format:"email"`
 	Password string `json:"password" binding:"required"`
 }
+
+// UpdateProfileRequest represents the payload to update user's profile fields.
+type UpdateProfileRequest struct {
+	DisplayName string `json:"display_name" binding:"required,min=2,max=50" example:"João Santos"`
+}

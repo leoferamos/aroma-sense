@@ -16,3 +16,12 @@ type LoginResponse struct {
 	AccessToken string       `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 	User        UserResponse `json:"user"`
 }
+
+// ProfileResponse represents the current user's profile data
+type ProfileResponse struct {
+	PublicID    string    `json:"public_id"`
+	Email       string    `json:"email"`
+	Role        string    `json:"role"`
+	DisplayName *string   `json:"display_name,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+}

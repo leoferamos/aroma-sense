@@ -12,6 +12,7 @@ type UserRepository interface {
 	Create(user *model.User) error
 	FindByEmail(email string) (*model.User, error)
 	FindByRefreshTokenHash(hash string) (*model.User, error)
+	FindByPublicID(publicID string) (*model.User, error)
 	Update(user *model.User) error
 	UpdateRefreshToken(userID uint, hash *string, expiresAt *time.Time) error
 }
@@ -42,7 +43,16 @@ func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 // FindByRefreshTokenHash retrieves a user by refresh token hash
 func (r *userRepository) FindByRefreshTokenHash(hash string) (*model.User, error) {
 	var user model.User
-	if err := r.db.Select("id, refresh_token_hash, refresh_token_expires_at").Where("refresh_token_hash = ? AND refresh_token_expires_at > ?", hash, time.Now()).First(&user).Error; err != nil {
+	if err := r.db.Where("refresh_token_hash = ? AND refresh_token_expires_at > ?", hash, time.Now()).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// FindByPublicID retrieves a user by their public UUID identifier
+func (r *userRepository) FindByPublicID(publicID string) (*model.User, error) {
+	var user model.User
+	if err := r.db.Where("public_id = ?", publicID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

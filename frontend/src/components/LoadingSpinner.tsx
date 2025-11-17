@@ -7,8 +7,11 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '', message = 'Loading...' }) => (
   <div className={`flex flex-col items-center justify-center py-20 ${className}`} role="status" aria-live="polite">
-    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-    <p className="text-gray-600">{message}</p>
+    <div className="relative w-12 h-12 mb-4">
+      <div className="absolute inset-0 rounded-full border-2 border-gray-200"></div>
+      <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-blue-600 border-r-blue-600 animate-spin"></div>
+    </div>
+    <p className="text-gray-600 text-sm font-medium">{message}</p>
   </div>
 );
 

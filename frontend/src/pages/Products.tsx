@@ -4,34 +4,26 @@ import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
 import type { Product } from '../types/product';
-import { useCart } from '../contexts/CartContext';
 import Pagination from '../components/Pagination';
 import { useProductSearch } from '../hooks/useProductSearch';
 import { listProducts } from '../services/product';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { useSearchParams } from 'react-router-dom';
+import ChatBubble from '../components/chat/ChatBubble';
 
 const Products: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Product[] | null>(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching } = useProductSearch({ limit: 12, debounceMs: 600 });
   const [searchParams] = useSearchParams();
-  const { addItem } = useCart();
-
-  const handleAddToCart = async (product: Product) => {
-    try {
-      await addItem(product.id, 1);
-    } catch (err) {
-      console.error('Failed to add to cart', err);
-    }
-  };
+  
 
   // Sync state from URL
   useEffect(() => {
     const q = searchParams.get('q') ?? '';
     const p = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1);
-  if (q !== query) { setQuery(q); }
-  if (p !== page) { setPage(p); }
+    if (q !== query) { setQuery(q); }
+    if (p !== page) { setPage(p); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -65,19 +57,21 @@ const Products: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
         {(() => {
           return null;
         })()}
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Products</h1>
-          <p className="text-gray-600">Find your favorite fragrance</p>
+        <div className="mb-10">
+          <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl p-6 shadow-sm border border-gray-50">
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-2">Products</h1>
+            <p className="text-lg text-gray-500">Find your favorite fragrance</p>
+          </div>
         </div>
 
         {/* Loading State */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" aria-live="polite">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" aria-live="polite">
             {Array.from({ length: 8 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
@@ -113,17 +107,17 @@ const Products: React.FC = () => {
                 </svg>
                 {query.trim().length >= 2 ? (
                   <>
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Unfortunately, we couldn’t find “{query.trim()}”.</h3>
-                    <p className="text-gray-500">However, check these products:</p>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">We couldn’t find “{query.trim()}”.</h3>
+                    <p className="text-gray-500">Here are some suggestions you might like:</p>
                     <div className="mt-8">
                       {loadingSuggestions ? (
                         <LoadingSpinner message="Loading suggestions..." />
                       ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                           {((Array.isArray(suggestions) ? suggestions : [])
                             .filter((p) => p && typeof (p as any).id === 'number')
                           ).map((p) => (
-                            <ProductCard key={(p as any).id} product={p as any} onAddToCart={handleAddToCart} />
+                            <ProductCard key={(p as any).id} product={p as any} showAddToCart={false} />
                           ))}
                         </div>
                       )}
@@ -157,16 +151,12 @@ const Products: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                   {(Array.isArray(results)
                     ? results.filter((p) => p && typeof (p as any).id === 'number')
                     : []
                   ).map((product: any) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={handleAddToCart}
-                    />
+                    <ProductCard key={product.id} product={product} showAddToCart={false} />
                   ))}
                 </div>
 
@@ -183,6 +173,7 @@ const Products: React.FC = () => {
           </>
         )}
       </main>
+      <ChatBubble />
     </div>
   );
 };

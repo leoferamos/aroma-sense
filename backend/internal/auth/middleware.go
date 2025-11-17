@@ -48,3 +48,24 @@ func AdminOnly() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// OptionalAuthMiddleware attempts to parse a JWT if present, but never blocks the request.
+func OptionalAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			c.Next()
+			return
+		}
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenStr == "" {
+			c.Next()
+			return
+		}
+		if claims, err := ParseJWT(tokenStr); err == nil {
+			c.Set("userID", claims.Subject)
+			c.Set("role", claims.Role)
+		}
+		c.Next()
+	}
+}

@@ -83,7 +83,7 @@ func (m *MockProductService) DeleteProduct(ctx context.Context, id uint) error {
 // ---- SETUP ROUTER ----
 func setupProductRouter() (*gin.Engine, *MockProductService) {
 	mockService := new(MockProductService)
-	productHandler := handler.NewProductHandler(mockService)
+	productHandler := handler.NewProductHandler(mockService, nil, nil)
 
 	router := gin.Default()
 	// Public routes

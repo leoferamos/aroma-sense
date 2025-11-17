@@ -44,7 +44,7 @@ const Checkout: React.FC = () => {
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (cartIsEmpty) return;
-  if (!validateAll(address, payment)) return;
+    if (!validateAll(address, payment)) return;
     if (!selectedShipping) {
       setErrors((prev) => ({ ...prev, postalCode: prev.postalCode || 'Select a shipping option' }));
       return;
@@ -89,7 +89,7 @@ const Checkout: React.FC = () => {
         {loading ? (
           <LoadingSpinner message="Loading your cart..." />
         ) : cartIsEmpty ? (
-          <div className="bg-white shadow rounded-lg p-8 text-center">
+          <div className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100">
             <p className="text-gray-700 mb-4">Your cart is empty.</p>
             <Link to="/products" className="text-blue-600 hover:underline font-medium">Continue shopping</Link>
           </div>
@@ -98,7 +98,7 @@ const Checkout: React.FC = () => {
             {/* Left: Forms */}
             <form onSubmit={handleSubmit} noValidate className="lg:col-span-2 space-y-8">
               {/* Address */}
-              <section className="bg-white shadow rounded-lg p-6">
+              <section className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Shipping address</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
@@ -174,7 +174,7 @@ const Checkout: React.FC = () => {
               </section>
 
               {/* Shipping options */}
-              <section className="bg-white shadow rounded-lg p-6">
+              <section className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Shipping</h2>
                 <p className="text-sm text-gray-600 mb-4">Enter your postal code to see available options.</p>
                 {shippingError && <ErrorState message={shippingError} />}
@@ -207,7 +207,7 @@ const Checkout: React.FC = () => {
               </section>
 
               {/* Payment */}
-              <section className="bg-white shadow rounded-lg p-6">
+              <section className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
@@ -225,7 +225,11 @@ const Checkout: React.FC = () => {
                       label="Card number"
                       name="cardNumber"
                       value={payment.cardNumber}
-                      onChange={(e) => setPayment({ ...payment, cardNumber: e.target.value })}
+                      onChange={(e) => {
+                        const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 19);
+                        const formatted = digitsOnly.replace(/(\d{4})(?=\d)/g, '$1 ');
+                        setPayment({ ...payment, cardNumber: formatted });
+                      }}
                       placeholder="1234 5678 9012 3456"
                       autoComplete="cc-number"
                     />
@@ -236,7 +240,13 @@ const Checkout: React.FC = () => {
                       label="Expiry (MM/YY)"
                       name="expiry"
                       value={payment.expiry}
-                      onChange={(e) => setPayment({ ...payment, expiry: e.target.value })}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                        if (value.length >= 2) {
+                          value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                        }
+                        setPayment({ ...payment, expiry: value });
+                      }}
                       placeholder="MM/YY"
                       autoComplete="cc-exp"
                     />
@@ -247,7 +257,10 @@ const Checkout: React.FC = () => {
                       label="CVC"
                       name="cvc"
                       value={payment.cvc}
-                      onChange={(e) => setPayment({ ...payment, cvc: e.target.value })}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                        setPayment({ ...payment, cvc: value });
+                      }}
                       placeholder="123"
                       autoComplete="cc-csc"
                     />
@@ -262,7 +275,7 @@ const Checkout: React.FC = () => {
                   disabled={submitting || cartIsEmpty || !selectedShipping}
                   aria-disabled={submitting || cartIsEmpty || !selectedShipping}
                   aria-busy={submitting}
-                  className={`inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-3 text-white font-medium shadow hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {submitting ? 'Placing order...' : 'Place Order'}
                 </button>
@@ -271,14 +284,14 @@ const Checkout: React.FC = () => {
 
             {/* Right: Cart Summary */}
             <aside className="lg:col-span-1">
-              <div className="bg-white shadow rounded-lg p-6 sticky top-24">
+              <div className="bg-white shadow-sm rounded-xl p-6 sticky top-24 border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Order summary</h2>
-                
+
                 {/* Error display */}
                 {error && (
                   <ErrorState message={error} />
                 )}
-                
+
                 <ul className="divide-y divide-gray-200 mb-4">
                   {cart!.items.map((item) => (
                     <CartItem
@@ -286,7 +299,7 @@ const Checkout: React.FC = () => {
                       item={item}
                       onRemove={removeItem}
                       isRemoving={isRemovingItem(item.id)}
-                        showQuantityControls={true}
+                      showQuantityControls={true}
                     />
                   ))}
                 </ul>

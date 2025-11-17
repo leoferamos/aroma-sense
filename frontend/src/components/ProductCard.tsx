@@ -8,12 +8,13 @@ import { PLACEHOLDER_IMAGE, LOW_STOCK_THRESHOLD } from '../constants/app';
 interface ProductCardProps {
   product: Product;
   onAddToCart?: (product: Product) => void;
+  showAddToCart?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, showAddToCart = true }) => {
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation when clicking "Add to Cart"
+    e.stopPropagation();
     if (onAddToCart) {
       onAddToCart(product);
     }
@@ -23,7 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   const isLowStock = product.stock_quantity > 0 && product.stock_quantity < LOW_STOCK_THRESHOLD;
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
+    <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-gray-100 shadow-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl overflow-hidden group">
       {/* Clickable area*/}
       <Link
         to={`/products/${product.id}`}
@@ -31,68 +32,65 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         className="block cursor-pointer"
       >
         {/* Image Container */}
-        <div className="relative h-64 bg-white overflow-hidden flex items-center justify-center p-4">
+        <div className="relative h-60 bg-transparent overflow-hidden flex items-center justify-center p-6">
           <img
             src={product.image_url || PLACEHOLDER_IMAGE}
             alt={product.name}
-            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 bg-white"
+            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               e.currentTarget.src = PLACEHOLDER_IMAGE;
             }}
           />
           {isOutOfStock && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">Out of Stock</span>
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <span className="text-white font-semibold text-base">Out of Stock</span>
             </div>
           )}
         </div>
 
         {/* Content */}
-        <div className="px-4 pb-2">
+        <div className="px-6 pt-4 pb-4">
           {/* Brand */}
-          <p className="text-sm text-gray-500 font-medium mb-1">{product.brand}</p>
+          <p className="text-xs tracking-widest text-gray-500 uppercase font-semibold mb-1">{product.brand}</p>
 
           {/* Product Name */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem]">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight min-h-[3rem]">
             {product.name}
           </h3>
 
-          {/* Category & Weight */}
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-            <span>{product.category}</span>
-            <span>•</span>
-            <span>{product.weight}ml</span>
+          {/* Category & Weight (chips) */}
+          <div className="flex items-center gap-2 text-xs text-gray-700 mb-3 flex-wrap">
+            <span className="bg-gray-100 text-gray-700 border border-gray-200 rounded-full px-3 py-1 text-xs font-medium">{product.category}</span>
+            <span className="bg-gray-100 text-gray-700 border border-gray-200 rounded-full px-3 py-1 text-xs font-medium">{product.weight}ml</span>
           </div>
 
           {/* Price */}
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-2xl font-bold text-blue-600">
-              {formatCurrency(product.price)}
-            </span>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xl font-bold text-blue-600">{formatCurrency(product.price)}</span>
             {isLowStock && (
-              <span className="text-xs text-orange-600 font-medium">
-                Only {product.stock_quantity} left
-              </span>
+              <span className="text-xs font-medium px-2 py-1 bg-orange-50 text-orange-700 rounded-full">{product.stock_quantity} left</span>
             )}
           </div>
         </div>
       </Link>
 
-      {/* Actions */}
-      <div className="px-4 pb-4">
-        <button
-          onClick={handleAddToCart}
-          disabled={isOutOfStock}
-          className={cn(
-            'w-full py-2.5 px-4 rounded-lg font-medium transition-colors duration-200',
-            isOutOfStock
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
-          )}
-        >
-          {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-        </button>
-      </div>
+      {/* Actions (optional) */}
+      {showAddToCart && (
+        <div className="px-4 pb-4">
+          <button
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className={cn(
+              'w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 text-sm',
+              isOutOfStock
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-sm hover:shadow-md'
+            )}
+          >
+            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

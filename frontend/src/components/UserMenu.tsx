@@ -18,7 +18,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ open, role, isAuthenticated, onClos
   return (
     <div className="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-10">
       <nav className="py-2" aria-label="User menu">
-  <button type="button" className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile</button>
+  <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>Profile</Link>
   <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>My orders</Link>
         <button type="button" className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Addresses</button>
         <button type="button" className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Payment methods</button>

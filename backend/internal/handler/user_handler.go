@@ -149,3 +149,83 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Logout successful"})
 }
+
+// GetProfile returns the authenticated user's profile
+//
+// @Summary      Get my profile
+// @Description  Returns the authenticated user's profile information.
+// @Tags         users
+// @Produce      json
+// @Success      200  {object}  dto.ProfileResponse   "User profile"
+// @Failure      401  {object}  dto.ErrorResponse      "Unauthorized"
+// @Router       /users/me [get]
+// @Security     BearerAuth
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+	user, err := h.userService.GetByPublicID(publicID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	resp := dto.ProfileResponse{
+		PublicID:    user.PublicID,
+		Email:       user.Email,
+		Role:        user.Role,
+		DisplayName: user.DisplayName,
+		CreatedAt:   user.CreatedAt,
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+// UpdateProfile updates the authenticated user's display name
+//
+// @Summary      Update my profile
+// @Description  Updates profile fields such as display_name.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        input  body  dto.UpdateProfileRequest  true  "Profile update"
+// @Success      200  {object}  dto.ProfileResponse     "Updated profile"
+// @Failure      400  {object}  dto.ErrorResponse       "Validation error"
+// @Failure      401  {object}  dto.ErrorResponse       "Unauthorized"
+// @Router       /users/me/profile [patch]
+// @Security     BearerAuth
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	var req dto.UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	user, err := h.userService.UpdateDisplayName(publicID, req.DisplayName)
+	if err != nil {
+		// simple validation mapping
+		if strings.Contains(err.Error(), "too short") || strings.Contains(err.Error(), "too long") {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to update profile"})
+		return
+	}
+
+	resp := dto.ProfileResponse{
+		PublicID:    user.PublicID,
+		Email:       user.Email,
+		Role:        user.Role,
+		DisplayName: user.DisplayName,
+		CreatedAt:   user.CreatedAt,
+	}
+	c.JSON(http.StatusOK, resp)
+}
