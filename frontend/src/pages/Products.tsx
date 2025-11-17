@@ -117,7 +117,7 @@ const Products: React.FC = () => {
                           {((Array.isArray(suggestions) ? suggestions : [])
                             .filter((p) => p && typeof (p as any).id === 'number')
                           ).map((p) => (
-                            <ProductCard key={(p as any).id} product={p as any} />
+                            <ProductCard key={(p as any).id} product={p as any} showAddToCart={false} />
                           ))}
                         </div>
                       )}
@@ -156,7 +156,7 @@ const Products: React.FC = () => {
                     ? results.filter((p) => p && typeof (p as any).id === 'number')
                     : []
                   ).map((product: any) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product.id} product={product} showAddToCart={false} />
                   ))}
                 </div>
 
