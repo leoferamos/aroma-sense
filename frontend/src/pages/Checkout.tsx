@@ -10,6 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
 import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../hooks/useCheckoutValidation';
 import useShippingOptions from '../hooks/useShippingOptions';
+import useCepLookup from '../hooks/useCepLookup';
 import type { ShippingOption } from '../types/shipping';
 import { createOrder, type OrderCreateRequest } from '../services/order';
 
@@ -39,6 +40,7 @@ const Checkout: React.FC = () => {
   const cartIsEmpty = useMemo(() => !cart || cart.items.length === 0, [cart]);
   const { options: shippingOptions, loading: shippingLoading, error: shippingError } = useShippingOptions(address.postalCode);
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const { lookupCep, loading: cepLoading, error: cepError } = useCepLookup();
 
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
@@ -111,6 +113,50 @@ const Checkout: React.FC = () => {
                     />
                     <FormError message={errors.fullName} />
                   </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <InputField
+                        label="Postal code"
+                        name="postalCode"
+                        value={address.postalCode}
+                        onChange={(e) => {
+                          const cleaned = e.target.value.replace(/\D/g, '').slice(0, 8);
+                          setAddress({ ...address, postalCode: cleaned });
+                          if (cleaned.length === 8) {
+                            void (async () => {
+                              const data = await lookupCep(cleaned);
+                              if (data) {
+                                setAddress((prev) => ({
+                                  ...prev,
+                                  address1: data.logradouro || prev.address1,
+                                  city: data.localidade || prev.city,
+                                  state: data.uf || prev.state,
+                                  postalCode: cleaned,
+                                }));
+                              }
+                            })();
+                          }
+                        }}
+                        onBlur={() => {
+                          void (async () => {
+                            const data = await lookupCep(address.postalCode);
+                            if (data) {
+                              setAddress((prev) => ({
+                                ...prev,
+                                address1: data.logradouro || prev.address1,
+                                city: data.localidade || prev.city,
+                                state: data.uf || prev.state,
+                                postalCode: (address.postalCode || '').replace(/\D/g, ''),
+                              }));
+                            }
+                          })();
+                        }}
+                        autoComplete="postal-code"
+                      />
+                      {cepLoading && <span className="text-sm text-gray-500">Buscando...</span>}
+                    </div>
+                    <FormError message={cepError || errors.postalCode} />
+                  </div>
                   <div className="sm:col-span-2">
                     <InputField
                       label="Address line 1"
@@ -149,16 +195,6 @@ const Checkout: React.FC = () => {
                       autoComplete="address-level1"
                     />
                     <FormError message={errors.state} />
-                  </div>
-                  <div>
-                    <InputField
-                      label="Postal code"
-                      name="postalCode"
-                      value={address.postalCode}
-                      onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
-                      autoComplete="postal-code"
-                    />
-                    <FormError message={errors.postalCode} />
                   </div>
                   <div>
                     <InputField
