@@ -134,6 +134,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview }) =
                         onChange={(e) => setComment(e.target.value)}
                         placeholder="Share your experience with this product..."
                         rows={4}
+                        maxLength={500}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
                         required={false}
                     />
@@ -146,14 +147,15 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview }) =
                 <div className="flex gap-3">
                     <button
                         type="submit"
-                        disabled={submitting}
-                        aria-disabled={submitting}
+                        disabled={submitting || rating === 0}
+                        aria-disabled={submitting || rating === 0}
                         className={cn(
                             'px-6 py-3 rounded-md font-medium transition-colors',
-                            submitting
+                            (submitting || rating === 0)
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                         )}
+                        title={rating === 0 ? 'Please select a rating' : undefined}
                     >
                         {submitting ? 'Submitting...' : 'Submit Review'}
                     </button>

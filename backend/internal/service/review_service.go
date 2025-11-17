@@ -163,33 +163,48 @@ func (s *reviewService) ListReviews(ctx context.Context, productID uint, page, p
 
 // GetAverage returns the average rating and count for a product.
 func (s *reviewService) GetAverage(ctx context.Context, productID uint) (float64, int, error) {
-	// Check cache
 	s.mu.RLock()
-	if entry, ok := s.cache[productID]; ok && time.Now().Before(entry.staleAt) {
-		s.mu.RUnlock()
+	entry, ok := s.cache[productID]
+	isFresh := ok && time.Now().Before(entry.staleAt)
+	s.mu.RUnlock()
+	if isFresh {
 		return entry.avg, entry.count, nil
 	}
-	s.mu.RUnlock()
-
+	s.mu.Lock()
+	entry, ok = s.cache[productID]
+	isFresh = ok && time.Now().Before(entry.staleAt)
+	if isFresh {
+		avg, count := entry.avg, entry.count
+		s.mu.Unlock()
+		return avg, count, nil
+	}
+	// Cache is still stale, query database
 	avg, count, err := s.reviews.AverageRating(ctx, productID)
 	if err != nil {
+		s.mu.Unlock()
 		return 0, 0, fmt.Errorf("failed to compute average rating: %w", err)
 	}
-
-	s.mu.Lock()
 	s.cache[productID] = ratingCacheEntry{avg: avg, count: count, staleAt: time.Now().Add(s.ttl)}
 	s.mu.Unlock()
-
 	return avg, count, nil
 }
 
 // DeleteOwnReview allows a user to soft delete their own review
 func (s *reviewService) DeleteOwnReview(ctx context.Context, reviewID string, userID string) error {
+	// Try to get productID for precise cache invalidation
+	var productID uint
+	if pid, err := s.reviews.GetProductIDForUserReview(ctx, reviewID, userID); err == nil {
+		productID = pid
+	}
+
 	if err := s.reviews.SoftDeleteReview(ctx, reviewID, userID); err != nil {
 		return fmt.Errorf("failed to delete review: %w", err)
 	}
-	s.mu.Lock()
-	s.cache = make(map[uint]ratingCacheEntry)
-	s.mu.Unlock()
+
+	if productID != 0 {
+		s.mu.Lock()
+		delete(s.cache, productID)
+		s.mu.Unlock()
+	}
 	return nil
 }

@@ -67,6 +67,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 
 	if userModel.DisplayName == nil || strings.TrimSpace(getPtrVal(userModel.DisplayName)) == "" {
 		c.JSON(http.StatusForbidden, dto.ErrorResponse{Error: "profile_incomplete"})
+		return
 	}
 
 	review, err := h.service.CreateReview(c.Request.Context(), userModel, productID, req.Rating, req.Comment)
