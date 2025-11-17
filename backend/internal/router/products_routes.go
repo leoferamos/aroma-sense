@@ -9,6 +9,7 @@ import (
 // ProductRoutes sets up the product-related routes
 func ProductRoutes(r *gin.Engine, productHandler *handler.ProductHandler, reviewHandler *handler.ReviewHandler) {
 	productGroup := r.Group("/products")
+	productGroup.Use(auth.OptionalAuthMiddleware())
 	{
 		productGroup.GET("", productHandler.GetLatestProducts)
 		productGroup.GET("/:id", productHandler.GetProductByID)
