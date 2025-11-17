@@ -58,8 +58,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
         setMessages((prev) => [...prev, userMessage]);
         setInputValue('');
 
-        // TODO: Call AI API here
-        console.log('mensagem enviada:', inputValue);
+    // TODO: Call AI API here
 
         // Simulate assistant response
         setIsLoading(true);
