@@ -13,8 +13,17 @@ type ProductResponse struct {
 	Price              float64   `json:"price" example:"299.99"`
 	ImageURL           string    `json:"image_url" example:"https://example.com/image.jpg"`
 	ThumbnailURL       string    `json:"thumbnail_url,omitempty" example:"https://example.com/image_thumb.jpg"`
+	Slug               string    `json:"slug,omitempty" example:"dior-sauvage"`
+	Accords            []string  `json:"accords,omitempty" example:"[\"woody\",\"citrus\"]"`
+	Occasions          []string  `json:"occasions,omitempty" example:"[\"work\",\"night out\"]"`
+	Seasons            []string  `json:"seasons,omitempty" example:"[\"summer\",\"spring\"]"`
+	Intensity          string    `json:"intensity,omitempty" example:"moderate"`
+	Gender             string    `json:"gender,omitempty" example:"unisex"`
+	PriceRange         string    `json:"price_range,omitempty" example:"premium"`
+	NotesTop           []string  `json:"notes_top,omitempty" example:"[\"bergamot\"]"`
+	NotesHeart         []string  `json:"notes_heart,omitempty" example:"[\"lavender\"]"`
+	NotesBase          []string  `json:"notes_base,omitempty" example:"[\"ambroxan\"]"`
 	Category           string    `json:"category" example:"Eau de Parfum"`
-	Notes              string    `json:"notes" example:"bergamot, pepper, ambroxan"`
 	StockQuantity      int       `json:"stock_quantity" example:"50"`
 	CreatedAt          time.Time `json:"created_at" example:"2025-09-28T10:00:00Z"`
 	UpdatedAt          time.Time `json:"updated_at" example:"2025-09-28T10:00:00Z"`

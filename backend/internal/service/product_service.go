@@ -12,6 +12,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/storage"
+    "github.com/leoferamos/aroma-sense/utils"
 )
 
 // ProductService defines the interface for product-related business logic
@@ -96,8 +97,17 @@ func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.Produ
 		Price:         product.Price,
 		ImageURL:      product.ImageURL,
 		ThumbnailURL:  product.ThumbnailURL,
+		Slug:          product.Slug,
+		Accords:       product.Accords,
+		Occasions:     product.Occasions,
+		Seasons:       product.Seasons,
+		Intensity:     product.Intensity,
+		Gender:        product.Gender,
+		PriceRange:    product.PriceRange,
+		NotesTop:      product.NotesTop,
+		NotesHeart:    product.NotesHeart,
+		NotesBase:     product.NotesBase,
 		Category:      product.Category,
-		Notes:         product.Notes,
 		StockQuantity: product.StockQuantity,
 		CreatedAt:     product.CreatedAt,
 		UpdatedAt:     product.UpdatedAt,
@@ -122,8 +132,17 @@ func (s *productService) GetLatestProducts(ctx context.Context, limit int) ([]dt
 			Price:         p.Price,
 			ImageURL:      p.ImageURL,
 			ThumbnailURL:  p.ThumbnailURL,
+			Slug:          p.Slug,
+			Accords:       p.Accords,
+			Occasions:     p.Occasions,
+			Seasons:       p.Seasons,
+			Intensity:     p.Intensity,
+			Gender:        p.Gender,
+			PriceRange:    p.PriceRange,
+			NotesTop:      p.NotesTop,
+			NotesHeart:    p.NotesHeart,
+			NotesBase:     p.NotesBase,
 			Category:      p.Category,
-			Notes:         p.Notes,
 			StockQuantity: p.StockQuantity,
 			CreatedAt:     p.CreatedAt,
 		})
@@ -139,11 +158,15 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 		return fmt.Errorf("product not found: %w", err)
 	}
 
+	nameChanged := false
+	brandChanged := false
 	if input.Name != nil {
 		product.Name = *input.Name
+		nameChanged = true
 	}
 	if input.Brand != nil {
 		product.Brand = *input.Brand
+		brandChanged = true
 	}
 	if input.Weight != nil {
 		product.Weight = *input.Weight
@@ -160,14 +183,42 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 	if input.StockQuantity != nil {
 		product.StockQuantity = *input.StockQuantity
 	}
-	if len(input.Notes) > 0 {
-		notes := input.Notes[0]
-		if len(input.Notes) > 1 {
-			for _, n := range input.Notes[1:] {
-				notes += ", " + n
-			}
+	if len(input.Accords) > 0 {
+		product.Accords = input.Accords
+	}
+	if len(input.Occasions) > 0 {
+		product.Occasions = input.Occasions
+	}
+	if len(input.Seasons) > 0 {
+		product.Seasons = input.Seasons
+	}
+	if input.Intensity != nil {
+		product.Intensity = *input.Intensity
+	}
+	if input.Gender != nil {
+		product.Gender = *input.Gender
+	}
+	if input.PriceRange != nil {
+		product.PriceRange = *input.PriceRange
+	}
+	if len(input.NotesTop) > 0 {
+		product.NotesTop = input.NotesTop
+	}
+	if len(input.NotesHeart) > 0 {
+		product.NotesHeart = input.NotesHeart
+	}
+	if len(input.NotesBase) > 0 {
+		product.NotesBase = input.NotesBase
+	}
+
+	// If name or brand changed, regenerate slug.
+	if nameChanged || brandChanged {
+		base := utils.Slugify(product.Brand, product.Name)
+		if slug, err := s.repo.EnsureUniqueSlug(base); err == nil {
+			product.Slug = slug
+		} else {
+			product.Slug = base
 		}
-		product.Notes = notes
 	}
 
 	return s.repo.Update(&product)
@@ -214,8 +265,17 @@ func (s *productService) SearchProducts(ctx context.Context, query string, page 
 			Price:         p.Price,
 			ImageURL:      p.ImageURL,
 			ThumbnailURL:  p.ThumbnailURL,
+			Slug:          p.Slug,
+			Accords:       p.Accords,
+			Occasions:     p.Occasions,
+			Seasons:       p.Seasons,
+			Intensity:     p.Intensity,
+			Gender:        p.Gender,
+			PriceRange:    p.PriceRange,
+			NotesTop:      p.NotesTop,
+			NotesHeart:    p.NotesHeart,
+			NotesBase:     p.NotesBase,
 			Category:      p.Category,
-			Notes:         p.Notes,
 			StockQuantity: p.StockQuantity,
 			CreatedAt:     p.CreatedAt,
 			UpdatedAt:     p.UpdatedAt,

@@ -2,9 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
+	"github.com/leoferamos/aroma-sense/utils"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +19,7 @@ type ProductRepository interface {
 	Update(product *model.Product) error
 	Delete(id uint) error
 	DecrementStock(productID uint, quantity int) error
+	EnsureUniqueSlug(base string) (string, error)
 }
 
 type productRepository struct {
@@ -28,14 +32,11 @@ func NewProductRepository(db *gorm.DB) ProductRepository {
 
 // Create inserts a new product into the database
 func (r *productRepository) Create(input dto.ProductFormDTO, imageURL string, thumbnailURL string) error {
-	notes := ""
-	if len(input.Notes) > 0 {
-		notes = input.Notes[0]
-		if len(input.Notes) > 1 {
-			for _, n := range input.Notes[1:] {
-				notes += ", " + n
-			}
-		}
+	// Generate unique slug from brand + name
+	base := utils.Slugify(input.Brand, input.Name)
+	slug, err := r.uniqueSlug(base)
+	if err != nil {
+		return err
 	}
 
 	product := model.Product{
@@ -46,9 +47,18 @@ func (r *productRepository) Create(input dto.ProductFormDTO, imageURL string, th
 		Price:         input.Price,
 		ImageURL:      imageURL,
 		ThumbnailURL:  thumbnailURL,
+		Slug:          slug,
 		Category:      input.Category,
-		Notes:         notes,
 		StockQuantity: input.StockQuantity,
+		Accords:       input.Accords,
+		Occasions:     input.Occasions,
+		Seasons:       input.Seasons,
+		Intensity:     input.Intensity,
+		Gender:        input.Gender,
+		PriceRange:    input.PriceRange,
+		NotesTop:      input.NotesTop,
+		NotesHeart:    input.NotesHeart,
+		NotesBase:     input.NotesBase,
 	}
 	return r.db.Create(&product).Error
 }
@@ -129,4 +139,36 @@ func (r *productRepository) SearchProducts(ctx context.Context, query string, li
 	}
 
 	return products, int(total), nil
+}
+
+// uniqueSlug ensures the provided base slug is unique.
+func (r *productRepository) uniqueSlug(base string) (string, error) {
+	candidate := base
+	var count int64
+	// Fast path
+	if err := r.db.Model(&model.Product{}).Where("slug = ?", candidate).Count(&count).Error; err != nil {
+		return "", err
+	}
+	if count == 0 {
+		return candidate, nil
+	}
+	// Try with numeric suffixes
+	for i := 2; i < 1000; i++ {
+		candidate = fmt.Sprintf("%s-%d", base, i)
+		if err := r.db.Model(&model.Product{}).Where("slug = ?", candidate).Count(&count).Error; err != nil {
+			return "", err
+		}
+		if count == 0 {
+			return candidate, nil
+		}
+	}
+	// As a last resort append a timestamp-ish suffix
+	suffix := time.Now().Unix() % 100000
+	candidate = fmt.Sprintf("%s-%d", base, suffix)
+	return candidate, nil
+}
+
+// EnsureUniqueSlug exposes slug uniqueness to callers outside this package.
+func (r *productRepository) EnsureUniqueSlug(base string) (string, error) {
+	return r.uniqueSlug(base)
 }
