@@ -14,7 +14,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, showAddToCart = true }) => {
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation when clicking "Add to Cart"
+    e.stopPropagation();
     if (onAddToCart) {
       onAddToCart(product);
     }

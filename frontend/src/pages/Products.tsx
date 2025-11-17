@@ -4,7 +4,6 @@ import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
 import type { Product } from '../types/product';
-import { useCart } from '../contexts/CartContext';
 import Pagination from '../components/Pagination';
 import { useProductSearch } from '../hooks/useProductSearch';
 import { listProducts } from '../services/product';
@@ -17,15 +16,7 @@ const Products: React.FC = () => {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching } = useProductSearch({ limit: 12, debounceMs: 600 });
   const [searchParams] = useSearchParams();
-  const { addItem } = useCart();
-
-  const handleAddToCart = async (product: Product) => {
-    try {
-      await addItem(product.id, 1);
-    } catch (err) {
-      console.error('Failed to add to cart', err);
-    }
-  };
+  
 
   // Sync state from URL
   useEffect(() => {
@@ -126,8 +117,7 @@ const Products: React.FC = () => {
                           {((Array.isArray(suggestions) ? suggestions : [])
                             .filter((p) => p && typeof (p as any).id === 'number')
                           ).map((p) => (
-
-                            <ProductCard key={(p as any).id} product={p as any} onAddToCart={handleAddToCart} showAddToCart={false} />
+                            <ProductCard key={(p as any).id} product={p as any} />
                           ))}
                         </div>
                       )}
@@ -166,12 +156,7 @@ const Products: React.FC = () => {
                     ? results.filter((p) => p && typeof (p as any).id === 'number')
                     : []
                   ).map((product: any) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={handleAddToCart}
-                      showAddToCart={false}
-                    />
+                    <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
 
