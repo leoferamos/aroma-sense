@@ -71,7 +71,7 @@ const ProductDetail: React.FC = () => {
         <div className="bg-white shadow-sm rounded-xl overflow-hidden mb-12 border border-gray-100">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left: Image - Full height, half width */}
-            <div className="flex items-center justify-center bg-gray-50 p-8 min-h-[520px]">
+            <div className="flex items-center justify-center bg-white p-8 min-h-[520px]">
               <img
                 src={product.image_url || PLACEHOLDER_IMAGE}
                 alt={product.name}
