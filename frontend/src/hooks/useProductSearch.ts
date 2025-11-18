@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { AxiosError } from "axios";
+import { isAxiosError } from "axios";
 import type { Product } from "../types/product";
 import { searchProducts, listProducts } from "../services/product";
 
@@ -103,8 +103,8 @@ export function useProductSearch(options?: {
         } else {
           const data = await searchProducts({ query: trimmed, page: p, limit, sort, signal: controller.signal });
           if (requestSeq.current !== currentSeq) return; // stale
-          const items = Array.isArray((data as any)?.items) ? (data as any).items as Product[] : [];
-          const totalVal = typeof (data as any)?.total === 'number' ? (data as any).total as number : items.length;
+          const items = Array.isArray(data.items) ? data.items : [];
+          const totalVal = typeof data.total === 'number' ? data.total : items.length;
           // Cache
           cacheRef.current.set(key, { items, total: totalVal, expiresAt: now + 5 * 60_000 });
           if (cacheRef.current.size > 50) {
@@ -114,16 +114,14 @@ export function useProductSearch(options?: {
           setResults(items);
           setTotal(totalVal);
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         // Ignore aborts/cancels
-        if (e?.name === "CanceledError" || e?.name === "AbortError") {
+        if (e && typeof e === 'object' && 'name' in e && (e as { name?: string }).name && ((e as { name: string }).name === "CanceledError" || (e as { name: string }).name === "AbortError")) {
           return;
         }
         // Allow retries for same key after an error
         lastKeyRef.current = "";
-
-        const err = e as AxiosError;
-        const status = (err.response?.status as number | undefined) ?? undefined;
+        const status = isAxiosError(e) ? e.response?.status : undefined;
 
         // If we were running a search (>=2 chars), degrade gracefully to empty
         if (!tooShort) {
