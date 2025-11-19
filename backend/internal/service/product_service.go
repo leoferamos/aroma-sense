@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	"github.com/leoferamos/aroma-sense/internal/integrations/ai/embeddings"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/storage"
-    "github.com/leoferamos/aroma-sense/utils"
+	"github.com/leoferamos/aroma-sense/utils"
 )
 
 // ProductService defines the interface for product-related business logic
@@ -26,12 +28,13 @@ type ProductService interface {
 }
 
 type productService struct {
-	repo    repository.ProductRepository
-	storage storage.ImageStorage
+	repo       repository.ProductRepository
+	storage    storage.ImageStorage
+	embeddings embeddings.Provider
 }
 
-func NewProductService(repo repository.ProductRepository, storage storage.ImageStorage) ProductService {
-	return &productService{repo: repo, storage: storage}
+func NewProductService(repo repository.ProductRepository, storage storage.ImageStorage, embProvider embeddings.Provider) ProductService {
+	return &productService{repo: repo, storage: storage, embeddings: embProvider}
 }
 
 func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error {
@@ -78,7 +81,57 @@ func (s *productService) CreateProduct(ctx context.Context, input dto.ProductFor
 	}
 
 	// Call the repository to save to database
-	return s.repo.Create(input, origURL, thumbURL)
+	productID, err := s.repo.Create(input, origURL, thumbURL)
+	if err != nil {
+		return err
+	}
+
+	// Generate embedding asynchronously
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("PANIC in embedding generation for product %d: %v\n", productID, r)
+			}
+		}()
+
+		text := s.buildProductText(input)
+		emb, embErr := s.embeddings.Embed([]string{text})
+		if embErr == nil && len(emb) > 0 && len(emb[0]) > 0 {
+			_ = s.repo.UpsertProductEmbedding(productID, emb[0])
+		}
+	}()
+
+	return nil
+}
+
+// buildProductText creates a text representation of the product for embedding.
+func (s *productService) buildProductText(input dto.ProductFormDTO) string {
+	var parts []string
+	parts = append(parts, input.Name)
+	parts = append(parts, input.Brand)
+	parts = append(parts, input.Description)
+	if len(input.Accords) > 0 {
+		parts = append(parts, "Accords: "+strings.Join(input.Accords, ", "))
+	}
+	if len(input.Occasions) > 0 {
+		parts = append(parts, "Occasions: "+strings.Join(input.Occasions, ", "))
+	}
+	if len(input.Seasons) > 0 {
+		parts = append(parts, "Seasons: "+strings.Join(input.Seasons, ", "))
+	}
+	if input.Intensity != "" {
+		parts = append(parts, "Intensity: "+input.Intensity)
+	}
+	if len(input.NotesTop) > 0 {
+		parts = append(parts, "Top notes: "+strings.Join(input.NotesTop, ", "))
+	}
+	if len(input.NotesHeart) > 0 {
+		parts = append(parts, "Heart notes: "+strings.Join(input.NotesHeart, ", "))
+	}
+	if len(input.NotesBase) > 0 {
+		parts = append(parts, "Base notes: "+strings.Join(input.NotesBase, ", "))
+	}
+	return strings.Join(parts, ". ")
 }
 
 // GetProductByID retrieves a product by its ID and maps it to a DTO
@@ -183,14 +236,14 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 	if input.StockQuantity != nil {
 		product.StockQuantity = *input.StockQuantity
 	}
-	if len(input.Accords) > 0 {
-		product.Accords = input.Accords
+	if input.Accords != nil {
+		product.Accords = *input.Accords
 	}
-	if len(input.Occasions) > 0 {
-		product.Occasions = input.Occasions
+	if input.Occasions != nil {
+		product.Occasions = *input.Occasions
 	}
-	if len(input.Seasons) > 0 {
-		product.Seasons = input.Seasons
+	if input.Seasons != nil {
+		product.Seasons = *input.Seasons
 	}
 	if input.Intensity != nil {
 		product.Intensity = *input.Intensity
@@ -201,14 +254,14 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 	if input.PriceRange != nil {
 		product.PriceRange = *input.PriceRange
 	}
-	if len(input.NotesTop) > 0 {
-		product.NotesTop = input.NotesTop
+	if input.NotesTop != nil {
+		product.NotesTop = *input.NotesTop
 	}
-	if len(input.NotesHeart) > 0 {
-		product.NotesHeart = input.NotesHeart
+	if input.NotesHeart != nil {
+		product.NotesHeart = *input.NotesHeart
 	}
-	if len(input.NotesBase) > 0 {
-		product.NotesBase = input.NotesBase
+	if input.NotesBase != nil {
+		product.NotesBase = *input.NotesBase
 	}
 
 	// If name or brand changed, regenerate slug.
@@ -226,10 +279,32 @@ func (s *productService) UpdateProduct(ctx context.Context, id uint, input dto.U
 
 // DeleteProduct removes a product by its ID
 func (s *productService) DeleteProduct(ctx context.Context, id uint) error {
-	_, err := s.repo.FindByID(id)
+	product, err := s.repo.FindByID(id)
 	if err != nil {
 		return fmt.Errorf("product not found: %w", err)
 	}
+
+	// Delete images from storage first
+	if product.ImageURL != "" {
+		// Extract image name from URL
+		imageName := extractImageNameFromURL(product.ImageURL)
+		if imageName != "" {
+			if err := s.storage.DeleteImage(ctx, imageName); err != nil {
+				fmt.Printf("Warning: failed to delete image %s: %v\n", imageName, err)
+			}
+		}
+	}
+
+	// Also delete thumbnail if it exists and is different from main image
+	if product.ThumbnailURL != "" && product.ThumbnailURL != product.ImageURL {
+		thumbName := extractImageNameFromURL(product.ThumbnailURL)
+		if thumbName != "" {
+			if err := s.storage.DeleteImage(ctx, thumbName); err != nil {
+				fmt.Printf("Warning: failed to delete thumbnail %s: %v\n", thumbName, err)
+			}
+		}
+	}
+
 	return s.repo.Delete(id)
 }
 
@@ -283,4 +358,15 @@ func (s *productService) SearchProducts(ctx context.Context, query string, page 
 	}
 
 	return resp, total, nil
+}
+
+// extractImageNameFromURL extracts the image name from a Supabase storage URL
+func extractImageNameFromURL(imageURL string) string {
+	// URL format: https://domain.com/storage/v1/object/public/bucket/image-name.jpg
+	// We need to extract "image-name.jpg"
+	parts := strings.Split(imageURL, "/")
+	if len(parts) >= 2 {
+		return parts[len(parts)-1]
+	}
+	return ""
 }
