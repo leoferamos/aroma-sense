@@ -10,18 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/leoferamos/aroma-sense/internal/dto"
-	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
 type ProductHandler struct {
 	productService service.ProductService
 	reviewService  service.ReviewService
-	userRepo       repository.UserRepository
+	userService    service.UserService
 }
 
-func NewProductHandler(ps service.ProductService, rs service.ReviewService, ur repository.UserRepository) *ProductHandler {
-	return &ProductHandler{productService: ps, reviewService: rs, userRepo: ur}
+func NewProductHandler(ps service.ProductService, rs service.ReviewService, us service.UserService) *ProductHandler {
+	return &ProductHandler{productService: ps, reviewService: rs, userService: us}
 }
 
 // CreateProduct handles admin product creation
@@ -234,9 +233,9 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	}
 
 	// Check if user can review this product
-	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userRepo != nil {
+	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
 		publicID := rawUserID.(string)
-		if userModel, err := h.userRepo.FindByPublicID(publicID); err == nil {
+		if userModel, err := h.userService.GetByPublicID(publicID); err == nil {
 			can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, product.ID)
 			if can && canErr == nil {
 				trueVal := true

@@ -8,17 +8,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
-	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
 type ReviewHandler struct {
-	service  service.ReviewService
-	userRepo repository.UserRepository
+	service     service.ReviewService
+	userService service.UserService
 }
 
-func NewReviewHandler(s service.ReviewService, userRepo repository.UserRepository) *ReviewHandler {
-	return &ReviewHandler{service: s, userRepo: userRepo}
+func NewReviewHandler(s service.ReviewService, userService service.UserService) *ReviewHandler {
+	return &ReviewHandler{service: s, userService: userService}
 }
 
 // Create review handles the creation of a product review
@@ -53,7 +52,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 		return
 	}
 	publicID := rawUserID.(string)
-	userModel, err := h.userRepo.FindByPublicID(publicID)
+	userModel, err := h.userService.GetByPublicID(publicID)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
