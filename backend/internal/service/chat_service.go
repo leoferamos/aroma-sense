@@ -82,6 +82,24 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 		}
 		reply = base
 	}
+
+	// Append suggestions if not mentioned in reply
+	if len(suggestions) > 0 {
+		mentioned := false
+		for _, s := range suggestions {
+			if strings.Contains(strings.ToLower(reply), strings.ToLower(s.Name)) {
+				mentioned = true
+				break
+			}
+		}
+		if !mentioned {
+			reply += "\n\nBaseado no que você disse, tenho uma sugestão: " + suggestions[0].Name + " da " + suggestions[0].Brand + "."
+			if len(suggestions) > 1 {
+				reply += " Ou " + suggestions[1].Name + " da " + suggestions[1].Brand + "."
+			}
+		}
+	}
+
 	follow := ai.BuildFollowUpHint(conv.Prefs)
 	return dto.ChatResponse{Reply: reply, Suggestions: suggestions, FollowUpHint: follow}, nil
 }
