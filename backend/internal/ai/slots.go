@@ -1,4 +1,4 @@
-package slots
+package ai
 
 import (
 	"crypto/sha1"
