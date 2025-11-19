@@ -95,7 +95,7 @@ func (s *SupabaseS3) UploadImageWithThumbnail(ctx context.Context, imageName str
 	if _, err := s.Client.PutObject(ctx, origInput); err != nil {
 		return "", "", fmt.Errorf("upload original: %w", err)
 	}
-	origURL := fmt.Sprintf("%s/%s/%s", strings.TrimRight(s.PublicURL, "/"), s.Bucket, imageName)
+	origURL := fmt.Sprintf("%s/storage/v1/object/public/%s/%s", strings.TrimRight(s.PublicURL, "/"), s.Bucket, imageName)
 
 	//Create and upload thumbnail
 	thumbKey := deriveThumbnailKey(imageName)
@@ -114,6 +114,32 @@ func (s *SupabaseS3) UploadImageWithThumbnail(ctx context.Context, imageName str
 		// If thumbnail upload fails, still return original.
 		return origURL, "", nil
 	}
-	thumbURL := fmt.Sprintf("%s/%s/%s", strings.TrimRight(s.PublicURL, "/"), s.Bucket, thumbKey)
+	thumbURL := fmt.Sprintf("%s/storage/v1/object/public/%s/%s", strings.TrimRight(s.PublicURL, "/"), s.Bucket, thumbKey)
 	return origURL, thumbURL, nil
+}
+
+// DeleteImage deletes an image from storage
+func (s *SupabaseS3) DeleteImage(ctx context.Context, imageName string) error {
+	// Delete the original image
+	origInput := &s3.DeleteObjectInput{
+		Bucket: aws.String(s.Bucket),
+		Key:    aws.String(imageName),
+	}
+	if _, err := s.Client.DeleteObject(ctx, origInput); err != nil {
+		return fmt.Errorf("delete original image: %w", err)
+	}
+
+	// Delete the thumbnail if it exists
+	thumbKey := deriveThumbnailKey(imageName)
+	thumbInput := &s3.DeleteObjectInput{
+		Bucket: aws.String(s.Bucket),
+		Key:    aws.String(thumbKey),
+	}
+	// Don't return error if thumbnail doesn't exist
+	if _, err := s.Client.DeleteObject(ctx, thumbInput); err != nil {
+		// Log error but don't fail
+		fmt.Printf("Warning: failed to delete thumbnail %s: %v\n", thumbKey, err)
+	}
+
+	return nil
 }

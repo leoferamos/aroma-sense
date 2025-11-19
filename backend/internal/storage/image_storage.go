@@ -15,6 +15,7 @@ import (
 // ImageStorage defines an interface for image upload
 type ImageStorage interface {
 	UploadImageWithThumbnail(ctx context.Context, imageName string, content io.Reader, size int64, contentType string, maxW, maxH int) (string, string, error)
+	DeleteImage(ctx context.Context, imageName string) error
 }
 
 type SupabaseS3 struct {
