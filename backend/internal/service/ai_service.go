@@ -6,16 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/ai"
+	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 )
 
 // AIService provides low-cost recommendation logic without external calls.
 type AIService struct {
-	repo repository.ProductRepository
-
-	// Simple in-memory cache by sanitized message -> suggestions
+	repo  repository.ProductRepository
 	mu    sync.Mutex
 	cache map[string]cacheEntry
 	ttl   time.Duration
@@ -35,7 +33,6 @@ func NewAIService(repo repository.ProductRepository) *AIService {
 }
 
 // Recommend performs a full-text retrieval on products using the sanitized message.
-// It returns compact chat cards with a lightweight heuristic reason.
 func (s *AIService) Recommend(ctx context.Context, rawMessage string, limit int) ([]dto.RecommendSuggestion, string, error) {
 	// Sanitize and clamp input
 	sanitized := ai.SanitizeUserMessage(rawMessage, 400)
@@ -48,7 +45,7 @@ func (s *AIService) Recommend(ctx context.Context, rawMessage string, limit int)
 		return out, "cached", nil
 	}
 
-	// Use web-style query (already handled in repository) for relevance
+	// Use web-style query for relevance
 	products, _, err := s.repo.SearchProducts(ctx, sanitized, limit, 0, "relevance")
 	if err != nil {
 		return nil, "", err
