@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/leoferamos/aroma-sense/internal/integrations/ai"
+	"github.com/leoferamos/aroma-sense/internal/integrations/ai/config"
 )
 
 // HuggingFaceProvider implements Provider using Hugging Face Inference API.
@@ -20,7 +20,7 @@ type HuggingFaceProvider struct {
 }
 
 // NewHuggingFaceProvider creates a Provider backed by Hugging Face Inference API.
-func NewHuggingFaceProvider(cfg ai.Config) Provider {
+func NewHuggingFaceProvider(cfg config.Config) Provider {
 	return &HuggingFaceProvider{
 		apiKey:  cfg.APIKey,
 		model:   cfg.EmbModel,
