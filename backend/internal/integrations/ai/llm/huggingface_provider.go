@@ -1,0 +1,84 @@
+package llm
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/leoferamos/aroma-sense/internal/integrations/ai"
+)
+
+// HuggingFaceProvider implements Provider using Hugging Face Inference API.
+type HuggingFaceProvider struct {
+	apiKey  string
+	model   string
+	client  *http.Client
+	timeout time.Duration
+}
+
+// NewHuggingFaceProvider creates a Provider backed by Hugging Face Inference API.
+func NewHuggingFaceProvider(cfg ai.Config) Provider {
+	return &HuggingFaceProvider{
+		apiKey:  cfg.APIKey,
+		model:   cfg.LLMModel,
+		client:  &http.Client{Timeout: cfg.Timeout},
+		timeout: cfg.Timeout,
+	}
+}
+
+// Generate generates a completion for the given prompt using Hugging Face API.
+func (p *HuggingFaceProvider) Generate(ctx context.Context, prompt string, maxTokens int) (string, error) {
+	url := fmt.Sprintf("https://api-inference.huggingface.co/models/%s", p.model)
+
+	payload := map[string]interface{}{
+		"inputs": prompt,
+		"parameters": map[string]interface{}{
+			"max_new_tokens": maxTokens,
+			"temperature":    0.7,
+			"do_sample":      true,
+		},
+		"options": map[string]interface{}{
+			"wait_for_model": true,
+		},
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+p.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := p.client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("API error: %s, body: %s", resp.Status, string(body))
+	}
+
+	var result []map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if len(result) > 0 {
+		if generated, ok := result[0]["generated_text"].(string); ok {
+			return generated, nil
+		}
+	}
+
+	return "", fmt.Errorf("unexpected response format")
+}
