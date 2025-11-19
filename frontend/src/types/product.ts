@@ -6,8 +6,18 @@ export interface Product {
   description: string;
   price: number;
   image_url: string;
+  thumbnail_url?: string;
+  slug?: string;
+  accords?: string[];
+  occasions?: string[];
+  seasons?: string[];
+  intensity?: string;
+  gender?: string;
+  price_range?: string;
+  notes_top?: string[];
+  notes_heart?: string[];
+  notes_base?: string[];
   category: string;
-  notes: string;
   stock_quantity: number;
   created_at: string;
   updated_at: string;
@@ -34,7 +44,15 @@ export interface CreateProductFormData {
   description: string;
   price: number;
   category: string;
-  notes: string[];
+  accords: string[];
+  occasions: string[];
+  seasons: string[];
+  intensity: string;
+  gender: string;
+  price_range: string;
+  notes_top: string[];
+  notes_heart: string[];
+  notes_base: string[];
   stock_quantity: number;
   image: File | null;
 }
@@ -47,7 +65,15 @@ export interface ProductFormErrors {
   description?: string;
   price?: string;
   category?: string;
-  notes?: string;
+  accords?: string;
+  occasions?: string;
+  seasons?: string;
+  intensity?: string;
+  gender?: string;
+  price_range?: string;
+  notes_top?: string;
+  notes_heart?: string;
+  notes_base?: string;
   stock_quantity?: string;
   image?: string;
 }

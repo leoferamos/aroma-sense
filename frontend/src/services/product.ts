@@ -26,14 +26,34 @@ export async function createProduct(
   data.append("description", formData.description);
   data.append("category", formData.category);
   
+  // Add optional AI fields
+  if (formData.intensity) data.append("intensity", formData.intensity);
+  if (formData.gender) data.append("gender", formData.gender);
+  if (formData.price_range) data.append("price_range", formData.price_range);
+  
   // Add numeric fields as strings for multipart/form-data
   data.append("weight", formData.weight.toString());
   data.append("price", formData.price.toString());
   data.append("stock_quantity", Math.floor(formData.stock_quantity).toString());
   
-  // Add notes as separate form fields
-  formData.notes.forEach((note) => {
-    data.append("notes", note);
+  // Add array fields as separate form fields
+  formData.accords.forEach((accord) => {
+    data.append("accords", accord);
+  });
+  formData.occasions.forEach((occasion) => {
+    data.append("occasions", occasion);
+  });
+  formData.seasons.forEach((season) => {
+    data.append("seasons", season);
+  });
+  formData.notes_top.forEach((note) => {
+    data.append("notes_top", note);
+  });
+  formData.notes_heart.forEach((note) => {
+    data.append("notes_heart", note);
+  });
+  formData.notes_base.forEach((note) => {
+    data.append("notes_base", note);
   });
 
   // Add image file if present
@@ -67,7 +87,15 @@ export async function updateProduct(
     weight: formData.weight,
     price: formData.price,
     stock_quantity: Math.floor(formData.stock_quantity),
-    notes: formData.notes,
+    accords: formData.accords,
+    occasions: formData.occasions,
+    seasons: formData.seasons,
+    intensity: formData.intensity,
+    gender: formData.gender,
+    price_range: formData.price_range,
+    notes_top: formData.notes_top,
+    notes_heart: formData.notes_heart,
+    notes_base: formData.notes_base,
   };
 
   const response = await api.patch<Product>(`/admin/products/${id}`, payload);

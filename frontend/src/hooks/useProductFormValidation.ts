@@ -9,7 +9,15 @@ export interface ProductFormTouched {
   description: boolean;
   price: boolean;
   category: boolean;
-  notes: boolean;
+  accords: boolean;
+  occasions: boolean;
+  seasons: boolean;
+  intensity: boolean;
+  gender: boolean;
+  price_range: boolean;
+  notes_top: boolean;
+  notes_heart: boolean;
+  notes_base: boolean;
   stock_quantity: boolean;
   image: boolean;
 }
@@ -86,12 +94,30 @@ export function useProductFormValidation({
       }
     }
 
-    // Notes valid
-    if (touched.notes) {
-      if (form.notes.length > 0) {
-        const hasEmptyNote = form.notes.some((note) => note.trim() === "");
+    // Notes validation (separate for top, heart, base)
+    if (touched.notes_top) {
+      if (form.notes_top.length > 0) {
+        const hasEmptyNote = form.notes_top.some((note) => note.trim() === "");
         if (hasEmptyNote) {
-          newErrors.notes = messages.productNotesInvalid;
+          newErrors.notes_top = messages.productNotesInvalid;
+        }
+      }
+    }
+
+    if (touched.notes_heart) {
+      if (form.notes_heart.length > 0) {
+        const hasEmptyNote = form.notes_heart.some((note) => note.trim() === "");
+        if (hasEmptyNote) {
+          newErrors.notes_heart = messages.productNotesInvalid;
+        }
+      }
+    }
+
+    if (touched.notes_base) {
+      if (form.notes_base.length > 0) {
+        const hasEmptyNote = form.notes_base.some((note) => note.trim() === "");
+        if (hasEmptyNote) {
+          newErrors.notes_base = messages.productNotesInvalid;
         }
       }
     }
