@@ -39,7 +39,7 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 
 	productService := service.NewProductService(repos.product, storageClient, integrations.ai.embProvider)
 	cartService = service.NewCartService(repos.cart, productService)
-	chatService := service.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider)
+	chatService := service.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider, aiService)
 
 	return &services{
 		user:          userService,

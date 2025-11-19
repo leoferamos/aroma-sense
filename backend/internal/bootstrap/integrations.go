@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/email"
-	aiintegration "github.com/leoferamos/aroma-sense/internal/integrations/ai"
+	"github.com/leoferamos/aroma-sense/internal/integrations/ai/config"
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/embeddings"
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/llm"
 	shippingprovider "github.com/leoferamos/aroma-sense/internal/integrations/shipping"
@@ -84,12 +84,12 @@ func initializeShippingIntegration() *shippingIntegration {
 
 // initializeAIIntegration initializes AI providers
 func initializeAIIntegration() *aiIntegration {
-	cfg, err := aiintegration.LoadAIConfigFromEnv()
+	cfg, err := config.LoadAIConfigFromEnv()
 	if err != nil {
 		log.Printf("AI configuration error: %v", err)
 		log.Printf("Falling back to default Ollama configuration")
 		// Fallback to default Ollama config
-		cfg = aiintegration.Config{
+		cfg = config.Config{
 			Provider:   "ollama",
 			LLMBaseURL: "http://localhost:11434",
 			LLMModel:   "tinyllama:latest",
