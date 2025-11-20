@@ -3,15 +3,13 @@ package ai
 import (
 	"strings"
 	"time"
-
-	"github.com/leoferamos/aroma-sense/internal/ai/slots"
 )
 
 // Conversation represents a chat session state.
 type Conversation struct {
 	History   []string
 	Summary   string
-	Prefs     slots.Slots
+	Prefs     Slots
 	ExpiresAt time.Time
 }
 
@@ -19,14 +17,14 @@ type Conversation struct {
 func NewConversation() *Conversation {
 	return &Conversation{
 		History:   []string{},
-		Prefs:     slots.Slots{},
+		Prefs:     Slots{},
 		ExpiresAt: time.Now().Add(30 * time.Minute),
 	}
 }
 
 // AddMessage adds a user message and updates preferences.
-func (c *Conversation) AddMessage(msg string, prefs slots.Slots) {
-	c.Prefs = slots.Merge(c.Prefs, prefs)
+func (c *Conversation) AddMessage(msg string, prefs Slots) {
+	c.Prefs = Merge(c.Prefs, prefs)
 	c.History = append(c.History, msg)
 	if len(c.History) > 12 {
 		c.summarize()

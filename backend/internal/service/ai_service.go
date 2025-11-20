@@ -54,7 +54,7 @@ func (s *AIService) Recommend(ctx context.Context, rawMessage string, limit int)
 	// Build suggestions
 	suggestions := make([]dto.RecommendSuggestion, 0, len(products))
 	for _, p := range products {
-		reason := buildSimpleReason(sanitized, p.Occasions, p.Seasons, p.Accords)
+		reason := buildSimpleReason(sanitized, []string(p.Occasions), []string(p.Seasons), []string(p.Accords))
 		suggestions = append(suggestions, dto.RecommendSuggestion{
 			ID:           p.ID,
 			Name:         p.Name,

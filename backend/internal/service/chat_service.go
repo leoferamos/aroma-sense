@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/ai"
-	"github.com/leoferamos/aroma-sense/internal/ai/slots"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/embeddings"
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/llm"
@@ -56,7 +55,7 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 
 	conv := s.getOrCreate(sid)
 	// Update conversation state
-	conv.AddMessage(sanitized, slots.Parse(sanitized))
+	conv.AddMessage(sanitized, ai.Parse(sanitized))
 
 	// If message seems off-topic and we don't have preferences yet
 	if !isOnTopic(sanitized) && isEmptyPrefs(conv.Prefs) {
@@ -156,6 +155,6 @@ func isOnTopic(s string) bool {
 	return false
 }
 
-func isEmptyPrefs(p slots.Slots) bool {
+func isEmptyPrefs(p ai.Slots) bool {
 	return len(p.Occasions) == 0 && len(p.Seasons) == 0 && len(p.Accords) == 0 && len(p.Intensity) == 0 && len(p.Climate) == 0 && len(p.Budget) == 0 && len(p.Longevity) == 0
 }

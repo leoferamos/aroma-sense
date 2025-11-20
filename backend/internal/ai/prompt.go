@@ -3,7 +3,6 @@ package ai
 import (
 	"strings"
 
-	"github.com/leoferamos/aroma-sense/internal/ai/slots"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 )
 
@@ -19,8 +18,8 @@ func BuildPrompt(c *Conversation, userMsg string, suggestions []dto.RecommendSug
 }
 
 // BuildFollowUpHint returns a hint for missing slots.
-func BuildFollowUpHint(p slots.Slots) string {
-	missing := slots.NextMissing(p)
+func BuildFollowUpHint(p Slots) string {
+	missing := NextMissing(p)
 	if missing == "Accords" {
 		return "Você tem preferência por algum acorde (cítrico, floral, amadeirado)?"
 	}
