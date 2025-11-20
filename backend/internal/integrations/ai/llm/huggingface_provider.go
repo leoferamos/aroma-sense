@@ -30,20 +30,20 @@ func NewHuggingFaceProvider(cfg config.Config) Provider {
 	}
 }
 
-// Generate generates a completion for the given prompt using Hugging Face API.
+// Generate generates a completion for the given prompt using Hugging Face Inference Providers API.
 func (p *HuggingFaceProvider) Generate(ctx context.Context, prompt string, maxTokens int) (string, error) {
-	url := fmt.Sprintf("https://api-inference.huggingface.co/models/%s", p.model)
+	url := "https://router.huggingface.co/v1/chat/completions"
 
 	payload := map[string]interface{}{
-		"inputs": prompt,
-		"parameters": map[string]interface{}{
-			"max_new_tokens": maxTokens,
-			"temperature":    0.7,
-			"do_sample":      true,
+		"model": p.model,
+		"messages": []map[string]interface{}{
+			{
+				"role":    "user",
+				"content": prompt,
+			},
 		},
-		"options": map[string]interface{}{
-			"wait_for_model": true,
-		},
+		"max_tokens":  maxTokens,
+		"temperature": 0.7,
 	}
 
 	jsonData, err := json.Marshal(payload)
@@ -69,14 +69,18 @@ func (p *HuggingFaceProvider) Generate(ctx context.Context, prompt string, maxTo
 		return "", fmt.Errorf("API error: %s, body: %s", resp.Status, string(body))
 	}
 
-	var result []map[string]interface{}
+	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	if len(result) > 0 {
-		if generated, ok := result[0]["generated_text"].(string); ok {
-			return generated, nil
+	if choices, ok := result["choices"].([]interface{}); ok && len(choices) > 0 {
+		if choice, ok := choices[0].(map[string]interface{}); ok {
+			if message, ok := choice["message"].(map[string]interface{}); ok {
+				if content, ok := message["content"].(string); ok {
+					return content, nil
+				}
+			}
 		}
 	}
 
