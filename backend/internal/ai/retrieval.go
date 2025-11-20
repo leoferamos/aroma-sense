@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/leoferamos/aroma-sense/internal/ai/slots"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/embeddings"
 	"github.com/leoferamos/aroma-sense/internal/model"
@@ -40,8 +39,8 @@ func NewRetrievalService(repo repository.ProductRepository, embProvider embeddin
 }
 
 // GetSuggestions retrieves product suggestions using hybrid search.
-func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs slots.Slots, msg string) []dto.RecommendSuggestion {
-	key := slots.ProfileHash(prefs)
+func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg string) []dto.RecommendSuggestion {
+	key := ProfileHash(prefs)
 	if out, ok := r.getFromCache(key); ok {
 		return out
 	}
@@ -49,7 +48,7 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs slots.Slots
 	// If embeddings provider is not available, fallback to pure FTS
 	if r.emb == nil {
 		sugs := []dto.RecommendSuggestion{}
-		q := slots.BuildSearchQuery(prefs, msg)
+		q := BuildSearchQuery(prefs, msg)
 		q = strings.TrimSpace(q)
 		if q != "" {
 			prods, _, _ := r.products.SearchProducts(ctx, q, 5, 0, "relevance")
@@ -79,7 +78,7 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs slots.Slots
 	// 1. FTS
 	go func() {
 		sugs := []dto.RecommendSuggestion{}
-		q := slots.BuildSearchQuery(prefs, msg)
+		q := BuildSearchQuery(prefs, msg)
 		q = strings.TrimSpace(q)
 		if q != "" {
 			prods, _, _ := r.products.SearchProducts(ctx, q, topK, 0, "relevance")
@@ -98,7 +97,7 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs slots.Slots
 	go func() {
 		sugs := []dto.RecommendSuggestion{}
 		if r.emb != nil {
-			queryText := slots.BuildSearchQuery(prefs, msg)
+			queryText := BuildSearchQuery(prefs, msg)
 			if queryText != "" {
 				embs, err := r.emb.Embed([]string{queryText})
 				if err == nil && len(embs) > 0 && len(embs[0]) > 0 {
@@ -177,7 +176,7 @@ func (r *RetrievalService) setCache(key string, val []dto.RecommendSuggestion) {
 	r.cache[key] = cacheEntry{suggestions: val, expiresAt: time.Now().Add(r.ttl)}
 }
 
-func shortReason(p slots.Slots, prod model.Product) string {
+func shortReason(p Slots, prod model.Product) string {
 	lower := func(arr []string) []string {
 		out := make([]string, 0, len(arr))
 		for _, v := range arr {
@@ -185,10 +184,25 @@ func shortReason(p slots.Slots, prod model.Product) string {
 		}
 		return out
 	}
+
+	// Convert pq.StringArray to []string
+	prodOccasions := make([]string, len(prod.Occasions))
+	for i, v := range prod.Occasions {
+		prodOccasions[i] = string(v)
+	}
+	prodSeasons := make([]string, len(prod.Seasons))
+	for i, v := range prod.Seasons {
+		prodSeasons[i] = string(v)
+	}
+	prodAccords := make([]string, len(prod.Accords))
+	for i, v := range prod.Accords {
+		prodAccords[i] = string(v)
+	}
+
 	score := 0
-	score += overlapCount(lower(p.Occasions), lower(prod.Occasions))
-	score += overlapCount(lower(p.Seasons), lower(prod.Seasons))
-	score += overlapCount(lower(p.Accords), lower(prod.Accords))
+	score += overlapCount(lower(p.Occasions), lower(prodOccasions))
+	score += overlapCount(lower(p.Seasons), lower(prodSeasons))
+	score += overlapCount(lower(p.Accords), lower(prodAccords))
 	if score == 0 {
 		return "Compatível por perfil geral"
 	}
