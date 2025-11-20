@@ -29,19 +29,17 @@ func NewHuggingFaceProvider(cfg config.Config) Provider {
 	}
 }
 
-// Embed generates embeddings for the given texts using Hugging Face API.
+// Embed generates embeddings for the given texts using Hugging Face Inference Providers API.
 func (p *HuggingFaceProvider) Embed(texts []string) ([][]float32, error) {
 	if len(texts) == 0 {
 		return [][]float32{}, nil
 	}
 
-	url := fmt.Sprintf("https://api-inference.huggingface.co/models/%s", p.model)
+	url := "https://router.huggingface.co/v1/embeddings"
 
 	payload := map[string]interface{}{
-		"inputs": texts,
-		"options": map[string]interface{}{
-			"wait_for_model": true,
-		},
+		"model": p.model,
+		"input": texts,
 	}
 
 	jsonData, err := json.Marshal(payload)
@@ -67,22 +65,27 @@ func (p *HuggingFaceProvider) Embed(texts []string) ([][]float32, error) {
 		return nil, fmt.Errorf("API error: %s, body: %s", resp.Status, string(body))
 	}
 
-	var result []interface{}
+	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	embeddings := make([][]float32, len(result))
-	for i, item := range result {
-		if vec, ok := item.([]interface{}); ok {
-			embeddings[i] = make([]float32, len(vec))
-			for j, val := range vec {
-				if f, ok := val.(float64); ok {
-					embeddings[i][j] = float32(f)
+	if data, ok := result["data"].([]interface{}); ok {
+		embeddings := make([][]float32, len(data))
+		for i, item := range data {
+			if embeddingData, ok := item.(map[string]interface{}); ok {
+				if embedding, ok := embeddingData["embedding"].([]interface{}); ok {
+					embeddings[i] = make([]float32, len(embedding))
+					for j, val := range embedding {
+						if f, ok := val.(float64); ok {
+							embeddings[i][j] = float32(f)
+						}
+					}
 				}
 			}
 		}
+		return embeddings, nil
 	}
 
-	return embeddings, nil
+	return nil, fmt.Errorf("unexpected response format")
 }
