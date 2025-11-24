@@ -13,19 +13,48 @@ import (
 
 // HuggingFaceProvider implements Provider using Hugging Face Inference API.
 type HuggingFaceProvider struct {
-	apiKey  string
-	model   string
-	client  *http.Client
-	timeout time.Duration
+	apiKey        string
+	model         string
+	client        *http.Client
+	timeout       time.Duration
+	queryPrefix   string
+	passagePrefix string
+	baseURL       string
 }
 
 // NewHuggingFaceProvider creates a Provider backed by Hugging Face Inference API.
 func NewHuggingFaceProvider(cfg config.Config) Provider {
-	return &HuggingFaceProvider{
+	p := &HuggingFaceProvider{
 		apiKey:  cfg.APIKey,
 		model:   cfg.EmbModel,
 		client:  &http.Client{Timeout: cfg.Timeout},
 		timeout: cfg.Timeout,
+		baseURL: "https://router.huggingface.co/v1",
+	}
+	// Configure based on model
+	p.configureForModel()
+	return p
+}
+
+// configureForModel sets model-specific configurations
+func (p *HuggingFaceProvider) configureForModel() {
+	switch p.model {
+	case "intfloat/multilingual-e5-large", "intfloat/e5-small-v2":
+		p.queryPrefix = "query: "
+		p.passagePrefix = "passage: "
+		p.baseURL = "https://router.huggingface.co/v1"
+	case "BAAI/bge-small-en-v1.5":
+		p.queryPrefix = ""
+		p.passagePrefix = ""
+		p.baseURL = "https://router.huggingface.co/v1"
+	case "Qwen/Qwen3-Embedding-8B":
+		p.queryPrefix = ""
+		p.passagePrefix = ""
+		p.baseURL = "https://router.huggingface.co/nebius/v1"
+	default:
+		p.queryPrefix = ""
+		p.passagePrefix = ""
+		p.baseURL = "https://router.huggingface.co/v1"
 	}
 }
 
@@ -35,11 +64,17 @@ func (p *HuggingFaceProvider) Embed(texts []string) ([][]float32, error) {
 		return [][]float32{}, nil
 	}
 
-	url := "https://router.huggingface.co/v1/embeddings"
+	// Apply prefixes if configured
+	processedTexts := make([]string, len(texts))
+	for i, text := range texts {
+		processedTexts[i] = p.passagePrefix + text
+	}
+
+	url := p.baseURL + "/embeddings"
 
 	payload := map[string]interface{}{
 		"model": p.model,
-		"input": texts,
+		"input": processedTexts,
 	}
 
 	jsonData, err := json.Marshal(payload)
@@ -88,4 +123,28 @@ func (p *HuggingFaceProvider) Embed(texts []string) ([][]float32, error) {
 	}
 
 	return nil, fmt.Errorf("unexpected response format")
+}
+
+// EmbedQuery generates an embedding for a single query text.
+func (p *HuggingFaceProvider) EmbedQuery(query string) ([]float32, error) {
+	processedQuery := p.queryPrefix + query
+	embeddings, err := p.Embed([]string{processedQuery})
+	if err != nil {
+		return nil, err
+	}
+	if len(embeddings) == 0 {
+		return nil, fmt.Errorf("no embedding returned")
+	}
+	return embeddings[0], nil
+}
+
+// Configure allows setting model-specific options
+func (p *HuggingFaceProvider) Configure(config map[string]interface{}) Provider {
+	if queryPrefix, ok := config["queryPrefix"].(string); ok {
+		p.queryPrefix = queryPrefix
+	}
+	if passagePrefix, ok := config["passagePrefix"].(string); ok {
+		p.passagePrefix = passagePrefix
+	}
+	return p
 }

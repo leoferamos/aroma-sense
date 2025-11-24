@@ -43,7 +43,7 @@ type ollamaEmbResp struct {
 	Embedding []float32 `json:"embedding"`
 }
 
-// Embed calls Ollama /api/embeddings once per text (simple, reliable on current API).
+// Embed calls Ollama /api/embeddings once per text.
 func (p *ollamaProvider) Embed(texts []string) ([][]float32, error) {
 	out := make([][]float32, 0, len(texts))
 	for _, t := range texts {
@@ -66,4 +66,21 @@ func (p *ollamaProvider) Embed(texts []string) ([][]float32, error) {
 		out = append(out, r.Embedding)
 	}
 	return out, nil
+}
+
+// EmbedQuery generates an embedding for a single query text.
+func (p *ollamaProvider) EmbedQuery(query string) ([]float32, error) {
+	embeddings, err := p.Embed([]string{query})
+	if err != nil {
+		return nil, err
+	}
+	if len(embeddings) == 0 {
+		return nil, fmt.Errorf("no embedding returned")
+	}
+	return embeddings[0], nil
+}
+
+// Configure allows setting model-specific options
+func (p *ollamaProvider) Configure(config map[string]interface{}) Provider {
+	return p
 }
