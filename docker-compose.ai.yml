@@ -12,11 +12,19 @@ services:
     environment:
       - GIN_MODE=debug
       - CGO_ENABLED=0
+      # AI Configuration for local Ollama
+      - AI_PROVIDER=ollama
+      - AI_LLM_MODEL=tinyllama:latest
+      - AI_LLM_BASE_URL=http://ollama:11434
+      - AI_EMB_MODEL=nomic-embed-text:latest
+      - AI_EMB_BASE_URL=http://ollama:11434
+      - AI_TIMEOUT=30
     networks:
       - aroma-network
     restart: unless-stopped
     depends_on:
       - frontend
+      - ollama
 
   frontend:
     build:
@@ -33,11 +41,30 @@ services:
     networks:
       - aroma-network
     restart: unless-stopped
+  ollama:
+    image: ollama/ollama:latest
+    container_name: aroma-ollama-dev
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - aroma-network
+    restart: unless-stopped
+    environment:
+      - OLLAMA_NUM_PARALLEL=1
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     
 volumes:
   go-modules:
     driver: local
   node-modules:
+    driver: local
+  ollama-data:
     driver: local
 
 # Custom network for service communication
