@@ -118,12 +118,6 @@ const ProductDetail: React.FC = () => {
                   <div className="text-gray-900 font-medium">{product.weight} ml</div>
                   <div className="text-gray-600">Category</div>
                   <div className="text-gray-900 font-medium">{product.category}</div>
-                  {product.notes && (
-                    <>
-                      <div className="text-gray-600">Notes</div>
-                      <div className="text-gray-900 font-medium">{product.notes}</div>
-                    </>
-                  )}
                 </div>
               </div>
 

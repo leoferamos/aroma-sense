@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -15,7 +14,8 @@ import (
 
 // ImageStorage defines an interface for image upload
 type ImageStorage interface {
-	UploadImage(ctx context.Context, imageName string, content io.Reader, size int64, contentType string) (string, error)
+	UploadImageWithThumbnail(ctx context.Context, imageName string, content io.Reader, size int64, contentType string, maxW, maxH int) (string, string, error)
+	DeleteImage(ctx context.Context, imageName string) error
 }
 
 type SupabaseS3 struct {
@@ -56,27 +56,4 @@ func NewSupabaseS3() (*SupabaseS3, error) {
 		Bucket:    bucket,
 		PublicURL: publicURL,
 	}, nil
-}
-
-// UploadImage uploads an image to Supabase S3 and returns its public URL
-func (s *SupabaseS3) UploadImage(ctx context.Context, imageName string, content io.Reader, size int64, contentType string) (string, error) {
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
-
-	input := &s3.PutObjectInput{
-		Bucket:      aws.String(s.Bucket),
-		Key:         aws.String(imageName),
-		Body:        content,
-		ContentType: aws.String(contentType),
-	}
-
-	_, err := s.Client.PutObject(ctx, input)
-	if err != nil {
-		return "", fmt.Errorf("failed to upload image to S3: %w", err)
-	}
-
-	finalURL := fmt.Sprintf("%s/%s/%s", strings.TrimRight(s.PublicURL, "/"), s.Bucket, imageName)
-
-	return finalURL, nil
 }

@@ -34,7 +34,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
   currentImageUrl,
 }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [noteInput, setNoteInput] = useState("");
+  const [noteTopInput, setNoteTopInput] = useState("");
+  const [noteHeartInput, setNoteHeartInput] = useState("");
+  const [noteBaseInput, setNoteBaseInput] = useState("");
+  const [accordInput, setAccordInput] = useState("");
+  const [occasionInput, setOccasionInput] = useState("");
+  const [seasonInput, setSeasonInput] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -71,16 +76,76 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }
   };
 
-  const handleAddNote = () => {
-    if (noteInput.trim()) {
-      setForm({ ...form, notes: [...form.notes, noteInput.trim()] });
-      setNoteInput("");
-      setTouched({ ...touched, notes: true });
+  const handleAddNoteTop = () => {
+    if (noteTopInput.trim()) {
+      setForm({ ...form, notes_top: [...form.notes_top, noteTopInput.trim()] });
+      setNoteTopInput("");
+      setTouched({ ...touched, notes_top: true });
     }
   };
 
-  const handleRemoveNote = (index: number) => {
-    setForm({ ...form, notes: form.notes.filter((_, i) => i !== index) });
+  const handleRemoveNoteTop = (index: number) => {
+    setForm({ ...form, notes_top: form.notes_top.filter((_, i) => i !== index) });
+  };
+
+  const handleAddNoteHeart = () => {
+    if (noteHeartInput.trim()) {
+      setForm({ ...form, notes_heart: [...form.notes_heart, noteHeartInput.trim()] });
+      setNoteHeartInput("");
+      setTouched({ ...touched, notes_heart: true });
+    }
+  };
+
+  const handleRemoveNoteHeart = (index: number) => {
+    setForm({ ...form, notes_heart: form.notes_heart.filter((_, i) => i !== index) });
+  };
+
+  const handleAddNoteBase = () => {
+    if (noteBaseInput.trim()) {
+      setForm({ ...form, notes_base: [...form.notes_base, noteBaseInput.trim()] });
+      setNoteBaseInput("");
+      setTouched({ ...touched, notes_base: true });
+    }
+  };
+
+  const handleRemoveNoteBase = (index: number) => {
+    setForm({ ...form, notes_base: form.notes_base.filter((_, i) => i !== index) });
+  };
+
+  const handleAddAccord = () => {
+    if (accordInput.trim()) {
+      setForm({ ...form, accords: [...form.accords, accordInput.trim()] });
+      setAccordInput("");
+      setTouched({ ...touched, accords: true });
+    }
+  };
+
+  const handleRemoveAccord = (index: number) => {
+    setForm({ ...form, accords: form.accords.filter((_, i) => i !== index) });
+  };
+
+  const handleAddOccasion = () => {
+    if (occasionInput.trim()) {
+      setForm({ ...form, occasions: [...form.occasions, occasionInput.trim()] });
+      setOccasionInput("");
+      setTouched({ ...touched, occasions: true });
+    }
+  };
+
+  const handleRemoveOccasion = (index: number) => {
+    setForm({ ...form, occasions: form.occasions.filter((_, i) => i !== index) });
+  };
+
+  const handleAddSeason = () => {
+    if (seasonInput.trim()) {
+      setForm({ ...form, seasons: [...form.seasons, seasonInput.trim()] });
+      setSeasonInput("");
+      setTouched({ ...touched, seasons: true });
+    }
+  };
+
+  const handleRemoveSeason = (index: number) => {
+    setForm({ ...form, seasons: form.seasons.filter((_, i) => i !== index) });
   };
 
   return (
@@ -214,38 +279,81 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <FormError message={errors.stock_quantity} />
       </div>
 
-      {/* Notes */}
+      {/* Intensity */}
+      <div>
+        <InputField
+          label="Intensity (Optional)"
+          type="text"
+          name="intensity"
+          value={form.intensity}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          placeholder="e.g., Light, Moderate, Strong"
+        />
+        <FormError message={errors.intensity} />
+      </div>
+
+      {/* Gender */}
+      <div>
+        <InputField
+          label="Gender (Optional)"
+          type="text"
+          name="gender"
+          value={form.gender}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          placeholder="e.g., Unisex, Men, Women"
+        />
+        <FormError message={errors.gender} />
+      </div>
+
+      {/* Price Range */}
+      <div>
+        <InputField
+          label="Price Range (Optional)"
+          type="text"
+          name="price_range"
+          value={form.price_range}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          placeholder="e.g., Budget, Mid-range, Luxury"
+        />
+        <FormError message={errors.price_range} />
+      </div>
+
+      {/* Accords */}
       <div>
         <label className="text-base font-normal text-gray-800 block mb-2">
-          Notes (Optional)
+          Accords (Optional)
         </label>
         <div className="flex gap-2 mb-2">
           <input
             type="text"
-            value={noteInput}
-            onChange={(e) => setNoteInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddNote())}
+            value={accordInput}
+            onChange={(e) => setAccordInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddAccord())}
             className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            placeholder="e.g., Floral, Woody, Citrus"
           />
           <button
             type="button"
-            onClick={handleAddNote}
+            onClick={handleAddAccord}
             className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
           >
             Add
           </button>
         </div>
-        {form.notes.length > 0 && (
+        {form.accords.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
-            {form.notes.map((note, index) => (
+            {form.accords.map((accord, index) => (
               <span
                 key={index}
                 className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
               >
-                {note}
+                {accord}
                 <button
                   type="button"
-                  onClick={() => handleRemoveNote(index)}
+                  onClick={() => handleRemoveAccord(index)}
                   className="text-gray-500 hover:text-red-500"
                 >
                   ×
@@ -254,7 +362,227 @@ const ProductForm: React.FC<ProductFormProps> = ({
             ))}
           </div>
         )}
-        <FormError message={errors.notes} />
+        <FormError message={errors.accords} />
+      </div>
+
+      {/* Occasions */}
+      <div>
+        <label className="text-base font-normal text-gray-800 block mb-2">
+          Occasions (Optional)
+        </label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={occasionInput}
+            onChange={(e) => setOccasionInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddOccasion())}
+            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            placeholder="e.g., Day, Night, Casual, Formal"
+          />
+          <button
+            type="button"
+            onClick={handleAddOccasion}
+            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+          >
+            Add
+          </button>
+        </div>
+        {form.occasions.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {form.occasions.map((occasion, index) => (
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+              >
+                {occasion}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveOccasion(index)}
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <FormError message={errors.occasions} />
+      </div>
+
+      {/* Seasons */}
+      <div>
+        <label className="text-base font-normal text-gray-800 block mb-2">
+          Seasons (Optional)
+        </label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={seasonInput}
+            onChange={(e) => setSeasonInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSeason())}
+            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            placeholder="e.g., Spring, Summer, Fall, Winter"
+          />
+          <button
+            type="button"
+            onClick={handleAddSeason}
+            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+          >
+            Add
+          </button>
+        </div>
+        {form.seasons.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {form.seasons.map((season, index) => (
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+              >
+                {season}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSeason(index)}
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <FormError message={errors.seasons} />
+      </div>
+
+      {/* Top Notes */}
+      <div>
+        <label className="text-base font-normal text-gray-800 block mb-2">
+          Top Notes (Optional)
+        </label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={noteTopInput}
+            onChange={(e) => setNoteTopInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddNoteTop())}
+            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            placeholder="e.g., Bergamot, Lemon, Orange"
+          />
+          <button
+            type="button"
+            onClick={handleAddNoteTop}
+            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+          >
+            Add
+          </button>
+        </div>
+        {form.notes_top.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {form.notes_top.map((note, index) => (
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+              >
+                {note}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveNoteTop(index)}
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <FormError message={errors.notes_top} />
+      </div>
+
+      {/* Heart Notes */}
+      <div>
+        <label className="text-base font-normal text-gray-800 block mb-2">
+          Heart Notes (Optional)
+        </label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={noteHeartInput}
+            onChange={(e) => setNoteHeartInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddNoteHeart())}
+            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            placeholder="e.g., Rose, Jasmine, Lavender"
+          />
+          <button
+            type="button"
+            onClick={handleAddNoteHeart}
+            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+          >
+            Add
+          </button>
+        </div>
+        {form.notes_heart.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {form.notes_heart.map((note, index) => (
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+              >
+                {note}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveNoteHeart(index)}
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <FormError message={errors.notes_heart} />
+      </div>
+
+      {/* Base Notes */}
+      <div>
+        <label className="text-base font-normal text-gray-800 block mb-2">
+          Base Notes (Optional)
+        </label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={noteBaseInput}
+            onChange={(e) => setNoteBaseInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddNoteBase())}
+            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            placeholder="e.g., Vanilla, Sandalwood, Musk"
+          />
+          <button
+            type="button"
+            onClick={handleAddNoteBase}
+            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+          >
+            Add
+          </button>
+        </div>
+        {form.notes_base.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {form.notes_base.map((note, index) => (
+              <span
+                key={index}
+                className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+              >
+                {note}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveNoteBase(index)}
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <FormError message={errors.notes_base} />
       </div>
 
       {/* Image Upload */}

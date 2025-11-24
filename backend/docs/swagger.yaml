@@ -234,8 +234,19 @@ definitions:
   dto.ProductResponse:
     description: Product information returned by the API
     properties:
+      accords:
+        example:
+        - '["woody"'
+        - '"citrus"]'
+        items:
+          type: string
+        type: array
       brand:
         example: Dior
+        type: string
+      can_review:
+        type: boolean
+      cannot_review_reason:
         type: string
       category:
         example: Eau de Parfum
@@ -246,30 +257,87 @@ definitions:
       description:
         example: A fresh and woody fragrance
         type: string
+      gender:
+        example: unisex
+        type: string
       id:
         example: 1
         type: integer
       image_url:
         example: https://example.com/image.jpg
         type: string
+      intensity:
+        example: moderate
+        type: string
       name:
         example: Sauvage
         type: string
-      notes:
-        example: bergamot, pepper, ambroxan
-        type: string
+      notes_base:
+        example:
+        - '["ambroxan"]'
+        items:
+          type: string
+        type: array
+      notes_heart:
+        example:
+        - '["lavender"]'
+        items:
+          type: string
+        type: array
+      notes_top:
+        example:
+        - '["bergamot"]'
+        items:
+          type: string
+        type: array
+      occasions:
+        example:
+        - '["work"'
+        - '"night out"]'
+        items:
+          type: string
+        type: array
       price:
         example: 299.99
         type: number
+      price_range:
+        example: premium
+        type: string
+      seasons:
+        example:
+        - '["summer"'
+        - '"spring"]'
+        items:
+          type: string
+        type: array
+      slug:
+        example: dior-sauvage
+        type: string
       stock_quantity:
         example: 50
         type: integer
+      thumbnail_url:
+        example: https://example.com/image_thumb.jpg
+        type: string
       updated_at:
         example: "2025-09-28T10:00:00Z"
         type: string
       weight:
         example: 100
         type: number
+    type: object
+  dto.ProfileResponse:
+    properties:
+      created_at:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      public_id:
+        type: string
+      role:
+        type: string
     type: object
   dto.ResetPasswordConfirmRequest:
     properties:
@@ -295,6 +363,55 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  dto.ReviewListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.ReviewResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.ReviewRequest:
+    properties:
+      comment:
+        maxLength: 500
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    required:
+    - rating
+    type: object
+  dto.ReviewResponse:
+    properties:
+      author_display:
+        type: string
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      rating:
+        type: integer
+    type: object
+  dto.ReviewSummary:
+    properties:
+      average:
+        type: number
+      count:
+        type: integer
+      distribution:
+        additionalProperties:
+          type: integer
+        type: object
     type: object
   dto.ShippingOption:
     properties:
@@ -349,6 +466,10 @@ definitions:
   dto.UpdateProductRequest:
     description: Product update request (all fields are optional)
     properties:
+      accords:
+        items:
+          type: string
+        type: array
       brand:
         example: Dior
         type: string
@@ -358,26 +479,54 @@ definitions:
       description:
         example: An intense and spicy fragrance
         type: string
+      gender:
+        type: string
+      intensity:
+        type: string
       name:
         example: Sauvage Elixir
         type: string
-      notes:
-        example:
-        - cinnamon
-        - nutmeg
-        - cardamom
+      notes_base:
+        items:
+          type: string
+        type: array
+      notes_heart:
+        items:
+          type: string
+        type: array
+      notes_top:
+        items:
+          type: string
+        type: array
+      occasions:
         items:
           type: string
         type: array
       price:
         example: 399.99
         type: number
+      price_range:
+        type: string
+      seasons:
+        items:
+          type: string
+        type: array
       stock_quantity:
         example: 25
         type: integer
       weight:
         example: 60
         type: number
+    type: object
+  dto.UpdateProfileRequest:
+    properties:
+      display_name:
+        example: João Santos
+        maxLength: 50
+        minLength: 2
+        type: string
+    required:
+    - display_name
     type: object
   dto.UserResponse:
     properties:
@@ -967,6 +1116,130 @@ paths:
       summary: Get product by ID
       tags:
       - products
+  /products/{id}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Returns published reviews for a product in descending creation
+        order.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Paginated reviews
+          schema:
+            $ref: '#/definitions/dto.ReviewListResponse'
+        "400":
+          description: Invalid product id
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: List product reviews
+      tags:
+      - reviews
+    post:
+      consumes:
+      - application/json
+      description: Creates a review for a delivered product. Requires authentication,
+        a display_name set, and at least one delivered order containing the product.
+        One review per user/product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Review payload
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review created
+          schema:
+            $ref: '#/definitions/dto.ReviewResponse'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden (not delivered or profile incomplete)
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "409":
+          description: Already reviewed
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create product review
+      tags:
+      - reviews
+  /products/{id}/reviews/summary:
+    get:
+      consumes:
+      - application/json
+      description: Returns average rating, total review count, and rating distribution
+        for a product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Review summary
+          schema:
+            $ref: '#/definitions/dto.ReviewSummary'
+        "400":
+          description: Invalid product id
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get product review summary
+      tags:
+      - reviews
   /shipping/options:
     get:
       description: Returns a list of shipping options (carrier, service code, price,
@@ -1040,6 +1313,57 @@ paths:
       summary: Logout
       tags:
       - auth
+  /users/me:
+    get:
+      description: Returns the authenticated user's profile information.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile
+          schema:
+            $ref: '#/definitions/dto.ProfileResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get my profile
+      tags:
+      - users
+  /users/me/profile:
+    patch:
+      consumes:
+      - application/json
+      description: Updates profile fields such as display_name.
+      parameters:
+      - description: Profile update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated profile
+          schema:
+            $ref: '#/definitions/dto.ProfileResponse'
+        "400":
+          description: Validation error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update my profile
+      tags:
+      - users
   /users/refresh:
     post:
       description: Uses the HttpOnly refresh_token cookie to issue a new short-lived

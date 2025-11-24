@@ -874,6 +874,188 @@
                 }
             }
         },
+        "/products/{id}/reviews": {
+            "get": {
+                "description": "Returns published reviews for a product in descending creation order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "List product reviews",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated reviews",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid product id",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a review for a delivered product. Requires authentication, a display_name set, and at least one delivered order containing the product. One review per user/product.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Create product review",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Review payload",
+                        "name": "review",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Review created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (not delivered or profile incomplete)",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Already reviewed",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{id}/reviews/summary": {
+            "get": {
+                "description": "Returns average rating, total review count, and rating distribution for a product.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Get product review summary",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review summary",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewSummary"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid product id",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/shipping/options": {
             "get": {
                 "security": [
@@ -981,6 +1163,88 @@
                         "description": "Logout successful",
                         "schema": {
                             "$ref": "#/definitions/dto.MessageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the authenticated user's profile information.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get my profile",
+                "responses": {
+                    "200": {
+                        "description": "User profile",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/profile": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates profile fields such as display_name.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update my profile",
+                "parameters": [
+                    {
+                        "description": "Profile update",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated profile",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProfileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -1503,9 +1767,25 @@
             "description": "Product information returned by the API",
             "type": "object",
             "properties": {
+                "accords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"woody\"",
+                        "\"citrus\"]"
+                    ]
+                },
                 "brand": {
                     "type": "string",
                     "example": "Dior"
+                },
+                "can_review": {
+                    "type": "boolean"
+                },
+                "cannot_review_reason": {
+                    "type": "string"
                 },
                 "category": {
                     "type": "string",
@@ -1519,6 +1799,10 @@
                     "type": "string",
                     "example": "A fresh and woody fragrance"
                 },
+                "gender": {
+                    "type": "string",
+                    "example": "unisex"
+                },
                 "id": {
                     "type": "integer",
                     "example": 1
@@ -1527,21 +1811,80 @@
                     "type": "string",
                     "example": "https://example.com/image.jpg"
                 },
+                "intensity": {
+                    "type": "string",
+                    "example": "moderate"
+                },
                 "name": {
                     "type": "string",
                     "example": "Sauvage"
                 },
-                "notes": {
-                    "type": "string",
-                    "example": "bergamot, pepper, ambroxan"
+                "notes_base": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"ambroxan\"]"
+                    ]
+                },
+                "notes_heart": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"lavender\"]"
+                    ]
+                },
+                "notes_top": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"bergamot\"]"
+                    ]
+                },
+                "occasions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"work\"",
+                        "\"night out\"]"
+                    ]
                 },
                 "price": {
                     "type": "number",
                     "example": 299.99
                 },
+                "price_range": {
+                    "type": "string",
+                    "example": "premium"
+                },
+                "seasons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"summer\"",
+                        "\"spring\"]"
+                    ]
+                },
+                "slug": {
+                    "type": "string",
+                    "example": "dior-sauvage"
+                },
                 "stock_quantity": {
                     "type": "integer",
                     "example": 50
+                },
+                "thumbnail_url": {
+                    "type": "string",
+                    "example": "https://example.com/image_thumb.jpg"
                 },
                 "updated_at": {
                     "type": "string",
@@ -1550,6 +1893,26 @@
                 "weight": {
                     "type": "number",
                     "example": 100
+                }
+            }
+        },
+        "dto.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -1585,6 +1948,80 @@
                 "email": {
                     "type": "string",
                     "example": "user@example.com"
+                }
+            }
+        },
+        "dto.ReviewListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ReviewResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReviewRequest": {
+            "type": "object",
+            "required": [
+                "rating"
+            ],
+            "properties": {
+                "comment": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "rating": {
+                    "type": "integer",
+                    "maximum": 5,
+                    "minimum": 1
+                }
+            }
+        },
+        "dto.ReviewResponse": {
+            "type": "object",
+            "properties": {
+                "author_display": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ReviewSummary": {
+            "type": "object",
+            "properties": {
+                "average": {
+                    "type": "number"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "distribution": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -1664,6 +2101,12 @@
             "description": "Product update request (all fields are optional)",
             "type": "object",
             "properties": {
+                "accords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "brand": {
                     "type": "string",
                     "example": "Dior"
@@ -1676,24 +2119,52 @@
                     "type": "string",
                     "example": "An intense and spicy fragrance"
                 },
+                "gender": {
+                    "type": "string"
+                },
+                "intensity": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string",
                     "example": "Sauvage Elixir"
                 },
-                "notes": {
+                "notes_base": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "cinnamon",
-                        "nutmeg",
-                        "cardamom"
-                    ]
+                    }
+                },
+                "notes_heart": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "notes_top": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "occasions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "price": {
                     "type": "number",
                     "example": 399.99
+                },
+                "price_range": {
+                    "type": "string"
+                },
+                "seasons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "stock_quantity": {
                     "type": "integer",
@@ -1702,6 +2173,20 @@
                 "weight": {
                     "type": "number",
                     "example": 60
+                }
+            }
+        },
+        "dto.UpdateProfileRequest": {
+            "type": "object",
+            "required": [
+                "display_name"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 2,
+                    "example": "João Santos"
                 }
             }
         },

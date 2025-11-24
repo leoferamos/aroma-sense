@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '../../utils/cn';
+import { chat as chatApi, type ChatResponse } from '../../services/ai';
+import { Link } from 'react-router-dom';
 
 interface Message {
     id: string;
@@ -24,6 +26,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
     ]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [lastSuggestions, setLastSuggestions] = useState<ChatResponse['suggestions']>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -57,21 +60,38 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
 
         setMessages((prev) => [...prev, userMessage]);
         setInputValue('');
-
-    // TODO: Call AI API here
-
-        // Simulate assistant response
         setIsLoading(true);
-        setTimeout(() => {
+
+        try {
+            // Persist/obtain session id
+            let sessionId = localStorage.getItem('chat_session_id');
+            if (!sessionId) {
+                sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+                localStorage.setItem('chat_session_id', sessionId);
+            }
+
+            // Minimal history just last few contents
+            const history = messages.slice(-6).map(m => m.content);
+            const resp = await chatApi(userMessage.content, sessionId, history);
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),
-                content: 'I received your message. This is a placeholder response until the AI integration is implemented.',
+                content: resp.reply || 'Tudo certo! Pode me dizer mais sobre o que procura?',
                 sender: 'assistant',
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, assistantMessage]);
+            setLastSuggestions(resp.suggestions || []);
+        } catch {
+            const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                content: 'Não consegui responder agora. Pode tentar novamente?',
+                sender: 'assistant',
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     if (!isOpen) return null;
@@ -137,6 +157,24 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                             </div>
                         </div>
                     ))}
+                    {/* Suggestions */}
+                    {lastSuggestions && lastSuggestions.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                            <h3 className="text-sm font-semibold text-gray-700">Sugestões</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {lastSuggestions.map(s => (
+                                    <Link key={s.id} to={`/products/${s.id}`} className="flex gap-3 p-2 rounded-lg border border-gray-200 hover:border-blue-400 transition-colors">
+                                        <img src={s.thumbnail_url || ''} alt={s.name} className="w-12 h-12 object-cover rounded" />
+                                        <div className="min-w-0">
+                                            <div className="text-sm font-medium text-gray-900 truncate">{s.name}</div>
+                                            <div className="text-xs text-gray-600 truncate">{s.brand}</div>
+                                            {s.reason && <div className="text-[11px] text-gray-500 line-clamp-2">{s.reason}</div>}
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     {isLoading && (
                         <div className="flex justify-start">
                             <div className="bg-gray-200 text-gray-900 px-4 py-2 rounded-lg rounded-bl-none">

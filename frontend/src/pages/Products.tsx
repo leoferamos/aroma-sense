@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -9,7 +9,6 @@ import { useProductSearch } from '../hooks/useProductSearch';
 import { listProducts } from '../services/product';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { useSearchParams } from 'react-router-dom';
-import ChatBubble from '../components/chat/ChatBubble';
 
 const Products: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Product[] | null>(null);
@@ -29,7 +28,7 @@ const Products: React.FC = () => {
 
   // Load suggestions when user searched (>=2 chars) and got 0 results
   useEffect(() => {
-    const resultsLen = Array.isArray(results) ? results.length : 0;
+    const resultsLen = results.length;
     const needSuggestions = query.trim().length >= 2 && !isLoading && resultsLen === 0;
     if (!needSuggestions) {
       setSuggestions(null);
@@ -51,7 +50,10 @@ const Products: React.FC = () => {
         setLoadingSuggestions(false);
       });
     return () => { active = false; };
-  }, [query, isLoading, Array.isArray(results) ? results.length : 0]);
+  }, [query, isLoading, results]);
+
+  const safeResults = useMemo(() => results, [results]);
+  const safeSuggestions = useMemo(() => (suggestions ?? []).filter(Boolean) as Product[], [suggestions]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -85,9 +87,6 @@ const Products: React.FC = () => {
         {!isLoading && !error && (
           <>
             {(() => {
-              const safeResults = Array.isArray(results)
-                ? results.filter((p) => p && typeof (p as any).id === 'number')
-                : [];
               const showEmpty = safeResults.length === 0;
               return showEmpty;
             })() ? (
@@ -114,10 +113,8 @@ const Products: React.FC = () => {
                         <LoadingSpinner message="Loading suggestions..." />
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                          {((Array.isArray(suggestions) ? suggestions : [])
-                            .filter((p) => p && typeof (p as any).id === 'number')
-                          ).map((p) => (
-                            <ProductCard key={(p as any).id} product={p as any} showAddToCart={false} />
+                          {safeSuggestions.map((p) => (
+                            <ProductCard key={p.id} product={p} showAddToCart={false} />
                           ))}
                         </div>
                       )}
@@ -139,23 +136,17 @@ const Products: React.FC = () => {
                         Results for <span className="font-semibold">“{query.trim()}”</span>: <span className="font-semibold">{total}</span>
                       </>
                     ) : (
-                      (() => {
-                        const safeResults = Array.isArray(results)
-                          ? results.filter((p) => p && typeof (p as any).id === 'number')
-                          : [];
-                        return <>
+                      (() => (
+                        <>
                           Showing <span className="font-semibold">{safeResults.length}</span> {safeResults.length === 1 ? 'product' : 'products'}
-                        </>;
-                      })()
+                        </>
+                      ))()
                     )}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {(Array.isArray(results)
-                    ? results.filter((p) => p && typeof (p as any).id === 'number')
-                    : []
-                  ).map((product: any) => (
+                  {safeResults.map((product) => (
                     <ProductCard key={product.id} product={product} showAddToCart={false} />
                   ))}
                 </div>
@@ -173,7 +164,7 @@ const Products: React.FC = () => {
           </>
         )}
       </main>
-      <ChatBubble />
+  {/* ChatBubble is mounted globally in App; avoid duplicate here. */}
     </div>
   );
 };

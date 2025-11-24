@@ -1,10 +1,11 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import GuestRoute from './components/GuestRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import ChatBubble from './components/chat/ChatBubble';
 // Lazy load pages for better performance
 const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
@@ -34,6 +35,117 @@ const PageLoader: React.FC = () => (
   </div>
 );
 
+const ChatMount: React.FC = () => {
+  const location = useLocation();
+  const path = location.pathname;
+  const isAuthPage = path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/forgot-password');
+  const isAdmin = path.startsWith('/admin');
+  const showChat = !isAuthPage && !isAdmin;
+  return (
+    <>
+      <Routes>
+        {/* Public routes */}
+        <Route
+          path="/register"
+          element={<GuestRoute><Register /></GuestRoute>}
+        />
+        <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        
+        {/* Protected admin routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products/new"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AddProduct />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products/:id/edit"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <EditProduct />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminProducts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute>
+              <Products />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-confirmation"
+          element={
+            <ProtectedRoute>
+              <OrderConfirmation />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        {/* 404 - Catch all unmatched routes */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      {showChat && <ChatBubble />}
+    </>
+  );
+}
+
 const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -41,105 +153,7 @@ const App: React.FC = () => {
         <CartProvider>
           <Suspense fallback={<PageLoader />}>
             <ErrorBoundary>
-            <Routes>
-              {/* Public routes */}
-              {/* Redirect authenticated users away from register/login at the router level */}
-              <Route
-                path="/register"
-                element={<GuestRoute><Register /></GuestRoute>}
-              />
-              <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              
-              {/* Protected admin routes */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/products/new"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AddProduct />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/products/:id/edit"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <EditProduct />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/products"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminProducts />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/orders"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <AdminOrders />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <ProtectedRoute>
-                    <Products />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <Orders />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/products/:id" element={<ProductDetail />} />
-              <Route
-                path="/checkout"
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/order-confirmation"
-                element={
-                  <ProtectedRoute>
-                    <OrderConfirmation />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              
-              {/* 404 - Catch all unmatched routes */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <ChatMount />
             </ErrorBoundary>
           </Suspense>
         </CartProvider>

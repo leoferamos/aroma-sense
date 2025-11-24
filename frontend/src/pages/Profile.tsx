@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { isAxiosError } from 'axios';
 import { getMyProfile, updateMyProfile, type ProfileResponse } from '../services/profile';
 import LoadingSpinner from '../components/LoadingSpinner';
 import InputField from '../components/InputField';
@@ -20,9 +21,15 @@ const Profile: React.FC = () => {
     if (!mounted) return;
     setProfile(data);
     setName(data.display_name ?? '');
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (!mounted) return;
-        setError(e?.response?.data?.error || 'Failed to load profile');
+        if (isAxiosError(e)) {
+          setError(e.response?.data?.error || 'Failed to load profile');
+        } else if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError('Failed to load profile');
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -39,11 +46,17 @@ const Profile: React.FC = () => {
       const updated = await updateMyProfile({ display_name: name.trim() });
       setProfile(updated);
       setSuccess('Profile updated successfully');
-    } catch (e: any) {
-      if (e?.response?.status === 401) {
+    } catch (e: unknown) {
+      if (isAxiosError(e) && e.response?.status === 401) {
         setError('Session expired. Please sign in again.');
       } else {
-        setError(e?.response?.data?.error || 'Failed to update profile');
+        if (isAxiosError(e)) {
+          setError(e.response?.data?.error || 'Failed to update profile');
+        } else if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError('Failed to update profile');
+        }
       }
     } finally {
       setSaving(false);
