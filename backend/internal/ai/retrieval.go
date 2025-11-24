@@ -99,9 +99,9 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg 
 		if r.emb != nil {
 			queryText := BuildSearchQuery(prefs, msg)
 			if queryText != "" {
-				embs, err := r.emb.Embed([]string{queryText})
-				if err == nil && len(embs) > 0 && len(embs[0]) > 0 {
-					similar, err := r.products.FindSimilarProductsByEmbedding(ctx, embs[0], topK)
+				emb, err := r.emb.EmbedQuery(queryText)
+				if err == nil && len(emb) > 0 {
+					similar, err := r.products.FindSimilarProductsByEmbedding(ctx, emb, topK)
 					if err == nil {
 						for _, p := range similar {
 							reason := "Similaridade semântica com sua consulta"
