@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { OrderResponse } from '../types/order';
-import { useCart } from '../contexts/CartContext';
+import { useCart } from '../hooks/useCart';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/format';
 import { Link } from 'react-router-dom';
