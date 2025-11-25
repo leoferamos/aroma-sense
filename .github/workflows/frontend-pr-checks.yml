@@ -22,10 +22,19 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
+
+    - name: Upgrade npm
+      run: npm install -g npm@11
+
+    - name: Check versions
+      run: |
+        node --version
+        npm --version
+      working-directory: frontend
 
     - name: Install dependencies
-      run: npm ci
+      run: npm install
       working-directory: frontend
 
     - name: Run linter
