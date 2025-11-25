@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-frontend-version:
     runs-on: ubuntu-latest
@@ -31,10 +35,12 @@ jobs:
       run: |
         jq --arg version "${{ steps.get_version.outputs.version }}" '.version = $version' frontend/package-lock.json > tmp.json && mv tmp.json frontend/package-lock.json
 
-    - name: Commit and push changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add frontend/package.json frontend/package-lock.json
-        git commit -m "chore: update frontend version to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
-        git push origin main
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: update frontend version to ${{ steps.get_version.outputs.version }}"
+        title: "chore: update frontend version to ${{ steps.get_version.outputs.version }}"
+        body: "Automated update of frontend version to match the latest tag."
+        branch: update-frontend-version-${{ steps.get_version.outputs.version }}
+        delete-branch: true
