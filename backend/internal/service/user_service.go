@@ -101,6 +101,7 @@ func (s *userService) Login(input dto.LoginRequest) (string, string, *model.User
 	if err := s.repo.UpdateRefreshToken(user.ID, &refreshTokenHash, &expiresAt); err != nil {
 		return "", "", nil, errors.New("failed to save refresh token")
 	}
+	user.RefreshTokenExpiresAt = &expiresAt
 
 	return accessToken, refreshToken, user, nil
 }

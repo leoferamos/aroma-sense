@@ -56,9 +56,8 @@ Frontend ── POST /ai/chat ─▶ Backend (Handler)
 
 ### 3) Embeddings (Query and Products)
 
-- Local model via Ollama for dev (`/api/embeddings`).
-- Online API via Hugging Face Inference for prod (free-tier, ~30k calls/month).
-- Products have precomputed embeddings (automatic on creation via API) stored in `product_embeddings`.
+- Local model via Ollama for dev (`/api/embeddings`).- Online API via Hugging Face Inference for prod (free-tier, ~30k calls/month).
+- Products have precomputed embeddings (automatic on creation via API) stored in `product_embeddings` (pgvector).
 - Per query, generate 1 embedding of sanitized text via the configured provider.
 
 ### 4) Hybrid Retrieval (top-k)
@@ -71,13 +70,14 @@ Frontend ── POST /ai/chat ─▶ Backend (Handler)
 
 - Max content: 1–3 candidates (name — brand — reason), user message and summary (if any), PT-BR instructions.
 - Policy: ≤ 180 tokens; 0–1 clarification question (if `NextMissing` indicates critical empty slot).
+- LLM: Gemma-2-2b-it via Hugging Face Inference API.
 - If LLM fails/unavailable: return suggestions with deterministic reasons (no 500 error).
 
 ### 6) Caches and Limits
 
-- Cache `(profileHash + query)` → top-k for 2–5 min.
+- Cache `(profileHash + query)` → top-k for 5 min.
 - Rate-limit per IP in handler.
-- Concurrency=1 in Ollama; short timeouts (e.g., 10s embeddings, 30s LLM).
+- Short timeouts.
 
 ## Contracts (I/O)
 
@@ -125,24 +125,18 @@ No deterministic fallbacks needed; parallel retrieval from FTS, embeddings, and 
 
 ## Environment Variables
 
-- `OLLAMA_LLM_BASE_URL` (default: `http://localhost:11434`)
-- `OLLAMA_LLM_MODEL` (default dev: `tinyllama:1.1b-chat-v1.0-q4_K_M`)
-- `OLLAMA_EMB_MODEL` (e.g., `nomic-embed-text`) – for embeddings
-- `AI_PROVIDER` (ollama or huggingface)
+- `AI_PROVIDER` (huggingface)
+- `AI_EMB_MODEL` (Qwen/Qwen3-Embedding-8B)
+- `AI_LLM_MODEL` (Gemma-2-2b-it)
 - `AI_API_KEY` (for Hugging Face)
-
-First use (pull models inside container):
-
-```bash
-docker exec aroma-ollama-dev ollama pull tinyllama:1.1b-chat-v1.0-q4_K_M
-docker exec aroma-ollama-dev ollama pull nomic-embed-text
-```
+- `AI_EMB_BASE_URL` (optional, defaults to Hugging Face)
+- `AI_LLM_BASE_URL` (optional, defaults to Hugging Face)
 
 ## Performance and Limits (Free-Tier)
 
 - 1 embedding per query, k ≤ 5, prompt ≤ 180 tokens.
-- Small/medium catalog: cosine in memory/SQL full-scan is sufficient.
-- If catalog grows too much: consider `pgvector` later (out of current scope).
+- Small/medium catalog: cosine in pgvector is sufficient.
+- Parallel goroutines for retrieval to reduce latency (~1.5s average).
 
 ## Observability
 
@@ -153,13 +147,3 @@ docker exec aroma-ollama-dev ollama pull nomic-embed-text
 
 - Sanitize PII always before embeddings/FTS/LLM.
 - Rate-limit in handler; timeouts and concurrency limit in Ollama.
-
-## Next Steps (Implementation)
-
-1) Adjust Compose/env: add documented `OLLAMA_EMB_MODEL`.
-2) Minimal embeddings provider (Ollama `/api/embeddings`).
-3) Automatic embeddings on product creation.
-4) Repository: upsert and top-k query by cosine.
-5) Service: hybrid parallel retrieval + reasons.
-6) Caches and limits (profile hash + query → top-k for 2–5 min).
-7) Prompt/UX chat adjustments and flow tests.
