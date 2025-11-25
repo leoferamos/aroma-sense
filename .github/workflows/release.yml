@@ -30,8 +30,8 @@ jobs:
       run: npm ci
       working-directory: frontend
 
-    - name: Install semantic-release plugins
-      run: npm install --save-dev @semantic-release/changelog @semantic-release/git semantic-release
+    - name: Install semantic-release
+      run: npm install --save-dev semantic-release @semantic-release/changelog @semantic-release/git
       working-directory: frontend
 
     - name: Build
@@ -42,7 +42,7 @@ jobs:
       uses: cycjimmy/semantic-release-action@v3
       id: semantic
       with:
-        semantic_version: 23.0.2
+        semantic_version: 21.1.2
         working_directory: frontend
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
