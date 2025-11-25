@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser, refreshToken } from '../services/auth';
 import { setAccessToken } from '../services/api';
@@ -16,6 +16,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export { AuthContext };
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
@@ -55,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(data.user);
         }
       } catch (error) {
+        console.error('Token refresh failed:', error);
         // No valid refresh token cookie
         if (isMounted) {
           updateAccessToken(null);
@@ -76,24 +79,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = user !== null && accessToken !== null;
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      role, 
-      accessToken, 
-      isAuthenticated, 
+    <AuthContext.Provider value={{
+      user,
+      role,
+      accessToken,
+      isAuthenticated,
       isReady,
-      setAuth, 
-      logout 
+      setAuth,
+      logout
     }}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };
