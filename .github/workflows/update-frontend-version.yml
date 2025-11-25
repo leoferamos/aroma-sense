@@ -10,9 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout main branch
       uses: actions/checkout@v4
       with:
+        ref: main
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Get tag version
@@ -36,4 +37,4 @@ jobs:
         git config --local user.name "GitHub Action"
         git add frontend/package.json frontend/package-lock.json
         git commit -m "chore: update frontend version to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
-        git push
+        git push origin main
