@@ -6,7 +6,7 @@
     "@semantic-release/changelog",
     "@semantic-release/npm",
     ["@semantic-release/git", {
-      "push": false
+      "message": "Release v${nextRelease.version}"
     }],
     "@semantic-release/github"
   ]
