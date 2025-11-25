@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useCart } from '../contexts/CartContext';
+import { useCart } from './useCart';
 
 interface UseCartItemQuantityOptions {
   itemId: number;

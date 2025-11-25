@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { loginUser } from "../services/auth";
 import { messages } from "../constants/messages";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import type { LoginRequest } from "../types/auth";
 
 export function useLogin() {

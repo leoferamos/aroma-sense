@@ -4,13 +4,14 @@ import Navbar from '../components/Navbar';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
 import CartItem from '../components/CartItem';
-import { useCart } from '../contexts/CartContext';
+import { useCart } from '../hooks/useCart';
 import { formatCurrency } from '../utils/format';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
 import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../hooks/useCheckoutValidation';
 import useShippingOptions from '../hooks/useShippingOptions';
 import useCepLookup from '../hooks/useCepLookup';
+import type { CartItem as CartItemType } from '../types/cart';
 import type { ShippingOption } from '../types/shipping';
 import { createOrder, type OrderCreateRequest } from '../services/order';
 
@@ -329,7 +330,7 @@ const Checkout: React.FC = () => {
                 )}
 
                 <ul className="divide-y divide-gray-200 mb-4">
-                  {cart!.items.map((item) => (
+                  {cart!.items.map((item: CartItemType) => (
                     <CartItem
                       key={item.id}
                       item={item}
