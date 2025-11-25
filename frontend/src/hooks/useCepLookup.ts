@@ -34,7 +34,8 @@ export default function useCepLookup() {
             }
             return data;
         } catch (err) {
-            setError('Erro na consulta do CEP');
+            console.error('Error fetching CEP:', err);
+            setError('Error in CEP lookup');
             return null;
         } finally {
             setLoading(false);

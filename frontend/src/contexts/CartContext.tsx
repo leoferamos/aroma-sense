@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import React, { createContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import type { CartResponse } from '../types/cart';
 import { addToCart as svcAddToCart, getCart as svcGetCart, removeItem as svcRemoveItem, updateItemQuantity as svcUpdateItemQuantity } from '../services/cart';
-import { useAuth } from './AuthContext';
+import { getStoredToken } from '../utils/authHelpers';
 
 interface CartContextValue {
   cart: CartResponse | null;
@@ -18,15 +18,17 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
+export { CartContext };
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingItemIds, setRemovingItemIds] = useState<Set<number>>(new Set());
 
   const refresh = useCallback(async () => {
-    if (!isAuthenticated) {
+    const token = getStoredToken();
+    if (!token) {
       setCart(null);
       return;
     }
@@ -46,7 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   const addItem = useCallback(async (productId: number, quantity = 1) => {
     try {
@@ -118,18 +120,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refresh();
   }, [refresh]);
 
-  const itemCount = useMemo(() => cart?.item_count ?? 0, [cart]);
-
   const value = useMemo(
-    () => ({ cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem, updateItemQuantity }),
-    [cart, itemCount, loading, error, refresh, addItem, removeItem, isRemovingItem, updateItemQuantity]
+    () => ({
+      cart,
+      itemCount: cart?.item_count ?? 0,
+      loading,
+      error,
+      refresh,
+      addItem,
+      removeItem,
+      isRemovingItem,
+      updateItemQuantity
+    }),
+    [cart, loading, error, refresh, addItem, removeItem, isRemovingItem, updateItemQuantity]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-};
-
-export const useCart = () => {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within a CartProvider');
-  return ctx;
 };

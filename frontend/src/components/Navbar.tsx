@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../hooks/useCart';
+import { useAuth } from '../hooks/useAuth';
 import { formatCurrency } from '../utils/format';
 import { MAX_CART_BADGE_COUNT, LOGO_PATH } from '../constants/app';
 import CartItem from './CartItem';

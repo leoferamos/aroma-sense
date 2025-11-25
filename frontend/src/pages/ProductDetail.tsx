@@ -7,7 +7,7 @@ import ErrorState from '../components/ErrorState';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useProductDetail } from '../hooks/useProductDetail';
 import { useProducts } from '../hooks/useProducts';
-import { useCart } from '../contexts/CartContext';
+import { useCart } from '../hooks/useCart';
 import { formatCurrency } from '../utils/format';
 import { cn } from '../utils/cn';
 import { PLACEHOLDER_IMAGE, LOW_STOCK_THRESHOLD } from '../constants/app';

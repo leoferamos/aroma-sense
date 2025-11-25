@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { requestPasswordReset, confirmPasswordReset } from '../services/auth';
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
+}
+
 interface UseForgotPasswordReturn {
   requestReset: (email: string) => Promise<boolean>;
   confirmReset: (email: string, code: string, newPassword: string) => Promise<boolean>;
@@ -23,8 +31,9 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
       const response = await requestPasswordReset(email);
       setSuccess(response.message);
       return true;
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Failed to request password reset. Please try again.');
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      setError(apiError?.response?.data?.error || 'Failed to request password reset. Please try again.');
       return false;
     } finally {
       setLoading(false);
@@ -40,8 +49,9 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
       const response = await confirmPasswordReset(email, code, newPassword);
       setSuccess(response.message);
       return true;
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Invalid or expired code. Please try again.');
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      setError(apiError?.response?.data?.error || 'Invalid or expired code. Please try again.');
       return false;
     } finally {
       setLoading(false);
