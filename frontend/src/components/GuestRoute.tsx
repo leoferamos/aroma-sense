@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isReady, role } = useAuth();
