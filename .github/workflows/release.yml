@@ -43,3 +43,21 @@ jobs:
       working-directory: frontend
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Configure Git
+      if: env.GIT_TAG != ''
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+      working-directory: frontend
+
+    - name: Commit and Create PR
+      if: env.GIT_TAG != ''
+      run: |
+        git add .
+        git commit -m "chore: release ${GIT_TAG}"
+        git push origin HEAD:release/${GIT_TAG}
+        gh pr create --title "Release ${GIT_TAG}" --body "Automated release PR for ${GIT_TAG}" --base main --head release/${GIT_TAG}
+      working-directory: frontend
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
