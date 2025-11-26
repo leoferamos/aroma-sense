@@ -21,7 +21,7 @@ import (
 type ProductService interface {
 	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
 	GetProductByID(ctx context.Context, id uint) (dto.ProductResponse, error)
-	GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error)
+	GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error)
 	SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error)
 	UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error
 	DeleteProduct(ctx context.Context, id uint) error
@@ -167,11 +167,24 @@ func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.Produ
 	}, nil
 }
 
-// GetLatestProducts retrieves the latest products up to the specified limit
-func (s *productService) GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error) {
-	products, err := s.repo.FindAll(limit)
+// GetLatestProducts retrieves the latest products with pagination
+func (s *productService) GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	const maxLimit = 100
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
+	offset := (page - 1) * limit
+
+	products, total, err := s.repo.FindAllPaginated(limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get products: %w", err)
+		return nil, 0, fmt.Errorf("failed to get products: %w", err)
 	}
 
 	var response []dto.ProductResponse
@@ -201,7 +214,7 @@ func (s *productService) GetLatestProducts(ctx context.Context, limit int) ([]dt
 		})
 	}
 
-	return response, nil
+	return response, total, nil
 }
 
 // UpdateProduct updates an existing product with the provided details

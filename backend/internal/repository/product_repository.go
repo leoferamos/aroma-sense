@@ -16,6 +16,7 @@ import (
 type ProductRepository interface {
 	Create(input dto.ProductFormDTO, imageURL string, thumbnailURL string) (uint, error)
 	FindAll(limit int) ([]model.Product, error)
+	FindAllPaginated(limit int, offset int) ([]model.Product, int, error)
 	FindByID(id uint) (model.Product, error)
 	SearchProducts(ctx context.Context, query string, limit int, offset int, sort string) ([]model.Product, int, error)
 	Update(product *model.Product) error
@@ -80,6 +81,28 @@ func (r *productRepository) FindAll(limit int) ([]model.Product, error) {
 	}
 	err := query.Find(&products).Error
 	return products, err
+}
+
+// FindAllPaginated retrieves products with pagination support
+func (r *productRepository) FindAllPaginated(limit int, offset int) ([]model.Product, int, error) {
+	var products []model.Product
+	var total int64
+
+	// Count total products
+	if err := r.db.Model(&model.Product{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Fetch paginated products
+	query := r.db.Order("created_at desc")
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+	if offset > 0 {
+		query = query.Offset(offset)
+	}
+	err := query.Find(&products).Error
+	return products, int(total), err
 }
 
 // FindByID retrieves a product by its ID

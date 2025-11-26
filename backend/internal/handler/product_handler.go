@@ -126,7 +126,7 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 // `query` parameter is present.
 //
 // @Summary      List or search products
-// @Description  If `query` is provided, returns a paginated search envelope; otherwise returns the latest products (backwards-compatible).
+// @Description  If `query` is provided, returns a paginated search envelope; otherwise returns the latest products.
 // @Tags         products
 // @Accept       json
 // @Produce      json
@@ -134,8 +134,8 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 // @Param        page   query    int     false  "Page number (1-based)"  default(1)
 // @Param        limit  query    int     false  "Items per page (default 10, max 100)"  default(10)
 // @Param        sort   query    string  false  "Sort order: relevance|latest"  default(relevance)
-// @Success      200  {array}   dto.ProductResponse        "List of latest products (when query is absent)"
-// @Success      200  {object}  dto.ProductListResponse   "Search results envelope (when query is present)"
+// @Success      200  {array}   dto.ProductResponse        "List of latest products (when query is absent and page=1)"
+// @Success      200  {object}  dto.ProductListResponse   "Search results envelope (when query is present) or paginated latest (when query absent and page>1)"
 // @Failure      400  {object}  dto.ErrorResponse         "Invalid request parameters"
 // @Failure      500  {object}  dto.ErrorResponse         "Internal server error"
 // @Router       /products [get]
@@ -143,32 +143,8 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	const maxLimit = 100
 
 	query := strings.TrimSpace(c.Query("query"))
-	if query == "" {
-		// return latest products with optional limit
-		limitStr := c.DefaultQuery("limit", "10")
-		limit, err := strconv.Atoi(limitStr)
-		if err != nil || limit < 1 {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
-			return
-		}
-		if limit > maxLimit {
-			limit = maxLimit
-		}
-
-		products, err := h.productService.GetLatestProducts(c.Request.Context(), limit)
-		if err != nil {
-			log.Printf("GetLatestProducts: latest products error: %v", err)
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
-			return
-		}
-		c.JSON(http.StatusOK, products)
-		return
-	}
-
-	// parse and validate pagination and sort
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "10")
-	sort := c.DefaultQuery("sort", "relevance")
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
@@ -185,6 +161,31 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 		limit = maxLimit
 	}
 
+	if query == "" {
+		// return latest products
+		products, total, err := h.productService.GetLatestProducts(c.Request.Context(), page, limit)
+		if err != nil {
+			log.Printf("GetLatestProducts: latest products error: %v", err)
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
+			return
+		}
+
+		if page == 1 {
+			c.JSON(http.StatusOK, products)
+		} else {
+			resp := dto.ProductListResponse{
+				Items: products,
+				Total: total,
+				Page:  page,
+				Limit: limit,
+			}
+			c.JSON(http.StatusOK, resp)
+		}
+		return
+	}
+
+	// parse and validate sort
+	sort := c.DefaultQuery("sort", "relevance")
 	if sort != "relevance" && sort != "latest" {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid sort parameter"})
 		return
