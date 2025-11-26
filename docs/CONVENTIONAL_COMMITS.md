@@ -42,6 +42,10 @@ BREAKING CHANGE: The response format has changed from XML to JSON
 3. Determines the version type (major, minor, patch)
 4. Creates tag, release and updates CHANGELOG.md automatically
 
+## Release Notes
+
+For detailed release descriptions, see the templates in `./releases/`.
+
 ## Next Versions
 
 - `fix:` commits = **PATCH** (0.4.1 → 0.4.2)

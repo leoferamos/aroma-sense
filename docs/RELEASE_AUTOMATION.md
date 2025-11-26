@@ -12,26 +12,18 @@ This project uses **Semantic Release** to automate versioning, tag creation and 
    - Creates tag and GitHub release
    - Updates `package.json`, `package-lock.json` and `CHANGELOG.md`
 
+## 📋 Release Notes
+
+For more detailed releases, we use custom templates in `./releases/`:
+- `TEMPLATE_MINOR.md` for minor releases
+- `TEMPLATE_PATCH.md` for patch releases
+- `TEMPLATE_MAJOR.md` for major releases
+
+The `CHANGELOG.md` is generated automatically by semantic-release, but GitHub release descriptions use the templates for better narrative.
+
 ## 📝 Conventional Commits
 
-Use the format: `type(scope): description`
-
-### Types
-- `feat:` - New feature (increments MINOR: 1.0.0 → 1.1.0)
-- `fix:` - Bug fix (increments PATCH: 1.0.0 → 1.0.1)
-- `docs:` - Documentation
-- `style:` - Formatting/style
-- `refactor:` - Refactoring
-- `perf:` - Performance
-- `test:` - Tests
-- `chore:` - Maintenance
-
-### Examples
-```bash
-git commit -m "feat: add user login system"
-git commit -m "fix: resolve refresh token panic"
-git commit -m "docs: update API documentation"
-```
+See [Conventional Commits Guide](./CONVENTIONAL_COMMITS.md) for detailed rules and examples.
 
 ## 🔄 Next Versions
 
@@ -45,25 +37,20 @@ git commit -m "docs: update API documentation"
 - [ ] Commits follow conventional commits
 - [ ] Code reviewed and approved
 - [ ] Merge to `main` triggers automatic release
+## 🔧 Troubleshooting
 
-## 🛠️ Local Development
+### Release not triggered
+- Check if commits follow conventional commits (`feat:`, `fix:`, etc.)
+- Confirm there are changes since the last tag
+- Check workflow logs in GitHub Actions
 
-```bash
-# Install dependencies
-npm install
-
-# Development
-npm run dev
-
-# Build
-npm run build
-
-# Lint
-npm run lint
-```
+### Semantic-release error
+- Verify configuration in `.releaserc`
+- For manual releases, use `npx semantic-release --dry-run`
 
 ## 📚 Useful Links
 
 - [Conventional Commits](https://conventionalcommits.org/)
 - [Semantic Release](https://semantic-release.gitbook.io/)
 - [Commit Guide](./CONVENTIONAL_COMMITS.md)
+- [Release Templates](./releases/)
