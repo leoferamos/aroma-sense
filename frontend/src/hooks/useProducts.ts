@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { isAxiosError } from "axios";
-import { getProducts } from "../services/product";
+import { listProducts } from "../services/product";
 import type { Product } from "../types/product";
 
 export function useProducts() {
@@ -12,7 +12,7 @@ export function useProducts() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getProducts();
+      const data = await listProducts({ limit: 1000 });
       setProducts(data);
     } catch (err: unknown) {
       if (isAxiosError(err)) {
