@@ -39,6 +39,7 @@ export function useProductSearch(options?: {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
   const debounceRef = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -66,8 +67,13 @@ export function useProductSearch(options?: {
       }
       lastKeyRef.current = key;
 
-      setIsLoading(true);
-      setError(null);
+      // Set appropriate loading state
+      if (append) {
+        setIsLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
+      setIsSearching(!tooShort);
       setIsSearching(!tooShort);
 
       // Try cache first
@@ -176,7 +182,11 @@ export function useProductSearch(options?: {
         }
       } finally {
         if (requestSeq.current === currentSeq) {
-          setIsLoading(false);
+          if (append) {
+            setIsLoadingMore(false);
+          } else {
+            setIsLoading(false);
+          }
         }
       }
     },
@@ -255,6 +265,7 @@ export function useProductSearch(options?: {
     isSearching,
     error,
     hasMore,
+    isLoadingMore,
     // actions
     clear,
     submitNow,
