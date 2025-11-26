@@ -37,12 +37,12 @@ func (m *MockProductService) GetProductByID(ctx context.Context, id uint) (dto.P
 	return args.Get(0).(dto.ProductResponse), args.Error(1)
 }
 
-func (m *MockProductService) GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error) {
-	args := m.Called(ctx, limit)
-	if len(args.Get(0).([]dto.ProductResponse)) == 0 && args.Error(1) != nil {
-		return []dto.ProductResponse{}, args.Error(1)
+func (m *MockProductService) GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error) {
+	args := m.Called(ctx, page, limit)
+	if len(args.Get(0).([]dto.ProductResponse)) == 0 && args.Error(2) != nil {
+		return []dto.ProductResponse{}, 0, args.Error(2)
 	}
-	return args.Get(0).([]dto.ProductResponse), args.Error(1)
+	return args.Get(0).([]dto.ProductResponse), args.Int(1), args.Error(2)
 }
 
 func (m *MockProductService) SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error) {
@@ -330,7 +330,7 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 			{ID: 2, Name: "Test Fragance 2"},
 		}
 
-		mockService.On("GetLatestProducts", mock.Anything, 10).Return(productResponses, nil)
+		mockService.On("GetLatestProducts", mock.Anything, 1, 10).Return(productResponses, 2, nil)
 
 		w := performProductRequest(t, router, http.MethodGet, "/products", nil)
 
@@ -346,7 +346,7 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 	t.Run("Service Error", func(t *testing.T) {
 		router, mockService := setupProductRouter()
 
-		mockService.On("GetLatestProducts", mock.Anything, 10).Return([]dto.ProductResponse{}, fmt.Errorf("database error"))
+		mockService.On("GetLatestProducts", mock.Anything, 1, 10).Return([]dto.ProductResponse{}, 0, fmt.Errorf("database error"))
 
 		w := performProductRequest(t, router, http.MethodGet, "/products", nil)
 

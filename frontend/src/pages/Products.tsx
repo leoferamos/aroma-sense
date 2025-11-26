@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -13,8 +13,10 @@ import { useSearchParams } from 'react-router-dom';
 const Products: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Product[] | null>(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching } = useProductSearch({ limit: 12, debounceMs: 600 });
+  const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching, hasMore, loadMore } = useProductSearch({ limit: 12, debounceMs: 600, enableInfiniteScroll: true });
   const [searchParams] = useSearchParams();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   
 
   // Sync state from URL
@@ -25,6 +27,29 @@ const Products: React.FC = () => {
     if (p !== page) { setPage(p); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!sentinelRef.current || isSearching) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !isLoading) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observerRef.current.observe(sentinelRef.current);
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, isLoading, loadMore, isSearching]);
 
   // Load suggestions when user searched (>=2 chars) and got 0 results
   useEffect(() => {
@@ -129,27 +154,22 @@ const Products: React.FC = () => {
               </div>
             ) : (
               <>
-                <div className="mb-4" aria-live="polite">
-                  <p className="text-gray-600">
-                    {isSearching && query.trim().length >= 2 ? (
-                      <>
-                        Results for <span className="font-semibold">“{query.trim()}”</span>: <span className="font-semibold">{total}</span>
-                      </>
-                    ) : (
-                      (() => (
-                        <>
-                          Showing <span className="font-semibold">{safeResults.length}</span> {safeResults.length === 1 ? 'product' : 'products'}
-                        </>
-                      ))()
-                    )}
-                  </p>
-                </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                   {safeResults.map((product) => (
                     <ProductCard key={product.id} product={product} showAddToCart={false} />
                   ))}
                 </div>
+
+                {/* Infinite scroll sentinel */}
+                {!isSearching && hasMore && (
+                  <div ref={sentinelRef} className="flex justify-center py-8">
+                    {isLoading ? (
+                      <LoadingSpinner message="Loading more products..." />
+                    ) : (
+                      <div className="h-4" /> // Invisible sentinel
+                    )}
+                  </div>
+                )}
 
                 {isSearching && Number(total) > Number(limit) && (
                   <Pagination

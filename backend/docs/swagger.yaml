@@ -464,59 +464,6 @@ definitions:
     - quantity
     type: object
   dto.UpdateProductRequest:
-    description: Product update request (all fields are optional)
-    properties:
-      accords:
-        items:
-          type: string
-        type: array
-      brand:
-        example: Dior
-        type: string
-      category:
-        example: Eau de Parfum
-        type: string
-      description:
-        example: An intense and spicy fragrance
-        type: string
-      gender:
-        type: string
-      intensity:
-        type: string
-      name:
-        example: Sauvage Elixir
-        type: string
-      notes_base:
-        items:
-          type: string
-        type: array
-      notes_heart:
-        items:
-          type: string
-        type: array
-      notes_top:
-        items:
-          type: string
-        type: array
-      occasions:
-        items:
-          type: string
-        type: array
-      price:
-        example: 399.99
-        type: number
-      price_range:
-        type: string
-      seasons:
-        items:
-          type: string
-        type: array
-      stock_quantity:
-        example: 25
-        type: integer
-      weight:
-        example: 60
-        type: number
     type: object
   dto.UpdateProfileRequest:
     properties:
@@ -1048,7 +995,7 @@ paths:
       consumes:
       - application/json
       description: If `query` is provided, returns a paginated search envelope; otherwise
-        returns the latest products (backwards-compatible).
+        returns the latest products.
       parameters:
       - description: Search term (websearch syntax)
         in: query
@@ -1073,7 +1020,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: Search results envelope (when query is present)
+          description: Search results envelope (when query is present) or paginated
+            latest (when query absent and page>1)
           schema:
             $ref: '#/definitions/dto.ProductListResponse'
         "400":
