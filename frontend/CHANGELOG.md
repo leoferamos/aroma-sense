@@ -1,3 +1,10 @@
+## [0.6.1](https://github.com/leoferamos/aroma-sense/compare/v0.6.0...v0.6.1) (2025-11-26)
+
+
+### Bug Fixes
+
+* **products:** improve infinite scroll smoothness ([#78](https://github.com/leoferamos/aroma-sense/issues/78)) ([807ed5d](https://github.com/leoferamos/aroma-sense/commit/807ed5d1fc81999f3ef882394c5dac348aaa358a))
+
 # [0.6.0](https://github.com/leoferamos/aroma-sense/compare/v0.5.1...v0.6.0) (2025-11-26)
 
 
