@@ -90,10 +90,45 @@ const AddProduct: React.FC = () => {
     const product = await submitProduct(form);
 
     if (product) {
-      // Redirect to products page or show success message
-      setTimeout(() => {
-        navigate("/products");
-      }, 2000);
+      // Reset form for adding another product
+      setForm({
+        name: "",
+        brand: "",
+        weight: 0,
+        description: "",
+        price: 0,
+        category: "",
+        accords: [],
+        occasions: [],
+        seasons: [],
+        intensity: "",
+        gender: "",
+        price_range: "",
+        notes_top: [],
+        notes_heart: [],
+        notes_base: [],
+        stock_quantity: 0,
+        image: null,
+      });
+      setTouched({
+        name: false,
+        brand: false,
+        weight: false,
+        description: false,
+        price: false,
+        category: false,
+        accords: false,
+        occasions: false,
+        seasons: false,
+        intensity: false,
+        gender: false,
+        price_range: false,
+        notes_top: false,
+        notes_heart: false,
+        notes_base: false,
+        stock_quantity: false,
+        image: false,
+      });
     }
   };
 
@@ -120,7 +155,7 @@ const AddProduct: React.FC = () => {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span>Product created successfully! Redirecting to products page...</span>
+              <span>Product created successfully! You can add another product.</span>
             </div>
           )}
 
