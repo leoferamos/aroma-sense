@@ -24,7 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, showAdd
   const isLowStock = product.stock_quantity > 0 && product.stock_quantity < LOW_STOCK_THRESHOLD;
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-gray-100 shadow-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl overflow-hidden group">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-lg transition-all duration-200 transform overflow-hidden hover:-translate-y-1 hover:shadow-xl">
       {/* Clickable area*/}
       <Link
         to={`/products/${product.id}`}
@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, showAdd
           <img
             src={product.image_url || PLACEHOLDER_IMAGE}
             alt={product.name}
-            className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+            className="max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105"
             onError={(e) => {
               e.currentTarget.src = PLACEHOLDER_IMAGE;
             }}
