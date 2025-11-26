@@ -20,9 +20,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ open, role, isAuthenticated, onClos
       <nav className="py-2" aria-label="User menu">
   <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>Profile</Link>
   <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>My orders</Link>
-        <button type="button" className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Addresses</button>
-        <button type="button" className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Payment methods</button>
-        <button type="button" className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</button>
         {role === 'admin' && (
           <button type="button" className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Admin dashboard</button>
         )}
