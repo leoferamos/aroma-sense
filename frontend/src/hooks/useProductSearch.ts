@@ -12,6 +12,7 @@ import { searchProducts, listProducts } from "../services/product";
  * - Stale guard: sequence counter ensures only the last response updates state
  * - Reset page: when query changes, page resets to 1
  * - Dedupe: ignore repeated requests for the same (query|page|limit|sort)
+ * - Infinite scroll: for latest products, supports loading more pages
  */
 export function useProductSearch(options?: {
   initialQuery?: string;
@@ -19,6 +20,7 @@ export function useProductSearch(options?: {
   limit?: number;
   sort?: "relevance" | "latest";
   debounceMs?: number;
+  enableInfiniteScroll?: boolean;
 }) {
   const {
     initialQuery = "",
@@ -26,6 +28,7 @@ export function useProductSearch(options?: {
     limit = 12,
     sort = "relevance",
     debounceMs = 350,
+    enableInfiniteScroll = false,
   } = options || {};
 
   const [query, setQuery] = useState<string>(initialQuery);
@@ -35,18 +38,13 @@ export function useProductSearch(options?: {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   const debounceRef = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const requestSeq = useRef(0);
   const lastKeyRef = useRef<string>("");
   const cacheRef = useRef<Map<string, { items: Product[]; total: number; expiresAt: number }>>(new Map());
-
-  // Clear utilities
-  const clear = useCallback(() => {
-    setQuery("");
-    setPage(1);
-  }, []);
 
   const cancelInFlight = useCallback(() => {
     if (abortRef.current) {
@@ -56,14 +54,14 @@ export function useProductSearch(options?: {
   }, []);
 
   const runFetch = useCallback(
-    async (opts: { q: string; p: number }) => {
+    async (opts: { q: string; p: number; append?: boolean }) => {
       const currentSeq = ++requestSeq.current;
-      const { q, p } = opts;
+      const { q, p, append = false } = opts;
       const trimmed = q.trim();
       const tooShort = trimmed.length < 2;
       const key = `${trimmed}|${p}|${limit}|${sort}`;
 
-      if (lastKeyRef.current === key) {
+      if (!append && lastKeyRef.current === key) {
         return;
       }
       lastKeyRef.current = key;
@@ -73,13 +71,16 @@ export function useProductSearch(options?: {
       setIsSearching(!tooShort);
 
       // Try cache first
-      const cached = cacheRef.current.get(key);
-      const now = Date.now();
-      if (cached && cached.expiresAt > now) {
-        setResults(cached.items);
-        setTotal(cached.total);
-        setIsLoading(false);
-        return;
+      if (!append) {
+        const cached = cacheRef.current.get(key);
+        const now = Date.now();
+        if (cached && cached.expiresAt > now) {
+          setResults(cached.items);
+          setTotal(cached.total);
+          setHasMore(cached.items.length < cached.total);
+          setIsLoading(false);
+          return;
+        }
       }
 
       cancelInFlight();
@@ -89,30 +90,49 @@ export function useProductSearch(options?: {
   try {
         if (tooShort) {
           // Default: latest products
-          const data = await listProducts({ limit, signal: controller.signal });
+          const data = await listProducts({ limit, page: p, signal: controller.signal });
           if (requestSeq.current !== currentSeq) return; // stale
-          const payload = { items: data, total: data.length };
-          // Cache
-          cacheRef.current.set(key, { ...payload, expiresAt: now + 5 * 60_000 });
-          if (cacheRef.current.size > 50) {
-            const firstKey = cacheRef.current.keys().next().value as string | undefined;
-            if (firstKey) cacheRef.current.delete(firstKey);
+          
+          const products = Array.isArray(data) ? data : [];
+          
+          if (append && enableInfiniteScroll) {
+            // For infinite scroll, append new products
+            setResults(prev => [...prev, ...products]);
+            setHasMore(products.length === limit);
+          } else {
+            // Regular load or reset
+            const payload = { items: products, total: products.length };
+            // Cache
+            cacheRef.current.set(key, { ...payload, expiresAt: Date.now() + 5 * 60_000 });
+            if (cacheRef.current.size > 50) {
+              const firstKey = cacheRef.current.keys().next().value as string | undefined;
+              if (firstKey) cacheRef.current.delete(firstKey);
+            }
+            setResults(payload.items);
+            setTotal(payload.total);
+            setHasMore(products.length === limit);
           }
-          setResults(payload.items);
-          setTotal(payload.total);
         } else {
           const data = await searchProducts({ query: trimmed, page: p, limit, sort, signal: controller.signal });
           if (requestSeq.current !== currentSeq) return; // stale
           const items = Array.isArray(data.items) ? data.items : [];
           const totalVal = typeof data.total === 'number' ? data.total : items.length;
-          // Cache
-          cacheRef.current.set(key, { items, total: totalVal, expiresAt: now + 5 * 60_000 });
-          if (cacheRef.current.size > 50) {
-            const firstKey = cacheRef.current.keys().next().value as string | undefined;
-            if (firstKey) cacheRef.current.delete(firstKey);
+          
+          if (append && enableInfiniteScroll) {
+            // For infinite scroll search results
+            setResults(prev => [...prev, ...items]);
+            setHasMore(items.length === limit);
+          } else {
+            // Cache
+            cacheRef.current.set(key, { items, total: totalVal, expiresAt: Date.now() + 5 * 60_000 });
+            if (cacheRef.current.size > 50) {
+              const firstKey = cacheRef.current.keys().next().value as string | undefined;
+              if (firstKey) cacheRef.current.delete(firstKey);
+            }
+            setResults(items);
+            setTotal(totalVal);
+            setHasMore(items.length === limit);
           }
-          setResults(items);
-          setTotal(totalVal);
         }
       } catch (e: unknown) {
         // Ignore aborts/cancels
@@ -125,23 +145,34 @@ export function useProductSearch(options?: {
 
         // If we were running a search (>=2 chars), degrade gracefully to empty
         if (!tooShort) {
-          const payload = { items: [] as Product[], total: 0 };
-          cacheRef.current.set(key, { ...payload, expiresAt: now + 60_000 });
-          setResults(payload.items);
-          setTotal(payload.total);
+          if (append) {
+            setHasMore(false);
+          } else {
+            const payload = { items: [] as Product[], total: 0 };
+            cacheRef.current.set(key, { ...payload, expiresAt: Date.now() + 60_000 });
+            setResults(payload.items);
+            setTotal(payload.total);
+            setHasMore(false);
+          }
           setError(null);
           return;
         }
 
         // For listing latest (tooShort), keep a friendly error
         if (status === 404) {
-          const payload = { items: [] as Product[], total: 0 };
-          cacheRef.current.set(key, { ...payload, expiresAt: now + 60_000 });
-          setResults(payload.items);
-          setTotal(payload.total);
+          if (append) {
+            setHasMore(false);
+          } else {
+            const payload = { items: [] as Product[], total: 0 };
+            cacheRef.current.set(key, { ...payload, expiresAt: Date.now() + 60_000 });
+            setResults(payload.items);
+            setTotal(payload.total);
+            setHasMore(false);
+          }
           setError(null);
         } else {
           setError("Failed to load products. Please try again.");
+          setHasMore(false);
         }
       } finally {
         if (requestSeq.current === currentSeq) {
@@ -149,13 +180,23 @@ export function useProductSearch(options?: {
         }
       }
     },
-    [cancelInFlight, limit, sort]
+    [cancelInFlight, limit, sort, enableInfiniteScroll]
   );
+
+  // Load more products for infinite scroll
+  const loadMore = useCallback(() => {
+    if (isLoading || !hasMore) return;
+    const nextPage = Math.floor(results.length / limit) + 1;
+    runFetch({ q: query, p: nextPage, append: true });
+  }, [isLoading, hasMore, results.length, limit, query, runFetch]);
 
   // Debounced effect
   useEffect(() => {
     // reset to page 1 when query changes
     setPage(1);
+    setResults([]);
+    setTotal(0);
+    setHasMore(true);
   }, [query]);
 
   useEffect(() => {
@@ -192,6 +233,15 @@ export function useProductSearch(options?: {
     };
   }, [cancelInFlight]);
 
+  // Clear utilities
+  const clear = useCallback(() => {
+    setQuery("");
+    setPage(1);
+    setResults([]);
+    setTotal(0);
+    setHasMore(true);
+  }, []);
+
   return {
     // state
     query,
@@ -204,8 +254,10 @@ export function useProductSearch(options?: {
     isLoading,
     isSearching,
     error,
+    hasMore,
     // actions
     clear,
     submitNow,
+    loadMore,
   } as const;
 }

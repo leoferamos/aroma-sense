@@ -129,12 +129,22 @@ export async function searchProducts(params: {
 // Lists latest products when `query` is absent.
 export async function listProducts(params?: {
   limit?: number;
+  page?: number;
   signal?: AbortSignal;
 }): Promise<Product[]> {
-  const { limit = 10, signal } = params || {};
-  const response = await api.get<Product[]>("/products", {
-    params: { limit },
+  const { limit = 10, page = 1, signal } = params || {};
+  const response = await api.get("/products", {
+    params: { limit, page },
     signal,
   });
-  return response.data;
+  
+  // Handle both array format (page=1) and paginated format (page>1)
+  const data = response.data;
+  if (Array.isArray(data)) {
+    return data;
+  } else if (data && typeof data === 'object' && Array.isArray(data.items)) {
+    return data.items;
+  } else {
+    return [];
+  }
 }
