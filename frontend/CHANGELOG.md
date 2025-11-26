@@ -1,3 +1,11 @@
+# [0.6.0](https://github.com/leoferamos/aroma-sense/compare/v0.5.1...v0.6.0) (2025-11-26)
+
+
+### Features
+
+* implement infinite scroll for products ([7089573](https://github.com/leoferamos/aroma-sense/commit/708957379ccba36e146fbada47babd33afbf37d0))
+* implement infinite scroll for products ([26a5fdb](https://github.com/leoferamos/aroma-sense/commit/26a5fdbcbe28f9d0370a6e94b0d8e8ac5a011701))
+
 ## [0.5.1](https://github.com/leoferamos/aroma-sense/compare/v0.5.0...v0.5.1) (2025-11-25)
 
 
