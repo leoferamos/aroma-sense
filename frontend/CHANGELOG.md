@@ -1,3 +1,10 @@
+## [0.6.3](https://github.com/leoferamos/aroma-sense/compare/v0.6.2...v0.6.3) (2025-11-26)
+
+
+### Bug Fixes
+
+* **admin:** show all products in admin list ([#81](https://github.com/leoferamos/aroma-sense/issues/81)) ([46fbaab](https://github.com/leoferamos/aroma-sense/commit/46fbaab44eb075a5166a556eaf696ed1d55333d5))
+
 ## [0.6.2](https://github.com/leoferamos/aroma-sense/compare/v0.6.1...v0.6.2) (2025-11-26)
 
 
