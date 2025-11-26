@@ -330,7 +330,7 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 			{ID: 2, Name: "Test Fragance 2"},
 		}
 
-		mockService.On("GetLatestProducts", mock.Anything, 10).Return(productResponses, nil)
+		mockService.On("GetLatestProducts", mock.Anything, 1, 10).Return(productResponses, 2, nil)
 
 		w := performProductRequest(t, router, http.MethodGet, "/products", nil)
 
@@ -346,7 +346,7 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 	t.Run("Service Error", func(t *testing.T) {
 		router, mockService := setupProductRouter()
 
-		mockService.On("GetLatestProducts", mock.Anything, 10).Return([]dto.ProductResponse{}, fmt.Errorf("database error"))
+		mockService.On("GetLatestProducts", mock.Anything, 1, 10).Return([]dto.ProductResponse{}, 0, fmt.Errorf("database error"))
 
 		w := performProductRequest(t, router, http.MethodGet, "/products", nil)
 
