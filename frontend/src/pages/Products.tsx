@@ -13,7 +13,7 @@ import { useSearchParams } from 'react-router-dom';
 const Products: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Product[] | null>(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching, hasMore, loadMore } = useProductSearch({ limit: 12, debounceMs: 600, enableInfiniteScroll: true });
+  const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching, hasMore, loadMore, isLoadingMore } = useProductSearch({ limit: 12, debounceMs: 600, enableInfiniteScroll: true });
   const [searchParams] = useSearchParams();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -163,11 +163,14 @@ const Products: React.FC = () => {
                 {/* Infinite scroll sentinel */}
                 {!isSearching && hasMore && (
                   <div ref={sentinelRef} className="flex justify-center py-8">
-                    {isLoading ? (
-                      <LoadingSpinner message="Loading more products..." />
-                    ) : (
-                      <div className="h-4" /> // Invisible sentinel
-                    )}
+                    <div className="h-4" /> {/* Invisible sentinel for smooth infinite scroll */}
+                  </div>
+                )}
+
+                {/* Loading indicator at the end of the list*/}
+                {!isSearching && isLoadingMore && results.length > 0 && (
+                  <div className="flex justify-center py-8">
+                    <LoadingSpinner message="Loading more products..." />
                   </div>
                 )}
 
