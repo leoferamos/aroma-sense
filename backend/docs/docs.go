@@ -774,7 +774,7 @@ const docTemplate = `{
         },
         "/products": {
             "get": {
-                "description": "If ` + "`" + `query` + "`" + ` is provided, returns a paginated search envelope; otherwise returns the latest products (backwards-compatible).",
+                "description": "If ` + "`" + `query` + "`" + ` is provided, returns a paginated search envelope; otherwise returns the latest products.",
                 "consumes": [
                     "application/json"
                 ],
@@ -816,7 +816,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Search results envelope (when query is present)",
+                        "description": "Search results envelope (when query is present) or paginated latest (when query absent and page\u003e1)",
                         "schema": {
                             "$ref": "#/definitions/dto.ProductListResponse"
                         }
@@ -2104,83 +2104,7 @@ const docTemplate = `{
             }
         },
         "dto.UpdateProductRequest": {
-            "description": "Product update request (all fields are optional)",
-            "type": "object",
-            "properties": {
-                "accords": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "brand": {
-                    "type": "string",
-                    "example": "Dior"
-                },
-                "category": {
-                    "type": "string",
-                    "example": "Eau de Parfum"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "An intense and spicy fragrance"
-                },
-                "gender": {
-                    "type": "string"
-                },
-                "intensity": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Sauvage Elixir"
-                },
-                "notes_base": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "notes_heart": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "notes_top": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "occasions": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "price": {
-                    "type": "number",
-                    "example": 399.99
-                },
-                "price_range": {
-                    "type": "string"
-                },
-                "seasons": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "stock_quantity": {
-                    "type": "integer",
-                    "example": 25
-                },
-                "weight": {
-                    "type": "number",
-                    "example": 60
-                }
-            }
+            "type": "object"
         },
         "dto.UpdateProfileRequest": {
             "type": "object",
