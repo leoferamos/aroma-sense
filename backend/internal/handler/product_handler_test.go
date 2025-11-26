@@ -37,12 +37,12 @@ func (m *MockProductService) GetProductByID(ctx context.Context, id uint) (dto.P
 	return args.Get(0).(dto.ProductResponse), args.Error(1)
 }
 
-func (m *MockProductService) GetLatestProducts(ctx context.Context, limit int) ([]dto.ProductResponse, error) {
-	args := m.Called(ctx, limit)
-	if len(args.Get(0).([]dto.ProductResponse)) == 0 && args.Error(1) != nil {
-		return []dto.ProductResponse{}, args.Error(1)
+func (m *MockProductService) GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error) {
+	args := m.Called(ctx, page, limit)
+	if len(args.Get(0).([]dto.ProductResponse)) == 0 && args.Error(2) != nil {
+		return []dto.ProductResponse{}, 0, args.Error(2)
 	}
-	return args.Get(0).([]dto.ProductResponse), args.Error(1)
+	return args.Get(0).([]dto.ProductResponse), args.Int(1), args.Error(2)
 }
 
 func (m *MockProductService) SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error) {
