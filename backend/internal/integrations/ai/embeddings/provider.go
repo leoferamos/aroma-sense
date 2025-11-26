@@ -3,7 +3,6 @@ package embeddings
 type Provider interface {
 	Embed(texts []string) ([][]float32, error)
 	EmbedQuery(query string) ([]float32, error)
-	// Configure allows setting model-specific options
 	Configure(config map[string]interface{}) Provider
 }
 

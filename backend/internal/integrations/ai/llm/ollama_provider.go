@@ -14,7 +14,7 @@ type OllamaConfig struct {
 	BaseURL   string
 	Model     string
 	Timeout   time.Duration
-	MaxTokens int // default upper bound when caller doesn't specify
+	MaxTokens int
 }
 
 type ollamaPayload struct {
