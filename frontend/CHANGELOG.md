@@ -1,3 +1,10 @@
+## [0.6.2](https://github.com/leoferamos/aroma-sense/compare/v0.6.1...v0.6.2) (2025-11-26)
+
+
+### Bug Fixes
+
+* **products:** fix hover state persistence during scroll ([#79](https://github.com/leoferamos/aroma-sense/issues/79)) ([010a02d](https://github.com/leoferamos/aroma-sense/commit/010a02d3583e2fa91f72791b9b2aa4db86d8af7c))
+
 ## [0.6.1](https://github.com/leoferamos/aroma-sense/compare/v0.6.0...v0.6.1) (2025-11-26)
 
 
