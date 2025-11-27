@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/subtle"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -22,6 +23,15 @@ type UserService interface {
 	InvalidateRefreshToken(refreshToken string) error
 	GetByPublicID(publicID string) (*model.User, error)
 	UpdateDisplayName(publicID string, displayName string) (*model.User, error)
+	ListUsers(limit int, offset int, filters map[string]interface{}) ([]*model.User, int64, error)
+	GetUserByID(id uint) (*model.User, error)
+	UpdateUserRole(userID uint, newRole string, adminPublicID string) error
+	DeactivateUser(userID uint, adminPublicID string, reason string, notes string, suspensionUntil *time.Time) error
+	ExportUserData(publicID string) (*dto.UserExportResponse, error)
+	RequestAccountDeletion(publicID string) error
+	ConfirmAccountDeletion(publicID string) error
+	CancelAccountDeletion(publicID string) error
+	AnonymizeExpiredUser(publicID string) error
 }
 
 type userService struct {
@@ -199,4 +209,164 @@ func (s *userService) UpdateDisplayName(publicID string, displayName string) (*m
 		return nil, err
 	}
 	return user, nil
+}
+
+// ListUsers returns paginated list of users for admin (LGPD compliance)
+func (s *userService) ListUsers(limit int, offset int, filters map[string]interface{}) ([]*model.User, int64, error) {
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	return s.repo.ListUsers(limit, offset, filters)
+}
+
+// GetUserByID returns user by database ID for admin
+func (s *userService) GetUserByID(id uint) (*model.User, error) {
+	return s.repo.FindByID(id)
+}
+
+// UpdateUserRole updates user role with admin tracking
+func (s *userService) UpdateUserRole(userID uint, newRole string, adminPublicID string) error {
+	// Validate role
+	if newRole != "admin" && newRole != "client" {
+		return errors.New("invalid role")
+	}
+
+	// Prevent admin from changing their own role
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return err
+	}
+	if user.PublicID == adminPublicID {
+		return errors.New("cannot change your own role")
+	}
+
+	return s.repo.UpdateRole(userID, newRole)
+}
+
+// DeactivateUser soft deletes a user account with enhanced LGPD compliance
+func (s *userService) DeactivateUser(userID uint, adminPublicID string, reason string, notes string, suspensionUntil *time.Time) error {
+	now := time.Now()
+	return s.repo.DeactivateUser(userID, adminPublicID, now, reason, notes, suspensionUntil)
+}
+
+// ExportUserData exports all user data for GDPR compliance
+func (s *userService) ExportUserData(publicID string) (*dto.UserExportResponse, error) {
+	user, err := s.repo.FindByPublicID(publicID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.UserExportResponse{
+		PublicID:            user.PublicID,
+		Email:               user.Email,
+		Role:                user.Role,
+		DisplayName:         user.DisplayName,
+		CreatedAt:           user.CreatedAt,
+		LastLoginAt:         user.LastLoginAt,
+		DeactivatedAt:       user.DeactivatedAt,
+		DeletionRequestedAt: user.DeletionRequestedAt,
+		DeletionConfirmedAt: user.DeletionConfirmedAt,
+	}, nil
+}
+
+// RequestAccountDeletion initiates account deletion process with 7-day cooling off period (LGPD compliance)
+func (s *userService) RequestAccountDeletion(publicID string) error {
+	if publicID == "" {
+		return errors.New("unauthenticated")
+	}
+
+	// Check if user has active dependencies
+	hasDependencies, err := s.repo.HasActiveDependencies(publicID)
+	if err != nil {
+		return errors.New("failed to check account dependencies")
+	}
+	if hasDependencies {
+		return errors.New("cannot delete account with active orders - please cancel or complete all orders first")
+	}
+
+	// Check if already requested deletion
+	user, err := s.repo.FindByPublicID(publicID)
+	if err != nil {
+		return err
+	}
+	if user.DeletionRequestedAt != nil {
+		return errors.New("account deletion already requested")
+	}
+
+	now := time.Now()
+	return s.repo.RequestAccountDeletion(publicID, now)
+}
+
+// ConfirmAccountDeletion confirms account deletion after cooling off period (LGPD compliance)
+func (s *userService) ConfirmAccountDeletion(publicID string) error {
+	if publicID == "" {
+		return errors.New("unauthenticated")
+	}
+
+	user, err := s.repo.FindByPublicID(publicID)
+	if err != nil {
+		return err
+	}
+
+	// Check if deletion was requested
+	if user.DeletionRequestedAt == nil {
+		return errors.New("no deletion request found")
+	}
+
+	// Check if cooling off period (7 days) has passed
+	coolingOffPeriod := user.DeletionRequestedAt.Add(7 * 24 * time.Hour)
+	if time.Now().Before(coolingOffPeriod) {
+		return errors.New("cooling off period not yet expired - please wait 7 days from request")
+	}
+
+	now := time.Now()
+	return s.repo.ConfirmAccountDeletion(publicID, now)
+}
+
+// CancelAccountDeletion cancels a pending account deletion request
+func (s *userService) CancelAccountDeletion(publicID string) error {
+	if publicID == "" {
+		return errors.New("unauthenticated")
+	}
+
+	user, err := s.repo.FindByPublicID(publicID)
+	if err != nil {
+		return err
+	}
+
+	if user.DeletionRequestedAt == nil {
+		return errors.New("no deletion request to cancel")
+	}
+
+	// Clear deletion request
+	user.DeletionRequestedAt = nil
+	return s.repo.Update(user)
+}
+
+// AnonymizeExpiredUser anonymizes user data after retention period (LGPD compliance)
+func (s *userService) AnonymizeExpiredUser(publicID string) error {
+	user, err := s.repo.FindByPublicID(publicID)
+	if err != nil {
+		return err
+	}
+
+	// Verify deletion was confirmed and retention period has passed (2 years)
+	if user.DeletionConfirmedAt == nil {
+		return errors.New("user has not confirmed account deletion")
+	}
+
+	retentionPeriod := user.DeletionConfirmedAt.Add(2 * 365 * 24 * time.Hour) // 2 years
+	if time.Now().Before(retentionPeriod) {
+		return errors.New("retention period not yet expired")
+	}
+
+	// Anonymize personal data while keeping necessary records for compliance
+	anonymizedEmail := fmt.Sprintf("deleted-%s@anonymous.local", user.PublicID[:8])
+	anonymizedDisplayName := "Usuário Excluído"
+
+	return s.repo.AnonymizeUser(publicID, anonymizedEmail, anonymizedDisplayName)
 }
