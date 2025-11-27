@@ -1,3 +1,10 @@
+## [0.7.1](https://github.com/leoferamos/aroma-sense/compare/v0.7.0...v0.7.1) (2025-11-27)
+
+
+### Bug Fixes
+
+* **frontend:** create AuthBackLink component to resolve navigation bug ([#83](https://github.com/leoferamos/aroma-sense/issues/83)) ([b44ef88](https://github.com/leoferamos/aroma-sense/commit/b44ef88974b6854911500007736232eb273686ef))
+
 # [0.7.0](https://github.com/leoferamos/aroma-sense/compare/v0.6.3...v0.7.0) (2025-11-27)
 
 
