@@ -51,8 +51,8 @@ const ChatMount: React.FC = () => {
         />
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<GuestRoute><Terms /></GuestRoute>} />
+        <Route path="/privacy" element={<GuestRoute><Privacy /></GuestRoute>} />
 
         {/* Protected admin routes */}
         <Route
