@@ -9,6 +9,7 @@ import (
 func initializeHandlers(services *services, rateLimiter rate.RateLimiter) *AppHandlers {
 	return &AppHandlers{
 		UserHandler:          handler.NewUserHandler(services.user),
+		AdminUserHandler:     handler.NewAdminUserHandler(services.user),
 		ProductHandler:       handler.NewProductHandler(services.product, services.review, services.user),
 		CartHandler:          handler.NewCartHandler(services.cart),
 		OrderHandler:         handler.NewOrderHandler(services.order),

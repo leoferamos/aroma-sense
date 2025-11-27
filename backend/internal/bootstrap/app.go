@@ -10,6 +10,7 @@ import (
 // AppHandlers contains all initialized handlers
 type AppHandlers struct {
 	UserHandler          *handler.UserHandler
+	AdminUserHandler     *handler.AdminUserHandler
 	ProductHandler       *handler.ProductHandler
 	CartHandler          *handler.CartHandler
 	OrderHandler         *handler.OrderHandler
