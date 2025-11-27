@@ -2,7 +2,8 @@ import React, { createContext, useEffect, useMemo, useState, useCallback } from 
 import { isAxiosError } from 'axios';
 import type { CartResponse } from '../types/cart';
 import { addToCart as svcAddToCart, getCart as svcGetCart, removeItem as svcRemoveItem, updateItemQuantity as svcUpdateItemQuantity } from '../services/cart';
-import { getStoredToken } from '../utils/authHelpers';
+import { getAccessToken } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 interface CartContextValue {
   cart: CartResponse | null;
@@ -21,13 +22,14 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 export { CartContext };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isReady } = useAuth();
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingItemIds, setRemovingItemIds] = useState<Set<number>>(new Set());
 
   const refresh = useCallback(async () => {
-    const token = getStoredToken();
+    const token = getAccessToken();
     if (!token) {
       setCart(null);
       return;
@@ -116,9 +118,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Fetch cart on mount or when auth changes
-    refresh();
-  }, [refresh]);
+    // Only fetch cart when auth is ready
+    if (isReady) {
+      refresh();
+    }
+  }, [isReady, refresh]);
 
   const value = useMemo(
     () => ({
