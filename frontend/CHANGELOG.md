@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/leoferamos/aroma-sense/compare/v0.6.3...v0.7.0) (2025-11-27)
+
+
+### Features
+
+* **ui:** improve forms layout and add installment display ([29c35b0](https://github.com/leoferamos/aroma-sense/commit/29c35b094fc9f572c47b3fd2b6cc047cf460ebac))
+
 ## [0.6.3](https://github.com/leoferamos/aroma-sense/compare/v0.6.2...v0.6.3) (2025-11-26)
 
 
