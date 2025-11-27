@@ -15,6 +15,11 @@ type UserRepository interface {
 	FindByPublicID(publicID string) (*model.User, error)
 	Update(user *model.User) error
 	UpdateRefreshToken(userID uint, hash *string, expiresAt *time.Time) error
+	ListUsers(limit int, offset int, filters map[string]interface{}) ([]*model.User, int64, error)
+	FindByID(id uint) (*model.User, error)
+	UpdateRole(userID uint, newRole string) error
+	DeactivateUser(userID uint, adminPublicID string, deactivatedAt time.Time, reason string, notes string, suspensionUntil *time.Time) error
+	DeleteByPublicID(publicID string) error
 }
 
 type userRepository struct {
@@ -71,4 +76,74 @@ func (r *userRepository) UpdateRefreshToken(userID uint, hash *string, expiresAt
 		"refresh_token_hash":       hash,
 		"refresh_token_expires_at": expiresAt,
 	}).Error
+}
+
+// ListUsers returns paginated list of users for admin (LGPD compliance)
+func (r *userRepository) ListUsers(limit int, offset int, filters map[string]interface{}) ([]*model.User, int64, error) {
+	var users []*model.User
+	var total int64
+
+	query := r.db.Model(&model.User{})
+
+	// Apply filters
+	if role, exists := filters["role"]; exists && role != "" {
+		query = query.Where("role = ?", role)
+	}
+	if status, exists := filters["status"]; exists && status != "" {
+		switch status {
+		case "active":
+			query = query.Where("deleted_at IS NULL AND deactivated_at IS NULL")
+		case "deactivated":
+			query = query.Where("deactivated_at IS NOT NULL")
+		case "deleted":
+			query = query.Where("deleted_at IS NOT NULL")
+		}
+	}
+
+	// Count total
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
+	if err := query.Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
+}
+
+// FindByID retrieves a user by database ID
+func (r *userRepository) FindByID(id uint) (*model.User, error) {
+	var user model.User
+	if err := r.db.First(&user, id).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// UpdateRole updates user role
+func (r *userRepository) UpdateRole(userID uint, newRole string) error {
+	return r.db.Model(&model.User{}).Where("id = ?", userID).Update("role", newRole).Error
+}
+
+// DeactivateUser soft deletes a user account with enhanced LGPD compliance
+func (r *userRepository) DeactivateUser(userID uint, adminPublicID string, deactivatedAt time.Time, reason string, notes string, suspensionUntil *time.Time) error {
+	updates := map[string]interface{}{
+		"deactivated_by":      adminPublicID,
+		"deactivated_at":      deactivatedAt,
+		"deactivation_reason": reason,
+		"deactivation_notes":  notes,
+	}
+
+	if suspensionUntil != nil {
+		updates["suspension_until"] = suspensionUntil
+	}
+
+	return r.db.Model(&model.User{}).Where("id = ?", userID).Updates(updates).Error
+}
+
+// DeleteByPublicID permanently deletes a user by public ID
+func (r *userRepository) DeleteByPublicID(publicID string) error {
+	return r.db.Unscoped().Where("public_id = ?", publicID).Delete(&model.User{}).Error
 }
