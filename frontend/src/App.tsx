@@ -53,7 +53,7 @@ const ChatMount: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
-        
+
         {/* Protected admin routes */}
         <Route
           path="/admin/dashboard"
@@ -137,7 +137,7 @@ const ChatMount: React.FC = () => {
           }
         />
         <Route path="/" element={<Navigate to="/login" replace />} />
-        
+
         {/* 404 - Catch all unmatched routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -153,7 +153,7 @@ const App: React.FC = () => {
         <CartProvider>
           <Suspense fallback={<PageLoader />}>
             <ErrorBoundary>
-            <ChatMount />
+              <ChatMount />
             </ErrorBoundary>
           </Suspense>
         </CartProvider>

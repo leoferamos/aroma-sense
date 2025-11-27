@@ -78,7 +78,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleAddNoteTop = () => {
     if (noteTopInput.trim()) {
-      setForm({ ...form, notes_top: [...form.notes_top, noteTopInput.trim()] });
+      const items = noteTopInput.split(/[;,]/).map(item => item.trim()).filter(item => item.length > 0);
+      setForm({ ...form, notes_top: [...form.notes_top, ...items] });
       setNoteTopInput("");
       setTouched({ ...touched, notes_top: true });
     }
@@ -90,7 +91,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleAddNoteHeart = () => {
     if (noteHeartInput.trim()) {
-      setForm({ ...form, notes_heart: [...form.notes_heart, noteHeartInput.trim()] });
+      const items = noteHeartInput.split(/[;,]/).map(item => item.trim()).filter(item => item.length > 0);
+      setForm({ ...form, notes_heart: [...form.notes_heart, ...items] });
       setNoteHeartInput("");
       setTouched({ ...touched, notes_heart: true });
     }
@@ -102,7 +104,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleAddNoteBase = () => {
     if (noteBaseInput.trim()) {
-      setForm({ ...form, notes_base: [...form.notes_base, noteBaseInput.trim()] });
+      const items = noteBaseInput.split(/[;,]/).map(item => item.trim()).filter(item => item.length > 0);
+      setForm({ ...form, notes_base: [...form.notes_base, ...items] });
       setNoteBaseInput("");
       setTouched({ ...touched, notes_base: true });
     }
@@ -114,7 +117,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleAddAccord = () => {
     if (accordInput.trim()) {
-      setForm({ ...form, accords: [...form.accords, accordInput.trim()] });
+      const items = accordInput.split(/[;,]/).map(item => item.trim()).filter(item => item.length > 0);
+      setForm({ ...form, accords: [...form.accords, ...items] });
       setAccordInput("");
       setTouched({ ...touched, accords: true });
     }
@@ -126,7 +130,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleAddOccasion = () => {
     if (occasionInput.trim()) {
-      setForm({ ...form, occasions: [...form.occasions, occasionInput.trim()] });
+      const items = occasionInput.split(/[;,]/).map(item => item.trim()).filter(item => item.length > 0);
+      setForm({ ...form, occasions: [...form.occasions, ...items] });
       setOccasionInput("");
       setTouched({ ...touched, occasions: true });
     }
@@ -138,7 +143,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   const handleAddSeason = () => {
     if (seasonInput.trim()) {
-      setForm({ ...form, seasons: [...form.seasons, seasonInput.trim()] });
+      const items = seasonInput.split(/[;,]/).map(item => item.trim()).filter(item => item.length > 0);
+      setForm({ ...form, seasons: [...form.seasons, ...items] });
       setSeasonInput("");
       setTouched({ ...touched, seasons: true });
     }
@@ -151,7 +157,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
       {error && (
-        <div 
+        <div
           role="alert"
           className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
         >
@@ -159,91 +165,99 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </div>
       )}
 
-      {/* Product Name */}
-      <div>
-        <InputField
-          label="Product Name"
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          required
-        />
-        <FormError message={errors.name} />
+      {/* Product Name & Brand */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <InputField
+            label="Product Name"
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          <FormError message={errors.name} />
+        </div>
+        <div>
+          <InputField
+            label="Brand"
+            type="text"
+            name="brand"
+            value={form.brand}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          <FormError message={errors.brand} />
+        </div>
       </div>
 
-      {/* Brand */}
-      <div>
-        <InputField
-          label="Brand"
-          type="text"
-          name="brand"
-          value={form.brand}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          required
-        />
-        <FormError message={errors.brand} />
+      {/* Weight & Price */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <InputField
+            label="Weight (grams)"
+            type="number"
+            name="weight"
+            value={String(form.weight || "")}
+            onChange={handleNumberChange}
+            onBlur={handleBlur}
+            min="0"
+            step="0.01"
+            required
+          />
+          <FormError message={errors.weight} />
+        </div>
+        <div>
+          <InputField
+            label="Price (R$)"
+            type="number"
+            name="price"
+            value={String(form.price || "")}
+            onChange={handleNumberChange}
+            onBlur={handleBlur}
+            min="0"
+            step="0.01"
+            required
+          />
+          <FormError message={errors.price} />
+        </div>
       </div>
 
-      {/* Weight */}
-      <div>
-        <label htmlFor="weight" className="text-base font-normal text-gray-800 block mb-2">
-          Weight (grams)
-        </label>
-        <input
-          type="number"
-          id="weight"
-          name="weight"
-          value={form.weight || ""}
-          onChange={handleNumberChange}
-          onBlur={handleBlur}
-          className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-          min="0"
-          step="0.01"
-          required
-        />
-        <FormError message={errors.weight} />
-      </div>
-
-      {/* Price */}
-      <div>
-        <label htmlFor="price" className="text-base font-normal text-gray-800 block mb-2">
-          Price (R$)
-        </label>
-        <input
-          type="number"
-          id="price"
-          name="price"
-          value={form.price || ""}
-          onChange={handleNumberChange}
-          onBlur={handleBlur}
-          className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-          min="0"
-          step="0.01"
-          required
-        />
-        <FormError message={errors.price} />
-      </div>
-
-      {/* Category */}
-      <div>
-        <InputField
-          label="Category"
-          type="text"
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          required
-        />
-        <FormError message={errors.category} />
+      {/* Category & Stock Quantity */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <InputField
+            label="Category"
+            type="text"
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          <FormError message={errors.category} />
+        </div>
+        <div>
+          <InputField
+            label="Stock Quantity"
+            type="number"
+            name="stock_quantity"
+            value={String(form.stock_quantity || "")}
+            onChange={handleNumberChange}
+            onBlur={handleBlur}
+            min="0"
+            step="1"
+            required
+          />
+          <FormError message={errors.stock_quantity} />
+        </div>
       </div>
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="text-base font-normal text-gray-800 block mb-2">
+        <label htmlFor="description" className="text-sm font-medium text-gray-700 block mb-2">
           Description
         </label>
         <textarea
@@ -252,78 +266,56 @@ const ProductForm: React.FC<ProductFormProps> = ({
           value={form.description}
           onChange={handleChange}
           onBlur={handleBlur}
-          className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+          className="border border-gray-300 rounded-xl px-4 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
           rows={4}
           required
         />
         <FormError message={errors.description} />
       </div>
 
-      {/* Stock Quantity */}
-      <div>
-        <label htmlFor="stock_quantity" className="text-base font-normal text-gray-800 block mb-2">
-          Stock Quantity
-        </label>
-        <input
-          type="number"
-          id="stock_quantity"
-          name="stock_quantity"
-          value={form.stock_quantity || ""}
-          onChange={handleNumberChange}
-          onBlur={handleBlur}
-          className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-          min="0"
-          step="1"
-          required
-        />
-        <FormError message={errors.stock_quantity} />
-      </div>
-
-      {/* Intensity */}
-      <div>
-        <InputField
-          label="Intensity (Optional)"
-          type="text"
-          name="intensity"
-          value={form.intensity}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder="e.g., Light, Moderate, Strong"
-        />
-        <FormError message={errors.intensity} />
-      </div>
-
-      {/* Gender */}
-      <div>
-        <InputField
-          label="Gender (Optional)"
-          type="text"
-          name="gender"
-          value={form.gender}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder="e.g., Unisex, Men, Women"
-        />
-        <FormError message={errors.gender} />
-      </div>
-
-      {/* Price Range */}
-      <div>
-        <InputField
-          label="Price Range (Optional)"
-          type="text"
-          name="price_range"
-          value={form.price_range}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          placeholder="e.g., Budget, Mid-range, Luxury"
-        />
-        <FormError message={errors.price_range} />
+      {/* Intensity, Gender & Price Range */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <InputField
+            label="Intensity (Optional)"
+            type="text"
+            name="intensity"
+            value={form.intensity}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder="e.g., Light, Moderate"
+          />
+          <FormError message={errors.intensity} />
+        </div>
+        <div>
+          <InputField
+            label="Gender (Optional)"
+            type="text"
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder="e.g., Unisex, Men"
+          />
+          <FormError message={errors.gender} />
+        </div>
+        <div>
+          <InputField
+            label="Price Range (Optional)"
+            type="text"
+            name="price_range"
+            value={form.price_range}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            placeholder="e.g., Budget, Luxury"
+          />
+          <FormError message={errors.price_range} />
+        </div>
       </div>
 
       {/* Accords */}
       <div>
-        <label className="text-base font-normal text-gray-800 block mb-2">
+        <label className="text-sm font-medium text-gray-700 block mb-2">
           Accords (Optional)
         </label>
         <div className="flex gap-2 mb-2">
@@ -332,13 +324,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
             value={accordInput}
             onChange={(e) => setAccordInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddAccord())}
-            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-            placeholder="e.g., Floral, Woody, Citrus"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
+            placeholder="e.g., Floral; Woody; Citrus or Floral, Woody"
           />
           <button
             type="button"
             onClick={handleAddAccord}
-            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Add
           </button>
@@ -367,7 +359,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Occasions */}
       <div>
-        <label className="text-base font-normal text-gray-800 block mb-2">
+        <label className="text-sm font-medium text-gray-700 block mb-2">
           Occasions (Optional)
         </label>
         <div className="flex gap-2 mb-2">
@@ -376,13 +368,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
             value={occasionInput}
             onChange={(e) => setOccasionInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddOccasion())}
-            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-            placeholder="e.g., Day, Night, Casual, Formal"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
+            placeholder="e.g., Day; Night; Casual or Day, Night"
           />
           <button
             type="button"
             onClick={handleAddOccasion}
-            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Add
           </button>
@@ -411,7 +403,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Seasons */}
       <div>
-        <label className="text-base font-normal text-gray-800 block mb-2">
+        <label className="text-sm font-medium text-gray-700 block mb-2">
           Seasons (Optional)
         </label>
         <div className="flex gap-2 mb-2">
@@ -420,13 +412,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
             value={seasonInput}
             onChange={(e) => setSeasonInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSeason())}
-            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-            placeholder="e.g., Spring, Summer, Fall, Winter"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
+            placeholder="e.g., Spring; Summer; Fall or Spring, Summer"
           />
           <button
             type="button"
             onClick={handleAddSeason}
-            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Add
           </button>
@@ -455,7 +447,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Top Notes */}
       <div>
-        <label className="text-base font-normal text-gray-800 block mb-2">
+        <label className="text-sm font-medium text-gray-700 block mb-2">
           Top Notes (Optional)
         </label>
         <div className="flex gap-2 mb-2">
@@ -464,13 +456,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
             value={noteTopInput}
             onChange={(e) => setNoteTopInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddNoteTop())}
-            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-            placeholder="e.g., Bergamot, Lemon, Orange"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
+            placeholder="e.g., Bergamot; Lemon; Orange or Bergamot, Lemon"
           />
           <button
             type="button"
             onClick={handleAddNoteTop}
-            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Add
           </button>
@@ -499,7 +491,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Heart Notes */}
       <div>
-        <label className="text-base font-normal text-gray-800 block mb-2">
+        <label className="text-sm font-medium text-gray-700 block mb-2">
           Heart Notes (Optional)
         </label>
         <div className="flex gap-2 mb-2">
@@ -508,13 +500,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
             value={noteHeartInput}
             onChange={(e) => setNoteHeartInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddNoteHeart())}
-            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-            placeholder="e.g., Rose, Jasmine, Lavender"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
+            placeholder="e.g., Rose; Jasmine; Lavender or Rose, Jasmine"
           />
           <button
             type="button"
             onClick={handleAddNoteHeart}
-            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Add
           </button>
@@ -543,7 +535,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
       {/* Base Notes */}
       <div>
-        <label className="text-base font-normal text-gray-800 block mb-2">
+        <label className="text-sm font-medium text-gray-700 block mb-2">
           Base Notes (Optional)
         </label>
         <div className="flex gap-2 mb-2">
@@ -552,13 +544,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
             value={noteBaseInput}
             onChange={(e) => setNoteBaseInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddNoteBase())}
-            className="border border-gray-300 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-            placeholder="e.g., Vanilla, Sandalwood, Musk"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
+            placeholder="e.g., Vanilla; Sandalwood; Musk or Vanilla, Sandalwood"
           />
           <button
             type="button"
             onClick={handleAddNoteBase}
-            className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-colors"
+            className="bg-blue-500 text-white px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Add
           </button>
@@ -588,7 +580,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       {/* Image Upload */}
       {!isEditMode ? (
         <div>
-          <label htmlFor="image" className="text-base font-normal text-gray-800 block mb-2">
+          <label htmlFor="image" className="text-sm font-medium text-gray-700 block mb-2">
             Product Image
           </label>
           <input
@@ -598,7 +590,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             accept="image/jpeg,image/png"
             onChange={handleImageChange}
             onBlur={handleBlur}
-            className="border border-gray-300 rounded-xl px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
             required
           />
           {imagePreview && (
@@ -615,7 +607,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       ) : (
         currentImageUrl && (
           <div>
-            <label className="text-base font-normal text-gray-800 block mb-2">
+            <label className="text-sm font-medium text-gray-700 block mb-2">
               Image
             </label>
             <img
@@ -631,7 +623,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="w-full bg-blue-600 text-white py-2.5 rounded-xl font-medium text-sm hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         {loading ? loadingText : submitButtonText}
       </button>

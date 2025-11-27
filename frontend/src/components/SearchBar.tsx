@@ -47,14 +47,14 @@ const SearchBar: React.FC<Props> = ({
           onKeyDown={handleKeyDown}
           aria-label="Search products"
           placeholder={placeholder}
-          className="block w-full rounded-lg border border-gray-200 bg-gray-50 hover:bg-white py-2.5 pl-12 pr-32 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          className="block w-full rounded-2xl border-0 bg-white shadow-sm ring-1 ring-gray-200 py-3.5 pl-12 pr-32 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 hover:shadow-md hover:ring-gray-300"
         />
         {value && onClear && (
           <button
             type="button"
             onClick={onClear}
             aria-label="Clear search"
-            className="absolute inset-y-0 right-24 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            className="absolute inset-y-0 right-24 flex items-center text-gray-400 hover:text-gray-700 transition-colors duration-200 hover:scale-110"
           >
             <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fillRule="evenodd" d="M10 8.586l4.95-4.95a1 1 0 011.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 11-1.414-1.414L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z" clipRule="evenodd" />
@@ -65,7 +65,7 @@ const SearchBar: React.FC<Props> = ({
           type="button"
           onClick={onSubmit}
           aria-label="Submit search"
-          className="absolute inset-y-0 right-2 my-1 rounded-md bg-blue-600 px-4 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-200 active:scale-95"
+          className="absolute inset-y-0 right-2 my-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-5 text-sm font-medium text-white shadow-sm hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 active:scale-95"
         >
           Search
         </button>

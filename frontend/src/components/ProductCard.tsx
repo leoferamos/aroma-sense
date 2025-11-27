@@ -65,11 +65,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, showAdd
           </div>
 
           {/* Price */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xl font-bold text-blue-600">{formatCurrency(product.price)}</span>
-            {isLowStock && (
-              <span className="text-xs font-medium px-2 py-1 bg-orange-50 text-orange-700 rounded-full">{product.stock_quantity} left</span>
-            )}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xl font-bold text-blue-600">{formatCurrency(product.price)}</span>
+              {isLowStock && (
+                <span className="text-xs font-medium px-2 py-1 bg-orange-50 text-orange-700 rounded-full">{product.stock_quantity} left</span>
+              )}
+            </div>
+            <p className="text-xs text-gray-600">ou 10x de {formatCurrency(product.price / 10)} sem juros</p>
           </div>
         </div>
       </Link>

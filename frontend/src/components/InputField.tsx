@@ -28,6 +28,9 @@ interface InputFieldProps {
   autoComplete?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  min?: string;
+  max?: string;
+  step?: string;
   rightIcon?: React.ReactNode;
   onRightIconMouseDown?: () => void;
   onRightIconMouseUp?: () => void;
@@ -49,6 +52,9 @@ const InputField: React.FC<InputFieldProps> = ({
   autoComplete,
   disabled = false,
   readOnly = false,
+  min,
+  max,
+  step,
   rightIcon,
   onRightIconMouseDown,
   onRightIconMouseUp,
@@ -68,6 +74,9 @@ const InputField: React.FC<InputFieldProps> = ({
           value={value}
           onChange={onChange}
           {...(onBlur ? { onBlur } : {})}
+          {...(min !== undefined ? { min } : {})}
+          {...(max !== undefined ? { max } : {})}
+          {...(step !== undefined ? { step } : {})}
           className={`${baseClasses} ${disabled ? disabledClasses : enabledClasses}`}
           placeholder={placeholder}
           required={required}
