@@ -229,3 +229,125 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resp)
 }
+
+// ExportUserData exports all user data for GDPR compliance
+//
+// @Summary      Export user data
+// @Description  Download all personal data for GDPR portability right
+// @Tags         user,gdpr
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  dto.UserExportResponse "User data exported"
+// @Failure      401  {object}  dto.ErrorResponse      "Unauthorized"
+// @Failure      500  {object}  dto.ErrorResponse      "Internal server error"
+// @Router       /users/me/export [get]
+func (h *UserHandler) ExportUserData(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	data, err := h.userService.ExportUserData(publicID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to export user data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}
+
+// RequestAccountDeletion initiates account deletion process with cooling off period
+//
+// @Summary      Request account deletion
+// @Description  Initiates account deletion process with 7-day cooling off period (LGPD compliance)
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body   dto.DeleteAccountRequest true "Deletion confirmation"
+// @Success      200      {object}  dto.MessageResponse   "Deletion request initiated successfully"
+// @Failure      400      {object}  dto.ErrorResponse     "Invalid confirmation or active dependencies"
+// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
+// @Router       /users/me/deletion [post]
+func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	var input dto.DeleteAccountRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	// Require explicit confirmation
+	if input.Confirmation != "DELETE_MY_ACCOUNT" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid confirmation phrase"})
+		return
+	}
+
+	if err := h.userService.RequestAccountDeletion(publicID); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion requested successfully - you have 7 days to change your mind"})
+}
+
+// ConfirmAccountDeletion confirms account deletion after cooling off period
+//
+// @Summary      Confirm account deletion
+// @Description  Confirms account deletion after 7-day cooling off period has passed
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Success      200      {object}  dto.MessageResponse   "Account deletion confirmed"
+// @Failure      400      {object}  dto.ErrorResponse     "Cooling off period not expired or no deletion request"
+// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
+// @Router       /users/me/deletion/confirm [post]
+func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	if err := h.userService.ConfirmAccountDeletion(publicID); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion confirmed - your data will be retained for 2 years before permanent deletion"})
+}
+
+// CancelAccountDeletion cancels a pending account deletion request
+//
+// @Summary      Cancel account deletion
+// @Description  Cancels a pending account deletion request during cooling off period
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Success      200      {object}  dto.MessageResponse   "Account deletion cancelled"
+// @Failure      400      {object}  dto.ErrorResponse     "No deletion request to cancel"
+// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
+// @Router       /users/me/deletion/cancel [post]
+func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	if err := h.userService.CancelAccountDeletion(publicID); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion cancelled successfully"})
+}
