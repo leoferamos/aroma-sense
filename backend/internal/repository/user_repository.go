@@ -22,6 +22,7 @@ type UserRepository interface {
 	RequestAccountDeletion(publicID string, requestedAt time.Time) error
 	ConfirmAccountDeletion(publicID string, confirmedAt time.Time) error
 	HasActiveDependencies(publicID string) (bool, error)
+	AnonymizeUser(publicID string, anonymizedEmail string, anonymizedDisplayName string) error
 	DeleteByPublicID(publicID string) error
 }
 
@@ -173,4 +174,23 @@ func (r *userRepository) HasActiveDependencies(publicID string) (bool, error) {
 	}
 
 	return activeOrdersCount > 0, nil
+}
+
+// AnonymizeUser anonymizes user personal data while keeping audit trail (LGPD compliance)
+func (r *userRepository) AnonymizeUser(publicID string, anonymizedEmail string, anonymizedDisplayName string) error {
+	return r.db.Model(&model.User{}).Where("public_id = ?", publicID).Updates(map[string]interface{}{
+		"email":                    anonymizedEmail,
+		"password_hash":            "",
+		"display_name":             anonymizedDisplayName,
+		"last_login_at":            nil,
+		"refresh_token_hash":       nil,
+		"refresh_token_expires_at": nil,
+		"deactivated_at":           nil,
+		"deactivated_by":           nil,
+		"deactivation_reason":      nil,
+		"deactivation_notes":       nil,
+		"suspension_until":         nil,
+		"reactivation_requested":   false,
+		"contestation_deadline":    nil,
+	}).Error
 }
