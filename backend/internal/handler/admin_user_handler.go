@@ -1,0 +1,240 @@
+package handler
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/leoferamos/aroma-sense/internal/dto"
+	"github.com/leoferamos/aroma-sense/internal/service"
+)
+
+type AdminUserHandler struct {
+	userService service.UserService
+}
+
+// NewAdminUserHandler creates a new instance of AdminUserHandler
+func NewAdminUserHandler(s service.UserService) *AdminUserHandler {
+	return &AdminUserHandler{userService: s}
+}
+
+// AdminListUsers returns paginated list of users for admin
+//
+// @Summary      List users for admin
+// @Description  Get paginated list of users with optional filters
+// @Tags         admin,users
+// @Accept       json
+// @Produce      json
+// @Param        limit   query     int                  false  "Number of users per page" default(10)
+// @Param        offset  query     int                  false  "Offset for pagination" default(0)
+// @Param        role    query     string               false  "Filter by role (admin, client)"
+// @Param        status  query     string               false  "Filter by status (active, deactivated, deleted)"
+// @Success      200     {object}  dto.UserListResponse "Users list"
+// @Failure      400     {object}  dto.ErrorResponse    "Invalid request"
+// @Failure      500     {object}  dto.ErrorResponse    "Internal server error"
+// @Router       /admin/users [get]
+func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
+	// Parse query parameters
+	limitStr := c.DefaultQuery("limit", "10")
+	offsetStr := c.DefaultQuery("offset", "0")
+	role := c.Query("role")
+	status := c.Query("status")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	// Build filters
+	filters := make(map[string]interface{})
+	if role != "" {
+		filters["role"] = role
+	}
+	if status != "" {
+		filters["status"] = status
+	}
+
+	// Get users
+	users, total, err := h.userService.ListUsers(limit, offset, filters)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to fetch users"})
+		return
+	}
+
+	// Convert to response DTO
+	userResponses := make([]dto.AdminUserResponse, len(users))
+	for i, user := range users {
+		userResponses[i] = dto.AdminUserResponse{
+			ID:                    user.ID,
+			PublicID:              user.PublicID,
+			Email:                 user.Email,
+			Role:                  user.Role,
+			DisplayName:           user.DisplayName,
+			CreatedAt:             user.CreatedAt,
+			LastLoginAt:           user.LastLoginAt,
+			DeactivatedAt:         user.DeactivatedAt,
+			DeactivatedBy:         user.DeactivatedBy,
+			DeactivationReason:    user.DeactivationReason,
+			DeactivationNotes:     user.DeactivationNotes,
+			SuspensionUntil:       user.SuspensionUntil,
+			ReactivationRequested: user.ReactivationRequested,
+			ContestationDeadline:  user.ContestationDeadline,
+		}
+	}
+
+	response := dto.UserListResponse{
+		Users:  userResponses,
+		Total:  total,
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// AdminGetUser returns detailed user information for admin
+//
+// @Summary      Get user details for admin
+// @Description  Get detailed information about a specific user
+// @Tags         admin,users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int                  true  "User ID"
+// @Success      200  {object}  dto.AdminUserResponse "User details"
+// @Failure      404  {object}  dto.ErrorResponse     "User not found"
+// @Failure      500  {object}  dto.ErrorResponse     "Internal server error"
+// @Router       /admin/users/{id} [get]
+func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		return
+	}
+
+	user, err := h.userService.GetUserByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "User not found"})
+		return
+	}
+
+	response := dto.AdminUserResponse{
+		ID:                    user.ID,
+		PublicID:              user.PublicID,
+		Email:                 user.Email,
+		Role:                  user.Role,
+		DisplayName:           user.DisplayName,
+		CreatedAt:             user.CreatedAt,
+		LastLoginAt:           user.LastLoginAt,
+		DeactivatedAt:         user.DeactivatedAt,
+		DeactivatedBy:         user.DeactivatedBy,
+		DeactivationReason:    user.DeactivationReason,
+		DeactivationNotes:     user.DeactivationNotes,
+		SuspensionUntil:       user.SuspensionUntil,
+		ReactivationRequested: user.ReactivationRequested,
+		ContestationDeadline:  user.ContestationDeadline,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// AdminUpdateUserRole updates user role
+//
+// @Summary      Update user role
+// @Description  Change user role (admin/client) with admin confirmation
+// @Tags         admin,users
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                  true  "User ID"
+// @Param        role     body      dto.UpdateRoleRequest true "New role"
+// @Success      200      {object}  dto.MessageResponse   "Role updated successfully"
+// @Failure      400      {object}  dto.ErrorResponse     "Invalid request"
+// @Failure      403      {object}  dto.ErrorResponse     "Cannot change own role"
+// @Failure      404      {object}  dto.ErrorResponse     "User not found"
+// @Router       /admin/users/{id}/role [patch]
+func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		return
+	}
+
+	var input dto.UpdateRoleRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	// Get admin public ID from context
+	adminPublicID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
+		return
+	}
+
+	if err := h.userService.UpdateUserRole(uint(id), input.Role, adminPublicID.(string)); err != nil {
+		status := http.StatusInternalServerError
+		if err.Error() == "cannot change your own role" {
+			status = http.StatusForbidden
+		} else if err.Error() == "invalid role" {
+			status = http.StatusBadRequest
+		}
+		c.JSON(status, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "User role updated successfully"})
+}
+
+// AdminDeactivateUser deactivates a user account with enhanced LGPD compliance
+//
+// @Summary      Deactivate user account
+// @Description  Soft delete user account for GDPR compliance with detailed reason and notes
+// @Tags         admin,users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int                           true  "User ID"
+// @Param        request body   dto.AdminDeactivateUserRequest true "Deactivation details"
+// @Success      200  {object}  dto.MessageResponse           "User deactivated successfully"
+// @Failure      400  {object}  dto.ErrorResponse             "Invalid request"
+// @Failure      404  {object}  dto.ErrorResponse             "User not found"
+// @Failure      500  {object}  dto.ErrorResponse             "Internal server error"
+// @Router       /admin/users/{id}/deactivate [post]
+func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		return
+	}
+
+	// Get admin public ID from context
+	adminPublicID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
+		return
+	}
+
+	// Parse request body
+	var req dto.AdminDeactivateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid request body"})
+		return
+	}
+
+	if err := h.userService.DeactivateUser(uint(id), adminPublicID.(string), req.Reason, req.Notes, req.SuspensionUntil); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to deactivate user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "User deactivated successfully"})
+}
