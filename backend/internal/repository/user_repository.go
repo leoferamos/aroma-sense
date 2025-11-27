@@ -19,6 +19,9 @@ type UserRepository interface {
 	FindByID(id uint) (*model.User, error)
 	UpdateRole(userID uint, newRole string) error
 	DeactivateUser(userID uint, adminPublicID string, deactivatedAt time.Time, reason string, notes string, suspensionUntil *time.Time) error
+	RequestAccountDeletion(publicID string, requestedAt time.Time) error
+	ConfirmAccountDeletion(publicID string, confirmedAt time.Time) error
+	HasActiveDependencies(publicID string) (bool, error)
 	DeleteByPublicID(publicID string) error
 }
 
@@ -146,4 +149,28 @@ func (r *userRepository) DeactivateUser(userID uint, adminPublicID string, deact
 // DeleteByPublicID permanently deletes a user by public ID
 func (r *userRepository) DeleteByPublicID(publicID string) error {
 	return r.db.Unscoped().Where("public_id = ?", publicID).Delete(&model.User{}).Error
+}
+
+// RequestAccountDeletion marks account for deletion with retention period (LGPD compliance)
+func (r *userRepository) RequestAccountDeletion(publicID string, requestedAt time.Time) error {
+	return r.db.Model(&model.User{}).Where("public_id = ?", publicID).Update("deletion_requested_at", requestedAt).Error
+}
+
+// ConfirmAccountDeletion confirms account deletion after retention period
+func (r *userRepository) ConfirmAccountDeletion(publicID string, confirmedAt time.Time) error {
+	return r.db.Model(&model.User{}).Where("public_id = ?", publicID).Update("deletion_confirmed_at", confirmedAt).Error
+}
+
+// HasActiveDependencies checks if user has active orders or other dependencies that prevent deletion
+func (r *userRepository) HasActiveDependencies(publicID string) (bool, error) {
+	// Check for active (non-delivered) orders
+	var activeOrdersCount int64
+	if err := r.db.Table("orders").
+		Joins("JOIN order_items ON orders.id = order_items.order_id").
+		Where("orders.user_id = ? AND orders.status NOT IN ('delivered', 'cancelled')", publicID).
+		Count(&activeOrdersCount).Error; err != nil {
+		return false, err
+	}
+
+	return activeOrdersCount > 0, nil
 }
