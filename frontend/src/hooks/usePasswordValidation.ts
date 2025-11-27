@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { messages } from '../constants/messages';
 
 /**
@@ -11,7 +12,7 @@ export function usePasswordValidation() {
    * @param touched - Whether the field has been touched/blurred
    * @returns Error message or empty string if valid
    */
-  const validatePassword = (password: string, touched: boolean): string => {
+  const validatePassword = useCallback((password: string, touched: boolean): string => {
     if (!touched) return '';
     
     if (!password) {
@@ -31,7 +32,7 @@ export function usePasswordValidation() {
     }
     
     return '';
-  };
+  }, []);
 
   /**
    * Validates password confirmation matches the original password.
@@ -40,7 +41,7 @@ export function usePasswordValidation() {
    * @param touched - Whether the confirmation field has been touched
    * @returns Error message or empty string if valid
    */
-  const validatePasswordConfirmation = (
+  const validatePasswordConfirmation = useCallback((
     password: string,
     confirmPassword: string,
     touched: boolean
@@ -55,7 +56,7 @@ export function usePasswordValidation() {
     }
     
     return '';
-  };
+  }, []);
 
   return {
     validatePassword,
