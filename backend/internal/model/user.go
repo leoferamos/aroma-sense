@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // User represents the database entity for a registered user.
 type User struct {
@@ -13,4 +17,14 @@ type User struct {
 	RefreshTokenHash      *string    `gorm:"size:255" json:"-"`
 	RefreshTokenExpiresAt *time.Time `json:"-"`
 	CreatedAt             time.Time  `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt             time.Time  `gorm:"autoUpdateTime" json:"-"`
+	DeletedAt             gorm.DeletedAt `gorm:"index" json:"-"` // Soft delete
+	LastLoginAt           *time.Time `json:"last_login_at,omitempty"`
+	DeactivatedBy         *string    `gorm:"type:uuid" json:"deactivated_by,omitempty"`
+	DeactivatedAt         *time.Time `json:"deactivated_at,omitempty"`
+	DeactivationReason    *string    `gorm:"size:50" json:"deactivation_reason,omitempty"`
+	DeactivationNotes     *string    `gorm:"type:text" json:"deactivation_notes,omitempty"`
+	SuspensionUntil       *time.Time `json:"suspension_until,omitempty"`
+	ReactivationRequested bool       `gorm:"default:false" json:"reactivation_requested,omitempty"`
+	ContestationDeadline  *time.Time `json:"contestation_deadline,omitempty"`
 }
