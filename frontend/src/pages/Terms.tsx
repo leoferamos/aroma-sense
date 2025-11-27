@@ -4,9 +4,9 @@ import AuthBackLink from '../components/AuthBackLink';
 
 const Terms: React.FC = () => {
     return (
-        <LegalPageLayout title="Terms of Service" lastUpdate="October 23, 2025">
+        <LegalPageLayout title="Terms of Service" lastUpdate="November 27, 2025">
             <h1 className="text-center text-2xl font-semibold text-gray-900 mb-2">Termos de Uso — Aroma Sense</h1>
-            <p className="text-center text-sm text-gray-500 mb-8">Última atualização: 23 de outubro de 2025</p>
+            <p className="text-center text-sm text-gray-500 mb-8">Última atualização: 27 de novembro de 2025</p>
 
             <section className="space-y-4 text-justify">
                             <p>
@@ -108,8 +108,31 @@ const Terms: React.FC = () => {
 
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">9. Suspensão ou Encerramento de Conta</h3>
                             <p>
-                                O Aroma Sense poderá suspender ou excluir contas de usuários que violem estes Termos, que tentem
-                                fraudar o sistema, disseminar conteúdo inadequado ou comprometer a segurança da plataforma.
+                                O Aroma Sense poderá suspender temporariamente ou excluir permanentemente contas de usuários nas seguintes situações:
+                            </p>
+                            <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
+                                <li><strong>Violação dos Termos de Uso:</strong> Uso indevido da plataforma, spam, conteúdo ofensivo ou discriminatório;</li>
+                                <li><strong>Fraude ou Tentativa de Fraude:</strong> Uso de dados falsos, tentativas de burlar pagamentos ou comprometer transações;</li>
+                                <li><strong>Conteúdo Inadequado:</strong> Publicação de comentários abusivos, discriminatórios, ilegais ou que violem direitos de terceiros;</li>
+                                <li><strong>Comprometimento da Segurança:</strong> Tentativas de hacking, exploração de vulnerabilidades ou uso de ferramentas automatizadas sem autorização;</li>
+                                <li><strong>Inatividade Prolongada:</strong> Contas abandonadas sem uso por período superior a 2 anos;</li>
+                                <li><strong>Solicitação Judicial:</strong> Cumprimento de ordens legais, decisões judiciais ou requisições de autoridades competentes.</li>
+                            </ul>
+                            <p className="mt-3"><strong>Processo de Desativação:</strong></p>
+                            <ol className="list-decimal list-inside text-gray-700 ml-3 space-y-1">
+                                <li>Notificação prévia por e-mail com justificativa detalhada da medida;</li>
+                                <li>Período de 7 dias corridos para contestação e apresentação de defesa;</li>
+                                <li>Análise da contestação pela equipe de suporte em até 5 dias úteis;</li>
+                                <li>Possibilidade de recurso à decisão junto ao suporte (<a href="mailto:suporte.aromasense@gmail.com" className="text-blue-600 hover:underline">suporte.aromasense@gmail.com</a>);</li>
+                                <li>Em casos de violação grave ou risco iminente, desativação imediata pode ocorrer sem prévia notificação.</li>
+                            </ol>
+                            <p className="mt-3"><strong>Consequências:</strong></p>
+                            <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
+                                <li><strong>Suspensão temporária:</strong> Acesso bloqueado por período determinado, com possibilidade de reativação após correção das irregularidades;</li>
+                                <li><strong>Exclusão permanente:</strong> Remoção definitiva da conta e dados pessoais após período de retenção de 30 dias (exceto dados necessários para compliance legal, que serão mantidos por até 5 anos).</li>
+                            </ul>
+                            <p className="mt-2">
+                                O Aroma Sense compromete-se a agir de forma proporcional, transparente e fundamentada em todos os casos de desativação de contas.
                             </p>
 
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">10. Alterações nos Termos</h3>

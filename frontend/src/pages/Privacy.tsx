@@ -4,7 +4,7 @@ import AuthBackLink from '../components/AuthBackLink';
 
 const Privacy: React.FC = () => {
     return (
-        <LegalPageLayout title="Privacy Policy" lastUpdate="October 23, 2025">
+        <LegalPageLayout title="Privacy Policy" lastUpdate="November 27, 2025">
             <section className="space-y-4 text-justify">
                             <p>
                                 A sua privacidade é <strong className="text-gray-900">muito importante</strong> para nós. Esta Política de Privacidade explica como o Aroma Sense, de responsabilidade de Julio Oliveira e Leonardo Ramos, coleta, utiliza, armazena e protege as informações dos usuários que acessam e utilizam nossos serviços.
@@ -67,17 +67,36 @@ const Privacy: React.FC = () => {
                                 <li>Revogar o consentimento para uso dos dados;</li>
                                 <li>Solicitar informações sobre o compartilhamento de dados.</li>
                             </ul>
+                            <p className="mt-2"><strong>6.1 Direitos em Caso de Desativação de Conta</strong></p>
+                            <p>
+                                Caso sua conta seja desativada pela plataforma, você tem direito a:
+                            </p>
+                            <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
+                                <li>Receber notificação clara sobre os motivos da desativação;</li>
+                                <li>Apresentar contestação em até 7 dias corridos;</li>
+                                <li>Ser informado sobre o processo de recurso disponível;</li>
+                                <li>Solicitar revisão da decisão por parte da equipe de suporte;</li>
+                                <li>Receber confirmação da exclusão definitiva dos dados quando aplicável.</li>
+                            </ul>
                             <p className="mt-2">Para exercer qualquer um desses direitos, basta entrar em contato pelo e-mail:
-                                <a href="mailto:suporte.aromasene@gmail.com" className="text-blue-600 hover:underline ml-1">📩 suporte.aromasene@gmail.com</a>
+                                <a href="mailto:suporte.aromasense@gmail.com" className="text-blue-600 hover:underline ml-1">📩 suporte.aromasense@gmail.com</a>
                             </p>
 
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">7. Retenção e Exclusão de Dados</h3>
                             <p>Os dados do usuário serão mantidos apenas pelo tempo necessário para:</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
                                 <li>Cumprir as finalidades descritas nesta Política;</li>
-                                <li>Atender exigências legais ou contratuais.</li>
+                                <li>Atender exigências legais ou contratuais;</li>
+                                <li>Preservar direitos e interesses legítimos da plataforma.</li>
                             </ul>
-                            <p className="mt-2">Após o encerramento da conta ou solicitação de exclusão, os dados serão removidos de forma segura e definitiva.</p>
+                            <p className="mt-2"><strong>7.1 Desativação de Conta pela Plataforma</strong></p>
+                            <p>
+                                Além da exclusão por solicitação do usuário, o Aroma Sense pode desativar contas conforme descrito nos Termos de Uso.
+                                Em caso de desativação por violação ou outros motivos, os dados serão mantidos por até 2 anos para fins de auditoria,
+                                compliance legal e proteção contra fraudes, após o que serão definitivamente excluídos, exceto quando exigido
+                                por lei por período superior.
+                            </p>
+                            <p className="mt-2">Após o encerramento da conta (seja por solicitação do usuário ou decisão da plataforma), os dados serão removidos de forma segura e definitiva, mantendo apenas registros mínimos necessários para compliance legal.</p>
 
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">8. Inteligência Artificial e Personalização</h3>
                             <p>O Aroma Sense utiliza algoritmos de inteligência artificial para sugerir perfumes com base nas preferências e interações do usuário. Essas recomendações são automáticas e não envolvem decisões humanas diretas. Nenhuma decisão de caráter legal, financeiro ou pessoal é tomada exclusivamente por meio da IA.</p>
