@@ -45,7 +45,7 @@ func main() {
 	// Initialize and start LGPD data cleanup job
 	cleanupJob := job.NewDataCleanupJob(
 		app.Repos.UserRepo,
-		app.Services.UserService,
+		app.Services.LgpdService,
 		app.Services.AuditLogService,
 	)
 	cleanupJob.Start()
