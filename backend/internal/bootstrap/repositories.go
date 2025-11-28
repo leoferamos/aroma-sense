@@ -13,6 +13,7 @@ type repositories struct {
 	order      repository.OrderRepository
 	resetToken repository.ResetTokenRepository
 	review     repository.ReviewRepository
+	auditLog   repository.AuditLogRepository
 }
 
 // initializeRepositories creates all repository instances
@@ -24,5 +25,6 @@ func initializeRepositories(db *gorm.DB) *repositories {
 		order:      repository.NewOrderRepository(db),
 		resetToken: repository.NewResetTokenRepository(db),
 		review:     repository.NewReviewRepository(db),
+		auditLog:   repository.NewAuditLogRepository(db),
 	}
 }

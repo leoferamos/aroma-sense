@@ -18,5 +18,6 @@ func initializeHandlers(services *services, rateLimiter rate.RateLimiter) *AppHa
 		ReviewHandler:        handler.NewReviewHandler(services.review, services.user),
 		AIHandler:            handler.NewAIHandler(services.ai, rateLimiter),
 		ChatHandler:          handler.NewChatHandler(services.chat, rateLimiter),
+		AuditLogHandler:      handler.NewAuditLogHandler(services.auditLog),
 	}
 }

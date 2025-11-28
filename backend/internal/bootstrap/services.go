@@ -16,6 +16,7 @@ type services struct {
 	ai            *service.AIService
 	chat          *service.ChatService
 	shipping      service.ShippingService
+	auditLog      service.AuditLogService
 }
 
 // initializeServices creates all service instances with proper dependencies
@@ -29,9 +30,12 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 		)
 	}
 
+	// Initialize audit log service first
+	auditLogService := service.NewAuditLogService(repos.auditLog)
+
 	// Initialize services in dependency order
 	cartService := service.NewCartService(repos.cart, nil)
-	userService := service.NewUserService(repos.user, cartService)
+	userService := service.NewUserService(repos.user, cartService, auditLogService, integrations.email)
 	orderService := service.NewOrderService(repos.order, repos.cart, repos.product, integrations.shipping.service)
 	passwordResetService := service.NewPasswordResetService(repos.resetToken, repos.user, integrations.email)
 	reviewService := service.NewReviewService(repos.review, repos.order, repos.product)
@@ -51,5 +55,6 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 		ai:            aiService,
 		chat:          chatService,
 		shipping:      integrations.shipping.service,
+		auditLog:      auditLogService,
 	}
 }
