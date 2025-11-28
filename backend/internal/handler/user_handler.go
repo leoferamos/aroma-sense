@@ -11,12 +11,14 @@ import (
 )
 
 type UserHandler struct {
-	userService service.UserService
+	authService        service.AuthService
+	userProfileService service.UserProfileService
+	lgpdService        service.LgpdService
 }
 
 // NewUserHandler creates a new instance of UserHandler
-func NewUserHandler(s service.UserService) *UserHandler {
-	return &UserHandler{userService: s}
+func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService) *UserHandler {
+	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd}
 }
 
 // RegisterUser handles user registration requests.
@@ -39,7 +41,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 
 	input.Email = strings.ToLower(input.Email)
 
-	if err := h.userService.RegisterUser(input); err != nil {
+	if err := h.authService.RegisterUser(input); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -67,7 +69,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	input.Email = strings.ToLower(input.Email)
 
-	accessToken, refreshToken, user, err := h.userService.Login(input)
+	accessToken, refreshToken, user, err := h.authService.Login(input)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid credentials"})
 		return
@@ -109,7 +111,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 	}
 
 	// Validate refresh token and generate new access token + rotate refresh token
-	accessToken, newRefreshToken, user, err := h.userService.RefreshAccessToken(refreshToken)
+	accessToken, newRefreshToken, user, err := h.authService.RefreshAccessToken(refreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: err.Error()})
 		return
@@ -143,7 +145,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 // @Router       /users/logout [post]
 func (h *UserHandler) LogoutUser(c *gin.Context) {
 	if refreshToken, err := c.Cookie("refresh_token"); err == nil && refreshToken != "" {
-		_ = h.userService.InvalidateRefreshToken(refreshToken)
+		_ = h.authService.InvalidateRefreshToken(refreshToken)
 	}
 	auth.ClearRefreshTokenCookie(c)
 
@@ -167,7 +169,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 		return
 	}
 	publicID := rawUserID.(string)
-	user, err := h.userService.GetByPublicID(publicID)
+	user, err := h.userProfileService.GetByPublicID(publicID)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
 		return
@@ -209,7 +211,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.UpdateDisplayName(publicID, req.DisplayName)
+	user, err := h.userProfileService.UpdateDisplayName(publicID, req.DisplayName)
 	if err != nil {
 		// simple validation mapping
 		if strings.Contains(err.Error(), "too short") || strings.Contains(err.Error(), "too long") {
@@ -250,7 +252,7 @@ func (h *UserHandler) ExportUserData(c *gin.Context) {
 	}
 	publicID := rawUserID.(string)
 
-	data, err := h.userService.ExportUserData(publicID)
+	data, err := h.lgpdService.ExportUserData(publicID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to export user data"})
 		return
@@ -292,7 +294,7 @@ func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
 		return
 	}
 
-	if err := h.userService.RequestAccountDeletion(publicID); err != nil {
+	if err := h.lgpdService.RequestAccountDeletion(publicID); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -320,7 +322,7 @@ func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
 	}
 	publicID := rawUserID.(string)
 
-	if err := h.userService.ConfirmAccountDeletion(publicID); err != nil {
+	if err := h.lgpdService.ConfirmAccountDeletion(publicID); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -348,7 +350,7 @@ func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
 	}
 	publicID := rawUserID.(string)
 
-	if err := h.userService.CancelAccountDeletion(publicID); err != nil {
+	if err := h.lgpdService.CancelAccountDeletion(publicID); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -383,7 +385,7 @@ func (h *UserHandler) RequestContestation(c *gin.Context) {
 		return
 	}
 
-	if err := h.userService.RequestContestation(publicID, req.Reason); err != nil {
+	if err := h.lgpdService.RequestContestation(publicID, req.Reason); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
