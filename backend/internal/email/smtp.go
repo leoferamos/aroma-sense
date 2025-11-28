@@ -81,3 +81,58 @@ func (s *SMTPEmailService) sendEmail(to, subject, htmlBody string) error {
 
 	return nil
 }
+
+// SendAccountDeactivated sends notification when account is deactivated
+func (s *SMTPEmailService) SendAccountDeactivated(to, reason string, contestationDeadline string) error {
+	subject := "Sua conta no Aroma Sense foi desativada"
+
+	htmlBody := fmt.Sprintf(`
+		<h2>Conta Desativada</h2>
+		<p>Olá,</p>
+		<p>Informamos que sua conta no Aroma Sense foi desativada pelos seguintes motivos:</p>
+		<p><strong>%s</strong></p>
+		<p>Você tem até <strong>%s</strong> para apresentar contestação através do nosso suporte.</p>
+		<p>Para contestar, acesse sua conta ou entre em contato conosco.</p>
+		<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+	`, reason, contestationDeadline)
+
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendContestationReceived sends confirmation when contestation is received
+func (s *SMTPEmailService) SendContestationReceived(to string) error {
+	subject := "Contestação Recebida - Aroma Sense"
+
+	htmlBody := `
+		<h2>Contestação Recebida</h2>
+		<p>Olá,</p>
+		<p>Recebemos sua contestação sobre a desativação da conta.</p>
+		<p>Nossa equipe irá analisar o caso em até 5 dias úteis e entraremos em contato.</p>
+		<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+	`
+
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendContestationResult sends the result of contestation review
+func (s *SMTPEmailService) SendContestationResult(to string, approved bool, reason string) error {
+	var subject, status string
+
+	if approved {
+		subject = "Contestação Aprovada - Conta Reativada"
+		status = "aprovada"
+	} else {
+		subject = "Contestação Rejeitada - Aroma Sense"
+		status = "rejeitada"
+	}
+
+	htmlBody := fmt.Sprintf(`
+		<h2>Resultado da Contestação</h2>
+		<p>Olá,</p>
+		<p>Sua contestação foi <strong>%s</strong>.</p>
+		<p><strong>Motivo:</strong> %s</p>
+		<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+	`, status, reason)
+
+	return s.sendEmail(to, subject, htmlBody)
+}
