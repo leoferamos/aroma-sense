@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/leoferamos/aroma-sense/internal/utils"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/service"
-	"github.com/leoferamos/aroma-sense/internal/utils"
 )
 
 type AdminUserHandler struct {
