@@ -6,6 +6,7 @@ import (
 
 	"github.com/leoferamos/aroma-sense/internal/bootstrap"
 	"github.com/leoferamos/aroma-sense/internal/db"
+	"github.com/leoferamos/aroma-sense/internal/job"
 	"github.com/leoferamos/aroma-sense/internal/router"
 	"github.com/leoferamos/aroma-sense/internal/storage"
 
@@ -39,10 +40,18 @@ func main() {
 	}
 
 	// Initialize all modules with proper dependency injection
-	handlers := bootstrap.InitializeApp(db.DB, storageClient)
+	app := bootstrap.InitializeApp(db.DB, storageClient)
+
+	// Initialize and start LGPD data cleanup job
+	cleanupJob := job.NewDataCleanupJob(
+		app.Repos.UserRepo,
+		app.Services.UserService,
+		app.Services.AuditLogService,
+	)
+	cleanupJob.Start()
 
 	// Setup router with all handlers
-	r := router.SetupRouter(handlers)
+	r := router.SetupRouter(app.Handlers)
 
 	// Swagger docs route
 	if os.Getenv("ENABLE_SWAGGER") == "true" {
