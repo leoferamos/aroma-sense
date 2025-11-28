@@ -7,8 +7,8 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/email"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	"github.com/leoferamos/aroma-sense/internal/utils"
 	"github.com/leoferamos/aroma-sense/internal/validation"
-	"github.com/leoferamos/aroma-sense/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
