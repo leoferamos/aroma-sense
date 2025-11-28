@@ -8,7 +8,7 @@ import (
 // initializeHandlers creates all handler instances
 func initializeHandlers(services *services, rateLimiter rate.RateLimiter) *AppHandlers {
 	return &AppHandlers{
-		UserHandler:          handler.NewUserHandler(services.user),
+		UserHandler:          handler.NewUserHandler(services.auth, services.userProfile, services.lgpd),
 		AdminUserHandler:     handler.NewAdminUserHandler(services.user),
 		ProductHandler:       handler.NewProductHandler(services.product, services.review, services.user),
 		CartHandler:          handler.NewCartHandler(services.cart),
