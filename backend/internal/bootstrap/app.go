@@ -3,6 +3,8 @@ package bootstrap
 import (
 	"github.com/leoferamos/aroma-sense/internal/handler"
 	"github.com/leoferamos/aroma-sense/internal/rate"
+	"github.com/leoferamos/aroma-sense/internal/repository"
+	"github.com/leoferamos/aroma-sense/internal/service"
 	"github.com/leoferamos/aroma-sense/internal/storage"
 	"gorm.io/gorm"
 )
@@ -19,10 +21,29 @@ type AppHandlers struct {
 	ReviewHandler        *handler.ReviewHandler
 	AIHandler            *handler.AIHandler
 	ChatHandler          *handler.ChatHandler
+	AuditLogHandler      *handler.AuditLogHandler
+}
+
+// AppServices contains service instances needed for jobs
+type AppServices struct {
+	UserService     service.UserService
+	AuditLogService service.AuditLogService
+}
+
+// AppRepos contains repository instances needed for jobs
+type AppRepos struct {
+	UserRepo repository.UserRepository
+}
+
+// AppComponents contains all initialized application components
+type AppComponents struct {
+	Handlers *AppHandlers
+	Services *AppServices
+	Repos    *AppRepos
 }
 
 // InitializeApp initializes all modules with proper dependency injection
-func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers {
+func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppComponents {
 	// Initialize core infrastructure
 	repositories := initializeRepositories(db)
 	rateLimiter := rate.NewInMemory()
@@ -36,5 +57,18 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppHandlers
 	// Initialize handlers
 	handlers := initializeHandlers(services, rateLimiter)
 
-	return handlers
+	appServices := &AppServices{
+		UserService:     services.user,
+		AuditLogService: services.auditLog,
+	}
+
+	appRepos := &AppRepos{
+		UserRepo: repositories.user,
+	}
+
+	return &AppComponents{
+		Handlers: handlers,
+		Services: appServices,
+		Repos:    appRepos,
+	}
 }
