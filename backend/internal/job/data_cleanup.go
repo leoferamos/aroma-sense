@@ -12,15 +12,15 @@ import (
 // DataCleanupJob handles automated data cleanup tasks for LGPD compliance
 type DataCleanupJob struct {
 	userRepo        repository.UserRepository
-	userService     service.UserService
+	lgpdService     service.LgpdService
 	auditLogService service.AuditLogService
 }
 
 // NewDataCleanupJob creates a new data cleanup job instance
-func NewDataCleanupJob(userRepo repository.UserRepository, userService service.UserService, auditLogService service.AuditLogService) *DataCleanupJob {
+func NewDataCleanupJob(userRepo repository.UserRepository, lgpdService service.LgpdService, auditLogService service.AuditLogService) *DataCleanupJob {
 	return &DataCleanupJob{
 		userRepo:        userRepo,
-		userService:     userService,
+		lgpdService:     lgpdService,
 		auditLogService: auditLogService,
 	}
 }
@@ -68,7 +68,7 @@ func (j *DataCleanupJob) runCleanup() {
 	// Anonymize each expired user
 	anonymizedCount := 0
 	for _, user := range expiredUsers {
-		if err := j.userService.AnonymizeExpiredUser(user.PublicID); err != nil {
+		if err := j.lgpdService.AnonymizeExpiredUser(user.PublicID); err != nil {
 			log.Printf("Error anonymizing user %s: %v", user.PublicID, err)
 			continue
 		}
