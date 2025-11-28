@@ -25,3 +25,13 @@ type AdminDeactivateUserRequest struct {
 	Notes           string     `json:"notes" binding:"max=500" example:"User violated terms of service by posting inappropriate content"`
 	SuspensionUntil *time.Time `json:"suspension_until,omitempty" example:"2024-12-31T23:59:59Z"`
 }
+
+// ContestationRequest represents the payload for user contestation of account deactivation
+type ContestationRequest struct {
+	Reason string `json:"reason" binding:"required,min=10,max=500" example:"I believe my account was deactivated by mistake. I did not violate any terms of service."`
+}
+
+// AdminReactivateUserRequest represents the payload for admin user reactivation
+type AdminReactivateUserRequest struct {
+	Reason string `json:"reason" binding:"required,min=10,max=200" example:"Contestation reviewed and approved - account reactivated"`
+}
