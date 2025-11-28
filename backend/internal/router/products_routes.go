@@ -12,9 +12,9 @@ func ProductRoutes(r *gin.Engine, productHandler *handler.ProductHandler, review
 	productGroup.Use(auth.OptionalAuthMiddleware())
 	{
 		productGroup.GET("", productHandler.GetLatestProducts)
-		productGroup.GET("/:id", productHandler.GetProductByID)
-		productGroup.GET("/:id/reviews", reviewHandler.ListReviews)
 		productGroup.GET("/:id/reviews/summary", reviewHandler.GetSummary)
 		productGroup.POST("/:id/reviews", auth.JWTAuthMiddleware(), reviewHandler.CreateReview)
+		productGroup.GET("/:id/reviews", reviewHandler.ListReviews)
+		productGroup.GET("/:id", productHandler.GetProductByID)
 	}
 }
