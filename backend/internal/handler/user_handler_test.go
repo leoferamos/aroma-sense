@@ -132,22 +132,33 @@ func (m *MockUserService) AnonymizeExpiredUser(publicID string) error {
 
 // ---- MOCKS PARA NOVA ASSINATURA ----
 type MockAuthService struct{ mock.Mock }
+
 func (m *MockAuthService) RegisterUser(input dto.CreateUserRequest) error { return nil }
-func (m *MockAuthService) Login(input dto.LoginRequest) (string, string, *model.User, error) { return "", "", nil, nil }
-func (m *MockAuthService) RefreshAccessToken(refreshToken string) (string, string, *model.User, error) { return "", "", nil, nil }
-func (m *MockAuthService) Logout(refreshToken string) error { return nil }
+func (m *MockAuthService) Login(input dto.LoginRequest) (string, string, *model.User, error) {
+	return "", "", nil, nil
+}
+func (m *MockAuthService) RefreshAccessToken(refreshToken string) (string, string, *model.User, error) {
+	return "", "", nil, nil
+}
+func (m *MockAuthService) Logout(refreshToken string) error                 { return nil }
 func (m *MockAuthService) InvalidateRefreshToken(refreshToken string) error { return nil }
 
 type MockUserProfileService struct{ mock.Mock }
+
 func (m *MockUserProfileService) GetByPublicID(publicID string) (*model.User, error) { return nil, nil }
-func (m *MockUserProfileService) UpdateDisplayName(publicID string, displayName string) (*model.User, error) { return nil, nil }
+func (m *MockUserProfileService) UpdateDisplayName(publicID string, displayName string) (*model.User, error) {
+	return nil, nil
+}
 
 type MockLgpdService struct{ mock.Mock }
-func (m *MockLgpdService) ExportUserData(publicID string) (*dto.UserExportResponse, error) { return nil, nil }
-func (m *MockLgpdService) RequestAccountDeletion(publicID string) error { return nil }
-func (m *MockLgpdService) ConfirmAccountDeletion(publicID string) error { return nil }
-func (m *MockLgpdService) CancelAccountDeletion(publicID string) error { return nil }
-func (m *MockLgpdService) AnonymizeExpiredUser(publicID string) error { return nil }
+
+func (m *MockLgpdService) ExportUserData(publicID string) (*dto.UserExportResponse, error) {
+	return nil, nil
+}
+func (m *MockLgpdService) RequestAccountDeletion(publicID string) error             { return nil }
+func (m *MockLgpdService) ConfirmAccountDeletion(publicID string) error             { return nil }
+func (m *MockLgpdService) CancelAccountDeletion(publicID string) error              { return nil }
+func (m *MockLgpdService) AnonymizeExpiredUser(publicID string) error               { return nil }
 func (m *MockLgpdService) RequestContestation(publicID string, reason string) error { return nil }
 
 // Adapte os métodos necessários para os testes, se necessário.
