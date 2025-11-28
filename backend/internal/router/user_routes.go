@@ -24,9 +24,10 @@ func UserRoutes(r *gin.Engine, userHandler *handler.UserHandler, resetHandler *h
 			authGroup.GET("/me", userHandler.GetProfile)
 			authGroup.PATCH("/me/profile", userHandler.UpdateProfile)
 			authGroup.GET("/me/export", userHandler.ExportUserData)
-			authGroup.POST("/me/deletion", userHandler.RequestAccountDeletion)
 			authGroup.POST("/me/deletion/confirm", userHandler.ConfirmAccountDeletion)
 			authGroup.POST("/me/deletion/cancel", userHandler.CancelAccountDeletion)
+			authGroup.POST("/me/deletion", userHandler.RequestAccountDeletion)
+			authGroup.POST("/me/contest", userHandler.RequestContestation)
 		}
 	}
 }
