@@ -10,8 +10,6 @@ CREATE TABLE audit_logs (
     action VARCHAR(50) NOT NULL,
     resource VARCHAR(100) NOT NULL,
     resource_id VARCHAR(100),
-    ip_address INET,
-    user_agent TEXT,
     details TEXT NOT NULL DEFAULT '{}',
     old_values TEXT,
     new_values TEXT,
@@ -21,18 +19,18 @@ CREATE TABLE audit_logs (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-    -- Indexes for performance
-    INDEX idx_audit_logs_user_id (user_id),
-    INDEX idx_audit_logs_actor_id (actor_id),
-    INDEX idx_audit_logs_resource (resource),
-    INDEX idx_audit_logs_resource_id (resource_id),
-    INDEX idx_audit_logs_timestamp (timestamp),
-    INDEX idx_audit_logs_action (action),
-
     -- Foreign keys
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
+-- Create indexes for performance
+CREATE INDEX idx_audit_logs_user_id ON audit_logs (user_id);
+CREATE INDEX idx_audit_logs_actor_id ON audit_logs (actor_id);
+CREATE INDEX idx_audit_logs_resource ON audit_logs (resource);
+CREATE INDEX idx_audit_logs_resource_id ON audit_logs (resource_id);
+CREATE INDEX idx_audit_logs_timestamp ON audit_logs (timestamp);
+CREATE INDEX idx_audit_logs_action ON audit_logs (action);
 
 -- Create index for efficient queries
 CREATE INDEX idx_audit_logs_composite ON audit_logs (user_id, action, timestamp DESC);
