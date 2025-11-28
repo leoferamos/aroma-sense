@@ -9,7 +9,7 @@ import (
 
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
-	"github.com/leoferamos/aroma-sense/utils"
+	"github.com/leoferamos/aroma-sense/internal/utils"
 	"gorm.io/gorm"
 )
 
