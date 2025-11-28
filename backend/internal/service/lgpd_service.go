@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/leoferamos/aroma-sense/internal/email"
+
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
@@ -23,10 +25,10 @@ type LgpdService interface {
 type lgpdService struct {
 	repo            repository.UserRepository
 	auditLogService AuditLogService
-	emailService    EmailService
+	emailService    email.EmailService
 }
 
-func NewLgpdService(repo repository.UserRepository, auditLogService AuditLogService, emailService EmailService) LgpdService {
+func NewLgpdService(repo repository.UserRepository, auditLogService AuditLogService, emailService email.EmailService) LgpdService {
 	return &lgpdService{repo: repo, auditLogService: auditLogService, emailService: emailService}
 }
 
