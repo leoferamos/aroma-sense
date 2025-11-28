@@ -136,7 +136,7 @@ func (s *authService) Login(input dto.LoginRequest) (string, string, *model.User
 	if s.auditLogService != nil {
 		s.auditLogService.LogUserAction(nil, &user.ID, model.AuditActionUserLogin,
 			map[string]interface{}{
-				"email":   privacy.MaskEmail(user.Email),
+				"email":   utils.MaskEmail(user.Email),
 				"success": true,
 			})
 	}
@@ -193,7 +193,7 @@ func (s *authService) Logout(refreshToken string) error {
 		if s.auditLogService != nil {
 			s.auditLogService.LogUserAction(nil, &user.ID, model.AuditActionUserLogout,
 				map[string]interface{}{
-					"email": privacy.MaskEmail(user.Email),
+					"email": utils.MaskEmail(user.Email),
 				})
 		}
 	}
