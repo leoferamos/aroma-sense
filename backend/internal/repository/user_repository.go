@@ -23,6 +23,7 @@ type UserRepository interface {
 	ConfirmAccountDeletion(publicID string, confirmedAt time.Time) error
 	HasActiveDependencies(publicID string) (bool, error)
 	AnonymizeUser(publicID string, anonymizedEmail string, anonymizedDisplayName string) error
+	FindExpiredUsersForAnonymization() ([]*model.User, error)
 	DeleteByPublicID(publicID string) error
 }
 
@@ -174,6 +175,22 @@ func (r *userRepository) HasActiveDependencies(publicID string) (bool, error) {
 	}
 
 	return activeOrdersCount > 0, nil
+}
+
+// FindExpiredUsersForAnonymization finds users who have confirmed deletion and exceeded retention period
+func (r *userRepository) FindExpiredUsersForAnonymization() ([]*model.User, error) {
+	var users []*model.User
+
+	// Calculate cutoff date (2 years ago from now)
+	cutoffDate := time.Now().AddDate(-2, 0, 0)
+
+	// Find users who confirmed deletion more than 2 years ago
+	if err := r.db.Where("deletion_confirmed_at IS NOT NULL AND deletion_confirmed_at < ?", cutoffDate).
+		Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 // AnonymizeUser anonymizes user personal data while keeping audit trail (LGPD compliance)
