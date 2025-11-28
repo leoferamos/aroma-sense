@@ -2193,7 +2193,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "description": "Full email (only for detailed view)",
                     "type": "string"
                 },
                 "id": {
@@ -2203,7 +2202,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "masked_email": {
-                    "description": "Masked email for list view (LGPD compliance)",
                     "type": "string"
                 },
                 "public_id": {
