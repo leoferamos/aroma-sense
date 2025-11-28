@@ -22,7 +22,26 @@ func NewAuditLogHandler(auditLogService service.AuditLogService) *AuditLogHandle
 	}
 }
 
-// ListAuditLogs retrieves a paginated list of audit logs with filtering options
+// ListAuditLogs
+// @Summary      List audit logs
+// @Description  Get paginated list of audit logs with filters (user, actor, action, resource, date)
+// @Tags         audit-log
+// @Accept       json
+// @Produce      json
+// @Param        user_id      query     int     false  "User ID"
+// @Param        actor_id     query     int     false  "Actor ID"
+// @Param        action       query     string  false  "Action type"
+// @Param        resource     query     string  false  "Resource type"
+// @Param        resource_id  query     string  false  "Resource ID"
+// @Param        start_date   query     string  false  "Start date (RFC3339)"
+// @Param        end_date     query     string  false  "End date (RFC3339)"
+// @Param        limit        query     int     false  "Limit"
+// @Param        offset       query     int     false  "Offset"
+// @Success      200  {object}  dto.AuditLogListResponse
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /admin/audit-logs [get]
+// @Security     BearerAuth
 func (h *AuditLogHandler) ListAuditLogs(c *gin.Context) {
 	// Parse query parameters
 	filter := &dto.AuditLogFilterRequest{}
@@ -122,7 +141,18 @@ func (h *AuditLogHandler) ListAuditLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetAuditLog retrieves a specific audit log entry with masked emails for general viewing
+// GetAuditLog
+// @Summary      Get audit log
+// @Description  Get a specific audit log entry (masked emails)
+// @Tags         audit-log
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Audit Log ID"
+// @Success      200  {object}  dto.AuditLogResponse
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      404  {object}  dto.ErrorResponse
+// @Router       /admin/audit-logs/{id} [get]
+// @Security     BearerAuth
 func (h *AuditLogHandler) GetAuditLog(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -141,7 +171,18 @@ func (h *AuditLogHandler) GetAuditLog(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetAuditLogDetailed retrieves a specific audit log entry with full emails for operational purposes
+// GetAuditLogDetailed
+// @Summary      Get audit log (detailed)
+// @Description  Get a specific audit log entry with full emails (admin/ops)
+// @Tags         audit-log
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Audit Log ID"
+// @Success      200  {object}  dto.AuditLogResponse
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      404  {object}  dto.ErrorResponse
+// @Router       /admin/audit-logs/{id}/detailed [get]
+// @Security     BearerAuth
 func (h *AuditLogHandler) GetAuditLogDetailed(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -160,7 +201,20 @@ func (h *AuditLogHandler) GetAuditLogDetailed(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetUserAuditLogs retrieves paginated audit logs for a specific user with masked emails
+// GetUserAuditLogs
+// @Summary      Get user audit logs
+// @Description  Get paginated audit logs for a specific user (masked emails)
+// @Tags         audit-log
+// @Accept       json
+// @Produce      json
+// @Param        id     path      int  true  "User ID"
+// @Param        limit  query     int  false "Limit"
+// @Param        offset query     int  false "Offset"
+// @Success      200  {object}  dto.AuditLogListResponse
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      404  {object}  dto.ErrorResponse
+// @Router       /admin/users/{id}/audit-logs [get]
+// @Security     BearerAuth
 func (h *AuditLogHandler) GetUserAuditLogs(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := strconv.ParseUint(userIDStr, 10, 32)
@@ -199,7 +253,19 @@ func (h *AuditLogHandler) GetUserAuditLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetAuditSummary returns audit logs summary and statistics within a date range
+// GetAuditSummary
+// @Summary      Get audit log summary
+// @Description  Get summary/statistics of audit logs in a date range
+// @Tags         audit-log
+// @Accept       json
+// @Produce      json
+// @Param        start_date  query     string  false  "Start date (RFC3339)"
+// @Param        end_date    query     string  false  "End date (RFC3339)"
+// @Success      200  {object}  dto.AuditLogSummaryResponse
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /admin/audit-logs/summary [get]
+// @Security     BearerAuth
 func (h *AuditLogHandler) GetAuditSummary(c *gin.Context) {
 	var startDate, endDate *time.Time
 
@@ -225,7 +291,18 @@ func (h *AuditLogHandler) GetAuditSummary(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// CleanupOldLogs removes audit logs older than the retention period for LGPD compliance
+// CleanupOldLogs
+// @Summary      Cleanup old audit logs
+// @Description  Remove audit logs older than retention period (LGPD compliance)
+// @Tags         audit-log
+// @Accept       json
+// @Produce      json
+// @Param        retention_days  query     int  false  "Retention period in days"
+// @Success      200  {object}  dto.MessageResponse
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /admin/audit-logs/cleanup [post]
+// @Security     BearerAuth
 func (h *AuditLogHandler) CleanupOldLogs(c *gin.Context) {
 	retentionDays := 2555 // ~7 years for LGPD compliance
 	if daysStr := c.Query("retention_days"); daysStr != "" {
