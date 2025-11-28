@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/service"
+	"github.com/leoferamos/aroma-sense/internal/utils"
 )
 
 type AdminUserHandler struct {
@@ -22,7 +23,7 @@ func NewAdminUserHandler(s service.UserService) *AdminUserHandler {
 //
 // @Summary      List users for admin
 // @Description  Get paginated list of users with optional filters
-// @Tags         admin,users
+// @Tags         admin
 // @Accept       json
 // @Produce      json
 // @Param        limit   query     int                  false  "Number of users per page" default(10)
@@ -33,6 +34,7 @@ func NewAdminUserHandler(s service.UserService) *AdminUserHandler {
 // @Failure      400     {object}  dto.ErrorResponse    "Invalid request"
 // @Failure      500     {object}  dto.ErrorResponse    "Internal server error"
 // @Router       /admin/users [get]
+// @Security     BearerAuth
 func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 	// Parse query parameters
 	limitStr := c.DefaultQuery("limit", "10")
@@ -75,7 +77,8 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 		userResponses[i] = dto.AdminUserResponse{
 			ID:                    user.ID,
 			PublicID:              user.PublicID,
-			Email:                 user.Email,
+			Email:                 utils.MaskEmail(user.Email),
+			MaskedEmail:           utils.MaskEmail(user.Email),
 			Role:                  user.Role,
 			DisplayName:           user.DisplayName,
 			CreatedAt:             user.CreatedAt,
@@ -104,7 +107,7 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 //
 // @Summary      Get user details for admin
 // @Description  Get detailed information about a specific user
-// @Tags         admin,users
+// @Tags         admin
 // @Accept       json
 // @Produce      json
 // @Param        id   path      int                  true  "User ID"
@@ -112,6 +115,7 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 // @Failure      404  {object}  dto.ErrorResponse     "User not found"
 // @Failure      500  {object}  dto.ErrorResponse     "Internal server error"
 // @Router       /admin/users/{id} [get]
+// @Security     BearerAuth
 func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -150,7 +154,7 @@ func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 //
 // @Summary      Update user role
 // @Description  Change user role (admin/client) with admin confirmation
-// @Tags         admin,users
+// @Tags         admin
 // @Accept       json
 // @Produce      json
 // @Param        id       path      int                  true  "User ID"
@@ -160,6 +164,7 @@ func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 // @Failure      403      {object}  dto.ErrorResponse     "Cannot change own role"
 // @Failure      404      {object}  dto.ErrorResponse     "User not found"
 // @Router       /admin/users/{id}/role [patch]
+// @Security     BearerAuth
 func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -199,7 +204,7 @@ func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
 //
 // @Summary      Deactivate user account
 // @Description  Soft delete user account for GDPR compliance with detailed reason and notes
-// @Tags         admin,users
+// @Tags         admin
 // @Accept       json
 // @Produce      json
 // @Param        id   path      int                           true  "User ID"
@@ -209,6 +214,7 @@ func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
 // @Failure      404  {object}  dto.ErrorResponse             "User not found"
 // @Failure      500  {object}  dto.ErrorResponse             "Internal server error"
 // @Router       /admin/users/{id}/deactivate [post]
+// @Security     BearerAuth
 func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -237,4 +243,49 @@ func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "User deactivated successfully"})
+}
+
+// AdminReactivateUser reactivates a user account after contestation review
+//
+// @Summary      Reactivate user account
+// @Description  Reactivate a previously deactivated user account with reason
+// @Tags         admin
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                        true  "User ID"
+// @Param        request  body      dto.AdminReactivateUserRequest true "Reactivation details"
+// @Success      200      {object}  dto.MessageResponse        "User reactivated successfully"
+// @Failure      400      {object}  dto.ErrorResponse          "Invalid request"
+// @Failure      404      {object}  dto.ErrorResponse          "User not found"
+// @Failure      500      {object}  dto.ErrorResponse          "Internal server error"
+// @Router       /admin/users/{id}/reactivate [post]
+// @Security     BearerAuth
+func (h *AdminUserHandler) AdminReactivateUser(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		return
+	}
+
+	// Get admin public ID from context
+	adminPublicID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
+		return
+	}
+
+	// Parse request body
+	var req dto.AdminReactivateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid request body"})
+		return
+	}
+
+	if err := h.userService.AdminReactivateUser(uint(id), adminPublicID.(string), req.Reason); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to reactivate user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "User reactivated successfully"})
 }

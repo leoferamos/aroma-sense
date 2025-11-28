@@ -234,13 +234,14 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 //
 // @Summary      Export user data
 // @Description  Download all personal data for GDPR portability right
-// @Tags         user,gdpr
+// @Tags         users
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  dto.UserExportResponse "User data exported"
 // @Failure      401  {object}  dto.ErrorResponse      "Unauthorized"
 // @Failure      500  {object}  dto.ErrorResponse      "Internal server error"
 // @Router       /users/me/export [get]
+// @Security     BearerAuth
 func (h *UserHandler) ExportUserData(c *gin.Context) {
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
@@ -270,6 +271,7 @@ func (h *UserHandler) ExportUserData(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse     "Invalid confirmation or active dependencies"
 // @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
 // @Router       /users/me/deletion [post]
+// @Security     BearerAuth
 func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
@@ -309,6 +311,7 @@ func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse     "Cooling off period not expired or no deletion request"
 // @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
 // @Router       /users/me/deletion/confirm [post]
+// @Security     BearerAuth
 func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
@@ -336,6 +339,7 @@ func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse     "No deletion request to cancel"
 // @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
 // @Router       /users/me/deletion/cancel [post]
+// @Security     BearerAuth
 func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
@@ -350,4 +354,39 @@ func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion cancelled successfully"})
+}
+
+// RequestContestation allows user to contest account deactivation (LGPD compliance)
+//
+// @Summary      Request account deactivation contestation
+// @Description  User can contest their account deactivation within 7 days
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body   dto.ContestationRequest true "Contestation details"
+// @Success      200  {object}  dto.MessageResponse "Contestation requested successfully"
+// @Failure      400  {object}  dto.ErrorResponse "Invalid request"
+// @Failure      403  {object}  dto.ErrorResponse "No active deactivation or deadline expired"
+// @Router       /users/me/contest [post]
+// @Security     BearerAuth
+func (h *UserHandler) RequestContestation(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	var req dto.ContestationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if err := h.userService.RequestContestation(publicID, req.Reason); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "contestation request submitted successfully - our team will review it within 5 business days"})
 }
