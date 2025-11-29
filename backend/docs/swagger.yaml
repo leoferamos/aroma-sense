@@ -107,6 +107,80 @@ definitions:
       suspension_until:
         type: string
     type: object
+  dto.AuditLogListResponse:
+    properties:
+      audit_logs:
+        items:
+          $ref: '#/definitions/dto.AuditLogResponse'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.AuditLogResponse:
+    properties:
+      action:
+        $ref: '#/definitions/model.AuditAction'
+      actor:
+        $ref: '#/definitions/dto.UserBasicResponse'
+      actor_id:
+        type: integer
+      actor_type:
+        type: string
+      compliance:
+        type: string
+      created_at:
+        type: string
+      details:
+        additionalProperties: true
+        type: object
+      id:
+        type: integer
+      new_values:
+        additionalProperties: true
+        type: object
+      old_values:
+        additionalProperties: true
+        type: object
+      public_id:
+        type: string
+      resource:
+        type: string
+      resource_id:
+        type: string
+      severity:
+        type: string
+      timestamp:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserBasicResponse'
+      user_id:
+        type: integer
+    type: object
+  dto.AuditLogSummaryResponse:
+    properties:
+      actions_by_type:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      generated_at:
+        type: string
+      recent_actions:
+        items:
+          $ref: '#/definitions/dto.AuditLogResponse'
+        type: array
+      total_actions:
+        type: integer
+      user_activity:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+    type: object
   dto.CartItemResponse:
     properties:
       cart_id:
@@ -629,6 +703,19 @@ definitions:
     required:
     - role
     type: object
+  dto.UserBasicResponse:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      public_id:
+        type: string
+      role:
+        type: string
+    type: object
   dto.UserExportResponse:
     properties:
       created_at:
@@ -678,6 +765,38 @@ definitions:
         example: user
         type: string
     type: object
+  model.AuditAction:
+    enum:
+    - user_login
+    - user_logout
+    - user_created
+    - user_updated
+    - user_deactivated
+    - user_reactivated
+    - user_deleted
+    - user_exported
+    - role_changed
+    - data_accessed
+    - deletion_requested
+    - deletion_confirmed
+    - deletion_cancelled
+    - data_anonymized
+    type: string
+    x-enum-varnames:
+    - AuditActionUserLogin
+    - AuditActionUserLogout
+    - AuditActionUserCreated
+    - AuditActionUserUpdated
+    - AuditActionUserDeactivated
+    - AuditActionUserReactivated
+    - AuditActionUserDeleted
+    - AuditActionUserExported
+    - AuditActionRoleChanged
+    - AuditActionDataAccessed
+    - AuditActionDeletionRequested
+    - AuditActionDeletionConfirmed
+    - AuditActionDeletionCancelled
+    - AuditActionDataAnonymized
 host: localhost:8080
 info:
   contact:
@@ -687,6 +806,195 @@ info:
   title: Aroma Sense API
   version: "1.0"
 paths:
+  /admin/audit-logs:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of audit logs with filters (user, actor, action,
+        resource, date)
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        type: integer
+      - description: Actor ID
+        in: query
+        name: actor_id
+        type: integer
+      - description: Action type
+        in: query
+        name: action
+        type: string
+      - description: Resource type
+        in: query
+        name: resource
+        type: string
+      - description: Resource ID
+        in: query
+        name: resource_id
+        type: string
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuditLogListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List audit logs
+      tags:
+      - audit-log
+  /admin/audit-logs/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific audit log entry (masked emails)
+      parameters:
+      - description: Audit Log ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuditLogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get audit log
+      tags:
+      - audit-log
+  /admin/audit-logs/{id}/detailed:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific audit log entry with full emails (admin/ops)
+      parameters:
+      - description: Audit Log ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuditLogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get audit log (detailed)
+      tags:
+      - audit-log
+  /admin/audit-logs/cleanup:
+    post:
+      consumes:
+      - application/json
+      description: Remove audit logs older than retention period (LGPD compliance)
+      parameters:
+      - description: Retention period in days
+        in: query
+        name: retention_days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cleanup old audit logs
+      tags:
+      - audit-log
+  /admin/audit-logs/summary:
+    get:
+      consumes:
+      - application/json
+      description: Get summary/statistics of audit logs in a date range
+      parameters:
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuditLogSummaryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get audit log summary
+      tags:
+      - audit-log
   /admin/orders:
     get:
       consumes:
@@ -1004,6 +1312,45 @@ paths:
       summary: Get user details for admin
       tags:
       - admin
+  /admin/users/{id}/audit-logs:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated audit logs for a specific user (masked emails)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuditLogListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user audit logs
+      tags:
+      - audit-log
   /admin/users/{id}/deactivate:
     post:
       consumes:
