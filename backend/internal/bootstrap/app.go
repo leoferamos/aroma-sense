@@ -26,8 +26,9 @@ type AppHandlers struct {
 
 // AppServices contains service instances needed for jobs
 type AppServices struct {
-	UserService     service.UserService
-	AuditLogService service.AuditLogService
+	AdminUserService service.AdminUserService
+	AuditLogService  service.AuditLogService
+	LgpdService      service.LgpdService
 }
 
 // AppRepos contains repository instances needed for jobs
@@ -58,8 +59,9 @@ func InitializeApp(db *gorm.DB, storageClient storage.ImageStorage) *AppComponen
 	handlers := initializeHandlers(services, rateLimiter)
 
 	appServices := &AppServices{
-		UserService:     services.user,
-		AuditLogService: services.auditLog,
+		AdminUserService: services.adminUser,
+		AuditLogService:  services.auditLog,
+		LgpdService:      services.lgpd,
 	}
 
 	appRepos := &AppRepos{
