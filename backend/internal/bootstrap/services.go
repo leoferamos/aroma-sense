@@ -7,7 +7,6 @@ import (
 
 // services holds all service instances
 type services struct {
-	user          service.UserService
 	adminUser     service.AdminUserService
 	auth          service.AuthService
 	userProfile   service.UserProfileService
@@ -39,7 +38,6 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 
 	// Initialize services in dependency order
 	cartService := service.NewCartService(repos.cart, nil)
-	userService := service.NewUserService(repos.user, cartService)
 	adminUserService := service.NewAdminUserService(repos.user, auditLogService, integrations.email)
 	authService := service.NewAuthService(repos.user, cartService, auditLogService)
 	userProfileService := service.NewUserProfileService(repos.user, auditLogService)
@@ -54,7 +52,6 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 	chatService := service.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider, aiService)
 
 	return &services{
-		user:          userService,
 		adminUser:     adminUserService,
 		auth:          authService,
 		userProfile:   userProfileService,
