@@ -6,7 +6,7 @@ const Terms: React.FC = () => {
     return (
         <LegalPageLayout title="Terms of Service" lastUpdate="November 27, 2025">
             <h1 className="text-center text-2xl font-semibold text-gray-900 mb-2">Termos de Uso — Aroma Sense</h1>
-            <p className="text-center text-sm text-gray-500 mb-8">Última atualização: 27 de novembro de 2025</p>
+            <p className="text-center text-sm text-gray-500 mb-8">Última atualização: 30 de novembro de 2025</p>
 
             <section className="space-y-4 text-justify">
                             <p>
@@ -129,7 +129,7 @@ const Terms: React.FC = () => {
                             <p className="mt-3"><strong>Consequências:</strong></p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
                                 <li><strong>Suspensão temporária:</strong> Acesso bloqueado por período determinado, com possibilidade de reativação após correção das irregularidades;</li>
-                                <li><strong>Exclusão permanente:</strong> Remoção definitiva da conta e dados pessoais após período de retenção de 30 dias (exceto dados necessários para compliance legal, que serão mantidos por até 5 anos).</li>
+                                <li><strong>Exclusão permanente:</strong> Remoção definitiva da conta e dados pessoais após período de retenção de 2 anos (exceto dados necessários para compliance legal, que serão mantidos por até 5 anos). O fluxo de exclusão segue o processo de pedido de exclusão, período de reflexão de 7 dias, confirmação automática pelo sistema (se não houver cancelamento) e posterior anonimização dos dados após o prazo de retenção.</li>
                             </ul>
                             <p className="mt-2">
                                 O Aroma Sense compromete-se a agir de forma proporcional, transparente e fundamentada em todos os casos de desativação de contas.
@@ -146,8 +146,8 @@ const Terms: React.FC = () => {
                             <p>
                                 Em caso de dúvidas, sugestões ou solicitações, entre em contato pelo e-mail:
                                 <a href="mailto:suporte.aromasense@gmail.com" className="text-blue-600 hover:underline ml-1">
-                                    📩 suporte.aromasense@gmail.com
-                                </a>
+                                    suporte.aromasense@gmail.com
+                                </a>.
                             </p>
 
                             <p className="text-center text-gray-500 text-sm mt-6">

@@ -142,9 +142,9 @@ func HashEmailForLogging(email string) string {
 
 ### 2. Account Deletion Process
 ```
-User Requests Deletion → 7-Day Cooling Period → Admin Review → Final Deletion
-     ↓                        ↓                      ↓              ↓
-  Audit Logged          Email Notifications    Manual Approval   Data Anonymization
+User Requests Deletion → 7-Day Cooling Period → System Auto-Confirm → Retention (2 years) → Data Anonymization
+     ↓                        ↓                      ↓                      ↓
+  Audit Logged          Email Notifications   Auto-confirm by System   Data Anonymization (after retention)
 ```
 
 ### 3. Account Deactivation/Reactivation
@@ -221,13 +221,13 @@ POST   /admin/audit-logs/cleanup # Cleanup old logs
 
 ### User Rights
 ```
-GET    /users/profile            # User profile
-PATCH  /users/profile            # Update profile
-GET    /users/export             # Data export
-POST   /users/request-deletion   # Request account deletion
-POST   /users/confirm-deletion   # Confirm deletion
-POST   /users/cancel-deletion    # Cancel deletion request
-POST   /users/contest-deactivation # Contest deactivation
+GET    /users/profile                # User profile
+PATCH  /users/profile                # Update profile
+GET    /users/export                 # Data export
+POST   /users/me/deletion            # Request account deletion (authenticated)
+POST   /users/me/deletion/confirm    # Confirm account deletion (authenticated)
+POST   /users/me/deletion/cancel     # Cancel deletion request (authenticated)
+POST   /users/me/contest             # Contest account deactivation (authenticated)
 ```
 
 ## Compliance Validation
