@@ -21,6 +21,11 @@ func NewUserHandler(auth service.AuthService, profile service.UserProfileService
 	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd}
 }
 
+// UserProfile exposes the internal UserProfileService for middleware/router wiring
+func (h *UserHandler) UserProfile() service.UserProfileService {
+	return h.userProfileService
+}
+
 // RegisterUser handles user registration requests.
 //
 // @Summary      Register a new user
