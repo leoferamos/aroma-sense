@@ -157,6 +157,9 @@ func (s *lgpdService) CancelAccountDeletion(publicID string) error {
 		return errors.New("no deletion request to cancel")
 	}
 
+	// capture requested time before clearing
+	requestedAt := user.DeletionRequestedAt
+
 	// Clear deletion request
 	user.DeletionRequestedAt = nil
 	if err := s.repo.Update(user); err != nil {
@@ -168,8 +171,13 @@ func (s *lgpdService) CancelAccountDeletion(publicID string) error {
 		s.auditLogService.LogDeletionAction(nil, user.ID, model.AuditActionDeletionCancelled,
 			map[string]interface{}{
 				"reason":                "user_cancelled",
-				"deletion_requested_at": user.DeletionRequestedAt,
+				"deletion_requested_at": requestedAt,
 			})
+	}
+
+	// Send cancellation email
+	if s.notifier != nil {
+		_ = s.notifier.SendDeletionCancelled(user.Email)
 	}
 
 	return nil
