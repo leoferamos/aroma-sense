@@ -24,6 +24,7 @@ type UserRepository interface {
 	HasActiveDependencies(publicID string) (bool, error)
 	AnonymizeUser(publicID string, anonymizedEmail string, anonymizedDisplayName string) error
 	FindExpiredUsersForAnonymization() ([]*model.User, error)
+	FindUsersPendingAutoConfirm(cutoff time.Time) ([]*model.User, error)
 	DeleteByPublicID(publicID string) error
 }
 
@@ -186,6 +187,18 @@ func (r *userRepository) FindExpiredUsersForAnonymization() ([]*model.User, erro
 
 	// Find users who confirmed deletion more than 2 years ago
 	if err := r.db.Where("deletion_confirmed_at IS NOT NULL AND deletion_confirmed_at < ?", cutoffDate).
+		Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+// FindUsersPendingAutoConfirm finds users who requested deletion and whose deletion_requested_at is older than cutoff
+func (r *userRepository) FindUsersPendingAutoConfirm(cutoff time.Time) ([]*model.User, error) {
+	var users []*model.User
+
+	if err := r.db.Where("deletion_requested_at IS NOT NULL AND deletion_confirmed_at IS NULL AND deletion_requested_at <= ?", cutoff).
 		Find(&users).Error; err != nil {
 		return nil, err
 	}
