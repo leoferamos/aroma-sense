@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/leoferamos/aroma-sense/internal/email"
-
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
+	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 )
 
@@ -25,11 +24,11 @@ type LgpdService interface {
 type lgpdService struct {
 	repo            repository.UserRepository
 	auditLogService AuditLogService
-	emailService    email.EmailService
+	notifier        notification.NotificationService
 }
 
-func NewLgpdService(repo repository.UserRepository, auditLogService AuditLogService, emailService email.EmailService) LgpdService {
-	return &lgpdService{repo: repo, auditLogService: auditLogService, emailService: emailService}
+func NewLgpdService(repo repository.UserRepository, auditLogService AuditLogService, notifier notification.NotificationService) LgpdService {
+	return &lgpdService{repo: repo, auditLogService: auditLogService, notifier: notifier}
 }
 
 // ExportUserData exports all user data for GDPR compliance
@@ -81,6 +80,11 @@ func (s *lgpdService) RequestAccountDeletion(publicID string) error {
 		return err
 	}
 
+	// Send deletion requested email
+	if s.notifier != nil {
+		_ = s.notifier.SendDeletionRequested(user.Email, "")
+	}
+
 	// Log deletion request
 	if s.auditLogService != nil {
 		s.auditLogService.LogDeletionAction(nil, user.ID, model.AuditActionDeletionRequested,
@@ -128,6 +132,11 @@ func (s *lgpdService) ConfirmAccountDeletion(publicID string) error {
 				"retention_period_years": 2,
 				"deletion_requested_at":  user.DeletionRequestedAt,
 			})
+	}
+
+	// Send deletion confirmed email
+	if s.notifier != nil {
+		_ = s.notifier.SendDeletionAutoConfirmed(user.Email)
 	}
 
 	return nil
@@ -203,6 +212,12 @@ func (s *lgpdService) AnonymizeExpiredUser(publicID string) error {
 			})
 	}
 
+	// Send data anonymized email
+	if s.notifier != nil {
+		// send to previous email address
+		_ = s.notifier.SendDataAnonymized(user.Email)
+	}
+
 	return nil
 }
 
@@ -255,8 +270,8 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 	}
 
 	// Send contestation received confirmation email
-	if s.emailService != nil {
-		s.emailService.SendContestationReceived(user.Email)
+	if s.notifier != nil {
+		_ = s.notifier.SendContestationReceived(user.Email)
 	}
 
 	return nil
