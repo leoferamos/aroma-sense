@@ -117,6 +117,11 @@ func (s *adminUserService) DeactivateUser(userID uint, adminPublicID string, rea
 		s.emailService.SendAccountDeactivated(user.Email, reason, deadlineStr)
 	}
 
+	// Invalidate refresh token
+	if user != nil {
+		_ = s.repo.UpdateRefreshToken(user.ID, nil, nil)
+	}
+
 	return nil
 }
 

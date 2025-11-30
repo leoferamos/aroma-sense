@@ -7,6 +7,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/bootstrap"
+	"github.com/leoferamos/aroma-sense/internal/middleware"
 )
 
 // SetupRouter initializes the Gin router with all routes
@@ -26,6 +27,9 @@ func SetupRouter(handlers *bootstrap.AppHandlers) *gin.Engine {
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+
+	// Provide user profile service to auth middleware
+	middleware.SetUserProfileService(handlers.UserHandler.UserProfile())
 
 	// Register domain routes
 	UserRoutes(r, handlers.UserHandler, handlers.PasswordResetHandler)
