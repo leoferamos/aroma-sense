@@ -85,54 +85,49 @@ func (s *SMTPEmailService) sendEmail(to, subject, htmlBody string) error {
 // SendAccountDeactivated sends notification when account is deactivated
 func (s *SMTPEmailService) SendAccountDeactivated(to, reason string, contestationDeadline string) error {
 	subject := "Sua conta no Aroma Sense foi desativada"
-
-	htmlBody := fmt.Sprintf(`
-		<h2>Conta Desativada</h2>
-		<p>Olá,</p>
-		<p>Informamos que sua conta no Aroma Sense foi desativada pelos seguintes motivos:</p>
-		<p><strong>%s</strong></p>
-		<p>Você tem até <strong>%s</strong> para apresentar contestação através do nosso suporte.</p>
-		<p>Para contestar, acesse sua conta ou entre em contato conosco.</p>
-		<p>Atenciosamente,<br>Equipe Aroma Sense</p>
-	`, reason, contestationDeadline)
-
+	htmlBody := AccountDeactivatedTemplate(reason, contestationDeadline)
 	return s.sendEmail(to, subject, htmlBody)
 }
 
 // SendContestationReceived sends confirmation when contestation is received
 func (s *SMTPEmailService) SendContestationReceived(to string) error {
 	subject := "Contestação Recebida - Aroma Sense"
-
-	htmlBody := `
-		<h2>Contestação Recebida</h2>
-		<p>Olá,</p>
-		<p>Recebemos sua contestação sobre a desativação da conta.</p>
-		<p>Nossa equipe irá analisar o caso em até 5 dias úteis e entraremos em contato.</p>
-		<p>Atenciosamente,<br>Equipe Aroma Sense</p>
-	`
-
+	htmlBody := ContestationReceivedTemplate()
 	return s.sendEmail(to, subject, htmlBody)
 }
 
 // SendContestationResult sends the result of contestation review
 func (s *SMTPEmailService) SendContestationResult(to string, approved bool, reason string) error {
-	var subject, status string
+	subject := "Contestação Resultado - Aroma Sense"
+	htmlBody := ContestationResultTemplate(approved, reason)
+	return s.sendEmail(to, subject, htmlBody)
+}
 
-	if approved {
-		subject = "Contestação Aprovada - Conta Reativada"
-		status = "aprovada"
-	} else {
-		subject = "Contestação Rejeitada - Aroma Sense"
-		status = "rejeitada"
-	}
+// SendDeletionRequested notifies the user that their deletion request was received
+func (s *SMTPEmailService) SendDeletionRequested(to string, cancelLink string) error {
+	subject := "Pedido de exclusão recebido — Aroma Sense"
+	// requestedAt not available here; use a generic message
+	htmlBody := DeletionRequestedTemplate("", "agora", cancelLink)
+	return s.sendEmail(to, subject, htmlBody)
+}
 
-	htmlBody := fmt.Sprintf(`
-		<h2>Resultado da Contestação</h2>
-		<p>Olá,</p>
-		<p>Sua contestação foi <strong>%s</strong>.</p>
-		<p><strong>Motivo:</strong> %s</p>
-		<p>Atenciosamente,<br>Equipe Aroma Sense</p>
-	`, status, reason)
+// SendDeletionAutoConfirmed notifies the user that their deletion was auto-confirmed
+func (s *SMTPEmailService) SendDeletionAutoConfirmed(to string) error {
+	subject := "Exclusão da conta confirmada — Aroma Sense"
+	htmlBody := DeletionAutoConfirmedTemplate("", "agora")
+	return s.sendEmail(to, subject, htmlBody)
+}
 
+// SendDataAnonymized notifies the user that their data was anonymized
+func (s *SMTPEmailService) SendDataAnonymized(to string) error {
+	subject := "Seus dados foram anonimizados — Aroma Sense"
+	htmlBody := DataAnonymizedTemplate("agora")
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendDeletionCancelled notifies the user that their deletion request was cancelled
+func (s *SMTPEmailService) SendDeletionCancelled(to string) error {
+	subject := "Solicitação de exclusão cancelada — Aroma Sense"
+	htmlBody := DeletionCancelledTemplate("", "agora")
 	return s.sendEmail(to, subject, htmlBody)
 }

@@ -115,3 +115,8 @@ func (a *AsyncEmailService) SendDataAnonymized(to string) error {
 	a.enqueue(func() { _ = a.svc.SendDataAnonymized(to) })
 	return nil
 }
+
+func (a *AsyncEmailService) SendDeletionCancelled(to string) error {
+	a.enqueue(func() { _ = a.svc.SendDeletionCancelled(to) })
+	return nil
+}
