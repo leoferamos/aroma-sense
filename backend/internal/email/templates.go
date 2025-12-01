@@ -125,3 +125,87 @@ func OrderConfirmationTemplate(orderID string) string {
 </html>
 `, orderID)
 }
+
+// AccountDeactivatedTemplate generates the HTML body for account deactivation notification
+func AccountDeactivatedTemplate(reason string, contestationDeadline string) string {
+	return fmt.Sprintf(`
+<h2>Conta Desativada</h2>
+<p>Olá,</p>
+<p>Informamos que sua conta no Aroma Sense foi desativada pelos seguintes motivos:</p>
+<p><strong>%s</strong></p>
+<p>Você tem até <strong>%s</strong> para apresentar contestação através do nosso suporte.</p>
+<p>Para contestar, acesse sua conta ou entre em contato conosco.</p>
+<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+`, reason, contestationDeadline)
+}
+
+// ContestationReceivedTemplate generates the HTML body confirming receipt of contestation
+func ContestationReceivedTemplate() string {
+	return `
+<h2>Contestação Recebida</h2>
+<p>Olá,</p>
+<p>Recebemos sua contestação sobre a desativação da conta.</p>
+<p>Nossa equipe irá analisar o caso em até 5 dias úteis e entraremos em contato.</p>
+<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+`
+}
+
+// ContestationResultTemplate generates the HTML body for contestation review results
+func ContestationResultTemplate(approved bool, reason string) string {
+	status := "rejeitada"
+	if approved {
+		status = "aprovada"
+	}
+	return fmt.Sprintf(`
+<h2>Resultado da Contestação</h2>
+<p>Olá,</p>
+<p>Sua contestação foi <strong>%s</strong>.</p>
+<p><strong>Motivo:</strong> %s</p>
+<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+`, status, reason)
+}
+
+// DeletionRequestedTemplate informs the user their deletion request was received and how to cancel
+func DeletionRequestedTemplate(name, requestedAt, cancelLink string) string {
+	return fmt.Sprintf(`
+<h2>Pedido de Exclusão Recebido</h2>
+<p>Olá %s,</p>
+<p>Recebemos seu pedido de exclusão em %s.</p>
+<p>Você tem 7 dias para cancelar a solicitação. Para cancelar, acesse: <a href="%s">Cancelar exclusão</a></p>
+<p>Se não solicitou esta ação, entre em contato com o suporte.</p>
+<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+`, name, requestedAt, cancelLink)
+}
+
+// DeletionAutoConfirmedTemplate notifies user their deletion was auto-confirmed
+func DeletionAutoConfirmedTemplate(name, confirmedAt string) string {
+	return fmt.Sprintf(`
+<h2>Exclusão Confirmada</h2>
+<p>Olá %s,</p>
+<p>Seu pedido de exclusão foi confirmado em %s. Seus dados serão retidos por 2 anos antes de serem anonimizados.</p>
+<p>Se você acredita que isto é um erro, entre em contato com o suporte.</p>
+<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+`, name, confirmedAt)
+}
+
+// DataAnonymizedTemplate notifies user their personal data was anonymized
+func DataAnonymizedTemplate(anonymousDate string) string {
+	return fmt.Sprintf(`
+<h2>Dados Anonimizados</h2>
+<p>Olá,</p>
+<p>Conforme sua solicitação e nossa política, seus dados pessoais foram anonimizados em %s.</p>
+<p>Se precisar de mais informações, contate suporte.</p>
+<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+`, anonymousDate)
+}
+
+// DeletionCancelledTemplate notifies the user their deletion request was cancelled
+func DeletionCancelledTemplate(name, cancelledAt string) string {
+    return fmt.Sprintf(`
+<h2>Solicitação de Exclusão Cancelada</h2>
+<p>Olá %s,</p>
+<p>Sua solicitação de exclusão foi cancelada em %s. Sua conta permanece ativa.</p>
+<p>Se precisar de ajuda, entre em contato com o suporte.</p>
+<p>Atenciosamente,<br>Equipe Aroma Sense</p>
+`, name, cancelledAt)
+}
