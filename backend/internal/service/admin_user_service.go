@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/leoferamos/aroma-sense/internal/email"
 	"github.com/leoferamos/aroma-sense/internal/model"
+	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 )
 
@@ -21,11 +21,11 @@ type AdminUserService interface {
 type adminUserService struct {
 	repo            repository.UserRepository
 	auditLogService AuditLogService
-	emailService    email.EmailService
+	notifier        notification.NotificationService
 }
 
-func NewAdminUserService(repo repository.UserRepository, auditLogService AuditLogService, emailService email.EmailService) AdminUserService {
-	return &adminUserService{repo: repo, auditLogService: auditLogService, emailService: emailService}
+func NewAdminUserService(repo repository.UserRepository, auditLogService AuditLogService, notifier notification.NotificationService) AdminUserService {
+	return &adminUserService{repo: repo, auditLogService: auditLogService, notifier: notifier}
 }
 
 // ListUsers returns paginated list of users for admin (LGPD compliance)
@@ -109,12 +109,12 @@ func (s *adminUserService) DeactivateUser(userID uint, adminPublicID string, rea
 
 	// Send deactivation notification email
 	user, err := s.repo.FindByID(userID)
-	if err == nil && s.emailService != nil {
+	if err == nil && s.notifier != nil {
 		deadlineStr := "7 dias a partir da desativação"
 		if user.ContestationDeadline != nil {
 			deadlineStr = user.ContestationDeadline.Format("02/01/2006 15:04")
 		}
-		s.emailService.SendAccountDeactivated(user.Email, reason, deadlineStr)
+		s.notifier.SendAccountDeactivated(user.Email, reason, deadlineStr)
 	}
 
 	// Invalidate refresh token
@@ -165,8 +165,8 @@ func (s *adminUserService) AdminReactivateUser(userID uint, adminPublicID string
 	}
 
 	// Send reactivation result email
-	if s.emailService != nil {
-		s.emailService.SendContestationResult(user.Email, true, reason)
+	if s.notifier != nil {
+		s.notifier.SendContestationResult(user.Email, true, reason)
 	}
 
 	return nil
