@@ -2174,31 +2174,6 @@ paths:
       summary: Cancel account deletion
       tags:
       - users
-  /users/me/deletion/confirm:
-    post:
-      consumes:
-      - application/json
-      description: Confirms account deletion after 7-day cooling off period has passed
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Account deletion confirmed
-          schema:
-            $ref: '#/definitions/dto.MessageResponse'
-        "400":
-          description: Cooling off period not expired or no deletion request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Confirm account deletion
-      tags:
-      - users
   /users/me/export:
     get:
       consumes:
