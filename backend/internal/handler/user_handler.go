@@ -306,19 +306,6 @@ func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion requested successfully - you have 7 days to change your mind"})
 }
-
-// ConfirmAccountDeletion confirms account deletion after cooling off period
-//
-// @Summary      Confirm account deletion
-// @Description  Confirms account deletion after 7-day cooling off period has passed
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Success      200      {object}  dto.MessageResponse   "Account deletion confirmed"
-// @Failure      400      {object}  dto.ErrorResponse     "Cooling off period not expired or no deletion request"
-// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
-// @Router       /users/me/deletion/confirm [post]
-// @Security     BearerAuth
 func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
