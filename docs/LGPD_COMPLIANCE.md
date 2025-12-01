@@ -225,7 +225,6 @@ GET    /users/profile                # User profile
 PATCH  /users/profile                # Update profile
 GET    /users/export                 # Data export
 POST   /users/me/deletion            # Request account deletion (authenticated)
-POST   /users/me/deletion/confirm    # Confirm account deletion (authenticated)
 POST   /users/me/deletion/cancel     # Cancel deletion request (authenticated)
 POST   /users/me/contest             # Contest account deactivation (authenticated)
 ```
