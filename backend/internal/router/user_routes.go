@@ -32,7 +32,7 @@ func UserRoutes(r *gin.Engine, userHandler *handler.UserHandler, resetHandler *h
 		{
 			authNoStatus.POST("/me/deletion/cancel", userHandler.CancelAccountDeletion)
 			authNoStatus.POST("/me/contest", userHandler.RequestContestation)
-			authGroup.GET("/me/export", userHandler.ExportUserData)
+			authNoStatus.GET("/me/export", userHandler.ExportUserData)
 		}
 	}
 }
