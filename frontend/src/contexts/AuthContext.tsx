@@ -13,11 +13,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isReady: boolean; // Indicates if initial session check is complete
   setAuth: (accessToken: string, user: User) => void;
+  refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
 }
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export { AuthContext };
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
@@ -75,6 +74,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [updateAccessToken]);
 
+  // Refresh user profile
+  const refreshUser = useCallback(async () => {
+    try {
+      const data = await refreshToken();
+      updateAccessToken(data.access_token);
+      setUser(data.user);
+    } catch (err) {
+      updateAccessToken(null);
+      setUser(null);
+    }
+  }, [updateAccessToken]);
+
+  // Listen for account deletion events emitted by API interceptor
+  useEffect(() => {
+    const onRequested = (e: Event) => {
+      const detail = (e as CustomEvent).detail as any;
+      setUser((prev) => {
+        if (!prev) return prev;
+        return { ...prev, deletion_requested_at: detail.deletion_requested_at } as any;
+      });
+    };
+    const onConfirmed = (e: Event) => {
+      const detail = (e as CustomEvent).detail as any;
+      setUser((prev) => {
+        if (!prev) return prev;
+        return { ...prev, deletion_confirmed_at: detail.deletion_confirmed_at } as any;
+      });
+    };
+
+    window.addEventListener('account-deletion-requested', onRequested);
+    window.addEventListener('account-deletion-confirmed', onConfirmed);
+    return () => {
+      window.removeEventListener('account-deletion-requested', onRequested);
+      window.removeEventListener('account-deletion-confirmed', onConfirmed);
+    };
+  }, [navigate]);
+
   const role = user?.role as UserRole | null;
   const isAuthenticated = user !== null && accessToken !== null;
 
@@ -86,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated,
       isReady,
       setAuth,
+      refreshUser,
       logout
     }}>
       {children}
