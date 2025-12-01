@@ -201,7 +201,7 @@ func DataAnonymizedTemplate(anonymousDate string) string {
 
 // DeletionCancelledTemplate notifies the user their deletion request was cancelled
 func DeletionCancelledTemplate(name, cancelledAt string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 <h2>Solicitação de Exclusão Cancelada</h2>
 <p>Olá %s,</p>
 <p>Sua solicitação de exclusão foi cancelada em %s. Sua conta permanece ativa.</p>
