@@ -22,6 +22,9 @@ export interface User {
   role: string;
   created_at: string;
   display_name?: string;
+  deletion_requested_at?: string | null;
+  deletion_confirmed_at?: string | null;
+  contestation_deadline?: string | null;
 }
 
 export interface LoginResponse {
