@@ -6,6 +6,7 @@ import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import ChatBubble from './components/chat/ChatBubble';
+import AccountBlockOverlay from './components/AccountBlockOverlay';
 // Lazy load pages for better performance
 const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
@@ -154,6 +155,8 @@ const App: React.FC = () => {
           <Suspense fallback={<PageLoader />}>
             <ErrorBoundary>
               <ChatMount />
+              {/* Global overlay shown when account is blocked */}
+              <AccountBlockOverlay />
             </ErrorBoundary>
           </Suspense>
         </CartProvider>
