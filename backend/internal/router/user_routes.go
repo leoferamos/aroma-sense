@@ -24,7 +24,6 @@ func UserRoutes(r *gin.Engine, userHandler *handler.UserHandler, resetHandler *h
 		{
 			authGroup.GET("/me", userHandler.GetProfile)
 			authGroup.PATCH("/me/profile", userHandler.UpdateProfile)
-			authGroup.GET("/me/export", userHandler.ExportUserData)
 			authGroup.POST("/me/deletion", userHandler.RequestAccountDeletion)
 		}
 		// Routes that require authentication but must remain callable while the account is suspended or in cooling-off period.
@@ -33,6 +32,7 @@ func UserRoutes(r *gin.Engine, userHandler *handler.UserHandler, resetHandler *h
 		{
 			authNoStatus.POST("/me/deletion/cancel", userHandler.CancelAccountDeletion)
 			authNoStatus.POST("/me/contest", userHandler.RequestContestation)
+			authGroup.GET("/me/export", userHandler.ExportUserData)
 		}
 	}
 }
