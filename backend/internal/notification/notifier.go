@@ -15,6 +15,7 @@ type NotificationService interface {
 	SendContestationResult(to string, approved bool, reason string) error
 	SendDeletionRequested(to string, cancelLink string) error
 	SendDeletionAutoConfirmed(to string) error
+	SendDeletionCancelled(to string) error
 	SendDataAnonymized(to string) error
 	SendPromotional(to, subject, htmlBody string) error
 }
@@ -69,6 +70,10 @@ func (n *notifier) SendDeletionRequested(to string, cancelLink string) error {
 
 func (n *notifier) SendDeletionAutoConfirmed(to string) error {
 	return n.es.SendDeletionAutoConfirmed(to)
+}
+
+func (n *notifier) SendDeletionCancelled(to string) error {
+	return n.es.SendDeletionCancelled(to)
 }
 
 func (n *notifier) SendDataAnonymized(to string) error {
