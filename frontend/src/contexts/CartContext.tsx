@@ -17,9 +17,7 @@ interface CartContextValue {
   updateItemQuantity: (itemId: number, quantity: number) => Promise<void>;
 }
 
-const CartContext = createContext<CartContextValue | undefined>(undefined);
-
-export { CartContext };
+export const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isReady } = useAuth();
