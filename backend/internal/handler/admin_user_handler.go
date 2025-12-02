@@ -78,7 +78,6 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 		userResponses[i] = dto.AdminUserResponse{
 			ID:                    user.ID,
 			PublicID:              user.PublicID,
-			Email:                 utils.MaskEmail(user.Email),
 			MaskedEmail:           utils.MaskEmail(user.Email),
 			Role:                  user.Role,
 			DisplayName:           user.DisplayName,
@@ -134,7 +133,7 @@ func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 	response := dto.AdminUserResponse{
 		ID:                    user.ID,
 		PublicID:              user.PublicID,
-		Email:                 user.Email,
+		MaskedEmail:           utils.MaskEmail(user.Email),
 		Role:                  user.Role,
 		DisplayName:           user.DisplayName,
 		CreatedAt:             user.CreatedAt,

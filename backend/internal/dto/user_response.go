@@ -45,7 +45,6 @@ type UserExportResponse struct {
 type AdminUserResponse struct {
 	ID                    uint       `json:"id"`
 	PublicID              string     `json:"public_id"`
-	Email                 string     `json:"email"`
 	MaskedEmail           string     `json:"masked_email"`
 	Role                  string     `json:"role"`
 	DisplayName           *string    `json:"display_name,omitempty"`
