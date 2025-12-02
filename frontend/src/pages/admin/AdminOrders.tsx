@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import FiltersBar from '../../components/admin/FiltersBar';
 import OrdersTable from '../../components/admin/OrdersTable';
 import PaginationControls from '../../components/admin/PaginationControls';
@@ -14,8 +15,14 @@ const AdminOrders: React.FC = () => {
   const perPage = params.per_page ?? 25;
   const totalPages = data?.meta.pagination.total_pages ?? 1;
 
+  const actions = (
+    <div className="flex items-center gap-2">
+      <Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link>
+    </div>
+  );
+
   return (
-    <AdminLayout title="Orders">
+    <AdminLayout title="Orders" actions={actions}>
       <div className="p-6">
         <h1 className="text-2xl font-semibold mb-4">Orders</h1>
 
