@@ -18,6 +18,7 @@ const AddProduct = lazy(() => import('./pages/admin/AddProduct'));
 const EditProduct = lazy(() => import('./pages/admin/EditProduct'));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
+const AdminUsers = lazy(() => import('./pages/admin/Users'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
@@ -52,6 +53,14 @@ const ChatMount: React.FC = () => {
         />
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/terms" element={<GuestRoute><Terms /></GuestRoute>} />
         <Route path="/privacy" element={<GuestRoute><Privacy /></GuestRoute>} />
 
