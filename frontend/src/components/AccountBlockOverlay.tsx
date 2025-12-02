@@ -16,7 +16,7 @@ interface AccountBlockOverlayProps {
 }
 
 const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationData }) => {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
   const { refresh: refreshCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +113,18 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
     }
   };
 
+  const onLogout = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await logout();
+    } catch {
+      setError('Failed to logout');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const requestedAt = user?.deletion_requested_at ? new Date(user.deletion_requested_at).toLocaleString() : null;
   const confirmedAt = user?.deletion_confirmed_at ? new Date(user.deletion_confirmed_at).toLocaleString() : null;
   const deactivatedAt = deactivationData?.deactivated_at ? new Date(deactivationData.deactivated_at).toLocaleString() : user?.deactivated_at ? new Date(user.deactivated_at).toLocaleString() : null;
@@ -138,8 +150,16 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white pointer-events-auto">
-      <div className="max-w-xl w-full bg-white rounded-lg shadow-xl p-6 border border-gray-100">
+      <div className="relative max-w-xl w-full bg-white rounded-lg shadow-xl p-6 border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <button
+          type="button"
+          onClick={onLogout}
+          disabled={loading}
+          className="absolute top-3 right-3 inline-flex items-center px-3 py-1.5 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 disabled:opacity-50"
+        >
+          Logout
+        </button>
         <p className="mt-2 text-sm text-gray-700">{message}</p>
 
         {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
