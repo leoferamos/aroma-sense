@@ -1,5 +1,5 @@
 import React from 'react';
-import { AuthContext } from '../contexts/AuthContext';
+import { AuthContext } from '../contexts/AuthContextData';
 import AccountBlockOverlay from './AccountBlockOverlay';
 
 type ErrorBoundaryState = { hasError: boolean };
@@ -27,7 +27,7 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
         if (ctx?.user && (ctx.user.deletion_requested_at || ctx.user.deletion_confirmed_at)) {
           return <AccountBlockOverlay />;
         }
-      } catch (e) {
+      } catch {
         // fall back to generic error UI below
       }
       return (
