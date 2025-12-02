@@ -25,6 +25,11 @@ export interface User {
   deletion_requested_at?: string | null;
   deletion_confirmed_at?: string | null;
   contestation_deadline?: string | null;
+  deactivated_at?: string | null;
+  deactivated_by?: string | null;
+  deactivation_reason?: string | null;
+  deactivation_notes?: string | null;
+  suspension_until?: string | null;
 }
 
 export interface LoginResponse {
