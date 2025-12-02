@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getAdminUsers } from '../../services/admin';
 import type { AdminUser } from '../../services/admin';
+import AdminLayout from '../../components/admin/AdminLayout';
+import PaginationControls from '../../components/admin/PaginationControls';
 
 const Roles = ['admin', 'client'];
 const Statuses = ['active', 'deactivated', 'deleted'];
@@ -10,6 +13,8 @@ const UsersPage: React.FC = () => {
   const [limit, setLimit] = useState<number>(10);
   const [offset, setOffset] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
+  const currentPage = Math.floor(offset / limit) + 1;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const [role, setRole] = useState<string>('');
   const [status, setStatus] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -35,12 +40,12 @@ const UsersPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limit, offset, role, status]);
 
-  const onPrev = () => setOffset(Math.max(0, offset - limit));
-  const onNext = () => setOffset(offset + limit >= total ? offset : offset + limit);
+  
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">Admin — Users</h2>
+    <AdminLayout title="Users" actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link></div>}>
+      <div className="p-6">
+        <h1 className="text-2xl font-semibold mb-4">Users</h1>
 
       <div className="mb-4 flex gap-3 items-center">
         <label className="text-sm">Role:</label>
@@ -98,12 +103,15 @@ const UsersPage: React.FC = () => {
 
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-600">Showing {Math.min(total, offset + 1)} - {Math.min(total, offset + limit)} of {total}</div>
-        <div className="flex gap-2">
-          <button onClick={onPrev} disabled={offset === 0} className="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
-          <button onClick={onNext} disabled={offset + limit >= total} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
-        </div>
+        <PaginationControls
+          page={currentPage}
+          totalPages={totalPages}
+          onPrev={() => { if (currentPage > 1) { setOffset(Math.max(0, offset - limit)); } }}
+          onNext={() => { if (currentPage < totalPages) { setOffset(offset + limit); } }}
+        />
       </div>
     </div>
+    </AdminLayout>
   );
 };
 
