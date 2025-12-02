@@ -2509,9 +2509,6 @@ const docTemplate = `{
                 "display_name": {
                     "type": "string"
                 },
-                "email": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },

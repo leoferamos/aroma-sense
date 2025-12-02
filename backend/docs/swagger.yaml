@@ -90,8 +90,6 @@ definitions:
         type: string
       display_name:
         type: string
-      email:
-        type: string
       id:
         type: integer
       last_login_at:
