@@ -8,7 +8,6 @@ export interface AdminUser {
   deactivation_notes?: string | null;
   deactivation_reason?: string | null;
   display_name?: string | null;
-  email?: string;
   id: number;
   last_login_at?: string | null;
   masked_email?: string | null;

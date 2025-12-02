@@ -86,7 +86,7 @@ const UsersPage: React.FC = () => {
                 <td className="px-4 py-2">{u.id}</td>
                 <td className="px-4 py-2">{u.public_id}</td>
                 <td className="px-4 py-2">{u.display_name || '-'}</td>
-                <td className="px-4 py-2">{u.masked_email || u.email}</td>
+                <td className="px-4 py-2">{u.masked_email}</td>
                 <td className="px-4 py-2">{u.role}</td>
                 <td className="px-4 py-2">{u.deactivated_at ? 'deactivated' : 'active'}</td>
                 <td className="px-4 py-2">{u.created_at ? new Date(u.created_at).toLocaleString() : '-'}</td>
