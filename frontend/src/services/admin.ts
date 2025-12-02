@@ -36,7 +36,22 @@ export async function getAdminUsers(params: GetAdminUsersParams = {}): Promise<A
   return data as AdminUsersResponse;
 }
 
+// Orders
+interface GetAdminOrdersParams {
+  page?: number;
+  per_page?: number;
+  status?: string;
+  start_date?: string; // YYYY-MM-DD
+  end_date?: string; // YYYY-MM-DD
+}
+
+export async function getAdminOrders(params: GetAdminOrdersParams = {}): Promise<any> {
+  const res = await api.get('/admin/orders', { params });
+  return res.data;
+}
+
 export default {
   getAdminUsers,
+  getAdminOrders,
 };
 
