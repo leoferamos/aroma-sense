@@ -163,7 +163,7 @@ const Profile: React.FC = () => {
                   a.remove();
                   window.URL.revokeObjectURL(url);
                   setSuccess('Data exported successfully');
-                } catch (e) {
+                } catch {
                   setError('Failed to export data');
                 } finally {
                   setActionLoading(false);
@@ -185,9 +185,9 @@ const Profile: React.FC = () => {
                     const updated = await getMyProfile();
                     setProfile(updated);
                     setSuccess('Account deletion cancelled');
-                  } catch (e) {
-                    setError('Failed to cancel deletion');
-                  } finally {
+                  } catch {
+                      setError('Failed to cancel deletion');
+                    } finally {
                     setActionLoading(false);
                   }
                 }}
@@ -216,14 +216,14 @@ const Profile: React.FC = () => {
           confirmText="Request deletion"
           cancelText="Cancel"
           requirePhrase="DELETE_MY_ACCOUNT"
-          onConfirm={async () => {
+            onConfirm={async () => {
             setActionLoading(true);
             try {
               await requestAccountDeletion();
               const updated = await getMyProfile();
               setProfile(updated);
               setSuccess('Account deletion requested successfully');
-            } catch (e) {
+            } catch {
               setError('Failed to request deletion');
             } finally {
               setActionLoading(false);
