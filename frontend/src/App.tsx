@@ -19,6 +19,7 @@ const EditProduct = lazy(() => import('./pages/admin/EditProduct'));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminAuditLogs = lazy(() => import('./pages/admin/AdminAuditLogs'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
@@ -102,6 +103,14 @@ const ChatMount: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/audit-logs"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminAuditLogs />
             </ProtectedRoute>
           }
         />
