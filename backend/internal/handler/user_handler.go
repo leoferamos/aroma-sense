@@ -81,6 +81,10 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	}
 
 	// Set refresh token in HttpOnly cookie
+	if user.RefreshTokenExpiresAt == nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "refresh token expiration not set"})
+		return
+	}
 	auth.SetRefreshTokenCookie(c, refreshToken, *user.RefreshTokenExpiresAt)
 
 	// Return access token in JSON response
