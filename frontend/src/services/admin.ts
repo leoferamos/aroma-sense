@@ -44,10 +44,25 @@ interface GetAdminOrdersParams {
   start_date?: string; // YYYY-MM-DD
   end_date?: string; // YYYY-MM-DD
 }
+export interface AdminOrder {
+  id: number;
+  public_id?: string;
+  status?: string;
+  total_amount?: number;
+  created_at?: string;
+  [key: string]: unknown;
+}
 
-export async function getAdminOrders(params: GetAdminOrdersParams = {}): Promise<any> {
+export interface AdminOrdersResponse {
+  page: number;
+  per_page: number;
+  total: number;
+  orders: AdminOrder[];
+}
+
+export async function getAdminOrders(params: GetAdminOrdersParams = {}): Promise<AdminOrdersResponse> {
   const res = await api.get('/admin/orders', { params });
-  return res.data;
+  return res.data as AdminOrdersResponse;
 }
 
 export default {
