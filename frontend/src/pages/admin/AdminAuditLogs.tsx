@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { getAuditLogs } from '../../services/audit';
+import { getAuditLogs, getAuditLog } from '../../services/audit';
 import type { GetAuditLogsParams, AuditLog } from '../../types/audit';
+import { useSearchParams } from 'react-router-dom';
 import AuditLogTable from '../../components/admin/AuditLogTable';
 import AuditLogDetailsModal from '../../components/admin/AuditLogDetailsModal';
 import PaginationControls from '../../components/admin/PaginationControls';
@@ -58,6 +59,26 @@ const AdminAuditLogs: React.FC = () => {
     fetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limit, offset]);
+
+  // auto-open modal when ?id= is present
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (!id) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const single = await getAuditLog(id);
+        if (!mounted) return;
+        setSelectedLog(single);
+        setModalOpen(true);
+      } catch (err) {
+        console.debug('getAuditLog error', err);
+      }
+    })();
+    return () => { mounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openLog = (l: AuditLog) => { setSelectedLog(l); setModalOpen(true); };
 

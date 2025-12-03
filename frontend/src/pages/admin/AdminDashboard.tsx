@@ -2,8 +2,8 @@ import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { getAuditLogs } from '../../services/audit';
-import type { AuditLog } from '../../types/audit';
+import { getAuditLogs, getAuditLogsSummary } from '../../services/audit';
+import type { AuditLog, AuditLogSummary } from '../../types/audit';
 
 const AdminDashboard: React.FC = () => {
   const { role, logout } = useAuth();
@@ -29,6 +29,7 @@ const AdminDashboard: React.FC = () => {
   // RecentAuditLogs component (inline) — shows a few latest logs
   const RecentAuditLogs: React.FC = () => {
     const [logs, setLogs] = React.useState<AuditLog[]>([]);
+    const [summary, setSummary] = React.useState<AuditLogSummary | null>(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
 
@@ -41,6 +42,14 @@ const AdminDashboard: React.FC = () => {
           const resp = await getAuditLogs({ limit: 5, offset: 0 });
           if (!mounted) return;
           setLogs(resp.audit_logs || []);
+          // fetch summary in background
+          try {
+            const s = await getAuditLogsSummary();
+            if (mounted) setSummary(s || null);
+          } catch (e) {
+            // ignore summary errors
+            console.debug('getAuditLogsSummary error', e);
+          }
         } catch (err) {
           console.debug('getAuditLogs recent error', err);
           if (!mounted) return;
@@ -65,6 +74,14 @@ const AdminDashboard: React.FC = () => {
 
     return (
       <div className="space-y-2">
+        {summary && (
+          <div className="flex items-center gap-3 mb-2">
+            <div className="text-sm text-gray-700">Total actions: <span className="font-medium">{summary.total_actions}</span></div>
+            {Object.entries(summary.actions_by_type || {}).slice(0,3).map(([k,v]) => (
+              <div key={k} className="text-xs bg-gray-100 px-2 py-1 rounded">{k}: {v}</div>
+            ))}
+          </div>
+        )}
         {logs.length === 0 ? (
           <div className="text-sm text-gray-600">No recent audit logs</div>
         ) : (

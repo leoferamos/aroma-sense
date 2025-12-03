@@ -43,3 +43,11 @@ export type AuditLogsResponse = {
   offset: number;
   total: number;
 };
+
+export type AuditLogSummary = {
+  total_actions: number;
+  actions_by_type: Record<string, number>;
+  recent_actions: AuditLog[];
+  user_activity: Record<string, number>;
+  generated_at: string;
+};
