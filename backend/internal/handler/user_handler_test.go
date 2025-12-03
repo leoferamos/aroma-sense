@@ -145,21 +145,59 @@ func (m *MockAuthService) InvalidateRefreshToken(refreshToken string) error { re
 
 type MockUserProfileService struct{ mock.Mock }
 
-func (m *MockUserProfileService) GetByPublicID(publicID string) (*model.User, error) { return nil, nil }
+func (m *MockUserProfileService) GetByPublicID(publicID string) (*model.User, error) {
+	args := m.Called(publicID)
+	var user *model.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*model.User)
+	}
+	return user, args.Error(1)
+}
+
 func (m *MockUserProfileService) UpdateDisplayName(publicID string, displayName string) (*model.User, error) {
-	return nil, nil
+	args := m.Called(publicID, displayName)
+	var user *model.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*model.User)
+	}
+	return user, args.Error(1)
 }
 
 type MockLgpdService struct{ mock.Mock }
 
 func (m *MockLgpdService) ExportUserData(publicID string) (*dto.UserExportResponse, error) {
-	return nil, nil
+	args := m.Called(publicID)
+	var export *dto.UserExportResponse
+	if args.Get(0) != nil {
+		export = args.Get(0).(*dto.UserExportResponse)
+	}
+	return export, args.Error(1)
 }
-func (m *MockLgpdService) RequestAccountDeletion(publicID string) error             { return nil }
-func (m *MockLgpdService) ConfirmAccountDeletion(publicID string) error             { return nil }
-func (m *MockLgpdService) CancelAccountDeletion(publicID string) error              { return nil }
-func (m *MockLgpdService) AnonymizeExpiredUser(publicID string) error               { return nil }
-func (m *MockLgpdService) RequestContestation(publicID string, reason string) error { return nil }
+
+func (m *MockLgpdService) RequestAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) ConfirmAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) CancelAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) AnonymizeExpiredUser(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) RequestContestation(publicID string, reason string) error {
+	args := m.Called(publicID, reason)
+	return args.Error(0)
+}
 
 // Adapte os métodos necessários para os testes, se necessário.
 
