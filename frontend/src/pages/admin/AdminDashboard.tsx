@@ -44,14 +44,15 @@ const AdminDashboard: React.FC = () => {
           </div>
           <p className="text-gray-600 text-sm mb-4">Manage your product catalog</p>
           <div className="flex flex-col gap-2">
-            <Link
-              to="/admin/products"
-              className="text-blue-600 hover:text-blue-700 font-medium text-center text-sm"
-            >
-              View All Products →
-            </Link>
+              <Link
+                to="/admin/products"
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm inline-block"
+              >
+                View All Products →
+              </Link>
           </div>
         </div>
+
 
         {/* Orders Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
