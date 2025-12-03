@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/leoferamos/aroma-sense/internal/email"
 	"github.com/leoferamos/aroma-sense/internal/model"
+	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	"github.com/leoferamos/aroma-sense/internal/utils"
 	"github.com/leoferamos/aroma-sense/internal/validation"
-	"github.com/leoferamos/aroma-sense/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,19 +26,19 @@ type PasswordResetService interface {
 type passwordResetService struct {
 	resetTokenRepo repository.ResetTokenRepository
 	userRepo       repository.UserRepository
-	emailService   email.EmailService
+	notifier       notification.NotificationService
 }
 
 // NewPasswordResetService creates a new instance of PasswordResetService
 func NewPasswordResetService(
 	resetTokenRepo repository.ResetTokenRepository,
 	userRepo repository.UserRepository,
-	emailService email.EmailService,
+	notifier notification.NotificationService,
 ) PasswordResetService {
 	return &passwordResetService{
 		resetTokenRepo: resetTokenRepo,
 		userRepo:       userRepo,
-		emailService:   emailService,
+		notifier:       notifier,
 	}
 }
 
@@ -72,9 +72,11 @@ func (s *passwordResetService) RequestReset(email string) error {
 		return fmt.Errorf("failed to create reset token: %w", err)
 	}
 
-	// Send email with code
-	if err := s.emailService.SendPasswordResetCode(user.Email, code); err != nil {
-		return fmt.Errorf("failed to send reset email: %w", err)
+	// Send email with code via notifier
+	if s.notifier != nil {
+		if err := s.notifier.SendPasswordResetCode(user.Email, code); err != nil {
+			return fmt.Errorf("failed to send reset email: %w", err)
+		}
 	}
 
 	return nil

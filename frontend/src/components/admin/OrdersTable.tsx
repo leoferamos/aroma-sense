@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { AdminOrderItem } from '../../types/order';
+import type { AdminOrder } from '../../services/admin';
 import { formatCurrency } from '../../utils/format';
 
 type Props = {
-  orders: AdminOrderItem[];
+  orders: AdminOrder[];
 };
 
 const OrdersTable: React.FC<Props> = ({ orders }) => {
@@ -39,9 +39,9 @@ const OrdersTable: React.FC<Props> = ({ orders }) => {
             onKeyDown={(e) => onRowKeyDown(e, o.id)}
           >
             <td className="px-4 py-2 border">{o.id}</td>
-            <td className="px-4 py-2 border text-right">{formatCurrency(o.total_amount)}</td>
+            <td className="px-4 py-2 border text-right">{formatCurrency(o.total_amount ?? 0)}</td>
             <td className="px-4 py-2 border">{o.status}</td>
-            <td className="px-4 py-2 border">{new Date(o.created_at).toLocaleString()}</td>
+            <td className="px-4 py-2 border">{o.created_at ? new Date(o.created_at).toLocaleString() : '-'}</td>
           </tr>
         ))}
       </tbody>

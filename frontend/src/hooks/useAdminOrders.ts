@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import type { AdminOrdersResponse } from '../types/order';
+import type { AdminOrdersResponse } from '@/services/admin';
 import { getAdminOrders } from '../services/admin';
 
 export type AdminOrdersParams = {

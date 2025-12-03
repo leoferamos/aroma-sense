@@ -16,10 +16,10 @@ import (
 type ProductHandler struct {
 	productService service.ProductService
 	reviewService  service.ReviewService
-	userService    service.UserService
+	userService    service.UserProfileService
 }
 
-func NewProductHandler(ps service.ProductService, rs service.ReviewService, us service.UserService) *ProductHandler {
+func NewProductHandler(ps service.ProductService, rs service.ReviewService, us service.UserProfileService) *ProductHandler {
 	return &ProductHandler{productService: ps, reviewService: rs, userService: us}
 }
 

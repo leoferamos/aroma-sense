@@ -81,3 +81,53 @@ func (s *SMTPEmailService) sendEmail(to, subject, htmlBody string) error {
 
 	return nil
 }
+
+// SendAccountDeactivated sends notification when account is deactivated
+func (s *SMTPEmailService) SendAccountDeactivated(to, reason string, contestationDeadline string) error {
+	subject := "Sua conta no Aroma Sense foi desativada"
+	htmlBody := AccountDeactivatedTemplate(reason, contestationDeadline)
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendContestationReceived sends confirmation when contestation is received
+func (s *SMTPEmailService) SendContestationReceived(to string) error {
+	subject := "Contestação Recebida - Aroma Sense"
+	htmlBody := ContestationReceivedTemplate()
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendContestationResult sends the result of contestation review
+func (s *SMTPEmailService) SendContestationResult(to string, approved bool, reason string) error {
+	subject := "Contestação Resultado - Aroma Sense"
+	htmlBody := ContestationResultTemplate(approved, reason)
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendDeletionRequested notifies the user that their deletion request was received
+func (s *SMTPEmailService) SendDeletionRequested(to string, cancelLink string) error {
+	subject := "Pedido de exclusão recebido — Aroma Sense"
+	// requestedAt not available here; use a generic message
+	htmlBody := DeletionRequestedTemplate("", "agora", cancelLink)
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendDeletionAutoConfirmed notifies the user that their deletion was auto-confirmed
+func (s *SMTPEmailService) SendDeletionAutoConfirmed(to string) error {
+	subject := "Exclusão da conta confirmada — Aroma Sense"
+	htmlBody := DeletionAutoConfirmedTemplate("", "agora")
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendDataAnonymized notifies the user that their data was anonymized
+func (s *SMTPEmailService) SendDataAnonymized(to string) error {
+	subject := "Seus dados foram anonimizados — Aroma Sense"
+	htmlBody := DataAnonymizedTemplate("agora")
+	return s.sendEmail(to, subject, htmlBody)
+}
+
+// SendDeletionCancelled notifies the user that their deletion request was cancelled
+func (s *SMTPEmailService) SendDeletionCancelled(to string) error {
+	subject := "Solicitação de exclusão cancelada — Aroma Sense"
+	htmlBody := DeletionCancelledTemplate("", "agora")
+	return s.sendEmail(to, subject, htmlBody)
+}

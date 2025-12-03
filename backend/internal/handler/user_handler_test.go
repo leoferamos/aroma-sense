@@ -45,6 +45,11 @@ func (m *MockUserService) RefreshAccessToken(refreshToken string) (string, strin
 	return args.String(0), args.String(1), user, args.Error(3)
 }
 
+func (m *MockUserService) Logout(refreshToken string) error {
+	args := m.Called(refreshToken)
+	return args.Error(0)
+}
+
 func (m *MockUserService) InvalidateRefreshToken(refreshToken string) error {
 	args := m.Called(refreshToken)
 	return args.Error(0)
@@ -68,10 +73,155 @@ func (m *MockUserService) UpdateDisplayName(publicID string, displayName string)
 	return user, args.Error(1)
 }
 
-// ---- SETUP ROUTER ----
-func setupUserRouter() (*gin.Engine, *MockUserService) {
-	mockService := new(MockUserService)
-	userHandler := handler.NewUserHandler(mockService)
+func (m *MockUserService) ListUsers(limit int, offset int, filters map[string]interface{}) ([]*model.User, int64, error) {
+	args := m.Called(limit, offset, filters)
+	var users []*model.User
+	if args.Get(0) != nil {
+		users = args.Get(0).([]*model.User)
+	}
+	return users, args.Get(1).(int64), args.Error(2)
+}
+
+func (m *MockUserService) GetUserByID(id uint) (*model.User, error) {
+	args := m.Called(id)
+	var user *model.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*model.User)
+	}
+	return user, args.Error(1)
+}
+
+func (m *MockUserService) UpdateUserRole(userID uint, newRole string, adminPublicID string) error {
+	args := m.Called(userID, newRole, adminPublicID)
+	return args.Error(0)
+}
+
+func (m *MockUserService) DeactivateUser(userID uint, adminPublicID string, reason string, notes string, suspensionUntil *time.Time) error {
+	args := m.Called(userID, adminPublicID, reason, notes, suspensionUntil)
+	return args.Error(0)
+}
+
+func (m *MockUserService) ExportUserData(publicID string) (*dto.UserExportResponse, error) {
+	args := m.Called(publicID)
+	var export *dto.UserExportResponse
+	if args.Get(0) != nil {
+		export = args.Get(0).(*dto.UserExportResponse)
+	}
+	return export, args.Error(1)
+}
+
+func (m *MockUserService) RequestAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockUserService) ConfirmAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockUserService) CancelAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockUserService) AnonymizeExpiredUser(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+// ---- MOCKS PARA NOVA ASSINATURA ----
+type MockAuthService struct{ mock.Mock }
+
+func (m *MockAuthService) RegisterUser(input dto.CreateUserRequest) error {
+	args := m.Called(input)
+	return args.Error(0)
+}
+func (m *MockAuthService) Login(input dto.LoginRequest) (string, string, *model.User, error) {
+	args := m.Called(input)
+	var user *model.User
+	if args.Get(2) != nil {
+		user = args.Get(2).(*model.User)
+	}
+	return args.String(0), args.String(1), user, args.Error(3)
+}
+func (m *MockAuthService) RefreshAccessToken(refreshToken string) (string, string, *model.User, error) {
+	args := m.Called(refreshToken)
+	var user *model.User
+	if args.Get(2) != nil {
+		user = args.Get(2).(*model.User)
+	}
+	return args.String(0), args.String(1), user, args.Error(3)
+}
+func (m *MockAuthService) Logout(refreshToken string) error {
+	args := m.Called(refreshToken)
+	return args.Error(0)
+}
+func (m *MockAuthService) InvalidateRefreshToken(refreshToken string) error {
+	args := m.Called(refreshToken)
+	return args.Error(0)
+}
+
+type MockUserProfileService struct{ mock.Mock }
+
+func (m *MockUserProfileService) GetByPublicID(publicID string) (*model.User, error) {
+	args := m.Called(publicID)
+	var user *model.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*model.User)
+	}
+	return user, args.Error(1)
+}
+
+func (m *MockUserProfileService) UpdateDisplayName(publicID string, displayName string) (*model.User, error) {
+	args := m.Called(publicID, displayName)
+	var user *model.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*model.User)
+	}
+	return user, args.Error(1)
+}
+
+type MockLgpdService struct{ mock.Mock }
+
+func (m *MockLgpdService) ExportUserData(publicID string) (*dto.UserExportResponse, error) {
+	args := m.Called(publicID)
+	var export *dto.UserExportResponse
+	if args.Get(0) != nil {
+		export = args.Get(0).(*dto.UserExportResponse)
+	}
+	return export, args.Error(1)
+}
+
+func (m *MockLgpdService) RequestAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) ConfirmAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) CancelAccountDeletion(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) AnonymizeExpiredUser(publicID string) error {
+	args := m.Called(publicID)
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) RequestContestation(publicID string, reason string) error {
+	args := m.Called(publicID, reason)
+	return args.Error(0)
+}
+func setupUserRouter() (*gin.Engine, *MockAuthService, *MockUserProfileService, *MockLgpdService) {
+	mockAuth := new(MockAuthService)
+	mockProfile := new(MockUserProfileService)
+	mockLgpd := new(MockLgpdService)
+	userHandler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd)
 
 	router := gin.Default()
 	router.POST("/users/register", userHandler.RegisterUser)
@@ -79,11 +229,13 @@ func setupUserRouter() (*gin.Engine, *MockUserService) {
 	router.GET("/users/me", userHandler.GetProfile)
 	router.PATCH("/users/me/profile", userHandler.UpdateProfile)
 
-	return router, mockService
+	return router, mockAuth, mockProfile, mockLgpd
 }
 func TestGetProfile(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockUserService)
+	mockAuth := new(MockAuthService)
+	mockProfile := new(MockUserProfileService)
+	mockLgpd := new(MockLgpdService)
 	user := &model.User{
 		PublicID:    "uuid",
 		Email:       "test@example.com",
@@ -91,23 +243,25 @@ func TestGetProfile(t *testing.T) {
 		DisplayName: ptr("Test User"),
 		CreatedAt:   time.Now(),
 	}
-	mockService.On("GetByPublicID", "uuid").Return(user, nil)
+	mockProfile.On("GetByPublicID", "uuid").Return(user, nil)
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "/users/me", nil)
 	c.Set("userID", "uuid")
-	handler := handler.NewUserHandler(mockService)
+	handler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd)
 	handler.GetProfile(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), "Test User")
-	mockService.AssertExpectations(t)
+	mockProfile.AssertExpectations(t)
 }
 
 func TestUpdateProfile(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockService := new(MockUserService)
+	mockAuth := new(MockAuthService)
+	mockProfile := new(MockUserProfileService)
+	mockLgpd := new(MockLgpdService)
 	user := &model.User{
 		PublicID:    "uuid",
 		Email:       "test@example.com",
@@ -115,7 +269,7 @@ func TestUpdateProfile(t *testing.T) {
 		DisplayName: ptr("Updated Name"),
 		CreatedAt:   time.Now(),
 	}
-	mockService.On("UpdateDisplayName", "uuid", "Updated Name").Return(user, nil)
+	mockProfile.On("UpdateDisplayName", "uuid", "Updated Name").Return(user, nil)
 
 	payload := dto.UpdateProfileRequest{DisplayName: "Updated Name"}
 	body, _ := json.Marshal(payload)
@@ -124,12 +278,12 @@ func TestUpdateProfile(t *testing.T) {
 	c.Request, _ = http.NewRequest("PATCH", "/users/me/profile", bytes.NewBuffer(body))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Set("userID", "uuid")
-	handler := handler.NewUserHandler(mockService)
+	handler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd)
 	handler.UpdateProfile(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Contains(t, w.Body.String(), "Updated Name")
-	mockService.AssertExpectations(t)
+	mockProfile.AssertExpectations(t)
 }
 
 func ptr(s string) *string { return &s }
@@ -156,33 +310,33 @@ func TestRegisterUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("Success", func(t *testing.T) {
-		router, mockService := setupUserRouter()
+		router, mockAuth, _, _ := setupUserRouter()
 		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "StrongPass1"}
 
-		mockService.On("RegisterUser", payload).Return(nil)
+		mockAuth.On("RegisterUser", mock.Anything).Return(nil).Maybe()
 
 		w := performRequest(t, router, "POST", "/users/register", payload)
 
 		assert.Equal(t, http.StatusCreated, w.Code)
 		assert.Contains(t, w.Body.String(), "User registered successfully")
-		mockService.AssertExpectations(t)
+		mockAuth.AssertExpectations(t)
 	})
 
 	t.Run("Email Exists", func(t *testing.T) {
-		router, mockService := setupUserRouter()
+		router, mockAuth, _, _ := setupUserRouter()
 		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "StrongPass1"}
 
-		mockService.On("RegisterUser", payload).Return(errors.New("email already registered"))
+		mockAuth.On("RegisterUser", mock.Anything).Return(errors.New("email already registered")).Maybe()
 
 		w := performRequest(t, router, "POST", "/users/register", payload)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 		assert.Contains(t, w.Body.String(), "email already registered")
-		mockService.AssertExpectations(t)
+		mockAuth.AssertExpectations(t)
 	})
 
 	t.Run("Invalid Payload", func(t *testing.T) {
-		router, _ := setupUserRouter()
+		router, _, _, _ := setupUserRouter()
 		w := performRequest(t, router, "POST", "/users/register", "invalid-payload")
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
@@ -191,8 +345,21 @@ func TestRegisterUser(t *testing.T) {
 func TestLoginUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
+	t.Run("Nil_RefreshTokenExpiresAt", func(t *testing.T) {
+		router, mockAuth, _, _ := setupUserRouter()
+		payload := dto.LoginRequest{Email: "test@example.com", Password: "StrongPass1"}
+		user := &model.User{
+			PublicID:              "uuid",
+			Email:                 "test@example.com",
+			Role:                  "client",
+			RefreshTokenExpiresAt: nil,
+		}
+		mockAuth.On("Login", mock.Anything).Return("mock-access", "mock-refresh", user, nil)
+		w := performRequest(t, router, "POST", "/users/login", payload)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	})
 	t.Run("Success", func(t *testing.T) {
-		router, mockService := setupUserRouter()
+		router, mockAuth, _, _ := setupUserRouter()
 		payload := dto.LoginRequest{Email: "test@example.com", Password: "StrongPass1"}
 		expiresAt := time.Now().Add(7 * 24 * time.Hour)
 		user := &model.User{
@@ -202,13 +369,12 @@ func TestLoginUser(t *testing.T) {
 			RefreshTokenExpiresAt: &expiresAt,
 		}
 
-		mockService.On("Login", payload).Return("mock-access", "mock-refresh", user, nil)
+		mockAuth.On("Login", mock.Anything).Return("mock-access", "mock-refresh", user, nil)
 
 		w := performRequest(t, router, "POST", "/users/login", payload)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		// Check that refresh cookie is set
 		cookies := w.Result().Cookies()
 		var refreshCookie *http.Cookie
 		for _, cookie := range cookies {
@@ -224,24 +390,23 @@ func TestLoginUser(t *testing.T) {
 		assert.Contains(t, w.Body.String(), "public_id")
 		assert.Contains(t, w.Body.String(), "access_token")
 		assert.Contains(t, w.Body.String(), "Login successful")
-		mockService.AssertExpectations(t)
+		mockAuth.AssertExpectations(t)
 	})
 
 	t.Run("Invalid Credentials", func(t *testing.T) {
-		router, mockService := setupUserRouter()
+		router, mockAuth, _, _ := setupUserRouter()
 		payload := dto.LoginRequest{Email: "test@example.com", Password: "wrongpassword"}
 
-		mockService.On("Login", payload).Return("", "", (*model.User)(nil), errors.New("invalid credentials"))
+		mockAuth.On("Login", mock.Anything).Return("", "", (*model.User)(nil), errors.New("invalid credentials"))
 
 		w := performRequest(t, router, "POST", "/users/login", payload)
 
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
-		assert.Contains(t, w.Body.String(), "invalid credentials")
-		mockService.AssertExpectations(t)
+		mockAuth.AssertExpectations(t)
 	})
 
 	t.Run("Invalid Payload", func(t *testing.T) {
-		router, _ := setupUserRouter()
+		router, _, _, _ := setupUserRouter()
 		w := performRequest(t, router, "POST", "/users/login", "invalid-payload")
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})

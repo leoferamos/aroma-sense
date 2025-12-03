@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 type NavItem = {
@@ -18,11 +18,26 @@ const defaultNav: NavItem[] = [
   { label: 'Dashboard', to: '/admin/dashboard' },
   { label: 'Products', to: '/admin/products' },
   { label: 'Orders', to: '/admin/orders' },
-  { label: 'Users', to: '/admin/users' },
+    { label: 'Users', to: '/admin/users' },
+    { label: 'Audit Logs', to: '/admin/audit-logs' },
 ];
 
 const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) => {
   const items = navItems ?? defaultNav;
+  const location = useLocation();
+  const pathname = location.pathname;
+  const [isAnimating, setIsAnimating] = React.useState(false);
+
+  React.useEffect(() => {
+    // Respect users who prefer reduced motion
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    // Trigger a short fade/slide animation whenever pathname changes
+    setIsAnimating(true);
+    const t = window.setTimeout(() => setIsAnimating(false), 220);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
@@ -48,11 +63,21 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
               </Link>
 
               <nav aria-label="Admin navigation" className="hidden md:flex items-center gap-2">
-                {items.map((it) => (
-                  <Link key={it.to} to={it.to} className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
-                    {it.label}
-                  </Link>
-                ))}
+                {items.map((it) => {
+                  const active = pathname === it.to || pathname.startsWith(it.to + '/');
+                  return (
+                    <Link
+                      key={it.to}
+                      to={it.to}
+                      className={`px-3 py-2 text-sm rounded-md ${active ? 'text-blue-700 font-semibold bg-blue-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        {active && <span className="w-2 h-2 bg-blue-600 rounded-full" aria-hidden />}
+                        <span>{it.label}</span>
+                      </span>
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
 
@@ -86,11 +111,22 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
         {mobileOpen && (
           <div className="md:hidden border-t bg-white">
             <div className="px-4 py-3 flex flex-col">
-              {items.map((it) => (
-                <Link key={it.to} to={it.to} className="py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md" onClick={() => setMobileOpen(false)}>
-                  {it.label}
-                </Link>
-              ))}
+              {items.map((it) => {
+                const active = pathname === it.to || pathname.startsWith(it.to + '/');
+                return (
+                  <Link
+                    key={it.to}
+                    to={it.to}
+                    className={`py-2 text-sm rounded-md ${active ? 'text-blue-700 font-semibold bg-blue-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      {active && <span className="w-2 h-2 bg-blue-600 rounded-full" aria-hidden />}
+                      <span>{it.label}</span>
+                    </span>
+                  </Link>
+                );
+              })}
               <div className="mt-2 border-t pt-2">
                 {actions}
               </div>
@@ -103,7 +139,13 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
         )}
       </header>
 
-      <main role="main" className="max-w-7xl mx-auto p-4">{children}</main>
+      <main role="main" className="max-w-7xl mx-auto p-4">
+        <div
+          className={`transition-transform transition-opacity duration-200 ease-out ${isAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'}`}
+        >
+          {children}
+        </div>
+      </main>
     </div>
   );
 };

@@ -1,25 +1,10 @@
-import React, { createContext, useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { CartContext } from './CartContextData';
 import { isAxiosError } from 'axios';
 import type { CartResponse } from '../types/cart';
 import { addToCart as svcAddToCart, getCart as svcGetCart, removeItem as svcRemoveItem, updateItemQuantity as svcUpdateItemQuantity } from '../services/cart';
 import { getAccessToken } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
-
-interface CartContextValue {
-  cart: CartResponse | null;
-  itemCount: number;
-  loading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-  addItem: (productId: number, quantity?: number) => Promise<void>;
-  removeItem: (itemId: number) => Promise<void>;
-  isRemovingItem: (itemId: number) => boolean;
-  updateItemQuantity: (itemId: number, quantity: number) => Promise<void>;
-}
-
-const CartContext = createContext<CartContextValue | undefined>(undefined);
-
-export { CartContext };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isReady } = useAuth();

@@ -20,7 +20,19 @@ func NewAIHandler(svc *service.AIService, limiter rate.RateLimiter) *AIHandler {
 	return &AIHandler{svc: svc, limit: limiter}
 }
 
-// Recommend returns product suggestions.
+// Recommend returns AI-powered product suggestions based on user preferences.
+//
+// @Summary      Get AI product recommendations
+// @Description  Returns personalized product recommendations based on user's fragrance preferences and message
+// @Tags         ai
+// @Accept       json
+// @Produce      json
+// @Param        request  body  dto.RecommendRequest  true  "Recommendation request with user message and limit"
+// @Success      200  {object}  dto.RecommendResponse  "Product recommendations with reasoning"
+// @Failure      400  {object}  dto.ErrorResponse     "Invalid request or non-perfume related query"
+// @Failure      429  {object}  dto.ErrorResponse     "Rate limit exceeded"
+// @Failure      500  {object}  dto.ErrorResponse     "Internal server error"
+// @Router       /ai/recommend [post]
 func (h *AIHandler) Recommend(c *gin.Context) {
 	var req dto.RecommendRequest
 	if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.Message) == "" {

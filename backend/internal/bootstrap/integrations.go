@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -18,6 +19,9 @@ type integrations struct {
 	shipping *shippingIntegration
 	ai       *aiIntegration
 }
+
+// emailAsyncWrapper is used to gracefully shutdown async email service
+var emailAsyncWrapper *email.AsyncEmailService
 
 // shippingIntegration holds shipping-related services
 type shippingIntegration struct {
@@ -53,7 +57,29 @@ func initializeEmailIntegration() email.EmailService {
 		log.Fatalf("Failed to initialize email service: %v", err)
 	}
 
-	return emailService
+	// Wrap email service with async sender to avoid blocking callers
+	async := email.NewAsyncEmailService(emailService, 2, 200)
+	emailAsyncWrapper = async
+	return async
+}
+
+// ShutdownIntegrations performs graceful shutdown for integrations (flushes async email queue)
+func ShutdownIntegrations(ctx context.Context) {
+	if emailAsyncWrapper != nil {
+		log.Println("Shutting down async email workers...")
+		done := make(chan struct{})
+		go func() {
+			emailAsyncWrapper.Stop()
+			close(done)
+		}()
+
+		select {
+		case <-done:
+			log.Println("Async email workers stopped")
+		case <-ctx.Done():
+			log.Println("Timeout while stopping async email workers")
+		}
+	}
 }
 
 // initializeShippingIntegration initializes shipping provider and service

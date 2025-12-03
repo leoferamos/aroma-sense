@@ -1,8 +1,12 @@
 import React from 'react';
+import { AuthContext } from '../contexts/AuthContextData';
+import AccountBlockOverlay from './AccountBlockOverlay';
 
 type ErrorBoundaryState = { hasError: boolean };
 
 export default class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBoundaryState> {
+  static contextType = AuthContext;
+  declare context: React.ContextType<typeof AuthContext> | undefined;
   constructor(props: React.PropsWithChildren) {
     super(props);
     this.state = { hasError: false };
@@ -18,6 +22,14 @@ export default class ErrorBoundary extends React.Component<React.PropsWithChildr
 
   render() {
     if (this.state.hasError) {
+      try {
+        const ctx = this.context;
+        if (ctx?.user && (ctx.user.deletion_requested_at || ctx.user.deletion_confirmed_at)) {
+          return <AccountBlockOverlay />;
+        }
+      } catch {
+        // fall back to generic error UI below
+      }
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="bg-white shadow rounded-lg p-8 text-center max-w-md">

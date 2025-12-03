@@ -6,6 +6,7 @@ import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import ChatBubble from './components/chat/ChatBubble';
+import AccountBlockOverlay from './components/AccountBlockOverlay';
 // Lazy load pages for better performance
 const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
@@ -17,6 +18,8 @@ const AddProduct = lazy(() => import('./pages/admin/AddProduct'));
 const EditProduct = lazy(() => import('./pages/admin/EditProduct'));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
+const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminAuditLogs = lazy(() => import('./pages/admin/AdminAuditLogs'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.tsx'));
@@ -51,6 +54,14 @@ const ChatMount: React.FC = () => {
         />
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/terms" element={<GuestRoute><Terms /></GuestRoute>} />
         <Route path="/privacy" element={<GuestRoute><Privacy /></GuestRoute>} />
 
@@ -92,6 +103,14 @@ const ChatMount: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/audit-logs"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminAuditLogs />
             </ProtectedRoute>
           }
         />
@@ -154,6 +173,8 @@ const App: React.FC = () => {
           <Suspense fallback={<PageLoader />}>
             <ErrorBoundary>
               <ChatMount />
+              {/* Global overlay shown when account is blocked */}
+              <AccountBlockOverlay />
             </ErrorBoundary>
           </Suspense>
         </CartProvider>

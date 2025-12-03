@@ -1,6 +1,19 @@
 import axios, { AxiosError } from "axios";
 import type { InternalAxiosRequestConfig } from "axios";
 
+interface ErrorResponseBody {
+  error: string;
+  message?: string;
+  deactivated_at?: string | null;
+  deactivated_by?: string | null;
+  deactivation_reason?: string | null;
+  deactivation_notes?: string | null;
+  suspension_until?: string | null;
+  contestation_deadline?: string | null;
+  deletion_requested_at?: string | null;
+  deletion_confirmed_at?: string | null;
+}
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '/api',
   headers: {
@@ -50,7 +63,25 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _isRetryRequest?: boolean };
     
-    // Only handle 401 errors
+    // Handle 403 responses for deletion status first
+    if (error.response && error.response.status === 403) {
+      try {
+        const body = error.response.data as ErrorResponseBody;
+        const code = body?.error;
+        if (code === 'deletion_requested') {
+          window.dispatchEvent(new CustomEvent('account-deletion-requested', { detail: body }));
+        } else if (code === 'deletion_confirmed') {
+          window.dispatchEvent(new CustomEvent('account-deletion-confirmed', { detail: body }));
+        } else if (code === 'account_deactivated') {
+          window.dispatchEvent(new CustomEvent('account-deactivated', { detail: body }));
+        }
+      } catch {
+        // ignore
+      }
+      return Promise.reject(error);
+    }
+
+    // Only handle 401 errors for token refresh
     if (!error.response || error.response.status !== 401) {
       return Promise.reject(error);
     }
@@ -79,6 +110,7 @@ api.interceptors.response.use(
       }
       return api(originalRequest);
     }
+
     return Promise.reject(error);
   }
 );

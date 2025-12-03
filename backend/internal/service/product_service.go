@@ -14,7 +14,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/embeddings"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/storage"
-	"github.com/leoferamos/aroma-sense/utils"
+	"github.com/leoferamos/aroma-sense/internal/utils"
 )
 
 // ProductService defines the interface for product-related business logic

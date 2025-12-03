@@ -4,12 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/handler"
+	"github.com/leoferamos/aroma-sense/internal/middleware"
 )
 
 // ShippingRoutes sets up the shipping-related routes
 func ShippingRoutes(r *gin.Engine, shippingHandler *handler.ShippingHandler) {
 	grp := r.Group("/shipping")
-	grp.Use(auth.JWTAuthMiddleware())
+	grp.Use(auth.JWTAuthMiddleware(), middleware.AccountStatusMiddleware())
 	{
 		grp.GET("/options", shippingHandler.GetShippingOptions)
 	}

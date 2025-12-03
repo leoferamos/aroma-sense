@@ -2,6 +2,8 @@ import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { getAuditLogs, getAuditLogsSummary } from '../../services/audit';
+import type { AuditLog, AuditLogSummary } from '../../types/audit';
 
 const AdminDashboard: React.FC = () => {
   const { role, logout } = useAuth();
@@ -24,6 +26,85 @@ const AdminDashboard: React.FC = () => {
     </div>
   );
 
+  // RecentAuditLogs component (inline) — shows a few latest logs
+  const RecentAuditLogs: React.FC = () => {
+    const [logs, setLogs] = React.useState<AuditLog[]>([]);
+    const [summary, setSummary] = React.useState<AuditLogSummary | null>(null);
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+      let mounted = true;
+      const fetch = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const resp = await getAuditLogs({ limit: 5, offset: 0 });
+          if (!mounted) return;
+          setLogs(resp.audit_logs || []);
+          // fetch summary in background
+          try {
+            const s = await getAuditLogsSummary();
+            if (mounted) setSummary(s || null);
+          } catch (e) {
+            // ignore summary errors
+            console.debug('getAuditLogsSummary error', e);
+          }
+        } catch (err) {
+          console.debug('getAuditLogs recent error', err);
+          if (!mounted) return;
+          setError('Failed to load recent audit logs');
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      };
+      fetch();
+      return () => { mounted = false; };
+    }, []);
+
+    function fmt(ts?: string | undefined | null) {
+      if (!ts) return '-';
+      const d = new Date(ts);
+      if (Number.isNaN(d.getTime())) return ts;
+      return d.toLocaleString();
+    }
+
+    if (loading) return <div className="py-4">Loading…</div>;
+    if (error) return <div className="py-4 text-red-600">{error}</div>;
+
+    return (
+      <div className="space-y-2">
+        {summary && (
+          <div className="flex items-center gap-3 mb-2">
+            <div className="text-sm text-gray-700">Total actions: <span className="font-medium">{summary.total_actions}</span></div>
+            {Object.entries(summary.actions_by_type || {}).slice(0,3).map(([k,v]) => (
+              <div key={k} className="text-xs bg-gray-100 px-2 py-1 rounded">{k}: {v}</div>
+            ))}
+          </div>
+        )}
+        {logs.length === 0 ? (
+          <div className="text-sm text-gray-600">No recent audit logs</div>
+        ) : (
+          logs.map((l) => (
+            <div key={l.id} className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-xs text-gray-500 w-44">{fmt(l.timestamp || l.created_at)}</div>
+                <div>
+                  <div className="font-medium text-sm">{l.action}</div>
+                  <div className="text-xs text-gray-500">{l.resource}{l.resource_id ? ` · ${l.resource_id}` : ''}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-gray-600">{l.actor?.display_name || l.user?.display_name || '-'}</div>
+                <Link to={`/admin/audit-logs?id=${l.id}`} className="text-blue-600 hover:underline text-sm">Details</Link>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
+
   return (
     <AdminLayout title="Dashboard" actions={actions}>
       <div className="mb-6">
@@ -44,20 +125,15 @@ const AdminDashboard: React.FC = () => {
           </div>
           <p className="text-gray-600 text-sm mb-4">Manage your product catalog</p>
           <div className="flex flex-col gap-2">
-            <Link
-              to="/admin/products/new"
-              className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm font-medium"
-            >
-              + Add New Product
-            </Link>
-            <Link
-              to="/admin/products"
-              className="text-blue-600 hover:text-blue-700 font-medium text-center text-sm"
-            >
-              View All Products →
-            </Link>
+              <Link
+                to="/admin/products"
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm inline-block"
+              >
+                View All Products →
+              </Link>
           </div>
         </div>
+
 
         {/* Orders Card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
@@ -95,6 +171,25 @@ const AdminDashboard: React.FC = () => {
           >
             View Users →
           </Link>
+        </div>
+      </div>
+      
+      {/* Recent Audit Logs - full width under the cards */}
+      <div className="mt-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900">Recent Audit Logs</h3>
+            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-gray-600 text-sm mb-4">Latest audit events</p>
+          <RecentAuditLogs />
+          <div className="mt-4">
+            <Link to="/admin/audit-logs" className="text-yellow-600 hover:text-yellow-700 font-medium text-sm inline-block">View All Audit Logs →</Link>
+          </div>
         </div>
       </div>
     </AdminLayout>

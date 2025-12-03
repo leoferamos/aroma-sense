@@ -18,13 +18,6 @@ export interface StatsMeta {
   average_order_value: number;
 }
 
-export interface AdminOrdersResponse {
-  orders: AdminOrderItem[];
-  meta: {
-    pagination: PaginationMeta;
-    stats: StatsMeta;
-  };
-}
 
 // User-facing order types
 export interface OrderItemResponse {

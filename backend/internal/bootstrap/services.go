@@ -1,13 +1,19 @@
 package bootstrap
 
 import (
+	"os"
+
+	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/service"
 	"github.com/leoferamos/aroma-sense/internal/storage"
 )
 
 // services holds all service instances
 type services struct {
-	user          service.UserService
+	adminUser     service.AdminUserService
+	auth          service.AuthService
+	userProfile   service.UserProfileService
+	lgpd          service.LgpdService
 	product       service.ProductService
 	cart          service.CartService
 	order         service.OrderService
@@ -16,6 +22,7 @@ type services struct {
 	ai            *service.AIService
 	chat          *service.ChatService
 	shipping      service.ShippingService
+	auditLog      service.AuditLogService
 }
 
 // initializeServices creates all service instances with proper dependencies
@@ -29,11 +36,20 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 		)
 	}
 
+	// Initialize audit log service first
+	auditLogService := service.NewAuditLogService(repos.auditLog)
+
 	// Initialize services in dependency order
 	cartService := service.NewCartService(repos.cart, nil)
-	userService := service.NewUserService(repos.user, cartService)
+	// create notifier to encapsulate email sending
+	frontend := os.Getenv("FRONTEND_URL")
+	notifier := notification.NewNotifier(integrations.email, frontend)
+	adminUserService := service.NewAdminUserService(repos.user, auditLogService, notifier)
+	authService := service.NewAuthService(repos.user, cartService, auditLogService)
+	userProfileService := service.NewUserProfileService(repos.user, auditLogService)
+	lgpdService := service.NewLgpdService(repos.user, auditLogService, notifier)
 	orderService := service.NewOrderService(repos.order, repos.cart, repos.product, integrations.shipping.service)
-	passwordResetService := service.NewPasswordResetService(repos.resetToken, repos.user, integrations.email)
+	passwordResetService := service.NewPasswordResetService(repos.resetToken, repos.user, notifier)
 	reviewService := service.NewReviewService(repos.review, repos.order, repos.product)
 	aiService := service.NewAIService(repos.product)
 
@@ -42,7 +58,10 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 	chatService := service.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider, aiService)
 
 	return &services{
-		user:          userService,
+		adminUser:     adminUserService,
+		auth:          authService,
+		userProfile:   userProfileService,
+		lgpd:          lgpdService,
 		product:       productService,
 		cart:          cartService,
 		order:         orderService,
@@ -51,5 +70,6 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 		ai:            aiService,
 		chat:          chatService,
 		shipping:      integrations.shipping.service,
+		auditLog:      auditLogService,
 	}
 }

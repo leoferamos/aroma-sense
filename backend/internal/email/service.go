@@ -15,4 +15,25 @@ type EmailService interface {
 
 	// SendPromotional sends promotional/marketing emails
 	SendPromotional(to, subject, htmlBody string) error
+
+	// SendAccountDeactivated sends notification when account is deactivated
+	SendAccountDeactivated(to, reason string, contestationDeadline string) error
+
+	// SendContestationReceived sends confirmation when contestation is received
+	SendContestationReceived(to string) error
+
+	// SendContestationResult sends the result of contestation review
+	SendContestationResult(to string, approved bool, reason string) error
+
+	// SendDeletionRequested notifies user that their deletion request was received
+	SendDeletionRequested(to string, cancelLink string) error
+
+	// SendDeletionAutoConfirmed notifies user that their deletion request was auto-confirmed
+	SendDeletionAutoConfirmed(to string) error
+
+	// SendDeletionCancelled notifies user that their deletion request was cancelled
+	SendDeletionCancelled(to string) error
+
+	// SendDataAnonymized notifies user that their personal data has been anonymized
+	SendDataAnonymized(to string) error
 }

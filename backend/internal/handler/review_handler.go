@@ -13,10 +13,10 @@ import (
 
 type ReviewHandler struct {
 	service     service.ReviewService
-	userService service.UserService
+	userService service.UserProfileService
 }
 
-func NewReviewHandler(s service.ReviewService, userService service.UserService) *ReviewHandler {
+func NewReviewHandler(s service.ReviewService, userService service.UserProfileService) *ReviewHandler {
 	return &ReviewHandler{service: s, userService: userService}
 }
 

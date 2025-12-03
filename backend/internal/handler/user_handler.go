@@ -11,12 +11,19 @@ import (
 )
 
 type UserHandler struct {
-	userService service.UserService
+	authService        service.AuthService
+	userProfileService service.UserProfileService
+	lgpdService        service.LgpdService
 }
 
 // NewUserHandler creates a new instance of UserHandler
-func NewUserHandler(s service.UserService) *UserHandler {
-	return &UserHandler{userService: s}
+func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService) *UserHandler {
+	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd}
+}
+
+// UserProfile exposes the internal UserProfileService for middleware/router wiring
+func (h *UserHandler) UserProfile() service.UserProfileService {
+	return h.userProfileService
 }
 
 // RegisterUser handles user registration requests.
@@ -39,7 +46,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 
 	input.Email = strings.ToLower(input.Email)
 
-	if err := h.userService.RegisterUser(input); err != nil {
+	if err := h.authService.RegisterUser(input); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -67,13 +74,17 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	input.Email = strings.ToLower(input.Email)
 
-	accessToken, refreshToken, user, err := h.userService.Login(input)
+	accessToken, refreshToken, user, err := h.authService.Login(input)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid credentials"})
 		return
 	}
 
 	// Set refresh token in HttpOnly cookie
+	if user.RefreshTokenExpiresAt == nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "refresh token expiration not set"})
+		return
+	}
 	auth.SetRefreshTokenCookie(c, refreshToken, *user.RefreshTokenExpiresAt)
 
 	// Return access token in JSON response
@@ -109,7 +120,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 	}
 
 	// Validate refresh token and generate new access token + rotate refresh token
-	accessToken, newRefreshToken, user, err := h.userService.RefreshAccessToken(refreshToken)
+	accessToken, newRefreshToken, user, err := h.authService.RefreshAccessToken(refreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: err.Error()})
 		return
@@ -143,7 +154,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 // @Router       /users/logout [post]
 func (h *UserHandler) LogoutUser(c *gin.Context) {
 	if refreshToken, err := c.Cookie("refresh_token"); err == nil && refreshToken != "" {
-		_ = h.userService.InvalidateRefreshToken(refreshToken)
+		_ = h.authService.InvalidateRefreshToken(refreshToken)
 	}
 	auth.ClearRefreshTokenCookie(c)
 
@@ -167,7 +178,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 		return
 	}
 	publicID := rawUserID.(string)
-	user, err := h.userService.GetByPublicID(publicID)
+	user, err := h.userProfileService.GetByPublicID(publicID)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
 		return
@@ -209,7 +220,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.UpdateDisplayName(publicID, req.DisplayName)
+	user, err := h.userProfileService.UpdateDisplayName(publicID, req.DisplayName)
 	if err != nil {
 		// simple validation mapping
 		if strings.Contains(err.Error(), "too short") || strings.Contains(err.Error(), "too long") {
@@ -228,4 +239,152 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		CreatedAt:   user.CreatedAt,
 	}
 	c.JSON(http.StatusOK, resp)
+}
+
+// ExportUserData exports all user data for GDPR compliance
+//
+// @Summary      Export user data
+// @Description  Download all personal data for GDPR portability right
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  dto.UserExportResponse "User data exported"
+// @Failure      401  {object}  dto.ErrorResponse      "Unauthorized"
+// @Failure      500  {object}  dto.ErrorResponse      "Internal server error"
+// @Router       /users/me/export [get]
+// @Security     BearerAuth
+func (h *UserHandler) ExportUserData(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	data, err := h.lgpdService.ExportUserData(publicID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to export user data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}
+
+// RequestAccountDeletion initiates account deletion process with cooling off period
+//
+// @Summary      Request account deletion
+// @Description  Initiates account deletion process with 7-day cooling off period (LGPD compliance)
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body   dto.DeleteAccountRequest true "Deletion confirmation"
+// @Success      200      {object}  dto.MessageResponse   "Deletion request initiated successfully"
+// @Failure      400      {object}  dto.ErrorResponse     "Invalid confirmation or active dependencies"
+// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
+// @Router       /users/me/deletion [post]
+// @Security     BearerAuth
+func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	var input dto.DeleteAccountRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	// Require explicit confirmation
+	if input.Confirmation != "DELETE_MY_ACCOUNT" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid confirmation phrase"})
+		return
+	}
+
+	if err := h.lgpdService.RequestAccountDeletion(publicID); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion requested successfully - you have 7 days to change your mind"})
+}
+func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	if err := h.lgpdService.ConfirmAccountDeletion(publicID); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion confirmed - your data will be retained for 2 years before permanent deletion"})
+}
+
+// CancelAccountDeletion cancels a pending account deletion request
+//
+// @Summary      Cancel account deletion
+// @Description  Cancels a pending account deletion request during cooling off period
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Success      200      {object}  dto.MessageResponse   "Account deletion cancelled"
+// @Failure      400      {object}  dto.ErrorResponse     "No deletion request to cancel"
+// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
+// @Router       /users/me/deletion/cancel [post]
+// @Security     BearerAuth
+func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	if err := h.lgpdService.CancelAccountDeletion(publicID); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion cancelled successfully"})
+}
+
+// RequestContestation allows user to contest account deactivation (LGPD compliance)
+//
+// @Summary      Request account deactivation contestation
+// @Description  User can contest their account deactivation within 7 days
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body   dto.ContestationRequest true "Contestation details"
+// @Success      200  {object}  dto.MessageResponse "Contestation requested successfully"
+// @Failure      400  {object}  dto.ErrorResponse "Invalid request"
+// @Failure      403  {object}  dto.ErrorResponse "No active deactivation or deadline expired"
+// @Router       /users/me/contest [post]
+// @Security     BearerAuth
+func (h *UserHandler) RequestContestation(c *gin.Context) {
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+	publicID := rawUserID.(string)
+
+	var req dto.ContestationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if err := h.lgpdService.RequestContestation(publicID, req.Reason); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "contestation request submitted successfully - our team will review it within 5 business days"})
 }

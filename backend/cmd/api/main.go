@@ -2,15 +2,11 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/leoferamos/aroma-sense/internal/bootstrap"
 	"github.com/leoferamos/aroma-sense/internal/db"
-	"github.com/leoferamos/aroma-sense/internal/router"
+	"github.com/leoferamos/aroma-sense/internal/server"
 	"github.com/leoferamos/aroma-sense/internal/storage"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "github.com/leoferamos/aroma-sense/docs"
 )
@@ -39,16 +35,10 @@ func main() {
 	}
 
 	// Initialize all modules with proper dependency injection
-	handlers := bootstrap.InitializeApp(db.DB, storageClient)
+	app := bootstrap.InitializeApp(db.DB, storageClient)
 
-	// Setup router with all handlers
-	r := router.SetupRouter(handlers)
-
-	// Swagger docs route
-	if os.Getenv("ENABLE_SWAGGER") == "true" {
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Start server (jobs, router, graceful shutdown centralized in server package)
+	if err := server.StartServer(app, ":8080"); err != nil {
+		log.Fatalf("server error: %v", err)
 	}
-
-	// Start the server
-	r.Run(":8080")
 }

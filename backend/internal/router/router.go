@@ -7,6 +7,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/bootstrap"
+	"github.com/leoferamos/aroma-sense/internal/middleware"
 )
 
 // SetupRouter initializes the Gin router with all routes
@@ -27,9 +28,12 @@ func SetupRouter(handlers *bootstrap.AppHandlers) *gin.Engine {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	// Provide user profile service to auth middleware
+	middleware.SetUserProfileService(handlers.UserHandler.UserProfile())
+
 	// Register domain routes
 	UserRoutes(r, handlers.UserHandler, handlers.PasswordResetHandler)
-	AdminRoutes(r, handlers.UserHandler, handlers.ProductHandler, handlers.OrderHandler)
+	AdminRoutes(r, handlers.AdminUserHandler, handlers.ProductHandler, handlers.OrderHandler, handlers.AuditLogHandler)
 	ProductRoutes(r, handlers.ProductHandler, handlers.ReviewHandler)
 	CartRoutes(r, handlers.CartHandler)
 	OrderRoutes(r, handlers.OrderHandler)

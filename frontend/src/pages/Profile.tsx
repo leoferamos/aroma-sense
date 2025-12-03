@@ -4,6 +4,8 @@ import { getMyProfile, updateMyProfile, type ProfileResponse } from '../services
 import LoadingSpinner from '../components/LoadingSpinner';
 import InputField from '../components/InputField';
 import Navbar from '../components/Navbar';
+import ConfirmModal from '../components/ConfirmModal';
+import { requestAccountDeletion, cancelAccountDeletion, exportMyData } from '../services/profile';
 
 const Profile: React.FC = () => {
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
@@ -12,6 +14,8 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -77,6 +81,28 @@ const Profile: React.FC = () => {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-6">My Profile</h1>
 
+        {/* Deletion status banner */}
+        {profile?.deletion_requested_at && !profile?.deletion_confirmed_at && (
+          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+            <h3 className="text-sm font-semibold text-yellow-800">Account deletion pending</h3>
+            <p className="text-sm text-yellow-700 mt-1">
+              We received a request to delete your account on{' '}
+              <strong>{new Date(profile.deletion_requested_at).toLocaleString()}</strong>.
+              You have a 7-day cooling-off period during which you can cancel the deletion or export your data.
+            </p>
+          </div>
+        )}
+
+        {profile?.deletion_confirmed_at && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+            <h3 className="text-sm font-semibold text-red-800">Account deletion confirmed</h3>
+            <p className="text-sm text-red-700 mt-1">
+              Your account deletion was confirmed on <strong>{new Date(profile.deletion_confirmed_at).toLocaleString()}</strong>.
+              Your personal data will be retained for the configured retention period and then anonymized.
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-4 text-red-700 border border-red-200">{error}</div>
         )}
@@ -116,6 +142,97 @@ const Profile: React.FC = () => {
             </div>
           </form>
         </div>
+
+        {/* Account & Privacy */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4 mt-6">
+          <h2 className="text-lg font-semibold">Account & Privacy</h2>
+          <p className="text-sm text-gray-600">Export your data, request account deletion, or cancel a pending deletion.</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 mt-4">
+            <button
+              type="button"
+              onClick={async () => {
+                setActionLoading(true);
+                try {
+                  const blob = await exportMyData();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `aroma-sense-data-${profile?.public_id ?? 'me'}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  window.URL.revokeObjectURL(url);
+                  setSuccess('Data exported successfully');
+                } catch {
+                  setError('Failed to export data');
+                } finally {
+                  setActionLoading(false);
+                }
+              }}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+              disabled={actionLoading}
+            >
+              {actionLoading ? 'Processing…' : 'Export my data'}
+            </button>
+
+            {profile?.deletion_requested_at && !profile?.deletion_confirmed_at ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  setActionLoading(true);
+                  try {
+                    await cancelAccountDeletion();
+                    const updated = await getMyProfile();
+                    setProfile(updated);
+                    setSuccess('Account deletion cancelled');
+                  } catch {
+                      setError('Failed to cancel deletion');
+                    } finally {
+                    setActionLoading(false);
+                  }
+                }}
+                className="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                disabled={actionLoading}
+              >
+                Cancel deletion
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setDeleteModalOpen(true)}
+                className="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                disabled={actionLoading}
+              >
+                Request account deletion
+              </button>
+            )}
+          </div>
+        </div>
+
+        <ConfirmModal
+          open={deleteModalOpen}
+          title="Request account deletion"
+          description="Type DELETE_MY_ACCOUNT to confirm that you want to request account deletion. You will have 7 days to cancel."
+          confirmText="Request deletion"
+          cancelText="Cancel"
+          requirePhrase="DELETE_MY_ACCOUNT"
+            onConfirm={async () => {
+            setActionLoading(true);
+            try {
+              await requestAccountDeletion();
+              const updated = await getMyProfile();
+              setProfile(updated);
+              setSuccess('Account deletion requested successfully');
+            } catch {
+              setError('Failed to request deletion');
+            } finally {
+              setActionLoading(false);
+              setDeleteModalOpen(false);
+            }
+          }}
+          onCancel={() => setDeleteModalOpen(false)}
+          loading={actionLoading}
+        />
       </main>
     </div>
   );
