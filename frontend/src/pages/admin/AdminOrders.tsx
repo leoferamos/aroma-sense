@@ -4,16 +4,15 @@ import FiltersBar from '../../components/admin/FiltersBar';
 import OrdersTable from '../../components/admin/OrdersTable';
 import PaginationControls from '../../components/admin/PaginationControls';
 import { useAdminOrders } from '../../hooks/useAdminOrders';
-import { formatCurrency } from '../../utils/format';
 import AdminLayout from '../../components/admin/AdminLayout';
 
 const AdminOrders: React.FC = () => {
   const { data, loading, error, params, setPage, setPerPage, setStatus, setDateRange } = useAdminOrders({ page: 1, per_page: 25 });
 
   const orders = data?.orders ?? [];
-  const page = params.page ?? 1;
-  const perPage = params.per_page ?? 25;
-  const totalPages = data?.meta.pagination.total_pages ?? 1;
+  const page = data?.page ?? 1;
+  const perPage = data?.per_page ?? 25;
+  const totalPages = Math.ceil((data?.total ?? 0) / perPage) || 1;
 
   const actions = (
     <div className="flex items-center gap-2">
@@ -42,7 +41,7 @@ const AdminOrders: React.FC = () => {
         {!loading && !error && (
           <>
             <div className="mb-4 text-sm text-gray-700">
-              <strong>{data?.meta.pagination.total_count ?? 0}</strong> orders — Total revenue: <strong>{formatCurrency(data?.meta.stats.total_revenue ?? 0)}</strong>
+              <strong>{data?.total ?? 0}</strong> orders
             </div>
 
             <div className="overflow-x-auto">
