@@ -22,13 +22,14 @@ type LgpdService interface {
 }
 
 type lgpdService struct {
-	repo            repository.UserRepository
-	auditLogService AuditLogService
-	notifier        notification.NotificationService
+	repo             repository.UserRepository
+	userContestation repository.UserContestationRepository
+	auditLogService  AuditLogService
+	notifier         notification.NotificationService
 }
 
-func NewLgpdService(repo repository.UserRepository, auditLogService AuditLogService, notifier notification.NotificationService) LgpdService {
-	return &lgpdService{repo: repo, auditLogService: auditLogService, notifier: notifier}
+func NewLgpdService(repo repository.UserRepository, userContestationRepo repository.UserContestationRepository, auditLogService AuditLogService, notifier notification.NotificationService) LgpdService {
+	return &lgpdService{repo: repo, userContestation: userContestationRepo, auditLogService: auditLogService, notifier: notifier}
 }
 
 // ExportUserData exports all user data for GDPR compliance
@@ -261,9 +262,14 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 		user.ContestationDeadline = &deadline
 	}
 
-	// Mark as reactivation requested
-	user.ReactivationRequested = true
-	if err := s.repo.Update(user); err != nil {
+	// Create contestation record
+	contest := &model.UserContestation{
+		UserID:      user.ID,
+		Reason:      reason,
+		Status:      "pending",
+		RequestedAt: time.Now(),
+	}
+	if err := s.userContestation.Create(contest); err != nil {
 		return err
 	}
 
@@ -280,6 +286,12 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 	// Send contestation received confirmation email
 	if s.notifier != nil {
 		_ = s.notifier.SendContestationReceived(user.Email)
+	}
+
+	// Mark reactivation requested
+	user.ReactivationRequested = true
+	if err := s.repo.Update(user); err != nil {
+		return err
 	}
 
 	return nil
