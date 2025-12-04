@@ -8,6 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ChatBubble from './components/chat/ChatBubble';
 import AccountBlockOverlay from './components/AccountBlockOverlay';
 // Lazy load pages for better performance
+const AdminContestations = lazy(() => import('./pages/admin/AdminContestations'));
 const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -47,7 +48,7 @@ const ChatMount: React.FC = () => {
   return (
     <>
       <Routes>
-        {/* Public routes */}
+        {/* Public Routes */}
         <Route
           path="/register"
           element={<GuestRoute><Register /></GuestRoute>}
@@ -111,6 +112,14 @@ const ChatMount: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminAuditLogs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/contestations"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminContestations />
             </ProtectedRoute>
           }
         />
