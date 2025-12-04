@@ -11,17 +11,18 @@ import (
 
 // AppHandlers contains all initialized handlers
 type AppHandlers struct {
-	UserHandler          *handler.UserHandler
-	AdminUserHandler     *handler.AdminUserHandler
-	ProductHandler       *handler.ProductHandler
-	CartHandler          *handler.CartHandler
-	OrderHandler         *handler.OrderHandler
-	PasswordResetHandler *handler.PasswordResetHandler
-	ShippingHandler      *handler.ShippingHandler
-	ReviewHandler        *handler.ReviewHandler
-	AIHandler            *handler.AIHandler
-	ChatHandler          *handler.ChatHandler
-	AuditLogHandler      *handler.AuditLogHandler
+	UserHandler              *handler.UserHandler
+	AdminUserHandler         *handler.AdminUserHandler
+	ProductHandler           *handler.ProductHandler
+	CartHandler              *handler.CartHandler
+	OrderHandler             *handler.OrderHandler
+	PasswordResetHandler     *handler.PasswordResetHandler
+	ShippingHandler          *handler.ShippingHandler
+	ReviewHandler            *handler.ReviewHandler
+	AIHandler                *handler.AIHandler
+	ChatHandler              *handler.ChatHandler
+	AuditLogHandler          *handler.AuditLogHandler
+	AdminContestationHandler *handler.AdminContestationHandler
 }
 
 // AppServices contains service instances needed for jobs
