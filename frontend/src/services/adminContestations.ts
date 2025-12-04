@@ -18,7 +18,12 @@ export interface ContestationListResponse {
 
 export async function getPendingContestations(limit = 20, offset = 0): Promise<ContestationListResponse> {
   const { data } = await api.get('/admin/contestations', { params: { limit, offset } });
-  return data as ContestationListResponse;
+  // Normalize backend response when there are no items (data can be null)
+  const normalized: ContestationListResponse = {
+    data: (data && data.data) ? (data.data as AdminContestation[]) : [],
+    total: data && typeof data.total === 'number' ? data.total : 0,
+  };
+  return normalized;
 }
 
 export async function approveContestation(id: number, reviewNotes?: string): Promise<{ message: string }> {
