@@ -6,7 +6,6 @@ Architecture document for the conversational retrieval (RAG) flow focused on per
 
 Deliver perfume recommendations via chat with:
 
-- Custo previsível (sem chamadas remotas pagas)
 - Determinism and explainability (slots + short reasons)
 - LLM only for concise writing (≤ 180 tokens) and at most 1 question
 
