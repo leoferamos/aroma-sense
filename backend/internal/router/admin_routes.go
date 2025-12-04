@@ -9,7 +9,8 @@ import (
 // AdminRoutes sets up the admin-related routes
 func AdminRoutes(r *gin.Engine, adminUserHandler *handler.AdminUserHandler,
 	productHandler *handler.ProductHandler, orderHandler *handler.OrderHandler,
-	auditLogHandler *handler.AuditLogHandler) {
+	auditLogHandler *handler.AuditLogHandler,
+	adminContestationHandler *handler.AdminContestationHandler) {
 	adminGroup := r.Group("/admin")
 	adminGroup.Use(auth.JWTAuthMiddleware(), auth.AdminOnly())
 	{
@@ -36,5 +37,10 @@ func AdminRoutes(r *gin.Engine, adminUserHandler *handler.AdminUserHandler,
 		adminGroup.GET("/audit-logs/summary", auditLogHandler.GetAuditSummary)
 		adminGroup.POST("/audit-logs/cleanup", auditLogHandler.CleanupOldLogs)
 		adminGroup.GET("/audit-logs", auditLogHandler.ListAuditLogs)
+
+		// User contestations
+		adminGroup.GET("/contestations", adminContestationHandler.ListPendingContestions)
+		adminGroup.POST("/contestations/:id/approve", adminContestationHandler.ApproveContestation)
+		adminGroup.POST("/contestations/:id/reject", adminContestationHandler.RejectContestation)
 	}
 }
