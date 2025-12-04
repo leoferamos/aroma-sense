@@ -10,16 +10,17 @@ import (
 type UserContestationService interface {
 	Create(userID uint, reason string) error
 	ListPending(limit, offset int) ([]model.UserContestation, int64, error)
-	Approve(id uint, adminID uint, notes *string) error
-	Reject(id uint, adminID uint, notes *string) error
+	Approve(id uint, adminPublicID string, notes *string) error
+	Reject(id uint, adminPublicID string, notes *string) error
 }
 
 type userContestationService struct {
-	repo repository.UserContestationRepository
+	repo     repository.UserContestationRepository
+	userRepo repository.UserRepository
 }
 
-func NewUserContestationService(repo repository.UserContestationRepository) UserContestationService {
-	return &userContestationService{repo: repo}
+func NewUserContestationService(repo repository.UserContestationRepository, userRepo repository.UserRepository) UserContestationService {
+	return &userContestationService{repo: repo, userRepo: userRepo}
 }
 
 func (s *userContestationService) Create(userID uint, reason string) error {
@@ -36,7 +37,7 @@ func (s *userContestationService) ListPending(limit, offset int) ([]model.UserCo
 	return s.repo.ListPending(limit, offset)
 }
 
-func (s *userContestationService) Approve(id uint, adminID uint, notes *string) error {
+func (s *userContestationService) Approve(id uint, adminPublicID string, notes *string) error {
 	c, err := s.repo.FindByID(id)
 	if err != nil {
 		return err
@@ -47,12 +48,17 @@ func (s *userContestationService) Approve(id uint, adminID uint, notes *string) 
 	now := time.Now()
 	c.Status = "approved"
 	c.ReviewedAt = &now
+	admin, err := s.userRepo.FindByPublicID(adminPublicID)
+	if err != nil {
+		return err
+	}
+	adminID := admin.ID
 	c.ReviewedBy = &adminID
 	c.ReviewNotes = notes
 	return s.repo.Update(c)
 }
 
-func (s *userContestationService) Reject(id uint, adminID uint, notes *string) error {
+func (s *userContestationService) Reject(id uint, adminPublicID string, notes *string) error {
 	c, err := s.repo.FindByID(id)
 	if err != nil {
 		return err
@@ -63,6 +69,11 @@ func (s *userContestationService) Reject(id uint, adminID uint, notes *string) e
 	now := time.Now()
 	c.Status = "rejected"
 	c.ReviewedAt = &now
+	admin, err := s.userRepo.FindByPublicID(adminPublicID)
+	if err != nil {
+		return err
+	}
+	adminID := admin.ID
 	c.ReviewedBy = &adminID
 	c.ReviewNotes = notes
 	return s.repo.Update(c)

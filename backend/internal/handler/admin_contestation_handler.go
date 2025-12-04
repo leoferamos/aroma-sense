@@ -61,7 +61,7 @@ func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid id"})
 		return
 	}
-	adminID, exists := c.Get("adminID")
+	adminPublicID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
 		return
@@ -70,7 +70,7 @@ func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 		Notes *string `json:"notes"`
 	}
 	_ = c.ShouldBindJSON(&req)
-	if err := h.service.Approve(uint(id), adminID.(uint), req.Notes); err != nil {
+	if err := h.service.Approve(uint(id), adminPublicID.(string), req.Notes); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
@@ -95,7 +95,7 @@ func (h *AdminContestationHandler) RejectContestation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid id"})
 		return
 	}
-	adminID, exists := c.Get("adminID")
+	adminPublicID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
 		return
@@ -104,7 +104,7 @@ func (h *AdminContestationHandler) RejectContestation(c *gin.Context) {
 		Notes *string `json:"notes"`
 	}
 	_ = c.ShouldBindJSON(&req)
-	if err := h.service.Reject(uint(id), adminID.(uint), req.Notes); err != nil {
+	if err := h.service.Reject(uint(id), adminPublicID.(string), req.Notes); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}

@@ -58,7 +58,7 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 	cartService = service.NewCartService(repos.cart, productService)
 	chatService := service.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider, aiService)
 
-	userContestationService := service.NewUserContestationService(repos.userContestation)
+	userContestationService := service.NewUserContestationService(repos.userContestation, repos.user)
 	return &services{
 		adminUser:        adminUserService,
 		auth:             authService,
