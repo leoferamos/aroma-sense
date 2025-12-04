@@ -18,6 +18,16 @@ func NewAdminContestationHandler(s service.UserContestationService) *AdminContes
 }
 
 // ListPendingContestions returns all pending user contestations
+//
+// @Summary List pending user contestations
+// @Description Returns all contestations with status 'pending' for admin review
+// @Tags admin-contestation
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
+// @Success 200 {object} map[string]interface{} "List of contestations and total count"
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /admin/contestations [get]
+// @Security BearerAuth
 func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
@@ -34,6 +44,17 @@ func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
 }
 
 // ApproveContestation approves a pending contestation
+//
+// @Summary Approve a user contestation
+// @Description Approves a pending contestation and adds optional review notes
+// @Tags admin-contestation
+// @Param id path int true "Contestation ID"
+// @Param body body object false "Review notes (optional)"
+// @Success 200 {object} dto.MessageResponse "Contestation approved"
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /admin/contestations/{id}/approve [post]
+// @Security BearerAuth
 func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -57,6 +78,17 @@ func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 }
 
 // RejectContestation rejects a pending contestation
+//
+// @Summary Reject a user contestation
+// @Description Rejects a pending contestation and adds optional review notes
+// @Tags admin-contestation
+// @Param id path int true "Contestation ID"
+// @Param body body object false "Review notes (optional)"
+// @Success 200 {object} dto.MessageResponse "Contestation rejected"
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /admin/contestations/{id}/reject [post]
+// @Security BearerAuth
 func (h *AdminContestationHandler) RejectContestation(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
