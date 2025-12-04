@@ -92,6 +92,9 @@ func (s *adminUserService) DeactivateUser(userID uint, adminPublicID string, rea
 	}
 
 	now := time.Now()
+	if suspensionUntil != nil && suspensionUntil.Before(now) {
+		return errors.New("suspensionUntil cannot be in the past")
+	}
 	if err := s.repo.DeactivateUser(userID, adminPublicID, now, reason, notes, suspensionUntil); err != nil {
 		return err
 	}
