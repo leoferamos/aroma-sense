@@ -26,8 +26,6 @@ type notifier struct {
 }
 
 // NewNotifier creates a notification service that delegates to the provided EmailService
-// frontendBase is optional and used to build frontend links (e.g. cancel link) when callers
-// pass an empty link.
 func NewNotifier(es email.EmailService, frontendBase string) NotificationService {
 	return &notifier{es: es, frontendBase: frontendBase}
 }
