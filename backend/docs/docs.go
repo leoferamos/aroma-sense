@@ -314,8 +314,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/contestations/pending": {
+        "/admin/contestations": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Returns all contestations with status 'pending' for admin review",
                 "tags": [
                     "admin-contestation"
@@ -354,6 +359,11 @@ const docTemplate = `{
         },
         "/admin/contestations/{id}/approve": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Approves a pending contestation and adds optional review notes",
                 "tags": [
                     "admin-contestation"
@@ -400,6 +410,11 @@ const docTemplate = `{
         },
         "/admin/contestations/{id}/reject": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Rejects a pending contestation and adds optional review notes",
                 "tags": [
                     "admin-contestation"
