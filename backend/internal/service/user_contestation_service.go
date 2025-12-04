@@ -17,10 +17,11 @@ type UserContestationService interface {
 type userContestationService struct {
 	repo     repository.UserContestationRepository
 	userRepo repository.UserRepository
+	adminSvc AdminUserService
 }
 
-func NewUserContestationService(repo repository.UserContestationRepository, userRepo repository.UserRepository) UserContestationService {
-	return &userContestationService{repo: repo, userRepo: userRepo}
+func NewUserContestationService(repo repository.UserContestationRepository, userRepo repository.UserRepository, adminSvc AdminUserService) UserContestationService {
+	return &userContestationService{repo: repo, userRepo: userRepo, adminSvc: adminSvc}
 }
 
 func (s *userContestationService) Create(userID uint, reason string) error {
@@ -46,13 +47,22 @@ func (s *userContestationService) Approve(id uint, adminPublicID string, notes *
 		return nil
 	}
 	now := time.Now()
-	c.Status = "approved"
-	c.ReviewedAt = &now
 	admin, err := s.userRepo.FindByPublicID(adminPublicID)
 	if err != nil {
 		return err
 	}
+	reason := "Contestation approved"
+	if notes != nil && *notes != "" {
+		reason = *notes
+	}
+	if s.adminSvc != nil {
+		if err := s.adminSvc.AdminReactivateUser(c.UserID, adminPublicID, reason); err != nil {
+			return err
+		}
+	}
 	adminID := admin.ID
+	c.Status = "approved"
+	c.ReviewedAt = &now
 	c.ReviewedBy = &adminID
 	c.ReviewNotes = notes
 	return s.repo.Update(c)
