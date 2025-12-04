@@ -53,12 +53,10 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 	passwordResetService := service.NewPasswordResetService(repos.resetToken, repos.user, notifier)
 	reviewService := service.NewReviewService(repos.review, repos.order, repos.product)
 	aiService := service.NewAIService(repos.product)
-
 	productService := service.NewProductService(repos.product, storageClient, integrations.ai.embProvider)
 	cartService = service.NewCartService(repos.cart, productService)
 	chatService := service.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider, aiService)
-
-	userContestationService := service.NewUserContestationService(repos.userContestation, repos.user)
+	userContestationService := service.NewUserContestationService(repos.userContestation, repos.user, adminUserService)
 	return &services{
 		adminUser:        adminUserService,
 		auth:             authService,
