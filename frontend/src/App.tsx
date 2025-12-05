@@ -28,6 +28,7 @@ const Checkout = lazy(() => import('./pages/Checkout.tsx'));
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation.tsx'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Profile = lazy(() => import('./pages/Profile'));
+const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -63,8 +64,8 @@ const ChatMount: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/terms" element={<GuestRoute><Terms /></GuestRoute>} />
-        <Route path="/privacy" element={<GuestRoute><Privacy /></GuestRoute>} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
 
         {/* Protected admin routes */}
         <Route
@@ -144,6 +145,14 @@ const ChatMount: React.FC = () => {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
 import { getUserOrders } from '../services/order';
@@ -37,6 +38,9 @@ const OrdersPage: React.FC = () => {
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-4">
+          <BackButton fallbackPath="/products" />
+        </div>
         <h1 className="text-2xl font-semibold mb-6">My Orders</h1>
 
         {loading && <LoadingSpinner message="Loading orders..." />}

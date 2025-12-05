@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
 import CartItem from '../components/CartItem';
@@ -87,6 +88,9 @@ const Checkout: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="mb-4">
+          <BackButton fallbackPath="/products" />
+        </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
         {loading ? (

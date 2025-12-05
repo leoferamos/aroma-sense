@@ -3,8 +3,8 @@
  * Renders the registration form with validation and error handling.
  */
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../components/InputField';
 import FormError from '../components/FormError';
 import ErrorState from '../components/ErrorState';
@@ -13,12 +13,41 @@ import { useRegisterValidation } from '../hooks/useRegisterValidation';
 import { messages } from '../constants/messages';
 import { useRegister } from '../hooks/useRegister';
 
+const STORAGE_KEY = 'register_form_draft_v1';
+const INITIAL_FORM = {
+  email: '',
+  password: '',
+  repeatPassword: '',
+};
+
+const getStoredDraft = () => {
+  if (typeof window === 'undefined') {
+    return { form: INITIAL_FORM, agreeTerms: false, agreePrivacy: false };
+  }
+
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) {
+    return { form: INITIAL_FORM, agreeTerms: false, agreePrivacy: false };
+  }
+
+  try {
+    const parsed = JSON.parse(stored);
+    return {
+      form: { ...INITIAL_FORM, ...(parsed?.form || {}) },
+      agreeTerms: Boolean(parsed?.agreeTerms),
+      agreePrivacy: Boolean(parsed?.agreePrivacy),
+    };
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+    return { form: INITIAL_FORM, agreeTerms: false, agreePrivacy: false };
+  }
+};
+
 const Register: React.FC = () => {
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    repeatPassword: '',
-  });
+  const navigate = useNavigate();
+  const draft = getStoredDraft();
+  const [form, setForm] = useState(draft.form);
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const [touched, setTouched] = useState({
     email: false,
     password: false,
@@ -26,13 +55,39 @@ const Register: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(draft.agreeTerms);
   const [touchedAgree, setTouchedAgree] = useState(false);
-  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(draft.agreePrivacy);
   const [touchedPrivacy, setTouchedPrivacy] = useState(false);
 
   const errors = useRegisterValidation(form, touched);
   const { register, loading, error, success } = useRegister();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ form, agreeTerms, agreePrivacy })
+    );
+  }, [form, agreeTerms, agreePrivacy]);
+
+  useEffect(() => {
+    if (!success) return;
+
+    setShowSuccessOverlay(true);
+    setForm(INITIAL_FORM);
+    setAgreeTerms(false);
+    setAgreePrivacy(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    const timer = setTimeout(() => {
+      navigate('/login');
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [success, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -73,7 +128,13 @@ const Register: React.FC = () => {
       </div>
       {/* Right side - white box */}
       <div className="w-full md:w-1/2 bg-white flex items-center justify-center px-4 py-8 md:px-0 md:py-0 relative">
-        <div className="w-full max-w-md px-4 md:px-8 py-8 md:py-12 rounded-lg shadow-md">
+        <div className="w-full max-w-md px-4 md:px-8 py-8 md:py-12 rounded-lg shadow-md relative overflow-hidden">
+          {showSuccessOverlay && (
+            <div className="absolute inset-0 z-20 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center text-center px-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Registration successful!</h3>
+              <p className="text-sm text-gray-600">Redirecting to login...</p>
+            </div>
+          )}
           <div className="flex flex-col items-center mb-8">
             <img src="/logo.png" alt="Logo" className="h-16 md:h-20 mb-4" />
             <h2 className="text-2xl md:text-3xl font-medium text-center" style={{ fontFamily: 'Poppins, sans-serif' }}>
