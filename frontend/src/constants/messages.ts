@@ -11,7 +11,7 @@ export const messages = {
   passwordHelper: 'Use at least 8 characters, numbers and symbols',
   createAccount: 'Create Account',
   alreadyHaveAccount: 'Already have an account?',
-  git commit -m "mensagem do commit"git login: 'Login',
+  login: 'Login',
   dontHaveAccount: "Don't have an account?",
   createOne: 'Create one',
   registrationSuccess: 'Registration successful!',

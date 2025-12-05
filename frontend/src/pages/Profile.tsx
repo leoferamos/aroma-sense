@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { getMyProfile, updateMyProfile, type ProfileResponse } from '../services/profile';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -8,6 +9,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { requestAccountDeletion, cancelAccountDeletion, exportMyData } from '../services/profile';
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -21,10 +23,10 @@ const Profile: React.FC = () => {
     let mounted = true;
     (async () => {
       try {
-    const data = await getMyProfile();
-    if (!mounted) return;
-    setProfile(data);
-    setName(data.display_name ?? '');
+        const data = await getMyProfile();
+        if (!mounted) return;
+        setProfile(data);
+        setName(data.display_name ?? '');
       } catch (e: unknown) {
         if (!mounted) return;
         if (isAxiosError(e)) {
@@ -143,6 +145,21 @@ const Profile: React.FC = () => {
           </form>
         </div>
 
+        {/* Security */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4 mt-6">
+          <h2 className="text-lg font-semibold">Security</h2>
+          <p className="text-sm text-gray-600">Manage your password and account security.</p>
+          <div>
+            <button
+              type="button"
+              onClick={() => navigate('/change-password')}
+              className="inline-flex items-center px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Change your password
+            </button>
+          </div>
+        </div>
+
         {/* Account & Privacy */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4 mt-6">
           <h2 className="text-lg font-semibold">Account & Privacy</h2>
@@ -186,8 +203,8 @@ const Profile: React.FC = () => {
                     setProfile(updated);
                     setSuccess('Account deletion cancelled');
                   } catch {
-                      setError('Failed to cancel deletion');
-                    } finally {
+                    setError('Failed to cancel deletion');
+                  } finally {
                     setActionLoading(false);
                   }
                 }}
@@ -216,7 +233,7 @@ const Profile: React.FC = () => {
           confirmText="Request deletion"
           cancelText="Cancel"
           requirePhrase="DELETE_MY_ACCOUNT"
-            onConfirm={async () => {
+          onConfirm={async () => {
             setActionLoading(true);
             try {
               await requestAccountDeletion();

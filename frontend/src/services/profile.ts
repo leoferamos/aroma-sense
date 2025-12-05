@@ -53,3 +53,13 @@ export async function exportMyData(): Promise<Blob> {
   const res = await api.get('/users/me/export', { responseType: 'blob' });
   return res.data as Blob;
 }
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
+export async function changePassword(payload: ChangePasswordRequest): Promise<{ message: string }> {
+  const { data } = await api.post('/users/me/change-password', payload);
+  return data as { message: string };
+}
