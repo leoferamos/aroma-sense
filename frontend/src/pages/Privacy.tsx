@@ -1,115 +1,104 @@
 import React from 'react';
 import LegalPageLayout from '../components/LegalPageLayout';
 import AuthBackLink from '../components/AuthBackLink';
+import { useTranslation } from 'react-i18next';
 
 const Privacy: React.FC = () => {
+    const { t } = useTranslation('privacy');
     return (
-        <LegalPageLayout title="Privacy Policy" lastUpdate="November 27, 2025">
+        <LegalPageLayout title={t('title')} lastUpdate="November 30, 2025">
             <section className="space-y-4 text-justify">
                             <p>
-                                A sua privacidade é <strong className="text-gray-900">muito importante</strong> para nós. Esta Política de Privacidade explica como o Aroma Sense, de responsabilidade de Julio Oliveira e Leonardo Ramos, coleta, utiliza, armazena e protege as informações dos usuários que acessam e utilizam nossos serviços.
+                                {t('intro')}
                             </p>
 
-                            <p>Ao utilizar o site Aroma Sense, você concorda com as práticas descritas nesta política.</p>
+                            <p>{t('agreement')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">1. Informações Coletadas</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section1.title')}</h3>
                             <p>
-                                O Aroma Sense coleta apenas as informações estritamente necessárias para o funcionamento do e-commerce e da personalização da experiência do usuário.
+                                {t('section1.content')}
                             </p>
-                            <p>As informações coletadas incluem:</p>
+                            <p>{t('section1.collected')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                <li><strong>E-mail e senha:</strong> fornecidos no momento do cadastro.</li>
-                                <li><strong>Cookies de navegação:</strong> usados para melhorar a experiência do usuário e personalizar recomendações.</li>
+                                {t('section1.items', { returnObjects: true }).map((item: string, index: number) => (
+                                    <li key={index} dangerouslySetInnerHTML={{ __html: item }}></li>
+                                ))}
                             </ul>
-                            <p className="mt-2">O Aroma Sense não coleta dados sensíveis, como CPF, endereço, telefone ou informações de pagamento diretamente em sua base — esses dados são processados de forma segura pelos provedores de pagamento.</p>
+                            <p className="mt-2">{t('section1.sensitive')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">2. Finalidade da Coleta</h3>
-                            <p>Os dados são coletados para as seguintes finalidades:</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section2.title')}</h3>
+                            <p>{t('section2.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                <li>Permitir o acesso à conta do usuário (login e autenticação);</li>
-                                <li>Gerenciar compras e histórico de pedidos;</li>
-                                <li>Oferecer recomendações personalizadas com base nas preferências do usuário;</li>
-                                <li>Melhorar a experiência de navegação e personalização do site;</li>
-                                <li>Garantir a segurança e integridade da plataforma.</li>
+                                {t('section2.purposes', { returnObjects: true }).map((item: string, index: number) => (
+                                    <li key={index}>{item}</li>
+                                ))}
                             </ul>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">3. Cookies e Tecnologias de Rastreamento</h3>
-                            <p>O Aroma Sense utiliza cookies e tecnologias semelhantes para:</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section3.title')}</h3>
+                            <p>{t('section3.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                <li>Armazenar preferências do usuário;</li>
-                                <li>Manter sessões ativas;</li>
-                                <li>Gerar estatísticas anônimas de uso do site;</li>
-                                <li>Aperfeiçoar as recomendações feitas pela inteligência artificial.</li>
+                                {t('section3.uses', { returnObjects: true }).map((item: string, index: number) => (
+                                    <li key={index}>{item}</li>
+                                ))}
                             </ul>
-                            <p className="mt-2">O usuário pode desativar os cookies nas configurações do navegador, mas isso pode limitar certas funcionalidades do site.</p>
+                            <p className="mt-2">{t('section3.control')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">4. Compartilhamento de Dados</h3>
-                            <p>O Aroma Sense não compartilha informações pessoais dos usuários com terceiros, exceto quando necessário para:</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section4.title')}</h3>
+                            <p>{t('section4.content')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                <li>Processamento de pagamentos (via parceiros como gateways de pagamento);</li>
-                                <li>Entrega de produtos, quando aplicável;</li>
-                                <li>Cumprimento de obrigações legais ou regulatórias.</li>
+                                {t('section4.exceptions', { returnObjects: true }).map((item: string, index: number) => (
+                                    <li key={index}>{item}</li>
+                                ))}
                             </ul>
-                            <p className="mt-2">Em nenhum caso os dados são vendidos, alugados ou cedidos para fins de marketing externo.</p>
+                            <p className="mt-2">{t('section4.noSale')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">5. Armazenamento e Segurança</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section5.title')}</h3>
                             <p>
-                                Os dados são armazenados em ambientes seguros, com medidas técnicas e organizacionais adequadas para evitar acesso não autorizado, destruição, perda ou alteração indevida.
+                                {t('section5.content')}
                             </p>
-                            <p className="mt-2">As senhas são criptografadas e não são visualizadas por nossa equipe. Apesar dos esforços, nenhum sistema é 100% seguro. Em caso de incidente de segurança que comprometa dados pessoais, o Aroma Sense notificará os usuários afetados conforme exigido pela LGPD.</p>
+                            <p className="mt-2">{t('section5.passwords')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">6. Direitos do Usuário (LGPD)</h3>
-                            <p>De acordo com a Lei Geral de Proteção de Dados (LGPD), o usuário tem direito a:</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section6.title')}</h3>
+                            <p>{t('section6.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                <li>Acessar os dados armazenados sobre si;</li>
-                                <li>Corrigir dados incompletos ou incorretos;</li>
-                                <li>Solicitar a exclusão da conta e dos dados pessoais;</li>
-                                <li>Revogar o consentimento para uso dos dados;</li>
-                                <li>Solicitar informações sobre o compartilhamento de dados.</li>
+                                {t('section6.rights', { returnObjects: true }).map((item: string, index: number) => (
+                                    <li key={index}>{item}</li>
+                                ))}
                             </ul>
-                            <p className="mt-2"><strong>6.1 Direitos em Caso de Desativação de Conta</strong></p>
+                            <p className="mt-2"><strong>{t('section6.deactivationRights.title')}</strong></p>
                             <p>
-                                Caso sua conta seja desativada pela plataforma, você tem direito a:
+                                {t('section6.deactivationRights.content')}
                             </p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                <li>Receber notificação clara sobre os motivos da desativação;</li>
-                                <li>Apresentar contestação em até 7 dias corridos;</li>
-                                <li>Ser informado sobre o processo de recurso disponível;</li>
-                                <li>Solicitar revisão da decisão por parte da equipe de suporte;</li>
-                                <li>Receber confirmação da exclusão definitiva dos dados quando aplicável.</li>
+                                {t('section6.deactivationRights.rights', { returnObjects: true }).map((item: string, index: number) => (
+                                    <li key={index}>{item}</li>
+                                ))}
                             </ul>
-                            <p className="mt-2">Para exercer qualquer um desses direitos, basta entrar em contato pelo e-mail:
-                                <a href="mailto:suporte.aromasense@gmail.com" className="text-blue-600 hover:underline ml-1">📩 suporte.aromasense@gmail.com</a>
-                            </p>
+                            <p className="mt-2">{t('section6.contact')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">7. Retenção e Exclusão de Dados</h3>
-                            <p>Os dados do usuário serão mantidos apenas pelo tempo necessário para:</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section7.title')}</h3>
+                            <p>{t('section7.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                <li>Cumprir as finalidades descritas nesta Política;</li>
-                                <li>Atender exigências legais ou contratuais;</li>
-                                <li>Preservar direitos e interesses legítimos da plataforma.</li>
+                                {t('section7.purposes', { returnObjects: true }).map((item: string, index: number) => (
+                                    <li key={index}>{item}</li>
+                                ))}
                             </ul>
-                            <p className="mt-2"><strong>7.1 Desativação de Conta pela Plataforma</strong></p>
+                            <p className="mt-2"><strong>{t('section7.platformDeactivation.title')}</strong></p>
                             <p>
-                                Além da exclusão por solicitação do usuário, o Aroma Sense pode desativar contas conforme descrito nos Termos de Uso.
-                                Em caso de desativação por violação ou outros motivos, os dados serão mantidos por até 2 anos para fins de auditoria,
-                                compliance legal e proteção contra fraudes, após o que serão definitivamente excluídos, exceto quando exigido
-                                por lei por período superior.
+                                {t('section7.platformDeactivation.content')}
                             </p>
-                            <p className="mt-2">Após o encerramento da conta (seja por solicitação do usuário ou decisão da plataforma), os dados serão removidos de forma segura e definitiva, mantendo apenas registros mínimos necessários para compliance legal.</p>
+                            <p className="mt-2">{t('section7.postClosure')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">8. Inteligência Artificial e Personalização</h3>
-                            <p>O Aroma Sense utiliza algoritmos de inteligência artificial para sugerir perfumes com base nas preferências e interações do usuário. Essas recomendações são automáticas e não envolvem decisões humanas diretas. Nenhuma decisão de caráter legal, financeiro ou pessoal é tomada exclusivamente por meio da IA.</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section8.title')}</h3>
+                            <p>{t('section8.content')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">9. Alterações na Política</h3>
-                            <p>Esta Política de Privacidade pode ser atualizada periodicamente para refletir melhorias ou mudanças legais. Recomenda-se a leitura regular desta página para se manter informado sobre eventuais alterações.</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section9.title')}</h3>
+                            <p>{t('section9.content')}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-900 mt-6">10. Contato</h3>
-                            <p>Em caso de dúvidas, solicitações ou reclamações sobre o tratamento de dados, entre em contato com nossa equipe pelo e-mail:
-                                <a href="mailto:suporte.aromasene@gmail.com" className="text-blue-600 hover:underline ml-1">📩 suporte.aromasene@gmail.com</a>
-                            </p>
+                            <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section10.title')}</h3>
+                            <p>{t('section10.content')}</p>
 
-                            <p className="text-center text-gray-500 text-sm mt-6">Aroma Sense © 2025 — Todos os direitos reservados.</p>
+                            <p className="text-center text-gray-500 text-sm mt-6">{t('copyright')}</p>
                         </section>
 
                         <div className="mt-6">
