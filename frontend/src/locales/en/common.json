@@ -136,5 +136,25 @@
     "logout": "Logout",
     "loading": "Loading…",
     "totalActions": "Total actions"
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "resetTitle": "Reset Password",
+    "emailDescription": "Enter your email and we will send a 6-digit code to reset your password.",
+    "codeDescription": "Enter the 6-digit code from your email and choose a new password.",
+    "emailLabel": "Email",
+    "codeLabel": "Verification Code",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "sendCode": "Send code",
+    "resetPassword": "Reset password",
+    "sending": "Sending...",
+    "resetting": "Resetting...",
+    "resendCode": "← Resend code",
+    "backToLogin": "Back to login",
+    "invalidEmail": "Invalid email.",
+    "codeRequired": "Code must be 6 digits.",
+    "successMessage": "Password reset successfully!",
+    "redirecting": "Redirecting to login..."
   }
 }

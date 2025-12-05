@@ -7,9 +7,11 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import WordGrid from '../components/WordGrid';
 import { useForgotPassword } from '../hooks/useForgotPassword';
 import { usePasswordValidation } from '../hooks/usePasswordValidation';
+import { useTranslation } from 'react-i18next';
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('common');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -70,19 +72,19 @@ const ForgotPassword: React.FC = () => {
           <div className="flex flex-col items-center mb-8">
             <img src="/logo.png" alt="Logo" className="h-16 md:h-20 mb-4" />
             <h2 className="text-2xl md:text-3xl font-medium text-center" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              {step === 'email' ? 'Forgot Password' : 'Reset Password'}
+              {step === 'email' ? t('forgotPassword.title') : t('forgotPassword.resetTitle')}
             </h2>
             <p className="text-sm text-gray-600 mt-2 text-center">
               {step === 'email' 
-                ? 'Enter your email and we will send a 6-digit code to reset your password.' 
-                : 'Enter the 6-digit code from your email and choose a new password.'}
+                ? t('forgotPassword.emailDescription')
+                : t('forgotPassword.codeDescription')}
             </p>
           </div>
 
           {step === 'email' ? (
             <form className="flex flex-col gap-6" onSubmit={handleEmailSubmit} noValidate>
               <InputField
-                label="Email"
+                label={t('forgotPassword.emailLabel')}
                 name="email"
                 type="email"
                 value={email}
@@ -91,7 +93,7 @@ const ForgotPassword: React.FC = () => {
                 required
                 autoComplete="email"
               />
-              <FormError message={(!email || validateEmail(email)) ? '' : 'Invalid email.'} />
+              <FormError message={(!email || validateEmail(email)) ? '' : t('forgotPassword.invalidEmail')} />
 
               <button
                 type="submit"
@@ -100,7 +102,7 @@ const ForgotPassword: React.FC = () => {
                 }`}
                 disabled={loading || !email}
               >
-                {loading ? <LoadingSpinner message="Sending..." /> : 'Send code'}
+                {loading ? <LoadingSpinner message={t('forgotPassword.sending')} /> : t('forgotPassword.sendCode')}
               </button>
 
               {error && <ErrorState message={error} />}
@@ -111,7 +113,7 @@ const ForgotPassword: React.FC = () => {
               {/* Code input with 6 boxes */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Verification Code
+                  {t('forgotPassword.codeLabel')}
                 </label>
                 <input
                   type="text"
@@ -124,11 +126,11 @@ const ForgotPassword: React.FC = () => {
                   autoComplete="off"
                   autoFocus
                 />
-                <FormError message={code && code.length !== 6 ? 'Code must be 6 digits.' : ''} />
+                <FormError message={code && code.length !== 6 ? t('forgotPassword.codeRequired') : ''} />
               </div>
 
               <InputField
-                label="New Password"
+                label={t('forgotPassword.newPasswordLabel')}
                 name="newPassword"
                 type="password"
                 value={newPassword}
@@ -140,7 +142,7 @@ const ForgotPassword: React.FC = () => {
               <FormError message={passwordError} />
 
               <InputField
-                label="Confirm Password"
+                label={t('forgotPassword.confirmPasswordLabel')}
                 name="confirmPassword"
                 type="password"
                 value={confirmPassword}
@@ -160,13 +162,13 @@ const ForgotPassword: React.FC = () => {
                 }`}
                 disabled={loading || code.length !== 6 || !!passwordError || !!confirmError || !newPassword || !confirmPassword}
               >
-                {loading ? <LoadingSpinner message="Resetting..." /> : 'Reset password'}
+                {loading ? <LoadingSpinner message={t('forgotPassword.resetting')} /> : t('forgotPassword.resetPassword')}
               </button>
 
               {error && <ErrorState message={error} />}
               {success && (
                 <div className="text-sm text-green-600 text-center font-medium">
-                  {success} Redirecting to login...
+                  {t('forgotPassword.successMessage')} {t('forgotPassword.redirecting')}
                 </div>
               )}
 
@@ -181,13 +183,13 @@ const ForgotPassword: React.FC = () => {
                 }}
                 className="text-sm text-blue-600 underline"
               >
-                ← Resend code
+                {t('forgotPassword.resendCode')}
               </button>
             </form>
           )}
 
           <div className="mt-6 text-gray-700 text-base text-center">
-            <Link to="/login" className="underline text-blue-600">Back to login</Link>
+            <Link to="/login" className="underline text-blue-600">{t('forgotPassword.backToLogin')}</Link>
           </div>
         </div>
       </div>

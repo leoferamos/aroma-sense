@@ -136,5 +136,25 @@
     "logout": "Sair",
     "loading": "Carregando…",
     "totalActions": "Total de ações"
+  },
+  "forgotPassword": {
+    "title": "Esqueceu a Senha",
+    "resetTitle": "Redefinir Senha",
+    "emailDescription": "Digite seu e-mail e enviaremos um código de 6 dígitos para redefinir sua senha.",
+    "codeDescription": "Digite o código de 6 dígitos do seu e-mail e escolha uma nova senha.",
+    "emailLabel": "E-mail",
+    "codeLabel": "Código de Verificação",
+    "newPasswordLabel": "Nova Senha",
+    "confirmPasswordLabel": "Confirmar Senha",
+    "sendCode": "Enviar código",
+    "resetPassword": "Redefinir senha",
+    "sending": "Enviando...",
+    "resetting": "Redefinindo...",
+    "resendCode": "← Reenviar código",
+    "backToLogin": "Voltar ao login",
+    "invalidEmail": "E-mail inválido.",
+    "codeRequired": "Código deve ter 6 dígitos.",
+    "successMessage": "Senha redefinida com sucesso!",
+    "redirecting": "Redirecionando para o login..."
   }
 }
