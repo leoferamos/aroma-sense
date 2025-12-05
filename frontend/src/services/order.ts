@@ -3,7 +3,7 @@ import type { OrderResponse } from '../types/order';
 
 export async function getUserOrders(): Promise<OrderResponse[]> {
   const res = await api.get<OrderResponse[]>('/orders');
-  return res.data;
+  return (res.data || []) as OrderResponse[];
 }
 
 export interface OrderCreateRequest {

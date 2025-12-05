@@ -202,7 +202,7 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 		return nil, err
 	}
 
-	var resp []dto.OrderResponse
+	resp := make([]dto.OrderResponse, 0, len(orders))
 	for _, o := range orders {
 		items := make([]dto.OrderItemResponse, len(o.Items))
 		for i, it := range o.Items {
@@ -240,5 +240,8 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 		})
 	}
 
+	if resp == nil {
+		resp = []dto.OrderResponse{}
+	}
 	return resp, nil
 }
