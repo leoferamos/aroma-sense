@@ -217,7 +217,6 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
               <button
                 type="button"
                 onClick={onContestDeactivation}
-<<<<<<< HEAD
                 disabled={loading || contestationReason.trim().length < 10 || contestationSubmitted}
                 className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50"
               >

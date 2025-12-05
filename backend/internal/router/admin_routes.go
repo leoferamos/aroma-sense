@@ -37,7 +37,6 @@ func AdminRoutes(r *gin.Engine, adminUserHandler *handler.AdminUserHandler,
 		adminGroup.GET("/audit-logs/summary", auditLogHandler.GetAuditSummary)
 		adminGroup.POST("/audit-logs/cleanup", auditLogHandler.CleanupOldLogs)
 		adminGroup.GET("/audit-logs", auditLogHandler.ListAuditLogs)
-<<<<<<< HEAD
 
 		// User contestations
 		adminGroup.GET("/contestations", adminContestationHandler.ListPendingContestions)

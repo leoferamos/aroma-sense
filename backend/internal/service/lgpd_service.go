@@ -262,7 +262,6 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 		user.ContestationDeadline = &deadline
 	}
 
-<<<<<<< HEAD
 	// Create contestation record
 	contest := &model.UserContestation{
 		UserID:      user.ID,
@@ -289,14 +288,5 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 		_ = s.notifier.SendContestationReceived(user.Email)
 	}
 
-<<<<<<< HEAD
-	// Mark reactivation requested
-	user.ReactivationRequested = true
-	if err := s.repo.Update(user); err != nil {
-		return err
-	}
-
-=======
->>>>>>> origin/main
 	return nil
 }
