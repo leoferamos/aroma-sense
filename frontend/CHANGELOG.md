@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/leoferamos/aroma-sense/compare/v0.8.0...v0.9.0) (2025-12-05)
+
+
+### Features
+
+* **contest:** Implement LGPD-compliant account deactivation contestation system ([#86](https://github.com/leoferamos/aroma-sense/issues/86)) ([131668d](https://github.com/leoferamos/aroma-sense/commit/131668d6db1f7062de8388e5177befe80e8e3742))
+
 # [0.8.0](https://github.com/leoferamos/aroma-sense/compare/v0.7.2...v0.8.0) (2025-12-03)
 
 
