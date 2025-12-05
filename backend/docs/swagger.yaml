@@ -993,6 +993,97 @@ paths:
       summary: Get audit log summary
       tags:
       - audit-log
+  /admin/contestations:
+    get:
+      description: Returns all contestations with status 'pending' for admin review
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      responses:
+        "200":
+          description: List of contestations and total count
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List pending user contestations
+      tags:
+      - admin-contestation
+  /admin/contestations/{id}/approve:
+    post:
+      description: Approves a pending contestation and adds optional review notes
+      parameters:
+      - description: Contestation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Review notes (optional)
+        in: body
+        name: body
+        schema:
+          type: object
+      responses:
+        "200":
+          description: Contestation approved
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Approve a user contestation
+      tags:
+      - admin-contestation
+  /admin/contestations/{id}/reject:
+    post:
+      description: Rejects a pending contestation and adds optional review notes
+      parameters:
+      - description: Contestation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Review notes (optional)
+        in: body
+        name: body
+        schema:
+          type: object
+      responses:
+        "200":
+          description: Contestation rejected
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reject a user contestation
+      tags:
+      - admin-contestation
   /admin/orders:
     get:
       consumes:

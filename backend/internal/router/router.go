@@ -33,7 +33,7 @@ func SetupRouter(handlers *bootstrap.AppHandlers) *gin.Engine {
 
 	// Register domain routes
 	UserRoutes(r, handlers.UserHandler, handlers.PasswordResetHandler)
-	AdminRoutes(r, handlers.AdminUserHandler, handlers.ProductHandler, handlers.OrderHandler, handlers.AuditLogHandler)
+	AdminRoutes(r, handlers.AdminUserHandler, handlers.ProductHandler, handlers.OrderHandler, handlers.AuditLogHandler, handlers.AdminContestationHandler)
 	ProductRoutes(r, handlers.ProductHandler, handlers.ReviewHandler)
 	CartRoutes(r, handlers.CartHandler)
 	OrderRoutes(r, handlers.OrderHandler)

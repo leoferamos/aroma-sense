@@ -18,8 +18,9 @@ const defaultNav: NavItem[] = [
   { label: 'Dashboard', to: '/admin/dashboard' },
   { label: 'Products', to: '/admin/products' },
   { label: 'Orders', to: '/admin/orders' },
-    { label: 'Users', to: '/admin/users' },
-    { label: 'Audit Logs', to: '/admin/audit-logs' },
+  { label: 'Users', to: '/admin/users' },
+  { label: 'Audit Logs', to: '/admin/audit-logs' },
+  { label: 'Contestations', to: '/admin/contestations' },
 ];
 
 const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) => {

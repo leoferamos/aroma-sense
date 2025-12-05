@@ -75,8 +75,8 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
   };
 
   const onContestDeactivation = async () => {
-    if (!contestationReason.trim()) {
-      setError('Please provide a reason for contestation');
+    if (contestationReason.trim().length < 10) {
+      setError('Please provide a reason for contestation (minimum 10 characters)');
       return;
     }
     setError(null);
@@ -217,7 +217,7 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
               <button
                 type="button"
                 onClick={onContestDeactivation}
-                disabled={loading || !contestationReason.trim() || contestationSubmitted}
+                disabled={loading || contestationReason.trim().length < 10 || contestationSubmitted}
                 className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50"
               >
                 {contestationSubmitted ? 'Submitted' : 'Submit Contest'}
