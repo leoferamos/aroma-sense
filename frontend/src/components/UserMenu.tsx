@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export type UserRole = 'admin' | 'client' | null | undefined;
 
@@ -13,19 +14,20 @@ interface UserMenuProps {
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ open, role, isAuthenticated, onClose, onLogout, onSignIn }) => {
+  const { t } = useTranslation('common');
   if (!open) return null;
 
   return (
     <div className="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-10">
       <nav className="py-2" aria-label="User menu">
-  <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>Profile</Link>
-  <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>My orders</Link>
+  <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.profile')}</Link>
+  <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.myOrders')}</Link>
         {role === 'admin' && (
-          <Link to="/admin/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>Admin dashboard</Link>
+          <Link to="/admin/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.adminDashboard')}</Link>
         )}
         <div className="my-1 border-t border-gray-100" />
-        <Link to="/terms" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>Terms</Link>
-        <Link to="/privacy" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>Privacy</Link>
+        <Link to="/terms" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.terms')}</Link>
+        <Link to="/privacy" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.privacy')}</Link>
         <div className="my-1 border-t border-gray-100" />
         {isAuthenticated ? (
           <button
@@ -33,7 +35,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ open, role, isAuthenticated, onClos
             onClick={() => { onClose(); onLogout(); }}
             className="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
           >
-            Logout
+            {t('logout')}
           </button>
         ) : (
           <button
@@ -41,7 +43,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ open, role, isAuthenticated, onClos
             onClick={() => { onClose(); onSignIn(); }}
             className="w-full text-left px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
           >
-            Sign in
+            {t('userMenu.signIn')}
           </button>
         )}
       </nav>

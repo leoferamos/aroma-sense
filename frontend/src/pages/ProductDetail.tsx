@@ -12,8 +12,10 @@ import { useCart } from '../hooks/useCart';
 import { formatCurrency } from '../utils/format';
 import { cn } from '../utils/cn';
 import { PLACEHOLDER_IMAGE, LOW_STOCK_THRESHOLD } from '../constants/app';
+import { useTranslation } from 'react-i18next';
 
 const ProductDetail: React.FC = () => {
+  const { t } = useTranslation('common');
   const { id } = useParams<{ id: string }>();
   const productId = parseInt(id || '0', 10);
   const { product, loading, error } = useProductDetail(productId);
@@ -138,7 +140,7 @@ const ProductDetail: React.FC = () => {
                       : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md'
                   )}
                 >
-                  {addingToCart ? 'Adding...' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                  {addingToCart ? t('products.adding') : isOutOfStock ? t('products.outOfStock') : t('products.addToCart')}
                 </button>
                 <button
                   disabled={isOutOfStock}

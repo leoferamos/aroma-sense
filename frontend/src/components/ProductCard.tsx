@@ -4,6 +4,7 @@ import type { Product } from '../types/product';
 import { formatCurrency } from '../utils/format';
 import { cn } from '../utils/cn';
 import { PLACEHOLDER_IMAGE, LOW_STOCK_THRESHOLD } from '../constants/app';
+import { useTranslation } from 'react-i18next';
 
 interface ProductCardProps {
   product: Product;
@@ -12,6 +13,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, showAddToCart = true }) => {
+  const { t } = useTranslation('common');
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -90,7 +92,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, showAdd
                 : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-sm hover:shadow-md'
             )}
           >
-            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+            {isOutOfStock ? t('products.outOfStock') : t('products.addToCart')}
           </button>
         </div>
       )}

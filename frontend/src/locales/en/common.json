@@ -57,12 +57,14 @@
   },
   "products": {
     "title": "Products",
-    "subtitle": "Find your favorite fragrance",
+    "subtitle": "Find your favorite perfume",
     "noProducts": "No products available",
-    "checkBackSoon": "Check back soon for new fragrances!",
+    "checkBackSoon": "Check back soon for new perfumes!",
     "loadingMore": "Loading more products...",
     "addToCart": "Add to Cart",
+    "adding": "Adding...",
     "outOfStock": "Out of Stock",
+    "inStock": "in stock",
     "price": "Price",
     "description": "Description",
     "category": "Category"
@@ -85,6 +87,8 @@
     "empty": "Your cart is empty",
     "checkout": "Checkout",
     "total": "Total",
+    "subtotal": "Subtotal",
+    "goToCheckout": "Go to Checkout",
     "quantity": "Quantity",
     "remove": "Remove",
     "productImage": "Product image",
@@ -156,5 +160,16 @@
     "codeRequired": "Code must be 6 digits.",
     "successMessage": "Password reset successfully!",
     "redirecting": "Redirecting to login..."
+  },
+  "checkout": {
+    "title": "Checkout",
+    "orderSummary": "Order Summary",
+    "cartEmpty": "Your cart is empty.",
+    "continueShopping": "Continue shopping",
+    "shippingAddress": "Shipping address",
+    "fullName": "Full name",
+    "payment": "Payment",
+    "placeOrder": "Place Order",
+    "placingOrder": "Placing order..."
   }
 }

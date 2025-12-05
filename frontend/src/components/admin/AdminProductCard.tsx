@@ -5,6 +5,7 @@ import { formatCurrency } from '../../utils/format';
 import { cn } from '../../utils/cn';
 import TrashIcon from '../TrashIcon';
 import PencilIcon from '../PencilIcon';
+import { useTranslation } from 'react-i18next';
 
 interface AdminProductCardProps {
   product: Product;
@@ -13,6 +14,7 @@ interface AdminProductCardProps {
 }
 
 const AdminProductCard: React.FC<AdminProductCardProps> = ({ product, onEdit, onDelete }) => {
+  const { t } = useTranslation('common');
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
   <div className="relative h-48 bg-white flex items-center justify-center p-3">
@@ -60,7 +62,7 @@ const AdminProductCard: React.FC<AdminProductCardProps> = ({ product, onEdit, on
         <div className="mt-2 flex items-center justify-between">
           <span className="text-blue-600 font-semibold">{formatCurrency(product.price)}</span>
           <span className={cn('text-xs font-medium', product.stock_quantity === 0 ? 'text-red-600' : 'text-gray-600')}>
-            {product.stock_quantity === 0 ? 'Out of stock' : `${product.stock_quantity} in stock`}
+            {product.stock_quantity === 0 ? t('products.outOfStock') : `${product.stock_quantity} ${t('products.inStock')}`}
           </span>
         </div>
       </div>

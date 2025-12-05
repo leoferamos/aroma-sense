@@ -62,7 +62,9 @@
     "checkBackSoon": "Volte em breve para novos perfumes!",
     "loadingMore": "Carregando mais produtos...",
     "addToCart": "Adicionar ao Carrinho",
+    "adding": "Adicionando...",
     "outOfStock": "Fora de Estoque",
+    "inStock": "em estoque",
     "price": "Preço",
     "description": "Descrição",
     "category": "Categoria"
@@ -85,6 +87,8 @@
     "empty": "Seu carrinho está vazio",
     "checkout": "Finalizar Compra",
     "total": "Total",
+    "subtotal": "Subtotal",
+    "goToCheckout": "Ir para Finalizar Compra",
     "quantity": "Quantidade",
     "remove": "Remover",
     "productImage": "Imagem do produto",
@@ -156,5 +160,16 @@
     "codeRequired": "Código deve ter 6 dígitos.",
     "successMessage": "Senha redefinida com sucesso!",
     "redirecting": "Redirecionando para o login..."
+  },
+  "checkout": {
+    "title": "Finalizar Compra",
+    "orderSummary": "Resumo do Pedido",
+    "cartEmpty": "Seu carrinho está vazio.",
+    "continueShopping": "Continuar comprando",
+    "shippingAddress": "Endereço de entrega",
+    "fullName": "Nome completo",
+    "payment": "Pagamento",
+    "placeOrder": "Fazer Pedido",
+    "placingOrder": "Fazendo pedido..."
   }
 }

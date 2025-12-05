@@ -162,7 +162,7 @@ const Navbar: React.FC = () => {
                 </div>
                 <div className="p-4 border-t border-gray-100">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-600">Subtotal</span>
+                    <span className="text-sm text-gray-600">{t('cart.subtotal')}</span>
                     <span className="text-base font-semibold text-gray-900">
                       {formatCurrency(cart?.total || 0)}
                     </span>
@@ -172,7 +172,7 @@ const Navbar: React.FC = () => {
                     onClick={() => { setOpen(false); navigate('/checkout'); }}
                     className="w-full py-2.5 px-4 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200"
                   >
-                    Go to Checkout
+                    {t('cart.goToCheckout')}
                   </button>
                 </div>
               </div>
