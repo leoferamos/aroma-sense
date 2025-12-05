@@ -142,7 +142,7 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
       <main role="main" className="max-w-7xl mx-auto p-4">
         <div
-          className={`transition-transform transition-opacity duration-200 ease-out ${isAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'}`}
+          className={`transition-all duration-200 ease-out ${isAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'}`}
         >
           {children}
         </div>

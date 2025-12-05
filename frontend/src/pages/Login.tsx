@@ -12,6 +12,7 @@ import WordGrid from '../components/WordGrid';
 import { useLoginValidation } from '../hooks/useLoginValidation';
 import { messages } from '../constants/messages';
 import { useLogin } from '../hooks/useLogin';
+import { useTranslation } from 'react-i18next';
 
 const Login: React.FC = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -19,6 +20,7 @@ const Login: React.FC = () => {
   const { errors, validateForm } = useLoginValidation();
   const { login, loading, error } = useLogin();
   const [generalError, setGeneralError] = useState("");
+  const { t } = useTranslation('common');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -52,13 +54,13 @@ const Login: React.FC = () => {
           <div className="flex flex-col items-center mb-8">
             <img src="/logo.png" alt="Logo" className="h-16 md:h-20 mb-4" />
             <h2 className="text-2xl md:text-3xl font-medium text-center" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Login
+              {t('auth.login')}
             </h2>
           </div>
 
           <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
             <InputField
-              label="Email"
+              label={t('auth.email')}
               type="email"
               name="email"
               value={form.email}
@@ -69,7 +71,7 @@ const Login: React.FC = () => {
             <FormError message={errors.email} />
 
             <InputField
-              label="Password"
+              label={t('auth.password')}
               type={showPassword ? 'text' : 'password'}
               name="password"
               value={form.password}
@@ -97,7 +99,7 @@ const Login: React.FC = () => {
 
                <div className="text-right">
               <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
-                Forgot your password?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
 
@@ -110,14 +112,14 @@ const Login: React.FC = () => {
               }`}
               disabled={loading || !form.email || !form.password}
             >
-              {loading ? "Logging in..." : messages.login}
+              {loading ? t('common.loading') : messages.login}
             </button>
             {error && <ErrorState message={error} />}
             {generalError && <ErrorState message={generalError} />}
           </form>
 
           <div className="mt-6 text-gray-700 text-base text-center">
-            {messages.dontHaveAccount} <Link to="/register" className="underline">{messages.createOne}</Link>
+            {t('auth.dontHaveAccount')} <Link to="/register" className="underline">{t('auth.createOne')}</Link>
           </div>
         </div>
       </div>

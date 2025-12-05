@@ -9,6 +9,7 @@ import { useProductSearch } from '../hooks/useProductSearch';
 import { listProducts } from '../services/product';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Products: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Product[] | null>(null);
@@ -17,6 +18,7 @@ const Products: React.FC = () => {
   const [searchParams] = useSearchParams();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const { t } = useTranslation('common');
   
 
   // Sync state from URL
@@ -91,8 +93,8 @@ const Products: React.FC = () => {
         {/* Header */}
         <div className="mb-10">
           <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl p-6 shadow-sm border border-gray-50">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-2">Products</h1>
-            <p className="text-lg text-gray-500">Find your favorite fragrance</p>
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-2">{t('products.title')}</h1>
+            <p className="text-lg text-gray-500">{t('products.subtitle')}</p>
           </div>
         </div>
 
@@ -147,8 +149,8 @@ const Products: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">No products available</h3>
-                    <p className="text-gray-500">Check back soon for new fragrances!</p>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('products.noProducts')}</h3>
+                    <p className="text-gray-500">{t('products.checkBackSoon')}</p>
                   </>
                 )}
               </div>
@@ -170,7 +172,7 @@ const Products: React.FC = () => {
                 {/* Loading indicator at the end of the list*/}
                 {!isSearching && isLoadingMore && results.length > 0 && (
                   <div className="flex justify-center py-8">
-                    <LoadingSpinner message="Loading more products..." />
+                    <LoadingSpinner message={t('products.loadingMore')} />
                   </div>
                 )}
 

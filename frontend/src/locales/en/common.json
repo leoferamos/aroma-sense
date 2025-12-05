@@ -23,11 +23,26 @@
     "register": "Register",
     "email": "Email",
     "password": "Password",
+    "repeatPassword": "Repeat Password",
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot Password?",
     "resetPassword": "Reset Password",
     "loginError": "Invalid email or password",
-    "registerSuccess": "Account created successfully"
+    "registerSuccess": "Account created successfully",
+    "registrationSuccessful": "Registration successful!",
+    "redirectingToLogin": "Redirecting to login...",
+    "registering": "Registering...",
+    "dontHaveAccount": "Don't have an account?",
+    "createOne": "Create one",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "agreeTerms": "I agree to the Terms of Service",
+    "agreePrivacy": "I agree to the Privacy Policy",
+    "agreeTermsError": "You must agree to the terms of service.",
+    "agreePrivacyError": "You must agree to the privacy policy.",
+    "alreadyHaveAccount": "Already have an account?",
+    "passwordHelper": "Use at least 8 characters, numbers and symbols",
+    "createAccount": "Create Account"
   },
   "navbar": {
     "home": "Home",
@@ -36,15 +51,31 @@
     "profile": "Profile",
     "admin": "Admin",
     "language": "Language",
-    "openCart": "Open cart"
+    "openCart": "Open cart",
+    "openMenu": "Open menu",
+    "logoAlt": "Aroma Sense"
   },
   "products": {
     "title": "Products",
+    "subtitle": "Find your favorite fragrance",
+    "noProducts": "No products available",
+    "checkBackSoon": "Check back soon for new fragrances!",
+    "loadingMore": "Loading more products...",
     "addToCart": "Add to Cart",
     "outOfStock": "Out of Stock",
     "price": "Price",
     "description": "Description",
     "category": "Category"
+  },
+  "search": {
+    "placeholder": "Search products...",
+    "ariaLabel": "Search products"
+  },
+  "error": {
+    "tryAgain": "Try Again",
+    "goToProducts": "Go to Products",
+    "somethingWrong": "Something went wrong.",
+    "refreshOrTryLater": "Please refresh the page or try again later."
   },
   "cart": {
     "title": "Shopping Cart",

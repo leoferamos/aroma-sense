@@ -23,11 +23,26 @@
     "register": "Cadastrar",
     "email": "E-mail",
     "password": "Senha",
+    "repeatPassword": "Repetir Senha",
     "confirmPassword": "Confirmar Senha",
     "forgotPassword": "Esqueceu a senha?",
     "resetPassword": "Redefinir Senha",
     "loginError": "E-mail ou senha inválidos",
-    "registerSuccess": "Conta criada com sucesso"
+    "registerSuccess": "Conta criada com sucesso",
+    "registrationSuccessful": "Cadastro realizado com sucesso!",
+    "redirectingToLogin": "Redirecionando para o login...",
+    "registering": "Cadastrando...",
+    "dontHaveAccount": "Não tem uma conta?",
+    "createOne": "Crie uma",
+    "termsOfService": "Termos de Serviço",
+    "privacyPolicy": "Política de Privacidade",
+    "agreeTerms": "Concordo com os Termos de Serviço",
+    "agreePrivacy": "Concordo com a Política de Privacidade",
+    "agreeTermsError": "Você deve concordar com os termos de serviço.",
+    "agreePrivacyError": "Você deve concordar com a política de privacidade.",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "passwordHelper": "Use pelo menos 8 caracteres, números e símbolos",
+    "createAccount": "Criar Conta"
   },
   "navbar": {
     "home": "Início",
@@ -36,15 +51,31 @@
     "profile": "Perfil",
     "admin": "Admin",
     "language": "Idioma",
-    "openCart": "Abrir carrinho"
+    "openCart": "Abrir carrinho",
+    "openMenu": "Abrir menu",
+    "logoAlt": "Aroma Sense"
   },
   "products": {
     "title": "Produtos",
+    "subtitle": "Encontre seu perfume favorito",
+    "noProducts": "Nenhum produto disponível",
+    "checkBackSoon": "Volte em breve para novos perfumes!",
+    "loadingMore": "Carregando mais produtos...",
     "addToCart": "Adicionar ao Carrinho",
     "outOfStock": "Fora de Estoque",
     "price": "Preço",
     "description": "Descrição",
     "category": "Categoria"
+  },
+  "search": {
+    "placeholder": "Buscar produtos...",
+    "ariaLabel": "Buscar produtos"
+  },
+  "error": {
+    "tryAgain": "Tentar Novamente",
+    "goToProducts": "Ir para Produtos",
+    "somethingWrong": "Algo deu errado.",
+    "refreshOrTryLater": "Atualize a página ou tente novamente mais tarde."
   },
   "cart": {
     "title": "Carrinho de Compras",

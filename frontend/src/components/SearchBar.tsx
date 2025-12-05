@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   value: string;
@@ -16,9 +17,12 @@ const SearchBar: React.FC<Props> = ({
   onSubmit,
   onClear,
   isLoading = false,
-  placeholder = "Search products...",
+  placeholder,
   className = "",
 }) => {
+  const { t } = useTranslation('common');
+  const defaultPlaceholder = t('search.placeholder');
+  const actualPlaceholder = placeholder || defaultPlaceholder;
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
@@ -45,8 +49,8 @@ const SearchBar: React.FC<Props> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          aria-label="Search products"
-          placeholder={placeholder}
+          aria-label={t('search.ariaLabel')}
+          placeholder={actualPlaceholder}
           className="block w-full rounded-2xl border-0 bg-white shadow-sm ring-1 ring-gray-200 py-3.5 pl-12 pr-32 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 hover:shadow-md hover:ring-gray-300"
         />
         {value && onClear && (

@@ -78,7 +78,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16 gap-4">
           {/* Logo */}
           <Link to="/products" className="flex items-center flex-shrink-0">
-            <img src={LOGO_PATH} alt="Aroma Sense" className="h-10 w-auto" />
+            <img src={LOGO_PATH} alt={t('navbar.logoAlt')} className="h-10 w-auto" />
           </Link>
 
           {/* Search (center) */}
@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
             {/* Hamburger Menu*/}
             <button
               type="button"
-              aria-label="Open menu"
+              aria-label={t('navbar.openMenu')}
               className="p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 transition-all duration-200 rounded-lg"
               onClick={() => {
                 setUserMenuOpen((v) => !v);
