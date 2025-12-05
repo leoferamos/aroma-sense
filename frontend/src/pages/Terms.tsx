@@ -29,7 +29,7 @@ const Terms: React.FC = () => {
                                 {t('section2.content')}
                             </p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section2.responsibilities', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section2.responsibilities', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -40,7 +40,7 @@ const Terms: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section3.title')}</h3>
                             <p>{t('section3.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section3.features', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section3.features', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -73,7 +73,7 @@ const Terms: React.FC = () => {
                             </p>
                             <p>{t('section7.acknowledgment')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section7.points', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section7.points', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -88,19 +88,19 @@ const Terms: React.FC = () => {
                                 {t('section9.content')}
                             </p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section9.situations', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section9.situations', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
                             <p className="mt-3"><strong>{t('section9.process')}</strong></p>
                             <ol className="list-decimal list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section9.processSteps', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section9.processSteps', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ol>
                             <p className="mt-3"><strong>{t('section9.consequences')}</strong></p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section9.consequencesList', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section9.consequencesList', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>

@@ -20,7 +20,7 @@ const Privacy: React.FC = () => {
                             </p>
                             <p>{t('section1.collected')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section1.items', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section1.items', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index} dangerouslySetInnerHTML={{ __html: item }}></li>
                                 ))}
                             </ul>
@@ -29,7 +29,7 @@ const Privacy: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section2.title')}</h3>
                             <p>{t('section2.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section2.purposes', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section2.purposes', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -37,7 +37,7 @@ const Privacy: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section3.title')}</h3>
                             <p>{t('section3.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section3.uses', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section3.uses', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -46,7 +46,7 @@ const Privacy: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section4.title')}</h3>
                             <p>{t('section4.content')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section4.exceptions', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section4.exceptions', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -61,7 +61,7 @@ const Privacy: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section6.title')}</h3>
                             <p>{t('section6.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section6.rights', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section6.rights', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -70,7 +70,7 @@ const Privacy: React.FC = () => {
                                 {t('section6.deactivationRights.content')}
                             </p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section6.deactivationRights.rights', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section6.deactivationRights.rights', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -79,7 +79,7 @@ const Privacy: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mt-6">{t('section7.title')}</h3>
                             <p>{t('section7.intro')}</p>
                             <ul className="list-disc list-inside text-gray-700 ml-3 space-y-1">
-                                {t('section7.purposes', { returnObjects: true }).map((item: string, index: number) => (
+                                {(t('section7.purposes', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
