@@ -35,7 +35,8 @@
     "cart": "Cart",
     "profile": "Profile",
     "admin": "Admin",
-    "language": "Language"
+    "language": "Language",
+    "openCart": "Open cart"
   },
   "products": {
     "title": "Products",
