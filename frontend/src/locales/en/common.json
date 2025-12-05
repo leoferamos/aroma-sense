@@ -1,0 +1,70 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "loginError": "Invalid email or password",
+    "registerSuccess": "Account created successfully"
+  },
+  "navbar": {
+    "home": "Home",
+    "products": "Products",
+    "cart": "Cart",
+    "profile": "Profile",
+    "admin": "Admin",
+    "language": "Language"
+  },
+  "products": {
+    "title": "Products",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "price": "Price",
+    "description": "Description",
+    "category": "Category"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "checkout": "Checkout",
+    "total": "Total",
+    "quantity": "Quantity",
+    "remove": "Remove"
+  },
+  "profile": {
+    "title": "Profile",
+    "settings": "Settings",
+    "changePassword": "Change Password",
+    "exportData": "Export Data",
+    "deleteAccount": "Delete Account"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "orders": "Orders",
+    "products": "Products",
+    "contestations": "Contestations"
+  }
+}

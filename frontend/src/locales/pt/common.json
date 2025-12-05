@@ -1,0 +1,70 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "close": "Fechar",
+    "open": "Abrir",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "register": "Cadastrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "resetPassword": "Redefinir Senha",
+    "loginError": "E-mail ou senha inválidos",
+    "registerSuccess": "Conta criada com sucesso"
+  },
+  "navbar": {
+    "home": "Início",
+    "products": "Produtos",
+    "cart": "Carrinho",
+    "profile": "Perfil",
+    "admin": "Admin",
+    "language": "Idioma"
+  },
+  "products": {
+    "title": "Produtos",
+    "addToCart": "Adicionar ao Carrinho",
+    "outOfStock": "Fora de Estoque",
+    "price": "Preço",
+    "description": "Descrição",
+    "category": "Categoria"
+  },
+  "cart": {
+    "title": "Carrinho de Compras",
+    "empty": "Seu carrinho está vazio",
+    "checkout": "Finalizar Compra",
+    "total": "Total",
+    "quantity": "Quantidade",
+    "remove": "Remover"
+  },
+  "profile": {
+    "title": "Perfil",
+    "settings": "Configurações",
+    "changePassword": "Alterar Senha",
+    "exportData": "Exportar Dados",
+    "deleteAccount": "Excluir Conta"
+  },
+  "admin": {
+    "dashboard": "Painel",
+    "users": "Usuários",
+    "orders": "Pedidos",
+    "products": "Produtos",
+    "contestations": "Contestações"
+  }
+}
