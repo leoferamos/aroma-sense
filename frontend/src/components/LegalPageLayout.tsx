@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import WordGrid from './WordGrid';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 interface LegalPageLayoutProps {
   title: string;
@@ -11,6 +12,7 @@ interface LegalPageLayoutProps {
 
 const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({ title, lastUpdate, children }) => {
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation('common');
   const backTo = isAuthenticated ? '/products' : '/register';
 
   return (
@@ -44,7 +46,7 @@ const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({ title, lastUpdate, ch
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
-              <span className="text-sm font-medium">Back</span>
+              <span className="text-sm font-medium">{t('legal.back')}</span>
             </Link>
             <div className="flex flex-col items-center">
               <img src="/logo.png" alt="Logo" className="h-16 md:h-20 mb-4" />

@@ -77,6 +77,9 @@
     "somethingWrong": "Algo deu errado.",
     "refreshOrTryLater": "Atualize a página ou tente novamente mais tarde."
   },
+  "legal": {
+    "back": "Voltar"
+  },
   "cart": {
     "title": "Carrinho de Compras",
     "empty": "Seu carrinho está vazio",
@@ -123,12 +126,15 @@
     "cancel": "Cancelar",
     "deletionRequested": "Exclusão da conta solicitada com sucesso",
     "requestDeletionFailed": "Falha ao solicitar exclusão"
-  }
+  },
   "admin": {
     "dashboard": "Painel",
     "users": "Usuários",
     "orders": "Pedidos",
     "products": "Produtos",
-    "contestations": "Contestações"
+    "contestations": "Contestações",
+    "logout": "Sair",
+    "loading": "Carregando…",
+    "totalActions": "Total de ações"
   }
 }

@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getAuditLogs, getAuditLogsSummary } from '../../services/audit';
 import type { AuditLog, AuditLogSummary } from '../../types/audit';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard: React.FC = () => {
   const { role, logout } = useAuth();
+  const { t } = useTranslation('common');
 
   const handleLogout = async () => {
     await logout();
@@ -21,7 +23,7 @@ const AdminDashboard: React.FC = () => {
         onClick={handleLogout}
         className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
       >
-        Logout
+        {t('admin.logout')}
       </button>
     </div>
   );
@@ -69,14 +71,14 @@ const AdminDashboard: React.FC = () => {
       return d.toLocaleString();
     }
 
-    if (loading) return <div className="py-4">Loading…</div>;
+    if (loading) return <div className="py-4">{t('admin.loading')}</div>;
     if (error) return <div className="py-4 text-red-600">{error}</div>;
 
     return (
       <div className="space-y-2">
         {summary && (
           <div className="flex items-center gap-3 mb-2">
-            <div className="text-sm text-gray-700">Total actions: <span className="font-medium">{summary.total_actions}</span></div>
+            <div className="text-sm text-gray-700">{t('admin.totalActions')}: <span className="font-medium">{summary.total_actions}</span></div>
             {Object.entries(summary.actions_by_type || {}).slice(0,3).map(([k,v]) => (
               <div key={k} className="text-xs bg-gray-100 px-2 py-1 rounded">{k}: {v}</div>
             ))}

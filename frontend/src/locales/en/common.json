@@ -77,6 +77,9 @@
     "somethingWrong": "Something went wrong.",
     "refreshOrTryLater": "Please refresh the page or try again later."
   },
+  "legal": {
+    "back": "Back"
+  },
   "cart": {
     "title": "Shopping Cart",
     "empty": "Your cart is empty",
@@ -123,12 +126,15 @@
     "cancel": "Cancel",
     "deletionRequested": "Account deletion requested successfully",
     "requestDeletionFailed": "Failed to request deletion"
-  }
+  },
   "admin": {
     "dashboard": "Dashboard",
     "users": "Users",
     "orders": "Orders",
     "products": "Products",
-    "contestations": "Contestations"
+    "contestations": "Contestations",
+    "logout": "Logout",
+    "loading": "Loading…",
+    "totalActions": "Total actions"
   }
 }
