@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/leoferamos/aroma-sense/compare/v0.7.2...v0.8.0) (2025-12-03)
+
+
+### Features
+
+* **lgpd:** add LGPD deactivation flow, admin user management and audit logs ([#85](https://github.com/leoferamos/aroma-sense/issues/85)) ([7030420](https://github.com/leoferamos/aroma-sense/commit/7030420ed953386644831a4c32f22632450a02fc))
+
 ## [0.7.2](https://github.com/leoferamos/aroma-sense/compare/v0.7.1...v0.7.2) (2025-11-27)
 
 

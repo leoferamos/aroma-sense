@@ -48,7 +48,11 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 	adminUserService := service.NewAdminUserService(repos.user, auditLogService, notifier)
 	authService := service.NewAuthService(repos.user, cartService, auditLogService)
 	userProfileService := service.NewUserProfileService(repos.user, auditLogService)
+<<<<<<< HEAD
 	lgpdService := service.NewLgpdService(repos.user, repos.userContestation, auditLogService, notifier)
+=======
+	lgpdService := service.NewLgpdService(repos.user, auditLogService, notifier)
+>>>>>>> origin/main
 	orderService := service.NewOrderService(repos.order, repos.cart, repos.product, integrations.shipping.service)
 	passwordResetService := service.NewPasswordResetService(repos.resetToken, repos.user, notifier)
 	reviewService := service.NewReviewService(repos.review, repos.order, repos.product)
