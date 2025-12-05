@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import ProductCard from '../components/ProductCard';
 import ProductReview from '../components/ProductReview';
 import ErrorState from '../components/ErrorState';
@@ -67,6 +68,9 @@ const ProductDetail: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-4">
+          <BackButton fallbackPath="/products" />
+        </div>
         {/* Product Detail Section */}
         <div className="bg-white shadow-sm rounded-xl overflow-hidden mb-12 border border-gray-100">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -154,7 +158,7 @@ const ProductDetail: React.FC = () => {
         </div>
 
         {/* Product Review Section */}
-        <ProductReview 
+        <ProductReview
           productId={productId}
           canReview={product.can_review}
         />

@@ -5,6 +5,7 @@ import { getMyProfile, updateMyProfile, type ProfileResponse } from '../services
 import LoadingSpinner from '../components/LoadingSpinner';
 import InputField from '../components/InputField';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import ConfirmModal from '../components/ConfirmModal';
 import { requestAccountDeletion, cancelAccountDeletion, exportMyData } from '../services/profile';
 
@@ -81,6 +82,9 @@ const Profile: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-4">
+          <BackButton fallbackPath="/products" />
+        </div>
         <h1 className="text-2xl font-semibold text-gray-900 mb-6">My Profile</h1>
 
         {/* Deletion status banner */}

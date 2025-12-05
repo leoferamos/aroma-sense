@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import BackButton from '../components/BackButton';
 import { formatCurrency } from '../utils/format';
 
 type LocationState = {
@@ -22,13 +23,16 @@ const OrderConfirmation: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="mb-4">
+          <BackButton fallbackPath="/products" />
+        </div>
         <div className="bg-white shadow rounded-lg p-8 text-center">
           <div className="mx-auto h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
             <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Thank you{ name ? `, ${name}` : '' }!</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Thank you{name ? `, ${name}` : ''}!</h1>
           <p className="mt-2 text-gray-700">Your order has been placed successfully.</p>
           <div className="mt-6 inline-flex items-center gap-6 text-gray-800">
             <div>
