@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/leoferamos/aroma-sense/compare/v0.9.0...v0.10.0) (2025-12-05)
+
+
+### Features
+
+* **ux:** add back button and correct order response ([#87](https://github.com/leoferamos/aroma-sense/issues/87)) ([cb58ded](https://github.com/leoferamos/aroma-sense/commit/cb58dede1f99a8b0cdd74c7cb14455c08c9380d7))
+
 # [0.9.0](https://github.com/leoferamos/aroma-sense/compare/v0.8.0...v0.9.0) (2025-12-05)
 
 
