@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 type NavItem = {
   label: string;
@@ -14,17 +15,16 @@ type Props = {
   navItems?: NavItem[];
 };
 
-const defaultNav: NavItem[] = [
-  { label: 'Dashboard', to: '/admin/dashboard' },
-  { label: 'Products', to: '/admin/products' },
-  { label: 'Orders', to: '/admin/orders' },
-  { label: 'Users', to: '/admin/users' },
-  { label: 'Audit Logs', to: '/admin/audit-logs' },
-  { label: 'Contestations', to: '/admin/contestations' },
-];
-
 const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) => {
-  const items = navItems ?? defaultNav;
+  const { t } = useTranslation('admin');
+  const items = navItems ?? [
+    { label: t('nav.dashboard'), to: '/admin/dashboard' },
+    { label: t('nav.products'), to: '/admin/products' },
+    { label: t('nav.orders'), to: '/admin/orders' },
+    { label: t('nav.users'), to: '/admin/users' },
+    { label: t('nav.auditLogs'), to: '/admin/audit-logs' },
+    { label: t('nav.contestations'), to: '/admin/contestations' },
+  ];
   const location = useLocation();
   const pathname = location.pathname;
   const [isAnimating, setIsAnimating] = React.useState(false);
@@ -60,7 +60,7 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
               <Link to="/admin/dashboard" className="flex items-center gap-3">
                 <img src="/logo.png" alt="Aroma Sense" className="h-8" />
-                <span className="text-lg font-semibold text-gray-900">{title ?? 'Admin'}</span>
+                <span className="text-lg font-semibold text-gray-900">{title ?? t('title')}</span>
               </Link>
 
               <nav aria-label="Admin navigation" className="hidden md:flex items-center gap-2">
@@ -99,8 +99,8 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20">
-                    <Link to="/admin/profile" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile</Link>
-                    <button onClick={logout} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Logout</button>
+                    <Link to="/admin/profile" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{t('nav.profile')}</Link>
+                    <button onClick={logout} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{t('nav.logout')}</button>
                   </div>
                 )}
               </div>
@@ -132,8 +132,8 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
                 {actions}
               </div>
               <div className="mt-2 border-t pt-2">
-                <Link to="/admin/profile" className="block py-2 text-sm text-gray-700">Profile</Link>
-                <button onClick={logout} className="w-full text-left py-2 text-sm text-gray-700">Logout</button>
+                <Link to="/admin/profile" className="block py-2 text-sm text-gray-700">{t('nav.profile')}</Link>
+                <button onClick={logout} className="w-full text-left py-2 text-sm text-gray-700">{t('nav.logout')}</button>
               </div>
             </div>
           </div>

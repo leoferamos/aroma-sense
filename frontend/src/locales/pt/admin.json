@@ -1,0 +1,16 @@
+{
+  "dashboard": "Painel",
+  "users": "Usuários",
+  "orders": "Pedidos",
+  "products": "Produtos",
+  "contestations": "Contestações",
+  "logout": "Sair",
+  "loading": "Carregando…",
+  "totalActions": "Total de ações",
+  "addProduct": "Adicionar Produto",
+  "editProduct": "Editar Produto",
+  "deleteProduct": "Excluir Produto",
+  "viewUsers": "Ver Usuários",
+  "manageOrders": "Gerenciar Pedidos",
+  "auditLogs": "Logs de Auditoria"
+}

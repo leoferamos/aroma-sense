@@ -1,0 +1,16 @@
+{
+  "dashboard": "Dashboard",
+  "users": "Users",
+  "orders": "Orders",
+  "products": "Products",
+  "contestations": "Contestations",
+  "logout": "Logout",
+  "loading": "Loading…",
+  "totalActions": "Total actions",
+  "addProduct": "Add Product",
+  "editProduct": "Edit Product",
+  "deleteProduct": "Delete Product",
+  "viewUsers": "View Users",
+  "manageOrders": "Manage Orders",
+  "auditLogs": "Audit Logs"
+}
