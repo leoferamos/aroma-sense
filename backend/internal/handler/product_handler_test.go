@@ -93,6 +93,14 @@ func (m *MockProductService) GetProductIDBySlug(ctx context.Context, slug string
 	return args.Get(0).(uint), args.Error(1)
 }
 
+func (m *MockProductService) AdminListProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error) {
+	args := m.Called(ctx, page, limit)
+	if len(args.Get(0).([]dto.ProductResponse)) == 0 && args.Error(2) != nil {
+		return []dto.ProductResponse{}, 0, args.Error(2)
+	}
+	return args.Get(0).([]dto.ProductResponse), args.Int(1), args.Error(2)
+}
+
 // ---- SETUP ROUTER ----
 func setupProductRouter() (*gin.Engine, *MockProductService) {
 	mockService := new(MockProductService)

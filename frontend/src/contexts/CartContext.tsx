@@ -39,11 +39,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const addItem = useCallback(async (productId: number, quantity = 1) => {
+  const addItem = useCallback(async (productSlug: string, quantity = 1) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await svcAddToCart(productId, quantity);
+      const data = await svcAddToCart(productSlug, quantity);
       setCart(data);
     } catch (err: unknown) {
       if (isAxiosError(err)) {

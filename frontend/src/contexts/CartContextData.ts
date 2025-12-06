@@ -7,7 +7,7 @@ export interface CartContextValue {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
-  addItem: (productId: number, quantity?: number) => Promise<void>;
+  addItem: (productSlug: string, quantity?: number) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
   isRemovingItem: (itemId: number) => boolean;
   updateItemQuantity: (itemId: number, quantity: number) => Promise<void>;
