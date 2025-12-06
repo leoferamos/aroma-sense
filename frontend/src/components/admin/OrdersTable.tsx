@@ -42,7 +42,7 @@ const OrdersTable: React.FC<Props> = ({ orders }) => {
           >
             <td className="px-4 py-2 border">{o.id}</td>
             <td className="px-4 py-2 border text-right">{formatCurrency(o.total_amount ?? 0)}</td>
-            <td className="px-4 py-2 border">{t(o.status)}</td>
+            <td className="px-4 py-2 border">{o.status || 'Unknown'}</td>
             <td className="px-4 py-2 border">{o.created_at ? new Date(o.created_at).toLocaleString() : '-'}</td>
           </tr>
         ))}
