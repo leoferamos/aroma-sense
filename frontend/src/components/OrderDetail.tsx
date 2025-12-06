@@ -55,11 +55,11 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
     <div className="mt-3 bg-white p-6 rounded-lg shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div className="space-y-1">
-          <div className="text-sm text-gray-500">Order #{order.id}</div>
+          <div className="text-sm text-gray-500">{t('order.orderNumber', { id: order.id })}</div>
           <div className="text-lg font-semibold">{new Date(order.created_at).toLocaleString()}</div>
         </div>
         <div className={`inline-flex items-center px-3 py-1 rounded text-sm font-medium ${statusColor(order.status)}`}>
-          {order.status}
+          {t(`order.status.${order.status}`, order.status)}
         </div>
       </div>
 
@@ -73,8 +73,8 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
               <Link to={`/products/${it.product_slug}`} onClick={(e) => e.stopPropagation()} className="font-medium text-sm text-gray-900 hover:underline">
                 {it.product_name || `Product #${it.product_slug}`}
               </Link>
-              <div className="text-sm text-gray-500 mt-1">Qty: {it.quantity}</div>
-              <div className="text-sm text-gray-600 mt-2">Price: {formatCurrency(it.price_at_purchase)}</div>
+              <div className="text-sm text-gray-500 mt-1">{t('order.quantity', { quantity: it.quantity })}</div>
+              <div className="text-sm text-gray-600 mt-2">{t('order.price', { price: formatCurrency(it.price_at_purchase) })}</div>
             </div>
             <div className="text-right w-36">
               <div className="font-medium">{formatCurrency(it.subtotal)}</div>
