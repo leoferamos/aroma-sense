@@ -226,6 +226,7 @@
     "failedToLoadOrders": "Failed to load orders",
     "failedToChangePassword": "Failed to change password",
     "invalidOrExpiredCode": "Invalid or expired code. Please try again.",
+    "tooManyResetRequests": "Too many reset requests. Please try again later.",
     "loading": "Loading...",
     "loadingSuggestions": "Loading suggestions...",
     "deleting": "Deleting...",

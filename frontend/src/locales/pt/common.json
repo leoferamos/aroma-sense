@@ -226,6 +226,7 @@
     "failedToLoadOrders": "Falha ao carregar pedidos",
     "failedToChangePassword": "Falha ao alterar senha",
     "invalidOrExpiredCode": "Código inválido ou expirado. Tente novamente.",
+    "tooManyResetRequests": "Muitas tentativas de redefinição. Tente novamente mais tarde.",
     "loading": "Carregando...",
     "loadingSuggestions": "Carregando sugestões...",
     "deleting": "Excluindo...",

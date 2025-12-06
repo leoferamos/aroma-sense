@@ -38,7 +38,15 @@ export const useForgotPassword = (): UseForgotPasswordReturn => {
       return true;
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      setError(apiError?.response?.data?.error || 'Failed to request password reset. Please try again.');
+      const errorMessage = apiError?.response?.data?.error;
+      
+      // Handle specific error messages
+      if (errorMessage === 'Too many reset requests. Please try again later.') {
+        setError(t('errors.tooManyResetRequests'));
+      } else {
+        setError(errorMessage || 'Failed to request password reset. Please try again.');
+      }
+      
       return false;
     } finally {
       setLoading(false);
