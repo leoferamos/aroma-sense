@@ -16,8 +16,8 @@ import { useTranslation } from 'react-i18next';
 
 const ProductDetail: React.FC = () => {
   const { t } = useTranslation('common');
-  const { id } = useParams<{ id: string }>();
-  const { product, loading, error } = useProductDetail(id || '');
+  const { slug } = useParams<{ slug: string }>();
+  const { product, loading, error } = useProductDetail(slug || '');
   const { products: relatedProducts } = useProducts();
   const { addItem } = useCart();
   const [addingToCart, setAddingToCart] = useState(false);

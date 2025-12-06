@@ -163,7 +163,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                             <h3 className="text-sm font-semibold text-gray-700">Sugestões</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {lastSuggestions.map(s => (
-                                    <Link key={s.id} to={`/products/${s.id}`} className="flex gap-3 p-2 rounded-lg border border-gray-200 hover:border-blue-400 transition-colors">
+                                    <Link key={s.id} to={`/products/${s.slug}`} className="flex gap-3 p-2 rounded-lg border border-gray-200 hover:border-blue-400 transition-colors">
                                         <img src={s.thumbnail_url || ''} alt={s.name} className="w-12 h-12 object-cover rounded" />
                                         <div className="min-w-0">
                                             <div className="text-sm font-medium text-gray-900 truncate">{s.name}</div>

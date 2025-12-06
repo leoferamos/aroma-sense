@@ -90,40 +90,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, dto.MessageResponse{Message: "Product created successfully"})
 }
 
-// GetProduct handles fetching a product by its ID or slug
-//
-// @Summary      Get product by ID or slug
-// @Description  Retrieves a specific product by its ID or slug
-// @Tags         products
-// @Accept       json
-// @Produce      json
-// @Param        id             path    string  true  "Product ID or slug"
-// @Success      200  {object}  dto.ProductResponse  "Product details"
-// @Failure      404  {object}  dto.ErrorResponse    "Product not found"
-// @Router       /products/{id} [get]
-func (h *ProductHandler) GetProduct(c *gin.Context) {
-	param := c.Param("id")
-
-	// Try to parse as ID first
-	if id, err := strconv.Atoi(param); err == nil {
-		product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
-		if err == nil {
-			c.JSON(http.StatusOK, product)
-			return
-		}
-	}
-
-	// If not a valid ID or ID lookup failed, try as slug
-	product, err := h.productService.GetProductBySlug(c.Request.Context(), param)
-	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, product)
-}
-
-// GetProductBySlug handles fetching a product by its slug (clean URLs)
+// GetProduct handles fetching a product by its slug
 //
 // @Summary      Get product by slug
 // @Description  Retrieves a specific product by its slug for clean URLs
@@ -133,8 +100,8 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 // @Param        slug           path    string  true  "Product slug"
 // @Success      200  {object}  dto.ProductResponse  "Product details"
 // @Failure      404  {object}  dto.ErrorResponse    "Product not found"
-// @Router       /product/{slug} [get]
-func (h *ProductHandler) GetProductBySlug(c *gin.Context) {
+// @Router       /products/{slug} [get]
+func (h *ProductHandler) GetProduct(c *gin.Context) {
 	slug := c.Param("slug")
 
 	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
