@@ -18,7 +18,7 @@ const ForgotPassword: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [touched, setTouched] = useState({ password: false, confirmPassword: false });
-  const { requestReset, confirmReset, loading, error, success } = useForgotPassword();
+  const { requestReset, confirmReset, loading, error, emailSentSuccess, passwordResetSuccess } = useForgotPassword();
   const { validatePassword, validatePasswordConfirmation } = usePasswordValidation();
 
   const validateEmail = (value: string) => value.trim().length >= 3 && value.includes('@');
@@ -102,11 +102,11 @@ const ForgotPassword: React.FC = () => {
                 }`}
                 disabled={loading || !email}
               >
-                {loading ? <LoadingSpinner message={t('forgotPassword.sending')} /> : t('forgotPassword.sendCode')}
+                {loading ? <LoadingSpinner message={t('forgotPassword.sending')} compact /> : t('forgotPassword.sendCode')}
               </button>
 
               {error && <ErrorState message={error} />}
-              {success && <div className="text-sm text-green-600">{success}</div>}
+              {emailSentSuccess && <div className="text-sm text-green-600">{emailSentSuccess}</div>}
             </form>
           ) : (
             <form className="flex flex-col gap-6" onSubmit={handleCodeSubmit} noValidate>
@@ -162,11 +162,11 @@ const ForgotPassword: React.FC = () => {
                 }`}
                 disabled={loading || code.length !== 6 || !!passwordError || !!confirmError || !newPassword || !confirmPassword}
               >
-                {loading ? <LoadingSpinner message={t('forgotPassword.resetting')} /> : t('forgotPassword.resetPassword')}
+                {loading ? <LoadingSpinner message={t('forgotPassword.resetting')} compact /> : t('forgotPassword.resetPassword')}
               </button>
 
               {error && <ErrorState message={error} />}
-              {success && (
+              {passwordResetSuccess && (
                 <div className="text-sm text-green-600 text-center font-medium">
                   {t('forgotPassword.successMessage')} {t('forgotPassword.redirecting')}
                 </div>

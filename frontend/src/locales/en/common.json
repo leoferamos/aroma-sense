@@ -225,6 +225,8 @@
     "failedToLoadProduct": "Failed to load product.",
     "failedToLoadOrders": "Failed to load orders",
     "failedToChangePassword": "Failed to change password",
+    "invalidOrExpiredCode": "Invalid or expired code. Please try again.",
+    "tooManyResetRequests": "Too many reset requests. Please try again later.",
     "loading": "Loading...",
     "loadingSuggestions": "Loading suggestions...",
     "deleting": "Deleting...",
@@ -239,6 +241,7 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "currentPasswordRequired": "Current password is required",
     "newPasswordRequired": "New password is required",
-    "passwordMinLength": "Password must be at least 8 characters"
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordSymbol": "Password must contain at least one symbol"
   }
 }

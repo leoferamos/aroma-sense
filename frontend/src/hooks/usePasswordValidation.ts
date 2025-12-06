@@ -1,11 +1,12 @@
 import { useCallback } from 'react';
-import { messages } from '../constants/messages';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Hook to validate password according to security rules.
  * Can be used in registration, password reset, and change password flows.
  */
 export function usePasswordValidation() {
+  const { t } = useTranslation('common');
   /**
    * Validates a single password against security requirements.
    * @param password - The password to validate
@@ -16,23 +17,23 @@ export function usePasswordValidation() {
     if (!touched) return '';
     
     if (!password) {
-      return messages.passwordRequired;
+      return t('newPasswordRequired');
     }
     if (password.length < 8) {
-      return messages.passwordMinLength;
+      return t('passwordMinLength');
     }
     if (!/[A-Z]/.test(password)) {
-      return messages.passwordUppercase;
+      return t('passwordUppercase');
     }
     if (!/[0-9]/.test(password)) {
-      return messages.passwordNumber;
+      return t('passwordNumber');
     }
     if (!/[!@#$%^&*(),.?":{}|<>[\]/'_;+=-]/.test(password)) {
-      return messages.passwordSymbol;
+      return t('passwordSymbol');
     }
     
     return '';
-  }, []);
+  }, [t]);
 
   /**
    * Validates password confirmation matches the original password.
@@ -49,14 +50,14 @@ export function usePasswordValidation() {
     if (!touched) return '';
     
     if (!confirmPassword) {
-      return messages.repeatPasswordRequired;
+      return t('confirmNewPassword');
     }
     if (confirmPassword !== password) {
-      return messages.passwordsDoNotMatch;
+      return t('passwordsDoNotMatch');
     }
     
     return '';
-  }, []);
+  }, [t]);
 
   return {
     validatePassword,
