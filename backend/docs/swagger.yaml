@@ -1244,44 +1244,6 @@ paths:
       summary: Delete product
       tags:
       - admin
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a specific product by its ID (Admin only)
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Product details
-          schema:
-            $ref: '#/definitions/dto.ProductResponse'
-        "400":
-          description: Invalid product ID
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "403":
-          description: Forbidden - Admin only
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Product not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Get product by ID
-      tags:
-      - admin
     patch:
       consumes:
       - application/json
@@ -1883,6 +1845,31 @@ paths:
       summary: Create a new order
       tags:
       - orders
+  /product/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific product by its slug for clean URLs
+      parameters:
+      - description: Product slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product details
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get product by slug
+      tags:
+      - products
   /products:
     get:
       consumes:
