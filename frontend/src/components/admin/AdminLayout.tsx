@@ -10,14 +10,14 @@ type NavItem = {
 };
 
 type Props = {
-  title?: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
   navItems?: NavItem[];
 };
 
-const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) => {
+const AdminLayout: React.FC<Props> = ({ children, actions, navItems }) => {
   const { t } = useTranslation('admin');
+  const location = useLocation();
   const items = navItems ?? [
     { label: t('nav.dashboard'), to: '/admin/dashboard' },
     { label: t('nav.products'), to: '/admin/products' },
@@ -26,9 +26,19 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
     { label: t('nav.auditLogs'), to: '/admin/audit-logs' },
     { label: t('nav.contestations'), to: '/admin/contestations' },
   ];
-  const location = useLocation();
   const pathname = location.pathname;
   const [isAnimating, setIsAnimating] = React.useState(false);
+
+  // Determine page title based on current route
+  const getPageTitle = () => {
+    if (pathname.startsWith('/admin/products')) return t('nav.products');
+    if (pathname.startsWith('/admin/orders')) return t('nav.orders');
+    if (pathname.startsWith('/admin/users')) return t('nav.users');
+    if (pathname.startsWith('/admin/audit-logs')) return t('nav.auditLogs');
+    if (pathname.startsWith('/admin/contestations')) return t('nav.contestations');
+    if (pathname.startsWith('/admin/dashboard')) return t('nav.dashboard');
+    return t('title'); // fallback to "Admin"
+  };
 
   React.useEffect(() => {
     // Respect users who prefer reduced motion
@@ -61,7 +71,7 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
               <Link to="/admin/dashboard" className="flex items-center gap-3">
                 <img src="/logo.png" alt="Aroma Sense" className="h-8" />
-                <span className="text-lg font-semibold text-gray-900">{title ?? t('title')}</span>
+                <span className="text-lg font-semibold text-gray-900">{getPageTitle()}</span>
               </Link>
 
               <nav aria-label="Admin navigation" className="hidden md:flex items-center gap-2">

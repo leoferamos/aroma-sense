@@ -23,7 +23,7 @@ const AdminOrders: React.FC = () => {
   );
 
   return (
-    <AdminLayout title={t('orders')} actions={actions}>
+    <AdminLayout actions={actions}>
       <div className="p-6">
         <h1 className="text-2xl font-semibold mb-4">{t('orders')}</h1>
 

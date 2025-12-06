@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { AuditLog } from '../../types/audit';
 
 function formatTimestamp(ts?: string | undefined | null) {
@@ -29,48 +30,50 @@ type Props = {
 };
 
 const AuditLogDetailsModal: React.FC<Props> = ({ open, onClose, log }) => {
+  const { t } = useTranslation('admin');
+
   if (!open || !log) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg">
         <div className="flex items-start justify-between gap-4">
-          <h3 className="text-lg font-semibold">Audit Log Details</h3>
-          <button onClick={onClose} className="text-sm text-gray-500">Close</button>
+          <h3 className="text-lg font-semibold">{t('auditLogDetails')}</h3>
+          <button onClick={onClose} className="text-sm text-gray-500">{t('close')}</button>
         </div>
 
         <div className="mt-4 space-y-3 text-sm text-gray-800">
           <div>
-            <strong>Action:</strong> <span className="ml-2">{log.action}</span>
+            <strong>{t('action')}:</strong> <span className="ml-2">{log.action}</span>
           </div>
           <div>
-            <strong>Resource:</strong> <span className="ml-2">{log.resource} {log.resource_id ? `(${log.resource_id})` : ''}</span>
+            <strong>{t('resource')}:</strong> <span className="ml-2">{log.resource} {log.resource_id ? `(${log.resource_id})` : ''}</span>
           </div>
           <div>
-            <strong>Actor:</strong>
+            <strong>{t('actor')}:</strong>
             <span className="ml-2">{log.actor?.display_name || log.actor?.public_id || log.actor?.email || '-'}</span>
-            <div className="text-xs text-gray-500 mt-1">Actor: the entity that performed the action (user, service or system). This shows the actor's display name, public id or email when available.</div>
+            <div className="text-xs text-gray-500 mt-1">{t('actorDescription')}</div>
           </div>
           <div>
-            <strong>Timestamp:</strong>
+            <strong>{t('timestamp')}:</strong>
             <span className="ml-2">{formatTimestamp(log.timestamp || log.created_at)}</span>
           </div>
 
           <div>
-            <strong>Details</strong>
-            <div className="text-xs text-gray-500 mt-1">Additional contextual data captured for the event.</div>
+            <strong>{t('details')}</strong>
+            <div className="text-xs text-gray-500 mt-1">{t('detailsDescription')}</div>
             <pre className="mt-2 max-h-64 overflow-auto bg-gray-50 p-3 rounded text-xs text-gray-700">{JSON.stringify(log.details || {}, null, 2)}</pre>
           </div>
 
           <div>
-            <strong>Old values</strong>
-            <div className="text-xs text-gray-500 mt-1">Old values: the previous state of the resource before this action (may be empty for create events).</div>
+            <strong>{t('oldValues')}</strong>
+            <div className="text-xs text-gray-500 mt-1">{t('oldValuesDescription')}</div>
             <pre className="mt-2 max-h-64 overflow-auto bg-gray-50 p-3 rounded text-xs text-gray-700">{JSON.stringify(log.old_values || {}, null, 2)}</pre>
           </div>
 
           <div>
-            <strong>New values</strong>
-            <div className="text-xs text-gray-500 mt-1">New values: the state of the resource after the action (useful for update events to see what changed).</div>
+            <strong>{t('newValues')}</strong>
+            <div className="text-xs text-gray-500 mt-1">{t('newValuesDescription')}</div>
             <pre className="mt-2 max-h-64 overflow-auto bg-gray-50 p-3 rounded text-xs text-gray-700">{JSON.stringify(log.new_values || {}, null, 2)}</pre>
           </div>
         </div>

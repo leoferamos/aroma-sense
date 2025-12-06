@@ -145,7 +145,7 @@ const EditProduct: React.FC = () => {
 
   if (loadingProduct) {
     return (
-      <AdminLayout title="Edit Product">
+      <AdminLayout>
         <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <LoadingSpinner message="Loading product..." />
         </div>
@@ -155,7 +155,7 @@ const EditProduct: React.FC = () => {
 
   if (loadError || !product) {
     return (
-      <AdminLayout title="Edit Product">
+      <AdminLayout>
         <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <ErrorState
             message={loadError || "Product not found."}

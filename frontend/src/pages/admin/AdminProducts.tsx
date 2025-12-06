@@ -15,7 +15,6 @@ const AdminProducts: React.FC = () => {
   const { products, loading, error, refetch } = useProducts();
   const navigate = useNavigate();
   const { t } = useTranslation('admin');
-  const { t } = useTranslation('admin');
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [deleting, setDeleting] = React.useState(false);
@@ -39,14 +38,14 @@ const AdminProducts: React.FC = () => {
     setDeleteError(null);
     try {
       await deleteProduct(selectedProduct.id);
-      setSuccessMsg('Product deleted successfully.');
+      setSuccessMsg(t('productDeletedSuccessfully'));
       setFadeOut(false);
       setModalOpen(false);
       setSelectedProduct(null);
       await refetch();
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string } }; message?: string };
-      setDeleteError(e?.response?.data?.error || e?.message || 'Failed to delete product.');
+      setDeleteError(e?.response?.data?.error || e?.message || t('failedToDeleteProduct'));
     } finally {
       setDeleting(false);
     }
@@ -89,7 +88,7 @@ const AdminProducts: React.FC = () => {
   return (
     <AdminLayout actions={actions}>
       {/* Loading State */}
-      {loading && <LoadingSpinner message="Loading products..." />}
+      {loading && <LoadingSpinner message={t('loadingProducts')} />}
 
       {/* Error State */}
       {error && (
@@ -110,7 +109,7 @@ const AdminProducts: React.FC = () => {
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700 text-center font-medium">
           {deleteError}
           <button className="ml-4 text-red-800 underline" onClick={() => setDeleteError(null)}>
-            Dismiss
+            {t('dismiss')}
           </button>
         </div>
       )}
@@ -165,10 +164,10 @@ const AdminProducts: React.FC = () => {
       {/* Confirm Delete Modal */}
       <ConfirmModal
         open={modalOpen}
-        title="Delete Product"
-        description={selectedProduct ? `Are you sure you want to delete "${selectedProduct.name}"? This action cannot be undone.` : ''}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('deleteProduct')}
+        description={selectedProduct ? t('confirmDeleteProduct', { name: selectedProduct.name }) : ''}
+        confirmText={t('delete')}
+        cancelText={t('cancel')}
         onConfirm={handleConfirmDelete}
         onCancel={handleCloseModal}
         loading={deleting}
