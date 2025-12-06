@@ -11,6 +11,11 @@ export async function getProductById(id: number): Promise<Product> {
   return response.data;
 }
 
+export async function getProductBySlug(slug: string): Promise<Product> {
+  const response = await api.get<Product>(`/products/${slug}`);
+  return response.data;
+}
+
 /**
  * Creates a new product with image upload
  * Sends multipart/form-data to POST /admin/products

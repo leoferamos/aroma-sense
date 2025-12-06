@@ -16,6 +16,16 @@ func ProductRoutes(r *gin.Engine, productHandler *handler.ProductHandler, review
 		productGroup.GET("/:id/reviews/summary", reviewHandler.GetSummary)
 		productGroup.POST("/:id/reviews", auth.JWTAuthMiddleware(), reviewHandler.CreateReview)
 		productGroup.GET("/:id/reviews", reviewHandler.ListReviews)
-		productGroup.GET("/:id", productHandler.GetProductByID)
+		productGroup.GET("/:id", productHandler.GetProduct)
+	}
+
+	// Clean URLs for users
+	productSlugGroup := r.Group("/product")
+	productSlugGroup.Use(auth.OptionalAuthMiddleware(), middleware.AccountStatusMiddleware())
+	{
+		productSlugGroup.GET("/:slug", productHandler.GetProductBySlug)
+		productSlugGroup.GET("/:slug/reviews/summary", reviewHandler.GetSummary)
+		productSlugGroup.POST("/:slug/reviews", auth.JWTAuthMiddleware(), reviewHandler.CreateReview)
+		productSlugGroup.GET("/:slug/reviews", reviewHandler.ListReviews)
 	}
 }

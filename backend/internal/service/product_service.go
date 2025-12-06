@@ -21,6 +21,7 @@ import (
 type ProductService interface {
 	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
 	GetProductByID(ctx context.Context, id uint) (dto.ProductResponse, error)
+	GetProductBySlug(ctx context.Context, slug string) (dto.ProductResponse, error)
 	GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error)
 	SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error)
 	UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error
@@ -137,6 +138,39 @@ func (s *productService) buildProductText(input dto.ProductFormDTO) string {
 // GetProductByID retrieves a product by its ID and maps it to a DTO
 func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.ProductResponse, error) {
 	product, err := s.repo.FindByID(id)
+	if err != nil {
+		return dto.ProductResponse{}, fmt.Errorf("failed to get product: %w", err)
+	}
+
+	return dto.ProductResponse{
+		ID:            product.ID,
+		Name:          product.Name,
+		Brand:         product.Brand,
+		Weight:        product.Weight,
+		Description:   product.Description,
+		Price:         product.Price,
+		ImageURL:      product.ImageURL,
+		ThumbnailURL:  product.ThumbnailURL,
+		Slug:          product.Slug,
+		Accords:       product.Accords,
+		Occasions:     product.Occasions,
+		Seasons:       product.Seasons,
+		Intensity:     product.Intensity,
+		Gender:        product.Gender,
+		PriceRange:    product.PriceRange,
+		NotesTop:      product.NotesTop,
+		NotesHeart:    product.NotesHeart,
+		NotesBase:     product.NotesBase,
+		Category:      product.Category,
+		StockQuantity: product.StockQuantity,
+		CreatedAt:     product.CreatedAt,
+		UpdatedAt:     product.UpdatedAt,
+	}, nil
+}
+
+// GetProductBySlug retrieves a product by its slug
+func (s *productService) GetProductBySlug(ctx context.Context, slug string) (dto.ProductResponse, error) {
+	product, err := s.repo.FindBySlug(slug)
 	if err != nil {
 		return dto.ProductResponse{}, fmt.Errorf("failed to get product: %w", err)
 	}

@@ -37,6 +37,14 @@ func (m *MockProductService) GetProductByID(ctx context.Context, id uint) (dto.P
 	return args.Get(0).(dto.ProductResponse), args.Error(1)
 }
 
+func (m *MockProductService) GetProductBySlug(ctx context.Context, slug string) (dto.ProductResponse, error) {
+	args := m.Called(ctx, slug)
+	if args.Get(0) == nil {
+		return dto.ProductResponse{}, args.Error(1)
+	}
+	return args.Get(0).(dto.ProductResponse), args.Error(1)
+}
+
 func (m *MockProductService) GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error) {
 	args := m.Called(ctx, page, limit)
 	if len(args.Get(0).([]dto.ProductResponse)) == 0 && args.Error(2) != nil {

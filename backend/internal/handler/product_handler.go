@@ -90,30 +90,54 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, dto.MessageResponse{Message: "Product created successfully"})
 }
 
-// GetProduct handles fetching a product by its ID
+// GetProduct handles fetching a product by its ID or slug
 //
-// @Summary      Get product by ID
-// @Description  Retrieves a specific product by its ID (Admin only)
-// @Tags         admin
+// @Summary      Get product by ID or slug
+// @Description  Retrieves a specific product by its ID or slug
+// @Tags         products
 // @Accept       json
 // @Produce      json
-// @Param        id             path    int     true  "Product ID"
+// @Param        id             path    string  true  "Product ID or slug"
 // @Success      200  {object}  dto.ProductResponse  "Product details"
-// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
-// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
-// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
 // @Failure      404  {object}  dto.ErrorResponse    "Product not found"
-// @Router       /admin/products/{id} [get]
-// @Security     BearerAuth
+// @Router       /products/{id} [get]
 func (h *ProductHandler) GetProduct(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	param := c.Param("id")
+
+	// Try to parse as ID first
+	if id, err := strconv.Atoi(param); err == nil {
+		product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
+		if err == nil {
+			c.JSON(http.StatusOK, product)
+			return
+		}
+	}
+
+	// If not a valid ID or ID lookup failed, try as slug
+	product, err := h.productService.GetProductBySlug(c.Request.Context(), param)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
-	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
+	c.JSON(http.StatusOK, product)
+}
+
+// GetProductBySlug handles fetching a product by its slug (clean URLs)
+//
+// @Summary      Get product by slug
+// @Description  Retrieves a specific product by its slug for clean URLs
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        slug           path    string  true  "Product slug"
+// @Success      200  {object}  dto.ProductResponse  "Product details"
+// @Failure      404  {object}  dto.ErrorResponse    "Product not found"
+// @Router       /product/{slug} [get]
+func (h *ProductHandler) GetProductBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+
+	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return

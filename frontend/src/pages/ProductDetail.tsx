@@ -17,8 +17,7 @@ import { useTranslation } from 'react-i18next';
 const ProductDetail: React.FC = () => {
   const { t } = useTranslation('common');
   const { id } = useParams<{ id: string }>();
-  const productId = parseInt(id || '0', 10);
-  const { product, loading, error } = useProductDetail(productId);
+  const { product, loading, error } = useProductDetail(id || '');
   const { products: relatedProducts } = useProducts();
   const { addItem } = useCart();
   const [addingToCart, setAddingToCart] = useState(false);
@@ -30,8 +29,8 @@ const ProductDetail: React.FC = () => {
   );
 
   const related = useMemo(
-    () => relatedProducts.filter((p) => p.id !== productId).slice(0, 4),
-    [relatedProducts, productId]
+    () => relatedProducts.filter((p) => p.id !== product?.id).slice(0, 4),
+    [relatedProducts, product?.id]
   );
 
   const handleAddToCart = async () => {
@@ -161,7 +160,7 @@ const ProductDetail: React.FC = () => {
 
         {/* Product Review Section */}
         <ProductReview
-          productId={productId}
+          productId={product?.id || 0}
           canReview={product.can_review}
         />
 
