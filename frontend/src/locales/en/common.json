@@ -225,6 +225,7 @@
     "failedToLoadProduct": "Failed to load product.",
     "failedToLoadOrders": "Failed to load orders",
     "failedToChangePassword": "Failed to change password",
+    "invalidOrExpiredCode": "Invalid or expired code. Please try again.",
     "loading": "Loading...",
     "loadingSuggestions": "Loading suggestions...",
     "deleting": "Deleting...",

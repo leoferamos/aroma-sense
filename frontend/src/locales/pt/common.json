@@ -225,6 +225,7 @@
     "failedToLoadProduct": "Falha ao carregar produto.",
     "failedToLoadOrders": "Falha ao carregar pedidos",
     "failedToChangePassword": "Falha ao alterar senha",
+    "invalidOrExpiredCode": "Código inválido ou expirado. Tente novamente.",
     "loading": "Carregando...",
     "loadingSuggestions": "Carregando sugestões...",
     "deleting": "Excluindo...",
