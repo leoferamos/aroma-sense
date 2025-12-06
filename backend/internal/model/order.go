@@ -45,13 +45,16 @@ type Order struct {
 
 // OrderItem represents an item in an order.
 type OrderItem struct {
-	ID              uint      `gorm:"primaryKey" json:"id"`
-	OrderID         uint      `gorm:"not null;index" json:"order_id"`
-	ProductID       uint      `gorm:"not null;index" json:"product_id"`
-	Product         *Product  `gorm:"foreignKey:ProductID" json:"product,omitempty"`
-	Quantity        int       `gorm:"not null" json:"quantity"`
-	PriceAtPurchase float64   `gorm:"type:decimal(10,2);not null" json:"price_at_purchase"`
-	Subtotal        float64   `gorm:"type:decimal(10,2);not null" json:"subtotal"`
-	CreatedAt       time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	ID                uint      `gorm:"primaryKey" json:"id"`
+	OrderID           uint      `gorm:"not null;index" json:"order_id"`
+	ProductID         uint      `gorm:"not null;index" json:"product_id"`
+	Product           *Product  `gorm:"foreignKey:ProductID" json:"product,omitempty"`
+	ProductSlug       string    `gorm:"size:255" json:"product_slug"`
+	ProductName       string    `gorm:"size:255" json:"product_name"`
+	ProductImageURL   string    `gorm:"size:500" json:"product_image_url"`
+	Quantity          int       `gorm:"not null" json:"quantity"`
+	PriceAtPurchase   float64   `gorm:"type:decimal(10,2);not null" json:"price_at_purchase"`
+	Subtotal          float64   `gorm:"type:decimal(10,2);not null" json:"subtotal"`
+	CreatedAt         time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt         time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
