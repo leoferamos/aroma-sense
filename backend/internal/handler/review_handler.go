@@ -42,8 +42,8 @@ func NewReviewHandler(s service.ReviewService, userService service.UserProfileSe
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	slug := c.Param("slug")
 
-	// Get product by slug to obtain ID
-	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
+	// Get product ID by slug
+	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
@@ -73,7 +73,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 		return
 	}
 
-	review, err := h.service.CreateReview(c.Request.Context(), userModel, product.ID, req.Rating, req.Comment)
+	review, err := h.service.CreateReview(c.Request.Context(), userModel, productID, req.Rating, req.Comment)
 	if err != nil {
 		if status, message, ok := mapServiceError(err); ok {
 			// Preserve detailed validation messages when available
@@ -116,8 +116,8 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 func (h *ReviewHandler) ListReviews(c *gin.Context) {
 	slug := c.Param("slug")
 
-	// Get product by slug to obtain ID
-	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
+	// Get product ID by slug
+	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
@@ -126,7 +126,7 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	reviews, total, err := h.service.ListReviews(c.Request.Context(), product.ID, page, limit)
+	reviews, total, err := h.service.ListReviews(c.Request.Context(), productID, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal error"})
 		return
@@ -166,21 +166,21 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 func (h *ReviewHandler) GetSummary(c *gin.Context) {
 	slug := c.Param("slug")
 
-	// Get product by slug to obtain ID
-	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
+	// Get product ID by slug
+	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
-	avg, count, err := h.service.GetAverage(c.Request.Context(), product.ID)
+	avg, count, err := h.service.GetAverage(c.Request.Context(), productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal error"})
 		return
 	}
 
 	dist := map[int]int{}
-	reviews, _, err := h.service.ListReviews(c.Request.Context(), product.ID, 1, 1000)
+	reviews, _, err := h.service.ListReviews(c.Request.Context(), productID, 1, 1000)
 	if err == nil {
 		for _, r := range reviews {
 			dist[r.Rating]++

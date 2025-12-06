@@ -88,6 +88,11 @@ func (m *MockProductService) DeleteProduct(ctx context.Context, id uint) error {
 	return args.Error(0)
 }
 
+func (m *MockProductService) GetProductIDBySlug(ctx context.Context, slug string) (uint, error) {
+	args := m.Called(ctx, slug)
+	return args.Get(0).(uint), args.Error(1)
+}
+
 // ---- SETUP ROUTER ----
 func setupProductRouter() (*gin.Engine, *MockProductService) {
 	mockService := new(MockProductService)
@@ -285,7 +290,6 @@ func TestProductHandler_GetProduct(t *testing.T) {
 		router, mockService := setupProductRouter()
 
 		productResponse := dto.ProductResponse{
-			ID:        1,
 			Name:      "Test Fragrance",
 			Brand:     "Test Brand",
 			Price:     99.99,
@@ -301,7 +305,6 @@ func TestProductHandler_GetProduct(t *testing.T) {
 
 		var returnedProduct dto.ProductResponse
 		json.Unmarshal(w.Body.Bytes(), &returnedProduct)
-		assert.Equal(t, productResponse.ID, returnedProduct.ID)
 		assert.Equal(t, productResponse.Name, returnedProduct.Name)
 
 		mockService.AssertExpectations(t)
@@ -337,8 +340,8 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 		router, mockService := setupProductRouter()
 
 		productResponses := []dto.ProductResponse{
-			{ID: 1, Name: "Test Fragance 1"},
-			{ID: 2, Name: "Test Fragance 2"},
+			{Name: "Test Fragance 1"},
+			{Name: "Test Fragance 2"},
 		}
 
 		mockService.On("GetLatestProducts", mock.Anything, 1, 10).Return(productResponses, 2, nil)

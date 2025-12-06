@@ -85,7 +85,6 @@ func (s *cartService) GetCartResponse(userID string) (*dto.CartResponse, error) 
 
 		if item.Product != nil {
 			cartItemResponse.Product = &dto.ProductResponse{
-				ID:            item.Product.ID,
 				Name:          item.Product.Name,
 				Brand:         item.Product.Brand,
 				Weight:        item.Product.Weight,

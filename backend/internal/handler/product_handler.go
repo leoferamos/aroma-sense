@@ -110,6 +110,28 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 		return
 	}
 
+	// Check if user can review this product
+	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
+		publicID := rawUserID.(string)
+		if userModel, err := h.userService.GetByPublicID(publicID); err == nil {
+			// Get product ID from slug for review check
+			productID, idErr := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
+			if idErr == nil {
+				can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, productID)
+				if can && canErr == nil {
+					trueVal := true
+					product.CanReview = &trueVal
+				} else if canErr == nil {
+					falseVal := false
+					product.CanReview = &falseVal
+					if reason == "profile_incomplete" || reason == "not_delivered" || reason == "already_reviewed" {
+						product.CannotReviewReason = &reason
+					}
+				}
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, product)
 }
 
@@ -222,24 +244,6 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
-	}
-
-	// Check if user can review this product
-	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
-		publicID := rawUserID.(string)
-		if userModel, err := h.userService.GetByPublicID(publicID); err == nil {
-			can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, product.ID)
-			if can && canErr == nil {
-				trueVal := true
-				product.CanReview = &trueVal
-			} else if canErr == nil {
-				falseVal := false
-				product.CanReview = &falseVal
-				if reason == "profile_incomplete" || reason == "not_delivered" || reason == "already_reviewed" {
-					product.CannotReviewReason = &reason
-				}
-			}
-		}
 	}
 
 	c.JSON(http.StatusOK, product)
