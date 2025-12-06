@@ -220,6 +220,58 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// AdminListProducts handles admin listing of all products with IDs
+//
+// @Summary      Admin list all products
+// @Description  Returns all products with IDs for admin management
+// @Tags         admin,products
+// @Accept       json
+// @Produce      json
+// @Param        page   query    int     false  "Page number (1-based)"  default(1)
+// @Param        limit  query    int     false  "Items per page (default 50, max 200)"  default(50)
+// @Success      200  {object}  dto.ProductListResponse   "Paginated product list with IDs"
+// @Failure      400  {object}  dto.ErrorResponse         "Invalid request parameters"
+// @Failure      500  {object}  dto.ErrorResponse         "Internal server error"
+// @Router       /admin/products [get]
+// @Security     BearerAuth
+func (h *ProductHandler) AdminListProducts(c *gin.Context) {
+	const maxLimit = 200
+
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "50")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
+		return
+	}
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
+	// Get products with IDs for admin
+	products, total, err := h.productService.AdminListProducts(c.Request.Context(), page, limit)
+	if err != nil {
+		log.Printf("AdminListProducts error: %v", err)
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
+		return
+	}
+
+	resp := dto.ProductListResponse{
+		Items: products,
+		Total: total,
+		Page:  page,
+		Limit: limit,
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
 // GetProductByID handles fetching a single product by ID
 //
 // @Summary      Get product by ID

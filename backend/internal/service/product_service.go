@@ -25,6 +25,7 @@ type ProductService interface {
 	GetProductIDBySlug(ctx context.Context, slug string) (uint, error)
 	GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error)
 	SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error)
+	AdminListProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error)
 	UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error
 	DeleteProduct(ctx context.Context, id uint) error
 }
@@ -144,6 +145,7 @@ func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.Produ
 	}
 
 	return dto.ProductResponse{
+		ID:            &product.ID, // Include ID for admin routes
 		Name:          product.Name,
 		Brand:         product.Brand,
 		Weight:        product.Weight,
@@ -387,6 +389,58 @@ func (s *productService) SearchProducts(ctx context.Context, query string, page 
 	var resp []dto.ProductResponse
 	for _, p := range products {
 		resp = append(resp, dto.ProductResponse{
+			Name:          p.Name,
+			Brand:         p.Brand,
+			Weight:        p.Weight,
+			Description:   p.Description,
+			Price:         p.Price,
+			ImageURL:      p.ImageURL,
+			ThumbnailURL:  p.ThumbnailURL,
+			Slug:          p.Slug,
+			Accords:       p.Accords,
+			Occasions:     p.Occasions,
+			Seasons:       p.Seasons,
+			Intensity:     p.Intensity,
+			Gender:        p.Gender,
+			PriceRange:    p.PriceRange,
+			NotesTop:      p.NotesTop,
+			NotesHeart:    p.NotesHeart,
+			NotesBase:     p.NotesBase,
+			Category:      p.Category,
+			StockQuantity: p.StockQuantity,
+			CreatedAt:     p.CreatedAt,
+			UpdatedAt:     p.UpdatedAt,
+		})
+	}
+
+	return resp, total, nil
+}
+
+// AdminListProducts returns all products with IDs for admin management
+func (s *productService) AdminListProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	// Allow higher limits for admin
+	const maxLimit = 200
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
+	offset := (page - 1) * limit
+
+	products, total, err := s.repo.FindAllPaginated(limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to list products: %w", err)
+	}
+
+	var resp []dto.ProductResponse
+	for _, p := range products {
+		resp = append(resp, dto.ProductResponse{
+			ID:            &p.ID, // Include ID for admin
 			Name:          p.Name,
 			Brand:         p.Brand,
 			Weight:        p.Weight,

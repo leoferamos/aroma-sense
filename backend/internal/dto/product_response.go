@@ -5,6 +5,7 @@ import "time"
 // ProductResponse represents the product data returned to the client
 // @Description Product information returned by the API
 type ProductResponse struct {
+	ID                 *uint     `json:"id,omitempty" example:"1"`
 	Name               string    `json:"name" example:"Sauvage"`
 	Brand              string    `json:"brand" example:"Dior"`
 	Weight             float64   `json:"weight" example:"100.0"`
