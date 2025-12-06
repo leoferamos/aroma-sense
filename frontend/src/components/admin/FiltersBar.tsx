@@ -42,41 +42,50 @@ const FiltersBar: React.FC<Props> = ({ status, onStatusChange, startDate, endDat
   };
 
   return (
-    <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-4">
-      <div className="flex items-center gap-2">
-        <label className="text-sm">{t('status')}</label>
-        <select value={status} onChange={(e) => onStatusChange(e.target.value)} className="border rounded px-2 py-1">
-          <option value="">{t('all')}</option>
-          <option value="pending">{t('pending')}</option>
-          <option value="processing">{t('processing')}</option>
-          <option value="shipped">{t('shipped')}</option>
-          <option value="delivered">{t('delivered')}</option>
-          <option value="cancelled">{t('cancelled')}</option>
-        </select>
+    <div className="mb-4 space-y-3">
+      {/* First Row - Status and Date Range */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="flex flex-col">
+          <label className="text-xs font-medium text-gray-700 mb-1">{t('status')}</label>
+          <select value={status} onChange={(e) => onStatusChange(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">{t('all')}</option>
+            <option value="pending">{t('pending')}</option>
+            <option value="processing">{t('processing')}</option>
+            <option value="shipped">{t('shipped')}</option>
+            <option value="delivered">{t('delivered')}</option>
+            <option value="cancelled">{t('cancelled')}</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-xs font-medium text-gray-700 mb-1">{t('from')}</label>
+          <input type="date" value={startDate || ''} onChange={(e) => onDateChange(e.target.value || undefined, endDate)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-xs font-medium text-gray-700 mb-1">{t('to')}</label>
+          <input type="date" value={endDate || ''} onChange={(e) => onDateChange(startDate, e.target.value || undefined)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 mt-2 md:mt-0">
-        <label className="text-sm">{t('from')}</label>
-        <input type="date" value={startDate || ''} onChange={(e) => onDateChange(e.target.value || undefined, endDate)} className="border rounded px-2 py-1" />
-        <label className="text-sm">{t('to')}</label>
-        <input type="date" value={endDate || ''} onChange={(e) => onDateChange(startDate, e.target.value || undefined)} className="border rounded px-2 py-1" />
-      </div>
+      {/* Second Row - Per Page and Actions */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <label className="text-xs sm:text-sm font-medium text-gray-700">{t('perPage')}</label>
+          <select value={perPage} onChange={(e) => onPerPageChange(Number(e.target.value))} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            {perPageOptions.map((o) => (
+              <option key={o} value={o}>{o}</option>
+            ))}
+          </select>
+        </div>
 
-      <div className="flex items-center gap-2 mt-2 md:mt-0 md:ml-auto">
-        <label className="text-sm">{t('perPage')}</label>
-        <select value={perPage} onChange={(e) => onPerPageChange(Number(e.target.value))} className="border rounded px-2 py-1">
-          {perPageOptions.map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
-      
-        <div className="flex items-center gap-2 ml-4">
-          <button type="button" onClick={clearFilters} className="text-sm px-3 py-1 border rounded hover:bg-gray-50">{t('clear')}</button>
+        <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:ml-auto">
+          <button type="button" onClick={clearFilters} className="text-sm px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">{t('clear')}</button>
 
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => applyPreset(1)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">{t('today')}</button>
-            <button type="button" onClick={() => applyPreset(7)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">{t('7days')}</button>
-            <button type="button" onClick={() => applyPreset(30)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">{t('30days')}</button>
+          <div className="grid grid-cols-3 gap-2">
+            <button type="button" onClick={() => applyPreset(1)} className="text-xs sm:text-sm px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">{t('today')}</button>
+            <button type="button" onClick={() => applyPreset(7)} className="text-xs sm:text-sm px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">{t('7days')}</button>
+            <button type="button" onClick={() => applyPreset(30)} className="text-xs sm:text-sm px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">{t('30days')}</button>
           </div>
         </div>
       </div>

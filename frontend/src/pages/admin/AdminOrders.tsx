@@ -24,8 +24,8 @@ const AdminOrders: React.FC = () => {
 
   return (
     <AdminLayout actions={actions}>
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-4">{t('orders')}</h1>
+      <div className="p-4 sm:p-6">
+        <h1 className="text-xl sm:text-2xl font-semibold mb-4">{t('orders')}</h1>
 
         <FiltersBar
           status={params.status ?? ''}
@@ -37,8 +37,8 @@ const AdminOrders: React.FC = () => {
           onPerPageChange={(n) => setPerPage(n)}
         />
 
-        {loading && <div className="py-8">{t('loadingOrders')}</div>}
-        {error && <div className="py-8 text-red-600">{error}</div>}
+        {loading && <div className="py-8 text-center text-gray-500">{t('loadingOrders')}</div>}
+        {error && <div className="py-8 text-red-600 p-3 bg-red-50 border border-red-200 rounded-lg text-sm">{error}</div>}
 
         {!loading && !error && (
           <>
@@ -46,16 +46,16 @@ const AdminOrders: React.FC = () => {
               <strong>{data?.total ?? 0}</strong> {t('totalOrders', { count: data?.total ?? 0 })}
             </div>
 
-            <div className="overflow-x-auto">
-              <OrdersTable orders={orders} />
-            </div>
+            <OrdersTable orders={orders} />
 
-            <PaginationControls
-              page={page}
-              totalPages={totalPages}
-              onPrev={() => setPage(Math.max(1, page - 1))}
-              onNext={() => setPage(Math.min(totalPages, page + 1))}
-            />
+            <div className="mt-4">
+              <PaginationControls
+                page={page}
+                totalPages={totalPages}
+                onPrev={() => setPage(Math.max(1, page - 1))}
+                onNext={() => setPage(Math.min(totalPages, page + 1))}
+              />
+            </div>
           </>
         )}
       </div>

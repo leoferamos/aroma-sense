@@ -96,37 +96,65 @@ const AdminAuditLogs: React.FC = () => {
 
   return (
     <AdminLayout actions={actions}>
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-4">{t('auditLogsTitle')}</h1>
+      <div className="p-4 sm:p-6">
+        <h1 className="text-xl sm:text-2xl font-semibold mb-4">{t('auditLogsTitle')}</h1>
 
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-          <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder={t('userId')} className="border rounded px-2 py-1" />
-          <input value={actorId} onChange={(e) => setActorId(e.target.value)} placeholder={t('actorId')} className="border rounded px-2 py-1" />
-          <input value={action} onChange={(e) => setAction(e.target.value)} placeholder={t('action')} className="border rounded px-2 py-1" />
-          <input value={resource} onChange={(e) => setResource(e.target.value)} placeholder={t('resource')} className="border rounded px-2 py-1" />
-          <input value={resourceId} onChange={(e) => setResourceId(e.target.value)} placeholder={t('resourceId')} className="border rounded px-2 py-1" />
-          <div className="flex gap-2">
-            <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border rounded px-2 py-1 w-full" />
-            <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border rounded px-2 py-1 w-full" />
+        {/* Filters - Responsive Grid */}
+        <div className="mb-4 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">{t('userId')}</label>
+              <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder={t('userId')} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">{t('actorId')}</label>
+              <input value={actorId} onChange={(e) => setActorId(e.target.value)} placeholder={t('actorId')} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">{t('action')}</label>
+              <input value={action} onChange={(e) => setAction(e.target.value)} placeholder={t('action')} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">{t('resource')}</label>
+              <input value={resource} onChange={(e) => setResource(e.target.value)} placeholder={t('resource')} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">{t('resourceId')}</label>
+              <input value={resourceId} onChange={(e) => setResourceId(e.target.value)} placeholder={t('resourceId')} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">{t('startDate')}</label>
+              <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">{t('endDate')}</label>
+              <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
           </div>
         </div>
 
-        <div className="mb-4 flex items-center gap-3">
-          <button onClick={() => { setOffset(0); fetch(); }} className="px-3 py-2 bg-blue-600 text-white rounded">{t('apply')}</button>
-          <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setOffset(0); }} className="border px-2 py-1 rounded">
-            {[10,25,50,100].map(n => <option key={n} value={n}>{n} {t('perPage')}</option>)}
-          </select>
+        <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <button onClick={() => { setOffset(0); fetch(); }} className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:shadow-lg transition-all text-sm">{t('apply')}</button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <label className="text-xs sm:text-sm font-medium text-gray-700">{t('perPage')}:</label>
+            <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setOffset(0); }} className="border border-gray-300 px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
         </div>
 
-        {loading && <div className="py-8">{t('loading')}</div>}
-        {error && <div className="py-8 text-red-600">{error}</div>}
+        {loading && <div className="py-8 text-center text-gray-500">{t('loading')}</div>}
+        {error && <div className="py-8 text-red-600 p-3 bg-red-50 border border-red-200 rounded-lg text-sm">{error}</div>}
 
         {!loading && !error && (
           <>
             <AuditLogTable logs={logs} onView={openLog} />
 
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-gray-600">{t('showingRange', { start: Math.min(total, offset + 1), end: Math.min(total, offset + limit), total })}</div>
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs sm:text-sm text-gray-600">{t('showingRange', { start: Math.min(total, offset + 1), end: Math.min(total, offset + limit), total })}</div>
               <PaginationControls
                 page={page}
                 totalPages={totalPages}
