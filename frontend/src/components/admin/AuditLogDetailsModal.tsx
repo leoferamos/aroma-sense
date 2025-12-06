@@ -35,47 +35,69 @@ const AuditLogDetailsModal: React.FC<Props> = ({ open, onClose, log }) => {
   if (!open || !log) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg">
-        <div className="flex items-start justify-between gap-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-3xl p-4 sm:p-6 shadow-lg my-8 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-4 mb-4">
           <h3 className="text-lg font-semibold">{t('auditLogDetails')}</h3>
-          <button onClick={onClose} className="text-sm text-gray-500">{t('close')}</button>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+            aria-label="Close modal"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        <div className="mt-4 space-y-3 text-sm text-gray-800">
-          <div>
-            <strong>{t('action')}:</strong> <span className="ml-2">{log.action}</span>
+        <div className="space-y-4 text-sm text-gray-800">
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-900">{t('action')}:</strong>
+            <span className="ml-2 font-medium">{log.action}</span>
           </div>
-          <div>
-            <strong>{t('resource')}:</strong> <span className="ml-2">{log.resource} {log.resource_id ? `(${log.resource_id})` : ''}</span>
+
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-900">{t('resource')}:</strong>
+            <span className="ml-2">{log.resource} {log.resource_id ? `(${log.resource_id})` : ''}</span>
           </div>
-          <div>
-            <strong>{t('actor')}:</strong>
+
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-900">{t('actor')}:</strong>
             <span className="ml-2">{log.actor?.display_name || log.actor?.public_id || log.actor?.email || '-'}</span>
             <div className="text-xs text-gray-500 mt-1">{t('actorDescription')}</div>
           </div>
-          <div>
-            <strong>{t('timestamp')}:</strong>
+
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-900">{t('timestamp')}:</strong>
             <span className="ml-2">{formatTimestamp(log.timestamp || log.created_at)}</span>
           </div>
 
           <div>
-            <strong>{t('details')}</strong>
-            <div className="text-xs text-gray-500 mt-1">{t('detailsDescription')}</div>
-            <pre className="mt-2 max-h-64 overflow-auto bg-gray-50 p-3 rounded text-xs text-gray-700">{JSON.stringify(log.details || {}, null, 2)}</pre>
+            <strong className="text-gray-900">{t('details')}</strong>
+            <div className="text-xs text-gray-500 mt-1 mb-2">{t('detailsDescription')}</div>
+            <pre className="max-h-48 overflow-auto bg-gray-50 p-3 rounded-lg text-xs text-gray-700 border border-gray-200">{JSON.stringify(log.details || {}, null, 2)}</pre>
           </div>
 
           <div>
-            <strong>{t('oldValues')}</strong>
-            <div className="text-xs text-gray-500 mt-1">{t('oldValuesDescription')}</div>
-            <pre className="mt-2 max-h-64 overflow-auto bg-gray-50 p-3 rounded text-xs text-gray-700">{JSON.stringify(log.old_values || {}, null, 2)}</pre>
+            <strong className="text-gray-900">{t('oldValues')}</strong>
+            <div className="text-xs text-gray-500 mt-1 mb-2">{t('oldValuesDescription')}</div>
+            <pre className="max-h-48 overflow-auto bg-gray-50 p-3 rounded-lg text-xs text-gray-700 border border-gray-200">{JSON.stringify(log.old_values || {}, null, 2)}</pre>
           </div>
 
           <div>
-            <strong>{t('newValues')}</strong>
-            <div className="text-xs text-gray-500 mt-1">{t('newValuesDescription')}</div>
-            <pre className="mt-2 max-h-64 overflow-auto bg-gray-50 p-3 rounded text-xs text-gray-700">{JSON.stringify(log.new_values || {}, null, 2)}</pre>
+            <strong className="text-gray-900">{t('newValues')}</strong>
+            <div className="text-xs text-gray-500 mt-1 mb-2">{t('newValuesDescription')}</div>
+            <pre className="max-h-48 overflow-auto bg-gray-50 p-3 rounded-lg text-xs text-gray-700 border border-gray-200">{JSON.stringify(log.new_values || {}, null, 2)}</pre>
           </div>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors"
+          >
+            {t('close')}
+          </button>
         </div>
       </div>
     </div>
