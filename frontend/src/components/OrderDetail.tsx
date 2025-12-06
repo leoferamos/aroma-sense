@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { OrderResponse } from '../types/order';
 import { formatCurrency } from '../utils/format';
 import { Link } from 'react-router-dom';
+import { useCart } from '../hooks/useCart';
+import { useTranslation } from 'react-i18next';
+import { cn } from '../utils/cn';
 
 interface Props {
   order: OrderResponse;
@@ -23,9 +26,29 @@ const statusColor = (status: string) => {
 };
 
 const OrderDetail: React.FC<Props> = ({ order }) => {
+  const { addItem } = useCart();
+  const { t } = useTranslation('common');
+  const [reordering, setReordering] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   const handleOrderAgain = async () => {
-    // This functionality is disabled because product IDs are not exposed to the frontend
-    alert('Order Again functionality is currently not available. Please add items manually to your cart.');
+    if (reordering) return;
+
+    setReordering(true);
+    try {
+      // Add each item from the order to cart sequentially
+      for (const item of order.items) {
+        await addItem(item.product_slug, item.quantity);
+      }
+      setToast({ type: 'success', message: t('order.orderAgainSuccess', 'Items added to cart successfully!') });
+      setTimeout(() => setToast(null), 2500);
+    } catch (error) {
+      console.error('Failed to reorder items:', error);
+      setToast({ type: 'error', message: t('order.orderAgainError', 'Failed to add items to cart. Please try again.') });
+      setTimeout(() => setToast(null), 2500);
+    } finally {
+      setReordering(false);
+    }
   };
 
   return (
@@ -41,8 +64,8 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {order.items.map((it) => (
-          <div key={it.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100">
+        {order.items.map((it, index) => (
+          <div key={index} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100">
             <Link to={`/products/${it.product_slug}`} className="w-28 h-28 flex-shrink-0 rounded-md overflow-hidden bg-white flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               <img src={it.product_image_url || '/placeholder.png'} alt={it.product_name || `Product ${it.product_slug}`} className="max-w-full max-h-full object-contain" />
             </Link>
@@ -63,12 +86,29 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
       <div className="mt-6 flex justify-end">
         <button
           onClick={handleOrderAgain}
-          className="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
-          disabled
+          disabled={reordering}
+          className={`inline-flex items-center px-4 py-2 rounded ${
+            reordering
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
         >
-          Order Again (Disabled)
+          {reordering ? t('order.reordering', 'Reordering...') : t('order.orderAgain', 'Order Again')}
         </button>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div
+          role="status"
+          className={cn(
+            'fixed top-4 right-4 z-50 px-4 py-3 rounded shadow-lg text-sm',
+            toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+          )}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 };

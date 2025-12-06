@@ -129,7 +129,6 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 	items := make([]dto.OrderItemResponse, len(order.Items))
 	for i, item := range order.Items {
 		items[i] = dto.OrderItemResponse{
-			ID:              item.ID,
 			ProductSlug:     item.ProductSlug,
 			ProductName:     item.ProductName,
 			ProductImageURL: item.ProductImageURL,
@@ -212,7 +211,6 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 		items := make([]dto.OrderItemResponse, len(o.Items))
 		for i, it := range o.Items {
 			item := dto.OrderItemResponse{
-				ID:              it.ID,
 				ProductSlug:     it.ProductSlug,
 				ProductName:     it.ProductName,
 				ProductImageURL: it.ProductImageURL,
