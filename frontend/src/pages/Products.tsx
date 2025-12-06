@@ -137,7 +137,7 @@ const Products: React.FC = () => {
                     <p className="text-gray-500">Here are some suggestions you might like:</p>
                     <div className="mt-8">
                       {loadingSuggestions ? (
-                        <LoadingSpinner message="Loading suggestions..." />
+                        <LoadingSpinner message={t('errors.loadingSuggestions')} />
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                           {safeSuggestions.map((p) => (

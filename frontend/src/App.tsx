@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import ChatBubble from './components/chat/ChatBubble';
 import AccountBlockOverlay from './components/AccountBlockOverlay';
+import { useTranslation } from 'react-i18next';
 // Lazy load pages for better performance
 const AdminContestations = lazy(() => import('./pages/admin/AdminContestations'));
 const Register = lazy(() => import('./pages/Register'));
@@ -31,14 +32,17 @@ const Profile = lazy(() => import('./pages/Profile'));
 const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 
 // Loading fallback component
-const PageLoader: React.FC = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <div className="text-center">
-      <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p className="mt-4 text-gray-600">Loading...</p>
+const PageLoader: React.FC = () => {
+  const { t } = useTranslation('common');
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <p className="mt-4 text-gray-600">{t('errors.loading')}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ChatMount: React.FC = () => {
   const location = useLocation();

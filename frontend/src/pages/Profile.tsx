@@ -33,11 +33,11 @@ const Profile: React.FC = () => {
       } catch (e: unknown) {
         if (!mounted) return;
         if (isAxiosError(e)) {
-          setError(e.response?.data?.error || 'Failed to load profile');
+          setError(e.response?.data?.error || t('errors.failedToLoadProfile'));
         } else if (e instanceof Error) {
           setError(e.message);
         } else {
-          setError('Failed to load profile');
+          setError(t('errors.failedToLoadProfile'));
         }
       } finally {
         if (mounted) setLoading(false);
@@ -57,14 +57,14 @@ const Profile: React.FC = () => {
       setSuccess('Profile updated successfully');
     } catch (e: unknown) {
       if (isAxiosError(e) && e.response?.status === 401) {
-        setError('Session expired. Please sign in again.');
+        setError(t('sessionExpired'));
       } else {
         if (isAxiosError(e)) {
-          setError(e.response?.data?.error || 'Failed to update profile');
+          setError(e.response?.data?.error || t('errors.failedToUpdateProfile'));
         } else if (e instanceof Error) {
           setError(e.message);
         } else {
-          setError('Failed to update profile');
+          setError(t('errors.failedToUpdateProfile'));
         }
       }
     } finally {

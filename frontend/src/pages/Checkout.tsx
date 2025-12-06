@@ -13,9 +13,9 @@ import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../ho
 import useShippingOptions from '../hooks/useShippingOptions';
 import useCepLookup from '../hooks/useCepLookup';
 import type { CartItem as CartItemType } from '../types/cart';
+import { useTranslation } from 'react-i18next';
 import type { ShippingOption } from '../types/shipping';
 import { createOrder, type OrderCreateRequest } from '../services/order';
-import { useTranslation } from 'react-i18next';
 
 const Checkout: React.FC = () => {
   const { t } = useTranslation('common');
@@ -80,7 +80,7 @@ const Checkout: React.FC = () => {
       });
     } catch (err) {
       console.error('Failed to create order', err);
-      setErrors((prev) => ({ ...prev, address1: 'Failed to create order. Please try again.' }));
+      setErrors((prev) => ({ ...prev, address1: t('errors.failedToCreateOrder') }));
     } finally {
       setSubmitting(false);
     }

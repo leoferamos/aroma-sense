@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmModalProps {
   open: boolean;
@@ -23,6 +24,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onCancel,
   loading = false,
 }) => {
+  const { t } = useTranslation('common');
   const [phrase, setPhrase] = React.useState('');
 
   React.useEffect(() => {
@@ -36,7 +38,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         <p className="text-gray-700 mb-6 text-sm">{description}</p>
         {requirePhrase ? (
           <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">To confirm, type <strong className="font-mono">{requirePhrase}</strong> below.</p>
+            <p className="text-sm text-gray-600 mb-2" dangerouslySetInnerHTML={{ __html: t('confirmTypePhrase', { phrase: requirePhrase }) }} />
             <input
               value={phrase}
               onChange={(e) => setPhrase(e.target.value)}
@@ -61,7 +63,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             onClick={onConfirm}
             disabled={loading || (requirePhrase ? phrase !== requirePhrase : false)}
           >
-            {loading ? 'Deleting...' : confirmText}
+            {loading ? t('deleting') : confirmText}
           </button>
         </div>
       </div>

@@ -6,9 +6,11 @@ import FormError from '../components/FormError';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { changePassword } from '../services/profile';
 import { isAxiosError } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const ChangePassword: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('common');
     const [form, setForm] = useState({
         currentPassword: '',
         newPassword: '',
@@ -38,28 +40,28 @@ const ChangePassword: React.FC = () => {
         const errors: Record<string, string> = {};
 
         if (touched.currentPassword && !form.currentPassword) {
-            errors.currentPassword = 'Current password is required';
+            errors.currentPassword = t('currentPasswordRequired');
         }
 
         if (touched.newPassword) {
             if (!form.newPassword) {
-                errors.newPassword = 'New password is required';
+                errors.newPassword = t('newPasswordRequired');
             } else if (form.newPassword.length < 8) {
-                errors.newPassword = 'Password must be at least 8 characters';
+                errors.newPassword = t('passwordMinLength');
             } else if (!/[A-Z]/.test(form.newPassword)) {
-                errors.newPassword = 'Password must contain at least one uppercase letter';
+                errors.newPassword = t('passwordUppercase');
             } else if (!/[a-z]/.test(form.newPassword)) {
-                errors.newPassword = 'Password must contain at least one lowercase letter';
+                errors.newPassword = t('passwordLowercase');
             } else if (!/[0-9]/.test(form.newPassword)) {
-                errors.newPassword = 'Password must contain at least one number';
+                errors.newPassword = t('passwordNumber');
             }
         }
 
         if (touched.confirmPassword) {
             if (!form.confirmPassword) {
-                errors.confirmPassword = 'Please confirm your new password';
+                errors.confirmPassword = t('confirmNewPassword');
             } else if (form.newPassword !== form.confirmPassword) {
-                errors.confirmPassword = 'Passwords do not match';
+                errors.confirmPassword = t('passwordsDoNotMatch');
             }
         }
 
@@ -97,11 +99,11 @@ const ChangePassword: React.FC = () => {
             }, 2000);
         } catch (e: unknown) {
             if (isAxiosError(e)) {
-                setError(e.response?.data?.error || 'Failed to change password');
+                setError(e.response?.data?.error || t('errors.failedToChangePassword'));
             } else if (e instanceof Error) {
                 setError(e.message);
             } else {
-                setError('Failed to change password');
+                setError(t('errors.failedToChangePassword'));
             }
         } finally {
             setLoading(false);

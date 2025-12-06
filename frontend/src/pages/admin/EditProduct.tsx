@@ -9,10 +9,12 @@ import { getProductById } from "../../services/product";
 import type { CreateProductFormData, Product } from "../../types/product";
 import type { ProductFormTouched } from "../../hooks/useProductFormValidation";
 import AdminLayout from '../../components/admin/AdminLayout';
+import { useTranslation } from 'react-i18next';
 const EditProduct: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const productId = parseInt(id || "0", 10);
+  const { t } = useTranslation('common');
 
   const [loadingProduct, setLoadingProduct] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -94,7 +96,7 @@ const EditProduct: React.FC = () => {
         });
       } catch (err: unknown) {
         const e = err as { response?: { data?: { error?: string } }; message?: string };
-        setLoadError(e?.response?.data?.error || e?.message || "Failed to load product.");
+        setLoadError(e?.response?.data?.error || e?.message || t('errors.failedToLoadProduct'));
       } finally {
         setLoadingProduct(false);
       }

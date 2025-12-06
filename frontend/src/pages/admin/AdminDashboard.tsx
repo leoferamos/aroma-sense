@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 const AdminDashboard: React.FC = () => {
   const { role, logout } = useAuth();
   const { t } = useTranslation('admin');
+  const { t: tCommon } = useTranslation('common');
 
   const handleLogout = async () => {
     await logout();
@@ -55,7 +56,7 @@ const AdminDashboard: React.FC = () => {
         } catch (err) {
           console.debug('getAuditLogs recent error', err);
           if (!mounted) return;
-          setError('Failed to load recent audit logs');
+          setError(tCommon('errors.failedToLoadAuditLogs'));
         } finally {
           if (mounted) setLoading(false);
         }

@@ -3,6 +3,7 @@ import { isAxiosError } from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { cancelAccountDeletion, exportMyData, requestContestation } from '../services/profile';
 import { useCart } from '../hooks/useCart';
+import { useTranslation } from 'react-i18next';
 
 interface AccountBlockOverlayProps {
   deactivationData?: {
@@ -18,6 +19,7 @@ interface AccountBlockOverlayProps {
 const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationData }) => {
   const { user, refreshUser, logout } = useAuth();
   const { refresh: refreshCart } = useCart();
+  const { t } = useTranslation('common');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contestationReason, setContestationReason] = useState('');
@@ -48,7 +50,7 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
       }
       window.location.replace('/products');
     } catch {
-      setError('Failed to cancel deletion');
+      setError(t('errors.failedToCancelDeletion'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +70,7 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      setError('Failed to export data');
+      setError(t('errors.failedToExportData'));
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,7 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
 
   const onContestDeactivation = async () => {
     if (contestationReason.trim().length < 10) {
-      setError('Please provide a reason for contestation (minimum 10 characters)');
+      setError(t('provideContestationReason'));
       return;
     }
     setError(null);
@@ -103,10 +105,10 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
           setError('You have already submitted a contestation.');
           setShowContestationForm(false);
         } else {
-          setError(serverMsg || 'Failed to submit contestation');
+          setError(serverMsg || t('errors.failedToSubmitContestation'));
         }
       } else {
-        setError('Failed to submit contestation');
+        setError(t('errors.failedToSubmitContestation'));
       }
     } finally {
       setLoading(false);
@@ -119,7 +121,7 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
     try {
       await logout();
     } catch {
-      setError('Failed to logout');
+      setError(t('errors.failedToLogout'));
     } finally {
       setLoading(false);
     }
@@ -201,7 +203,7 @@ const AccountBlockOverlay: React.FC<AccountBlockOverlayProps> = ({ deactivationD
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-6 border border-gray-100">
             <h4 className="text-md font-semibold text-gray-900">Contest Account Deactivation</h4>
-            <p className="mt-2 text-sm text-gray-700">Please provide a reason for contesting this deactivation. Our team will review it within 5 business days.</p>
+            <p className="mt-2 text-sm text-gray-700">{t('contestDescription')}</p>
             <textarea
               value={contestationReason}
               onChange={(e) => setContestationReason(e.target.value)}
