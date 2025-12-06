@@ -15,11 +15,11 @@
     "close": "Fechar",
     "open": "Abrir",
     "yes": "Sim",
-    "no": "Não"
+    "no": "Não",
+    "logout": "Sair"
   },
   "auth": {
     "login": "Entrar",
-    "logout": "Sair",
     "register": "Cadastrar",
     "email": "E-mail",
     "password": "Senha",
@@ -137,7 +137,6 @@
     "orders": "Pedidos",
     "products": "Produtos",
     "contestations": "Contestações",
-    "logout": "Sair",
     "loading": "Carregando…",
     "totalActions": "Total de ações"
   },
@@ -171,5 +170,13 @@
     "payment": "Pagamento",
     "placeOrder": "Fazer Pedido",
     "placingOrder": "Fazendo pedido..."
+  },
+  "userMenu": {
+    "profile": "Perfil",
+    "myOrders": "Meus pedidos",
+    "adminDashboard": "Painel admin",
+    "terms": "Termos",
+    "privacy": "Privacidade",
+    "signIn": "Entrar"
   }
 }

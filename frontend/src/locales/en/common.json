@@ -15,11 +15,11 @@
     "close": "Close",
     "open": "Open",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "logout": "Logout"
   },
   "auth": {
     "login": "Login",
-    "logout": "Logout",
     "register": "Register",
     "email": "Email",
     "password": "Password",
@@ -137,7 +137,6 @@
     "orders": "Orders",
     "products": "Products",
     "contestations": "Contestations",
-    "logout": "Logout",
     "loading": "Loading…",
     "totalActions": "Total actions"
   },
@@ -171,5 +170,13 @@
     "payment": "Payment",
     "placeOrder": "Place Order",
     "placingOrder": "Placing order..."
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "myOrders": "My orders",
+    "adminDashboard": "Admin dashboard",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "signIn": "Sign in"
   }
 }
