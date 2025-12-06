@@ -1,3 +1,10 @@
+# [0.11.0](https://github.com/leoferamos/aroma-sense/compare/v0.10.0...v0.11.0) (2025-12-06)
+
+
+### Features
+
+* **i18n:** add full implementation ([#88](https://github.com/leoferamos/aroma-sense/issues/88)) ([7512636](https://github.com/leoferamos/aroma-sense/commit/7512636d1086ea5c167e54de2fc1fd8f31b27578))
+
 # [0.10.0](https://github.com/leoferamos/aroma-sense/compare/v0.9.0...v0.10.0) (2025-12-05)
 
 
