@@ -22,7 +22,7 @@ export interface StatsMeta {
 // User-facing order types
 export interface OrderItemResponse {
   id: number;
-  product_id: number;
+  product_slug: string;
   product_name?: string;
   product_image_url?: string;
   quantity: number;

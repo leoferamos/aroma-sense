@@ -95,7 +95,7 @@ func setupProductRouter() (*gin.Engine, *MockProductService) {
 
 	router := gin.Default()
 	// Public routes
-	router.GET("/products/:id", productHandler.GetProduct)
+	router.GET("/products/:slug", productHandler.GetProduct)
 	router.GET("/products", productHandler.GetLatestProducts)
 
 	// Admin routes
@@ -293,9 +293,9 @@ func TestProductHandler_GetProduct(t *testing.T) {
 			UpdatedAt: time.Now(),
 		}
 
-		mockService.On("GetProductByID", mock.Anything, uint(1)).Return(productResponse, nil)
+		mockService.On("GetProductBySlug", mock.Anything, "test-fragrance").Return(productResponse, nil)
 
-		w := performProductRequest(t, router, http.MethodGet, "/products/1", nil)
+		w := performProductRequest(t, router, http.MethodGet, "/products/test-fragrance", nil)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
@@ -310,20 +310,23 @@ func TestProductHandler_GetProduct(t *testing.T) {
 	t.Run("Not Found", func(t *testing.T) {
 		router, mockService := setupProductRouter()
 
-		mockService.On("GetProductByID", mock.Anything, uint(1)).Return(dto.ProductResponse{}, fmt.Errorf("Product not found"))
+		mockService.On("GetProductBySlug", mock.Anything, "nonexistent").Return(dto.ProductResponse{}, fmt.Errorf("Product not found"))
 
-		w := performProductRequest(t, router, http.MethodGet, "/products/1", nil)
+		w := performProductRequest(t, router, http.MethodGet, "/products/nonexistent", nil)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("Invalid ID", func(t *testing.T) {
-		router, _ := setupProductRouter()
+	t.Run("Invalid Slug", func(t *testing.T) {
+		router, mockService := setupProductRouter()
 
-		w := performProductRequest(t, router, http.MethodGet, "/products/abc", nil)
+		mockService.On("GetProductBySlug", mock.Anything, "invalid-slug").Return(dto.ProductResponse{}, fmt.Errorf("Product not found"))
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
+		w := performProductRequest(t, router, http.MethodGet, "/products/invalid-slug", nil)
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		mockService.AssertExpectations(t)
 	})
 }
 

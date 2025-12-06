@@ -41,7 +41,7 @@ const OrderList: React.FC<Props> = ({ orders, onSelect }) => {
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-3 items-center">
                   {thumbs.map((it) => (
-                    <Link key={it.id} to={`/products/${it.product_id}`} onClick={(e) => e.stopPropagation()} className="w-20 h-20 rounded-lg overflow-hidden bg-white ring-1 ring-gray-100 block">
+                    <Link key={it.id} to={`/products/${it.product_slug}`} onClick={(e) => e.stopPropagation()} className="w-20 h-20 rounded-lg overflow-hidden bg-white ring-1 ring-gray-100 block">
                       <img src={it.product_image_url || '/placeholder.png'} alt={it.product_name || ''} className="w-full h-full object-contain" />
                     </Link>
                   ))}
@@ -53,7 +53,7 @@ const OrderList: React.FC<Props> = ({ orders, onSelect }) => {
                   <div className="text-sm text-gray-600 mt-1">{o.item_count} {o.item_count === 1 ? 'item' : 'items'}</div>
                   <div className="text-sm text-gray-700 mt-2 truncate w-40">
                     {o.items.length > 0 ? (
-                      <Link to={`/products/${o.items[0].product_id}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+                      <Link to={`/products/${o.items[0].product_slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
                         {o.items[0].product_name}
                       </Link>
                     ) : ''}

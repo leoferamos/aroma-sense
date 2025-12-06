@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { OrderResponse } from '../types/order';
-import { useCart } from '../hooks/useCart';
-import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/format';
 import { Link } from 'react-router-dom';
 
@@ -25,24 +23,9 @@ const statusColor = (status: string) => {
 };
 
 const OrderDetail: React.FC<Props> = ({ order }) => {
-  const { addItem } = useCart();
-  const navigate = useNavigate();
-  const [adding, setAdding] = useState(false);
-
   const handleOrderAgain = async () => {
-    setAdding(true);
-    try {
-      // Add each item to the cart
-      for (const it of order.items) {
-        await addItem(it.product_id, it.quantity);
-      }
-      // Redirect to checkout
-      navigate('/checkout');
-    } catch {
-      // ignore
-    } finally {
-      setAdding(false);
-    }
+    // This functionality is disabled because product IDs are not exposed to the frontend
+    alert('Order Again functionality is currently not available. Please add items manually to your cart.');
   };
 
   return (
@@ -60,12 +43,12 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {order.items.map((it) => (
           <div key={it.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100">
-            <Link to={`/products/${it.product_id}`} className="w-28 h-28 flex-shrink-0 rounded-md overflow-hidden bg-white flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-              <img src={it.product_image_url || '/placeholder.png'} alt={it.product_name || `Product ${it.product_id}`} className="max-w-full max-h-full object-contain" />
+            <Link to={`/products/${it.product_slug}`} className="w-28 h-28 flex-shrink-0 rounded-md overflow-hidden bg-white flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+              <img src={it.product_image_url || '/placeholder.png'} alt={it.product_name || `Product ${it.product_slug}`} className="max-w-full max-h-full object-contain" />
             </Link>
             <div className="flex-1">
-              <Link to={`/products/${it.product_id}`} onClick={(e) => e.stopPropagation()} className="font-medium text-sm text-gray-900 hover:underline">
-                {it.product_name || `Product #${it.product_id}`}
+              <Link to={`/products/${it.product_slug}`} onClick={(e) => e.stopPropagation()} className="font-medium text-sm text-gray-900 hover:underline">
+                {it.product_name || `Product #${it.product_slug}`}
               </Link>
               <div className="text-sm text-gray-500 mt-1">Qty: {it.quantity}</div>
               <div className="text-sm text-gray-600 mt-2">Price: {formatCurrency(it.price_at_purchase)}</div>
@@ -80,10 +63,10 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
       <div className="mt-6 flex justify-end">
         <button
           onClick={handleOrderAgain}
-          disabled={adding}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
+          className="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
+          disabled
         >
-          {adding ? 'Adding...' : 'Order Again'}
+          Order Again (Disabled)
         </button>
       </div>
     </div>

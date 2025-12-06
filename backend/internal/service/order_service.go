@@ -48,6 +48,9 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		itemSubtotal := float64(cartItem.Quantity) * product.Price
 		orderItems = append(orderItems, model.OrderItem{
 			ProductID:       product.ID,
+			ProductSlug:     product.Slug,
+			ProductName:     product.Name,
+			ProductImageURL: product.ImageURL,
 			Quantity:        cartItem.Quantity,
 			PriceAtPurchase: product.Price,
 			Subtotal:        itemSubtotal,
@@ -127,7 +130,9 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 	for i, item := range order.Items {
 		items[i] = dto.OrderItemResponse{
 			ID:              item.ID,
-			ProductID:       item.ProductID,
+			ProductSlug:     item.ProductSlug,
+			ProductName:     item.ProductName,
+			ProductImageURL: item.ProductImageURL,
 			Quantity:        item.Quantity,
 			PriceAtPurchase: item.PriceAtPurchase,
 			Subtotal:        item.Subtotal,
@@ -208,14 +213,12 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 		for i, it := range o.Items {
 			item := dto.OrderItemResponse{
 				ID:              it.ID,
-				ProductID:       it.ProductID,
+				ProductSlug:     it.ProductSlug,
+				ProductName:     it.ProductName,
+				ProductImageURL: it.ProductImageURL,
 				Quantity:        it.Quantity,
 				PriceAtPurchase: it.PriceAtPurchase,
 				Subtotal:        it.Subtotal,
-			}
-			if it.Product != nil {
-				item.ProductName = it.Product.Name
-				item.ProductImageURL = it.Product.ImageURL
 			}
 			items[i] = item
 		}

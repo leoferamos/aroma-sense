@@ -25,7 +25,7 @@ type OrderResponse struct {
 // OrderItemResponse represents an order item returned to the client
 type OrderItemResponse struct {
 	ID              uint    `json:"id"`
-	ProductID       uint    `json:"product_id"`
+	ProductSlug     string  `json:"product_slug"`
 	ProductName     string  `json:"product_name,omitempty"`
 	ProductImageURL string  `json:"product_image_url,omitempty"`
 	Quantity        int     `json:"quantity"`
