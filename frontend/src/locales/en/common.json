@@ -16,7 +16,8 @@
     "open": "Open",
     "yes": "Yes",
     "no": "No",
-    "logout": "Logout"
+    "logout": "Logout",
+    "back": "Back"
   },
   "auth": {
     "login": "Login",
@@ -64,14 +65,22 @@
     "addToCart": "Add to Cart",
     "adding": "Adding...",
     "outOfStock": "Out of Stock",
-    "inStock": "in stock",
-    "price": "Price",
+    "inStock": "In stock",
+    "lowStock": "Only {{quantity}} left",
     "description": "Description",
-    "category": "Category"
+    "productDetails": "Product Details",
+    "weight": "Weight",
+    "category": "Category",
+    "buyNow": "Buy Now",
+    "relatedProducts": "Related Products"
   },
   "search": {
     "placeholder": "Search products...",
-    "ariaLabel": "Search products"
+    "ariaLabel": "Search products",
+    "button": "Search",
+    "searching": "Searching...",
+    "clearSearch": "Clear search",
+    "submitSearch": "Submit search"
   },
   "error": {
     "tryAgain": "Try Again",
@@ -178,5 +187,26 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "signIn": "Sign in"
+  },
+  "reviews": {
+    "rateThisProduct": "Rate This Product",
+    "basedOnReviews": "based on {{count}} reviews",
+    "rating": "Rating",
+    "comment": "Comment",
+    "optional": "optional",
+    "placeholder": "Share your experience with this product...",
+    "characters": "{{length}}/500 characters",
+    "selectRating": "Please select a rating",
+    "submitting": "Submitting...",
+    "submitReview": "Submit Review",
+    "reviewSubmitted": "Review submitted successfully!",
+    "youSelected": "You selected {{rating}} star{{ratingPlural}}",
+    "recentReviews": "Recent Reviews",
+    "loadingReviews": "Loading reviews...",
+    "noReviewsYet": "No reviews yet.",
+    "pageOf": "Page {{page}} of {{total}}",
+    "prev": "Prev",
+    "next": "Next",
+    "perPage": "{{count}}/page"
   }
 }

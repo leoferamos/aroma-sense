@@ -1,10 +1,18 @@
 {
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "orders": "Orders",
+    "products": "Products",
+    "contestations": "Contestations",
+    "auditLogs": "Audit Logs",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
   "dashboard": "Dashboard",
-  "users": "Users",
   "orders": "Orders",
   "products": "Products",
   "contestations": "Contestations",
-  "logout": "Logout",
   "loading": "Loading…",
   "totalActions": "Total actions",
   "addProduct": "Add Product",
@@ -12,5 +20,17 @@
   "deleteProduct": "Delete Product",
   "viewUsers": "View Users",
   "manageOrders": "Manage Orders",
-  "auditLogs": "Audit Logs"
+  "welcomeAdmin": "Welcome, Admin",
+  "manageStore": "Manage your store",
+  "manageProducts": "Manage your product catalog",
+  "viewAllProducts": "View All Products →",
+  "trackOrders": "Track and manage orders",
+  "viewOrders": "View Orders →",
+  "manageUsers": "Manage user accounts",
+  "viewUsers": "View Users →",
+  "recentAuditLogs": "Recent Audit Logs",
+  "latestAuditEvents": "Latest audit events",
+  "viewAllAuditLogs": "View All Audit Logs →",
+  "details": "Details",
+  "noRecentAuditLogs": "No recent audit logs"
 }

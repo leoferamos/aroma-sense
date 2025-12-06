@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../LanguageSelector';
 
 type NavItem = {
   label: string;
@@ -84,6 +85,8 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
             <div className="flex items-center gap-3">
               <div className="hidden md:block">{actions}</div>
+
+              <LanguageSelector />
 
               <div className="relative">
                 <button

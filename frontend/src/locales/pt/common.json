@@ -16,7 +16,8 @@
     "open": "Abrir",
     "yes": "Sim",
     "no": "Não",
-    "logout": "Sair"
+    "logout": "Sair",
+    "back": "Voltar"
   },
   "auth": {
     "login": "Entrar",
@@ -64,14 +65,22 @@
     "addToCart": "Adicionar ao Carrinho",
     "adding": "Adicionando...",
     "outOfStock": "Fora de Estoque",
-    "inStock": "em estoque",
-    "price": "Preço",
+    "inStock": "Em estoque",
+    "lowStock": "Apenas {{quantity}} restantes",
     "description": "Descrição",
-    "category": "Categoria"
+    "productDetails": "Detalhes do Produto",
+    "weight": "Peso",
+    "category": "Categoria",
+    "buyNow": "Comprar Agora",
+    "relatedProducts": "Produtos Relacionados"
   },
   "search": {
     "placeholder": "Buscar produtos...",
-    "ariaLabel": "Buscar produtos"
+    "ariaLabel": "Buscar produtos",
+    "button": "Buscar",
+    "searching": "Buscando...",
+    "clearSearch": "Limpar busca",
+    "submitSearch": "Enviar busca"
   },
   "error": {
     "tryAgain": "Tentar Novamente",
@@ -178,5 +187,26 @@
     "terms": "Termos",
     "privacy": "Privacidade",
     "signIn": "Entrar"
+  },
+  "reviews": {
+    "rateThisProduct": "Avalie Este Produto",
+    "basedOnReviews": "baseado em {{count}} avaliações",
+    "rating": "Avaliação",
+    "comment": "Comentário",
+    "optional": "opcional",
+    "placeholder": "Compartilhe sua experiência com este produto...",
+    "characters": "{{length}}/500 caracteres",
+    "selectRating": "Por favor, selecione uma avaliação",
+    "submitting": "Enviando...",
+    "submitReview": "Enviar Avaliação",
+    "reviewSubmitted": "Avaliação enviada com sucesso!",
+    "youSelected": "Você selecionou {{rating}} estrela{{ratingPlural}}",
+    "recentReviews": "Avaliações Recentes",
+    "loadingReviews": "Carregando avaliações...",
+    "noReviewsYet": "Nenhuma avaliação ainda.",
+    "pageOf": "Página {{page}} de {{total}}",
+    "prev": "Anterior",
+    "next": "Próximo",
+    "perPage": "{{count}}/página"
   }
 }

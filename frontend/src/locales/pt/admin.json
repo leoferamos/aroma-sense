@@ -1,10 +1,19 @@
 {
+  "nav": {
+    "dashboard": "Painel",
+    "users": "Usuários",
+    "orders": "Pedidos",
+    "products": "Produtos",
+    "contestations": "Contestações",
+    "auditLogs": "Logs de Auditoria",
+    "profile": "Perfil",
+    "logout": "Sair"
+  },
   "dashboard": "Painel",
   "users": "Usuários",
   "orders": "Pedidos",
   "products": "Produtos",
   "contestations": "Contestações",
-  "logout": "Sair",
   "loading": "Carregando…",
   "totalActions": "Total de ações",
   "addProduct": "Adicionar Produto",
@@ -12,5 +21,18 @@
   "deleteProduct": "Excluir Produto",
   "viewUsers": "Ver Usuários",
   "manageOrders": "Gerenciar Pedidos",
-  "auditLogs": "Logs de Auditoria"
+  "auditLogs": "Logs de Auditoria",
+  "welcomeAdmin": "Bem-vindo, Admin",
+  "manageStore": "Gerencie sua loja",
+  "manageProducts": "Gerencie seu catálogo de produtos",
+  "viewAllProducts": "Ver Todos os Produtos →",
+  "trackOrders": "Acompanhe e gerencie pedidos",
+  "viewOrders": "Ver Pedidos →",
+  "manageUsers": "Gerencie contas de usuário",
+  "viewUsers": "Ver Usuários →",
+  "recentAuditLogs": "Logs de Auditoria Recentes",
+  "latestAuditEvents": "Últimos eventos de auditoria",
+  "viewAllAuditLogs": "Ver Todos os Logs de Auditoria →",
+  "details": "Detalhes",
+  "noRecentAuditLogs": "Nenhum log de auditoria recente"
 }

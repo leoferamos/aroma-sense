@@ -57,7 +57,7 @@ const SearchBar: React.FC<Props> = ({
           <button
             type="button"
             onClick={onClear}
-            aria-label="Clear search"
+            aria-label={t('search.clearSearch')}
             className="absolute inset-y-0 right-24 flex items-center text-gray-400 hover:text-gray-700 transition-colors duration-200 hover:scale-110"
           >
             <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -68,10 +68,10 @@ const SearchBar: React.FC<Props> = ({
         <button
           type="button"
           onClick={onSubmit}
-          aria-label="Submit search"
+          aria-label={t('search.ariaLabel')}
           className="absolute inset-y-0 right-2 my-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-5 text-sm font-medium text-white shadow-sm hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 active:scale-95"
         >
-          Search
+          {t('search.button')}
         </button>
         {isLoading && (
           <span className="absolute inset-y-0 right-28 my-auto inline-flex items-center text-gray-500" aria-live="polite" aria-busy="true">
@@ -79,7 +79,7 @@ const SearchBar: React.FC<Props> = ({
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
             </svg>
-            <span className="text-xs">Searching...</span>
+            <span className="text-xs">{t('search.searching')}</span>
           </span>
         )}
       </div>
