@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   status: string;
@@ -13,6 +14,7 @@ type Props = {
 const perPageOptions = [10, 25, 50, 100];
 
 const FiltersBar: React.FC<Props> = ({ status, onStatusChange, startDate, endDate, onDateChange, perPage, onPerPageChange }) => {
+  const { t } = useTranslation('admin');
 
   const formatDate = (d: Date) => {
     const yyyy = d.getFullYear();
@@ -42,26 +44,26 @@ const FiltersBar: React.FC<Props> = ({ status, onStatusChange, startDate, endDat
   return (
     <div className="mb-4 flex flex-col md:flex-row md:items-center md:gap-4">
       <div className="flex items-center gap-2">
-        <label className="text-sm">Status</label>
+        <label className="text-sm">{t('status')}</label>
         <select value={status} onChange={(e) => onStatusChange(e.target.value)} className="border rounded px-2 py-1">
-          <option value="">All</option>
-          <option value="pending">pending</option>
-          <option value="processing">processing</option>
-          <option value="shipped">shipped</option>
-          <option value="delivered">delivered</option>
-          <option value="cancelled">cancelled</option>
+          <option value="">{t('all')}</option>
+          <option value="pending">{t('pending')}</option>
+          <option value="processing">{t('processing')}</option>
+          <option value="shipped">{t('shipped')}</option>
+          <option value="delivered">{t('delivered')}</option>
+          <option value="cancelled">{t('cancelled')}</option>
         </select>
       </div>
 
       <div className="flex items-center gap-2 mt-2 md:mt-0">
-        <label className="text-sm">From</label>
+        <label className="text-sm">{t('from')}</label>
         <input type="date" value={startDate || ''} onChange={(e) => onDateChange(e.target.value || undefined, endDate)} className="border rounded px-2 py-1" />
-        <label className="text-sm">To</label>
+        <label className="text-sm">{t('to')}</label>
         <input type="date" value={endDate || ''} onChange={(e) => onDateChange(startDate, e.target.value || undefined)} className="border rounded px-2 py-1" />
       </div>
 
       <div className="flex items-center gap-2 mt-2 md:mt-0 md:ml-auto">
-        <label className="text-sm">Per page</label>
+        <label className="text-sm">{t('perPage')}</label>
         <select value={perPage} onChange={(e) => onPerPageChange(Number(e.target.value))} className="border rounded px-2 py-1">
           {perPageOptions.map((o) => (
             <option key={o} value={o}>{o}</option>
@@ -69,12 +71,12 @@ const FiltersBar: React.FC<Props> = ({ status, onStatusChange, startDate, endDat
         </select>
       
         <div className="flex items-center gap-2 ml-4">
-          <button type="button" onClick={clearFilters} className="text-sm px-3 py-1 border rounded hover:bg-gray-50">Clear</button>
+          <button type="button" onClick={clearFilters} className="text-sm px-3 py-1 border rounded hover:bg-gray-50">{t('clear')}</button>
 
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => applyPreset(1)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">Today</button>
-            <button type="button" onClick={() => applyPreset(7)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">7d</button>
-            <button type="button" onClick={() => applyPreset(30)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">30d</button>
+            <button type="button" onClick={() => applyPreset(1)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">{t('today')}</button>
+            <button type="button" onClick={() => applyPreset(7)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">{t('7days')}</button>
+            <button type="button" onClick={() => applyPreset(30)} className="text-sm px-2 py-1 border rounded hover:bg-gray-50">{t('30days')}</button>
           </div>
         </div>
       </div>

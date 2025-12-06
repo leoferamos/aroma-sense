@@ -5,9 +5,11 @@ import OrdersTable from '../../components/admin/OrdersTable';
 import PaginationControls from '../../components/admin/PaginationControls';
 import { useAdminOrders } from '../../hooks/useAdminOrders';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { useTranslation } from 'react-i18next';
 
 const AdminOrders: React.FC = () => {
   const { data, loading, error, params, setPage, setPerPage, setStatus, setDateRange } = useAdminOrders({ page: 1, per_page: 25 });
+  const { t } = useTranslation('admin');
 
   const orders = data?.orders ?? [];
   const page = data?.page ?? 1;
@@ -16,14 +18,14 @@ const AdminOrders: React.FC = () => {
 
   const actions = (
     <div className="flex items-center gap-2">
-      <Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link>
+      <Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('nav.dashboard')}</Link>
     </div>
   );
 
   return (
-    <AdminLayout title="Orders" actions={actions}>
+    <AdminLayout title={t('orders')} actions={actions}>
       <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-4">Orders</h1>
+        <h1 className="text-2xl font-semibold mb-4">{t('orders')}</h1>
 
         <FiltersBar
           status={params.status ?? ''}
@@ -35,13 +37,13 @@ const AdminOrders: React.FC = () => {
           onPerPageChange={(n) => setPerPage(n)}
         />
 
-        {loading && <div className="py-8">Loading orders…</div>}
+        {loading && <div className="py-8">{t('loadingOrders')}</div>}
         {error && <div className="py-8 text-red-600">{error}</div>}
 
         {!loading && !error && (
           <>
             <div className="mb-4 text-sm text-gray-700">
-              <strong>{data?.total ?? 0}</strong> orders
+              <strong>{data?.total ?? 0}</strong> {t('totalOrders', { count: data?.total ?? 0 })}
             </div>
 
             <div className="overflow-x-auto">

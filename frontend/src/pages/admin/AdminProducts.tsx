@@ -8,11 +8,14 @@ import type { Product } from '../../types/product';
 import ConfirmModal from '../../components/ConfirmModal';
 import { deleteProduct } from '../../services/product';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { useTranslation } from 'react-i18next';
 
 
 const AdminProducts: React.FC = () => {
   const { products, loading, error, refetch } = useProducts();
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
+  const { t } = useTranslation('admin');
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [deleting, setDeleting] = React.useState(false);
@@ -72,19 +75,19 @@ const AdminProducts: React.FC = () => {
         to="/admin/dashboard"
         className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
       >
-        ← Dashboard
+        ← {t('nav.dashboard')}
       </Link>
       <Link
         to="/admin/products/new"
         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
       >
-        + Add New Product
+        + {t('addProduct')}
       </Link>
     </div>
   );
 
   return (
-    <AdminLayout title="Products" actions={actions}>
+    <AdminLayout actions={actions}>
       {/* Loading State */}
       {loading && <LoadingSpinner message="Loading products..." />}
 
@@ -130,18 +133,17 @@ const AdminProducts: React.FC = () => {
                 />
               </svg>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No products yet
+                {t('noProductsYet')}
               </h3>
               <p className="text-gray-500">
-                Click "Add New Product" to create your first item.
+                {t('clickAddNewProduct')}
               </p>
             </div>
           ) : (
             <>
               <div className="mb-4">
                 <p className="text-gray-600">
-                  Showing <span className="font-semibold">{products.length}</span>{' '}
-                  {products.length === 1 ? 'product' : 'products'}
+                  {t('showingProducts', { count: products.length })}
                 </p>
               </div>
 

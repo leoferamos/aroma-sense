@@ -176,7 +176,7 @@ const EditProduct: React.FC = () => {
   );
 
   return (
-    <AdminLayout title="Edit Product" actions={actions}>
+    <AdminLayout actions={actions}>
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
           <div className="mb-6">

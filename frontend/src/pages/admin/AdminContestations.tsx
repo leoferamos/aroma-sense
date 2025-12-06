@@ -3,6 +3,7 @@ import { getPendingContestations, approveContestation, rejectContestation } from
 import type { AdminContestation } from '../../services/adminContestations';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard' },
@@ -17,6 +18,7 @@ const AdminContestations: React.FC = () => {
   const [contestations, setContestations] = useState<AdminContestation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation('admin');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [reviewNotes, setReviewNotes] = useState<{ [id: number]: string }>({});
 
@@ -67,7 +69,7 @@ const AdminContestations: React.FC = () => {
     <AdminLayout
       title="Contestations"
       navItems={navItems}
-      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link></div>}
+      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('nav.dashboard')}</Link></div>}
     >
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-4">Pending User Contestations</h2>

@@ -7,6 +7,7 @@ import AuditLogTable from '../../components/admin/AuditLogTable';
 import AuditLogDetailsModal from '../../components/admin/AuditLogDetailsModal';
 import PaginationControls from '../../components/admin/PaginationControls';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const AdminAuditLogs: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -24,6 +25,8 @@ const AdminAuditLogs: React.FC = () => {
   const [resourceId, setResourceId] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+
+  const { t } = useTranslation('admin');
 
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -87,12 +90,12 @@ const AdminAuditLogs: React.FC = () => {
 
   const actions = (
     <div className="flex items-center gap-2">
-      <Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link>
+      <Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('nav.dashboard')}</Link>
     </div>
   );
 
   return (
-    <AdminLayout title="Audit Logs" actions={actions}>
+    <AdminLayout actions={actions}>
       <div className="p-6">
         <h1 className="text-2xl font-semibold mb-4">Audit Logs</h1>
 
