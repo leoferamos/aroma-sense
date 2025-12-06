@@ -28,8 +28,8 @@ type CartItemResponse struct {
 
 // AddToCartRequest represents the payload for adding an item to cart
 type AddToCartRequest struct {
-	ProductID uint `json:"product_id" binding:"required"`
-	Quantity  int  `json:"quantity" binding:"required,min=1"`
+	ProductSlug string `json:"product_slug" binding:"required"`
+	Quantity    int    `json:"quantity" binding:"required,min=1"`
 }
 
 // UpdateCartItemRequest represents the payload for updating cart item quantity

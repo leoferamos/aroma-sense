@@ -15,7 +15,7 @@ type CartService interface {
 	CreateCartForUser(userID string) error
 	GetCartByUserID(userID string) (*model.Cart, error)
 	GetCartResponse(userID string) (*dto.CartResponse, error)
-	AddItemToCart(userID string, productID uint, quantity int) (*dto.CartResponse, error)
+	AddItemToCart(userID string, productSlug string, quantity int) (*dto.CartResponse, error)
 	UpdateItemQuantity(userID string, itemID uint, quantity int) (*dto.CartResponse, error)
 	RemoveItem(userID string, itemID uint) (*dto.CartResponse, error)
 	ClearCart(userID string) (*dto.CartResponse, error)
@@ -109,7 +109,13 @@ func (s *cartService) GetCartResponse(userID string) (*dto.CartResponse, error) 
 }
 
 // AddItemToCart adds an item to the user's cart or increases quantity if exists
-func (s *cartService) AddItemToCart(userID string, productID uint, quantity int) (*dto.CartResponse, error) {
+func (s *cartService) AddItemToCart(userID string, productSlug string, quantity int) (*dto.CartResponse, error) {
+	// Get product ID by slug
+	productID, err := s.productService.GetProductIDBySlug(context.Background(), productSlug)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+
 	// Validate product exists and get product data
 	product, err := s.productService.GetProductByID(context.Background(), productID)
 	if err != nil {

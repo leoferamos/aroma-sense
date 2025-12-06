@@ -55,7 +55,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        request        body    dto.AddToCartRequest  true   "Product ID and quantity to add"
+// @Param        request        body    dto.AddToCartRequest  true   "Product slug and quantity to add"
 // @Success      200  {object}  dto.CartResponse    "Updated cart with new item"
 // @Failure      400  {object}  dto.ErrorResponse   "Invalid request body or insufficient stock"
 // @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
@@ -79,7 +79,7 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	}
 
 	// Add item to cart
-	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductID, req.Quantity)
+	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductSlug, req.Quantity)
 	if err != nil {
 		// Handle different types of errors with appropriate HTTP status codes
 		if err.Error() == "product not found" {
