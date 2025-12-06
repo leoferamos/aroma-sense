@@ -15,7 +15,7 @@ func initializeHandlers(services *services, rateLimiter rate.RateLimiter) *AppHa
 		OrderHandler:             handler.NewOrderHandler(services.order),
 		PasswordResetHandler:     handler.NewPasswordResetHandler(services.passwordReset, rateLimiter),
 		ShippingHandler:          handler.NewShippingHandler(services.shipping),
-		ReviewHandler:            handler.NewReviewHandler(services.review, services.userProfile),
+		ReviewHandler:            handler.NewReviewHandler(services.review, services.userProfile, services.product),
 		AIHandler:                handler.NewAIHandler(services.ai, rateLimiter),
 		ChatHandler:              handler.NewChatHandler(services.chat, rateLimiter),
 		AuditLogHandler:          handler.NewAuditLogHandler(services.auditLog),

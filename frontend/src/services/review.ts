@@ -27,35 +27,35 @@ export interface ReviewSummary {
 }
 
 export async function listReviews(
-  productId: number,
+  productSlug: string,
   params?: { page?: number; limit?: number; signal?: AbortSignal }
 ): Promise<ReviewListResponse> {
   const { page = 1, limit = 10, signal } = params || {};
   const { data } = await api.get<ReviewListResponse>(
-    `/products/${productId}/reviews`,
+    `/products/${productSlug}/reviews`,
     { params: { page, limit }, signal }
   );
   return data;
 }
 
 export async function getSummary(
-  productId: number,
+  productSlug: string,
   opts?: { signal?: AbortSignal }
 ): Promise<ReviewSummary> {
   const { signal } = opts || {};
   const { data } = await api.get<ReviewSummary>(
-    `/products/${productId}/reviews/summary`,
+    `/products/${productSlug}/reviews/summary`,
     { signal }
   );
   return data;
 }
 
 export async function createReview(
-  productId: number,
+  productSlug: string,
   payload: ReviewRequest
 ): Promise<Review> {
   const { data } = await api.post<Review>(
-    `/products/${productId}/reviews`,
+    `/products/${productSlug}/reviews`,
     payload
   );
   return data;

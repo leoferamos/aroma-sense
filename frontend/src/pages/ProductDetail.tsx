@@ -159,10 +159,12 @@ const ProductDetail: React.FC = () => {
         </div>
 
         {/* Product Review Section */}
-        <ProductReview
-          productId={product?.id || 0}
-          canReview={product.can_review}
-        />
+        {product && product.slug && (
+          <ProductReview
+            productSlug={product.slug}
+            canReview={product.can_review}
+          />
+        )}
 
         {/* Related Products */}
         {related.length > 0 && (
