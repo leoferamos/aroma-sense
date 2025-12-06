@@ -241,6 +241,7 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "currentPasswordRequired": "Current password is required",
     "newPasswordRequired": "New password is required",
-    "passwordMinLength": "Password must be at least 8 characters"
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordSymbol": "Password must contain at least one symbol"
   }
 }
