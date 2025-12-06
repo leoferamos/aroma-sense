@@ -7,6 +7,7 @@ import AuditLogTable from '../../components/admin/AuditLogTable';
 import AuditLogDetailsModal from '../../components/admin/AuditLogDetailsModal';
 import PaginationControls from '../../components/admin/PaginationControls';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const AdminAuditLogs: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -24,6 +25,8 @@ const AdminAuditLogs: React.FC = () => {
   const [resourceId, setResourceId] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+
+  const { t } = useTranslation('admin');
 
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,7 +52,7 @@ const AdminAuditLogs: React.FC = () => {
       setTotal(resp.total || 0);
     } catch (err) {
       console.debug('getAuditLogs error', err);
-      setError('Failed to load audit logs');
+      setError(t('failedToLoadAuditLogs'));
     } finally {
       setLoading(false);
     }
@@ -87,21 +90,21 @@ const AdminAuditLogs: React.FC = () => {
 
   const actions = (
     <div className="flex items-center gap-2">
-      <Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link>
+      <Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('nav.dashboard')}</Link>
     </div>
   );
 
   return (
-    <AdminLayout title="Audit Logs" actions={actions}>
+    <AdminLayout actions={actions}>
       <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-4">Audit Logs</h1>
+        <h1 className="text-2xl font-semibold mb-4">{t('auditLogsTitle')}</h1>
 
         <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-          <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="User ID" className="border rounded px-2 py-1" />
-          <input value={actorId} onChange={(e) => setActorId(e.target.value)} placeholder="Actor ID" className="border rounded px-2 py-1" />
-          <input value={action} onChange={(e) => setAction(e.target.value)} placeholder="Action" className="border rounded px-2 py-1" />
-          <input value={resource} onChange={(e) => setResource(e.target.value)} placeholder="Resource" className="border rounded px-2 py-1" />
-          <input value={resourceId} onChange={(e) => setResourceId(e.target.value)} placeholder="Resource ID" className="border rounded px-2 py-1" />
+          <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder={t('userId')} className="border rounded px-2 py-1" />
+          <input value={actorId} onChange={(e) => setActorId(e.target.value)} placeholder={t('actorId')} className="border rounded px-2 py-1" />
+          <input value={action} onChange={(e) => setAction(e.target.value)} placeholder={t('action')} className="border rounded px-2 py-1" />
+          <input value={resource} onChange={(e) => setResource(e.target.value)} placeholder={t('resource')} className="border rounded px-2 py-1" />
+          <input value={resourceId} onChange={(e) => setResourceId(e.target.value)} placeholder={t('resourceId')} className="border rounded px-2 py-1" />
           <div className="flex gap-2">
             <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border rounded px-2 py-1 w-full" />
             <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border rounded px-2 py-1 w-full" />
@@ -109,13 +112,13 @@ const AdminAuditLogs: React.FC = () => {
         </div>
 
         <div className="mb-4 flex items-center gap-3">
-          <button onClick={() => { setOffset(0); fetch(); }} className="px-3 py-2 bg-blue-600 text-white rounded">Apply</button>
+          <button onClick={() => { setOffset(0); fetch(); }} className="px-3 py-2 bg-blue-600 text-white rounded">{t('apply')}</button>
           <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setOffset(0); }} className="border px-2 py-1 rounded">
-            {[10,25,50,100].map(n => <option key={n} value={n}>{n} per page</option>)}
+            {[10,25,50,100].map(n => <option key={n} value={n}>{n} {t('perPage')}</option>)}
           </select>
         </div>
 
-        {loading && <div className="py-8">Loading…</div>}
+        {loading && <div className="py-8">{t('loading')}</div>}
         {error && <div className="py-8 text-red-600">{error}</div>}
 
         {!loading && !error && (
@@ -123,7 +126,7 @@ const AdminAuditLogs: React.FC = () => {
             <AuditLogTable logs={logs} onView={openLog} />
 
             <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-gray-600">Showing {Math.min(total, offset + 1)} - {Math.min(total, offset + limit)} of {total}</div>
+              <div className="text-sm text-gray-600">{t('showingRange', { start: Math.min(total, offset + 1), end: Math.min(total, offset + limit), total })}</div>
               <PaginationControls
                 page={page}
                 totalPages={totalPages}

@@ -13,10 +13,12 @@ import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../ho
 import useShippingOptions from '../hooks/useShippingOptions';
 import useCepLookup from '../hooks/useCepLookup';
 import type { CartItem as CartItemType } from '../types/cart';
+import { useTranslation } from 'react-i18next';
 import type { ShippingOption } from '../types/shipping';
 import { createOrder, type OrderCreateRequest } from '../services/order';
 
 const Checkout: React.FC = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const { cart, loading, removeItem, error, isRemovingItem } = useCart();
 
@@ -78,7 +80,7 @@ const Checkout: React.FC = () => {
       });
     } catch (err) {
       console.error('Failed to create order', err);
-      setErrors((prev) => ({ ...prev, address1: 'Failed to create order. Please try again.' }));
+      setErrors((prev) => ({ ...prev, address1: t('errors.failedToCreateOrder') }));
     } finally {
       setSubmitting(false);
     }
@@ -91,14 +93,14 @@ const Checkout: React.FC = () => {
         <div className="mb-4">
           <BackButton fallbackPath="/products" />
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('cart.checkout')}</h1>
 
         {loading ? (
           <LoadingSpinner message="Loading your cart..." />
         ) : cartIsEmpty ? (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100">
-            <p className="text-gray-700 mb-4">Your cart is empty.</p>
-            <Link to="/products" className="text-blue-600 hover:underline font-medium">Continue shopping</Link>
+            <p className="text-gray-700 mb-4">{t('checkout.cartEmpty')}</p>
+            <Link to="/products" className="text-blue-600 hover:underline font-medium">{t('checkout.continueShopping')}</Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -106,11 +108,11 @@ const Checkout: React.FC = () => {
             <form onSubmit={handleSubmit} noValidate className="lg:col-span-2 space-y-8">
               {/* Address */}
               <section className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Shipping address</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('checkout.shippingAddress')}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <InputField
-                      label="Full name"
+                      label={t('checkout.fullName')}
                       name="fullName"
                       value={address.fullName}
                       onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
@@ -249,7 +251,7 @@ const Checkout: React.FC = () => {
 
               {/* Payment */}
               <section className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('checkout.payment')}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <InputField
@@ -318,7 +320,7 @@ const Checkout: React.FC = () => {
                   aria-busy={submitting}
                   className={`inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  {submitting ? 'Placing order...' : 'Place Order'}
+                  {submitting ? t('checkout.placingOrder') : t('checkout.placeOrder')}
                 </button>
               </div>
             </form>
@@ -326,7 +328,7 @@ const Checkout: React.FC = () => {
             {/* Right: Cart Summary */}
             <aside className="lg:col-span-1">
               <div className="bg-white shadow-sm rounded-xl p-6 sticky top-24 border border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Order summary</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('checkout.orderSummary')}</h2>
 
                 {/* Error display */}
                 {error && (
@@ -345,7 +347,7 @@ const Checkout: React.FC = () => {
                   ))}
                 </ul>
                 <div className="flex justify-between text-gray-700">
-                  <span>Subtotal</span>
+                  <span>{t('cart.subtotal')}</span>
                   <span className="font-semibold">{formatCurrency(cart!.total)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700 mt-2">
@@ -353,7 +355,7 @@ const Checkout: React.FC = () => {
                   <span className="font-semibold">{selectedShipping ? formatCurrency(selectedShipping.price) : '-'}</span>
                 </div>
                 <div className="flex justify-between text-gray-900 mt-2 border-t pt-2">
-                  <span>Total</span>
+                  <span>{t('cart.total')}</span>
                   <span className="font-bold">{formatCurrency(cart!.total + (selectedShipping?.price ?? 0))}</span>
                 </div>
               </div>

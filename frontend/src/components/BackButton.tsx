@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface BackButtonProps {
     className?: string;
@@ -9,10 +10,12 @@ interface BackButtonProps {
 
 const BackButton: React.FC<BackButtonProps> = ({
     className = '',
-    label = 'Back',
+    label,
     fallbackPath = '/'
 }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation('common');
+    const buttonLabel = label || t('common.back', 'Back');
 
     const handleBack = () => {
         if (window.history.length > 1) {
@@ -42,7 +45,7 @@ const BackButton: React.FC<BackButtonProps> = ({
                     d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
                 />
             </svg>
-            {label}
+            {buttonLabel}
         </button>
     );
 };

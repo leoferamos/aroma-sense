@@ -1,0 +1,103 @@
+{
+  "title": "Privacy Policy",
+  "lastUpdate": "Last updated: November 30, 2025",
+  "intro": "Your privacy is <strong>very important</strong> to us. This Privacy Policy explains how Aroma Sense, operated by Julio Oliveira and Leonardo Ramos, collects, uses, stores and protects information from users who access and use our services.",
+  "agreement": "By using the Aroma Sense website, you agree to the practices described in this policy.",
+  "section1": {
+    "title": "1. Information Collected",
+    "content": "Aroma Sense collects only the information strictly necessary for e-commerce operation and user experience personalization.",
+    "collected": "The information collected includes:",
+    "items": [
+      "<strong>Email and password:</strong> provided during registration.",
+      "<strong>Navigation cookies:</strong> used to improve user experience and personalize recommendations."
+    ],
+    "sensitive": "Aroma Sense does not collect sensitive data, such as CPF, address, phone or payment information directly in its database — this data is securely processed by payment providers."
+  },
+  "section2": {
+    "title": "2. Purpose of Collection",
+    "intro": "Data is collected for the following purposes:",
+    "purposes": [
+      "Allow access to user account (login and authentication);",
+      "Manage purchases and order history;",
+      "Offer personalized recommendations based on user preferences;",
+      "Improve navigation experience and website personalization;",
+      "Ensure platform security and integrity."
+    ]
+  },
+  "section3": {
+    "title": "3. Cookies and Tracking Technologies",
+    "intro": "Aroma Sense uses cookies and similar technologies to:",
+    "uses": [
+      "Store user preferences;",
+      "Maintain active sessions;",
+      "Generate anonymous website usage statistics;",
+      "Improve recommendations made by artificial intelligence."
+    ],
+    "control": "Users can disable cookies in their browser settings, but this may limit certain website functionalities."
+  },
+  "section4": {
+    "title": "4. Data Sharing",
+    "content": "Aroma Sense does not share users' personal information with third parties, except when necessary for:",
+    "exceptions": [
+      "Payment processing (via partners such as payment gateways);",
+      "Product delivery, when applicable;",
+      "Compliance with legal or regulatory obligations."
+    ],
+    "noSale": "In no case is data sold, rented or transferred for external marketing purposes."
+  },
+  "section5": {
+    "title": "5. Storage and Security",
+    "content": "Data is stored in secure environments, with appropriate technical and organizational measures to prevent unauthorized access, destruction, loss or improper alteration.",
+    "passwords": "Passwords are encrypted and not viewed by our team. Despite efforts, no system is 100% secure. In case of a security incident that compromises personal data, Aroma Sense will notify affected users as required by LGPD."
+  },
+  "section6": {
+    "title": "6. User Rights (LGPD)",
+    "intro": "In accordance with the General Data Protection Law (LGPD), users have the right to:",
+    "rights": [
+      "Access stored data about themselves;",
+      "Correct incomplete or incorrect data;",
+      "Request account and personal data deletion;",
+      "Revoke consent for data use;",
+      "Request information about data sharing."
+    ],
+    "deactivationRights": {
+      "title": "6.1 Rights in Case of Account Deactivation",
+      "content": "If your account is deactivated by the platform, you have the right to:",
+      "rights": [
+        "Receive clear notification about deactivation reasons;",
+        "Present contestation within 7 business days;",
+        "Be informed about the available appeal process;",
+        "Request review of the decision by the support team;",
+        "Receive confirmation of definitive data deletion when applicable."
+      ]
+    },
+    "contact": "To exercise any of these rights, simply contact us by email: 📩 suporte.aromasense@gmail.com"
+  },
+  "section7": {
+    "title": "7. Data Retention and Deletion",
+    "intro": "User data will be kept only for the time necessary to:",
+    "purposes": [
+      "Fulfill the purposes described in this Policy;",
+      "Meet legal or contractual requirements;",
+      "Preserve legitimate rights and interests of the platform."
+    ],
+    "platformDeactivation": {
+      "title": "7.1 Platform Account Deactivation",
+      "content": "In addition to deletion upon user request, Aroma Sense may deactivate accounts as described in the Terms of Use. In case of deactivation due to violation or other reasons, data will be kept for up to 2 years for audit purposes, legal compliance and fraud protection, after which it will be permanently deleted, except when required by law for a longer period."
+    },
+    "postClosure": "After account closure (whether by user request or platform decision), data will be securely and permanently removed, keeping only minimal records necessary for legal compliance."
+  },
+  "section8": {
+    "title": "8. Artificial Intelligence and Personalization",
+    "content": "Aroma Sense uses artificial intelligence algorithms to suggest perfumes based on user preferences and interactions. These recommendations are automatic and do not involve direct human decisions. No legal, financial or personal decisions are made exclusively through AI."
+  },
+  "section9": {
+    "title": "9. Policy Changes",
+    "content": "This Privacy Policy may be updated periodically to reflect improvements or legal changes. We recommend regular reading of this page to stay informed about possible changes."
+  },
+  "section10": {
+    "title": "10. Contact",
+    "content": "For questions, requests or complaints about data processing, contact our team by email: 📩 suporte.aromasene@gmail.com"
+  },
+  "copyright": "Aroma Sense © 2025 — All rights reserved."
+}

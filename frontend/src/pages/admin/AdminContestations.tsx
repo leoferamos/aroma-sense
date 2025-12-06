@@ -3,6 +3,7 @@ import { getPendingContestations, approveContestation, rejectContestation } from
 import type { AdminContestation } from '../../services/adminContestations';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard' },
@@ -17,6 +18,7 @@ const AdminContestations: React.FC = () => {
   const [contestations, setContestations] = useState<AdminContestation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation('admin');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [reviewNotes, setReviewNotes] = useState<{ [id: number]: string }>({});
 
@@ -27,7 +29,7 @@ const AdminContestations: React.FC = () => {
       const res = await getPendingContestations();
       setContestations(res.data);
     } catch {
-      setError('Failed to load contestations');
+      setError(t('failedToLoadContestations'));
     } finally {
       setLoading(false);
     }
@@ -44,7 +46,7 @@ const AdminContestations: React.FC = () => {
       await approveContestation(id, reviewNotes[id]);
       setContestations(contestations.filter(c => c.id !== id));
     } catch {
-      setError('Failed to approve contestation');
+      setError(t('failedToApproveContestation'));
     } finally {
       setActionLoading(null);
     }
@@ -57,7 +59,7 @@ const AdminContestations: React.FC = () => {
       await rejectContestation(id, reviewNotes[id]);
       setContestations(contestations.filter(c => c.id !== id));
     } catch {
-      setError('Failed to reject contestation');
+      setError(t('failedToRejectContestation'));
     } finally {
       setActionLoading(null);
     }
@@ -65,28 +67,27 @@ const AdminContestations: React.FC = () => {
 
   return (
     <AdminLayout
-      title="Contestations"
       navItems={navItems}
-      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link></div>}
+      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('nav.dashboard')}</Link></div>}
     >
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Pending User Contestations</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('pendingUserContestations')}</h2>
         {error && <div className="text-red-500 mb-2">{error}</div>}
         {loading ? (
-          <div>Loading...</div>
+          <div>{t('loadingContestations')}</div>
         ) : contestations.length === 0 ? (
-          <div>No pending contestations.</div>
+          <div>{t('noPendingContestations')}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full border bg-white rounded shadow">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="border px-3 py-2 text-left">ID</th>
-                  <th className="border px-3 py-2 text-left">User ID</th>
-                  <th className="border px-3 py-2 text-left">Reason</th>
-                  <th className="border px-3 py-2 text-left">Requested At</th>
-                  <th className="border px-3 py-2 text-left">Review Notes</th>
-                  <th className="border px-3 py-2 text-left">Actions</th>
+                  <th className="border px-3 py-2 text-left">{t('contestationId')}</th>
+                  <th className="border px-3 py-2 text-left">{t('userId')}</th>
+                  <th className="border px-3 py-2 text-left">{t('reason')}</th>
+                  <th className="border px-3 py-2 text-left">{t('requestedAt')}</th>
+                  <th className="border px-3 py-2 text-left">{t('reviewNotes')}</th>
+                  <th className="border px-3 py-2 text-left">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -100,7 +101,7 @@ const AdminContestations: React.FC = () => {
                       <input
                         type="text"
                         className="border px-2 py-1 w-40 rounded"
-                        placeholder="Review notes"
+                        placeholder={t('reviewNotesPlaceholder')}
                         value={reviewNotes[c.id] || ''}
                         onChange={e => setReviewNotes({ ...reviewNotes, [c.id]: e.target.value })}
                       />
@@ -110,12 +111,12 @@ const AdminContestations: React.FC = () => {
                         className="bg-green-600 text-white px-3 py-1 mr-2 rounded hover:bg-green-700 disabled:opacity-50"
                         disabled={actionLoading === c.id}
                         onClick={() => handleApprove(c.id)}
-                      >Approve</button>
+                      >{t('approve')}</button>
                       <button
                         className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 disabled:opacity-50"
                         disabled={actionLoading === c.id}
                         onClick={() => handleReject(c.id)}
-                      >Reject</button>
+                      >{t('reject')}</button>
                     </td>
                   </tr>
                 ))}

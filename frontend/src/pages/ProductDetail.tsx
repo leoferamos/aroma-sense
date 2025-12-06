@@ -12,8 +12,10 @@ import { useCart } from '../hooks/useCart';
 import { formatCurrency } from '../utils/format';
 import { cn } from '../utils/cn';
 import { PLACEHOLDER_IMAGE, LOW_STOCK_THRESHOLD } from '../constants/app';
+import { useTranslation } from 'react-i18next';
 
 const ProductDetail: React.FC = () => {
+  const { t } = useTranslation('common');
   const { id } = useParams<{ id: string }>();
   const productId = parseInt(id || '0', 10);
   const { product, loading, error } = useProductDetail(productId);
@@ -47,7 +49,7 @@ const ProductDetail: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <LoadingSpinner message="Loading product..." />
+          <LoadingSpinner message={t('common.loading')} />
         </main>
       </div>
     );
@@ -58,7 +60,7 @@ const ProductDetail: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <ErrorState message={error || 'Product not found.'} />
+          <ErrorState message={error || t('error.somethingWrong')} />
         </main>
       </div>
     );
@@ -98,29 +100,29 @@ const ProductDetail: React.FC = () => {
               {/* Stock Status */}
               <div className="mb-4">
                 {isOutOfStock ? (
-                  <p className="text-red-600 font-medium">Out of stock</p>
+                  <p className="text-red-600 font-medium">{t('products.outOfStock')}</p>
                 ) : isLowStock ? (
-                  <p className="text-orange-600 font-medium">Only {product.stock_quantity} left</p>
+                  <p className="text-orange-600 font-medium">{t('products.lowStock', { quantity: product.stock_quantity })}</p>
                 ) : (
-                  <p className="text-green-600 font-medium">In stock</p>
+                  <p className="text-green-600 font-medium">{t('products.inStock')}</p>
                 )}
               </div>
 
               {/* Description */}
               {product.description && (
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Description</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('products.description')}</h2>
                   <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
                 </div>
               )}
 
               {/* Product Details */}
               <div className="mb-6 space-y-2">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Product Details</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('products.productDetails')}</h2>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="text-gray-600">Weight</div>
+                  <div className="text-gray-600">{t('products.weight')}</div>
                   <div className="text-gray-900 font-medium">{product.weight} ml</div>
-                  <div className="text-gray-600">Category</div>
+                  <div className="text-gray-600">{t('products.category')}</div>
                   <div className="text-gray-900 font-medium">{product.category}</div>
                 </div>
               </div>
@@ -138,7 +140,7 @@ const ProductDetail: React.FC = () => {
                       : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md'
                   )}
                 >
-                  {addingToCart ? 'Adding...' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                  {addingToCart ? t('products.adding') : isOutOfStock ? t('products.outOfStock') : t('products.addToCart')}
                 </button>
                 <button
                   disabled={isOutOfStock}
@@ -150,7 +152,7 @@ const ProductDetail: React.FC = () => {
                       : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-50'
                   )}
                 >
-                  Buy Now
+                  {t('products.buyNow')}
                 </button>
               </div>
             </div>
@@ -166,7 +168,7 @@ const ProductDetail: React.FC = () => {
         {/* Related Products */}
         {related.length > 0 && (
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('products.relatedProducts')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
               {related.map((relatedProduct) => (
                 <ProductCard

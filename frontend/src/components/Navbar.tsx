@@ -7,6 +7,8 @@ import { MAX_CART_BADGE_COUNT, LOGO_PATH } from '../constants/app';
 import CartItem from './CartItem';
 import UserMenu from './UserMenu';
 import SearchBar from './SearchBar';
+import LanguageSelector from './LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 const Navbar: React.FC = () => {
   const { itemCount, cart, removeItem, isRemovingItem } = useCart();
@@ -18,6 +20,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [navQuery, setNavQuery] = useState<string>("");
+  const { t } = useTranslation('common');
 
   // Debounced URL navigation for live search (2+ chars). Empty clears query.
   const debounceRef = useRef<number | null>(null);
@@ -75,7 +78,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16 gap-4">
           {/* Logo */}
           <Link to="/products" className="flex items-center flex-shrink-0">
-            <img src={LOGO_PATH} alt="Aroma Sense" className="h-10 w-auto" />
+            <img src={LOGO_PATH} alt={t('navbar.logoAlt')} className="h-10 w-auto" />
           </Link>
 
           {/* Search (center) */}
@@ -106,7 +109,7 @@ const Navbar: React.FC = () => {
             {!isAccountBlocked && (
               <button
                 type="button"
-                aria-label="Open cart"
+                aria-label={t('navbar.openCart')}
                 className="relative p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 transition-all duration-200 rounded-lg"
                 onClick={() => {
                   setOpen((v) => !v);
@@ -139,7 +142,7 @@ const Navbar: React.FC = () => {
             {open && (
               <div className="absolute right-0 top-12 w-96 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="p-4 border-b border-gray-100">
-                  <h3 className="text-sm font-semibold text-gray-900">Shopping Cart</h3>
+                  <h3 className="text-sm font-semibold text-gray-900">{t('cart.title')}</h3>
                 </div>
                 <div className="max-h-80 overflow-auto divide-y divide-gray-100">
                   {cart && cart.items.length > 0 ? (
@@ -154,12 +157,12 @@ const Navbar: React.FC = () => {
                       />
                     ))
                   ) : (
-                    <div className="p-6 text-center text-gray-500 text-sm">Your cart is empty</div>
+                    <div className="p-6 text-center text-gray-500 text-sm">{t('cart.empty')}</div>
                   )}
                 </div>
                 <div className="p-4 border-t border-gray-100">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-600">Subtotal</span>
+                    <span className="text-sm text-gray-600">{t('cart.subtotal')}</span>
                     <span className="text-base font-semibold text-gray-900">
                       {formatCurrency(cart?.total || 0)}
                     </span>
@@ -169,7 +172,7 @@ const Navbar: React.FC = () => {
                     onClick={() => { setOpen(false); navigate('/checkout'); }}
                     className="w-full py-2.5 px-4 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200"
                   >
-                    Go to Checkout
+                    {t('cart.goToCheckout')}
                   </button>
                 </div>
               </div>
@@ -178,7 +181,7 @@ const Navbar: React.FC = () => {
             {/* Hamburger Menu*/}
             <button
               type="button"
-              aria-label="Open menu"
+              aria-label={t('navbar.openMenu')}
               className="p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 transition-all duration-200 rounded-lg"
               onClick={() => {
                 setUserMenuOpen((v) => !v);
@@ -200,6 +203,9 @@ const Navbar: React.FC = () => {
                 />
               </svg>
             </button>
+
+            {/* Language Selector */}
+            <LanguageSelector />
 
             <UserMenu
               open={userMenuOpen}

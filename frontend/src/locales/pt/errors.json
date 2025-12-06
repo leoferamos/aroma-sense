@@ -1,0 +1,23 @@
+{
+  "generic": "Ocorreu um erro inesperado. Tente novamente.",
+  "network": "Erro de rede. Verifique sua conexão e tente novamente.",
+  "unauthorized": "Você não está autorizado a realizar esta ação.",
+  "forbidden": "Acesso negado.",
+  "notFound": "O recurso solicitado não foi encontrado.",
+  "validation": "Verifique seus dados e tente novamente.",
+  "server": "Erro do servidor. Tente novamente mais tarde.",
+  "tryAgain": "Tentar Novamente",
+  "goToProducts": "Ir para Produtos",
+  "somethingWrong": "Algo deu errado.",
+  "refreshOrTryLater": "Atualize a página ou tente novamente mais tarde.",
+  "accountDeactivated": "Sua conta foi desativada.",
+  "deletionRequested": "Conta em período de carência. Você pode cancelar a solicitação.",
+  "deletionConfirmed": "Exclusão confirmada — retenção de dados em andamento.",
+  "invalidCredentials": "E-mail ou senha inválidos",
+  "emailAlreadyExists": "Este e-mail já está cadastrado",
+  "weakPassword": "A senha deve ter pelo menos 8 caracteres com números e símbolos",
+  "productNotFound": "Produto não encontrado",
+  "cartEmpty": "Seu carrinho está vazio",
+  "insufficientStock": "Estoque insuficiente para este produto",
+  "paymentFailed": "Pagamento falhou. Tente novamente."
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Terms of Service",
+  "lastUpdate": "Last updated: November 30, 2025",
+  "heading": "Terms of Use — Aroma Sense",
+  "welcome": "Welcome to Aroma Sense! These Terms of Use (\"Terms\") govern access to and use of the Aroma Sense website and platform, owned and operated by Julio Oliveira and Leonardo Ramos (\"we\", \"our team\" or \"Aroma Sense\").",
+  "agreement": "By accessing or using the website, you fully agree to these Terms. If you do not agree, we recommend that you do not use the service.",
+  "section1": {
+    "title": "1. Platform Purpose",
+    "content": "Aroma Sense is an e-commerce platform specialized in perfumes, offering users the ability to explore, review and purchase products directly through the website, with payment via Pix or credit card. The platform also offers a personalized recommendation system with artificial intelligence, suggesting perfumes according to user preferences."
+  },
+  "section2": {
+    "title": "2. User Registration and Account",
+    "content": "To make purchases and use all platform features, users must create an account by providing a valid email and password. The user is responsible for:",
+    "responsibilities": [
+      "Maintaining the confidentiality of their credentials;",
+      "Providing true and updated information;",
+      "Notifying Aroma Sense if they suspect unauthorized use of their account."
+    ],
+    "liability": "Aroma Sense is not responsible for unauthorized access resulting from negligence in protecting credentials."
+  },
+  "section3": {
+    "title": "3. Platform Features",
+    "intro": "The user can:",
+    "features": [
+      "Browse and view available products;",
+      "Make purchases with payment via Pix or card;",
+      "Rate products and leave comments;",
+      "Receive personalized recommendations through AI;",
+      "Track the status of their purchases and deliveries."
+    ],
+    "modifications": "Aroma Sense reserves the right to modify, suspend or terminate any functionality at any time, with prior notice when applicable."
+  },
+  "section4": {
+    "title": "4. Purchases, Payments and Deliveries",
+    "content": "Purchases made on Aroma Sense are subject to stock availability. Product shipping is done within 30 (thirty) business days from payment confirmation. Accepted payment methods are Pix and credit card, processed securely by our payment partners.",
+    "notification": "Users will receive information about order progress by email."
+  },
+  "section5": {
+    "title": "5. Returns and Refunds",
+    "content": "In accordance with the Consumer Protection Code, users may request product return or refund within 7 (seven) days after receipt, provided the product is sealed and in perfect condition. The return procedure will be informed by the support team via email",
+    "email": "suporte.aromasene@gmail.com"
+  },
+  "section6": {
+    "title": "6. Intellectual Property",
+    "content": "All Aroma Sense content — including texts, images, descriptions, logos, trademarks and platform design — is protected by copyright and may not be copied, reproduced, modified or distributed without prior express authorization. Misuse of any material made available on the website is prohibited."
+  },
+  "section7": {
+    "title": "7. Limitation of Liability",
+    "content": "Aroma Sense strives to keep the website secure, stable and updated, but does not guarantee that operation will be uninterrupted or error-free.",
+    "acknowledgment": "The user acknowledges that:",
+    "points": [
+      "AI recommendations are informative in nature and do not replace professional opinion;",
+      "Aroma Sense is not responsible for possible system failures, temporary unavailability or data loss;",
+      "Website use is done under the user's total responsibility."
+    ]
+  },
+  "section8": {
+    "title": "8. Cookies and Tracking Technologies",
+    "content": "Aroma Sense uses cookies to improve browsing experience, store preferences and collect anonymous access data. By using the website, the user agrees to the use of cookies as described in our Privacy Policy."
+  },
+  "section9": {
+    "title": "9. Account Suspension or Termination",
+    "content": "Aroma Sense may temporarily suspend or permanently delete user accounts in the following situations:",
+    "situations": [
+      "Violation of Terms of Use: Misuse of the platform, spam, offensive or discriminatory content;",
+      "Fraud or Attempted Fraud: Use of false data, attempts to circumvent payments or compromise transactions;",
+      "Inappropriate Content: Publication of abusive, discriminatory, illegal comments or that violate third-party rights;",
+      "Security Compromise: Hacking attempts, vulnerability exploitation or use of automated tools without authorization;",
+      "Prolonged Inactivity: Abandoned accounts without use for more than 2 years;",
+      "Judicial Request: Compliance with legal orders, court decisions or requests from competent authorities."
+    ],
+    "process": "Deactivation Process:",
+    "processSteps": [
+      "Prior email notification with detailed justification of the measure;",
+      "7-day period for contestation and defense presentation;",
+      "Analysis of contestation by support team within 5 business days;",
+      "Possibility of appeal against the decision with support (suporte.aromasense@gmail.com);",
+      "In cases of serious violation or imminent risk, immediate deactivation may occur without prior notification."
+    ],
+    "consequences": "Consequences:",
+    "consequencesList": [
+      "Temporary suspension: Access blocked for a determined period, with possibility of reactivation after correction of irregularities;",
+      "Permanent deletion: Definitive removal of account and personal data after 2-year retention period (except data necessary for legal compliance, which will be kept for up to 5 years). The deletion flow follows the deletion request process, 7-day reflection period, automatic system confirmation (if no cancellation) and subsequent data anonymization after the retention period."
+    ],
+    "commitment": "Aroma Sense is committed to acting proportionally, transparently and based on all account deactivation cases."
+  },
+  "section10": {
+    "title": "10. Changes to Terms",
+    "content": "Aroma Sense may change these Terms at any time, by updating this page with a new effective date. Continued use of the platform after changes constitutes acceptance of the new Terms."
+  },
+  "section11": {
+    "title": "11. Contact",
+    "content": "For questions, suggestions or requests, contact us by email:",
+    "email": "suporte.aromasense@gmail.com"
+  },
+  "copyright": "Aroma Sense © 2025 — All rights reserved."
+}

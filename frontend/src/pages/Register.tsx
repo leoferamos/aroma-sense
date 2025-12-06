@@ -10,8 +10,8 @@ import FormError from '../components/FormError';
 import ErrorState from '../components/ErrorState';
 import WordGrid from '../components/WordGrid';
 import { useRegisterValidation } from '../hooks/useRegisterValidation';
-import { messages } from '../constants/messages';
 import { useRegister } from '../hooks/useRegister';
+import { useTranslation } from 'react-i18next';
 
 const STORAGE_KEY = 'register_form_draft_v1';
 const INITIAL_FORM = {
@@ -62,6 +62,7 @@ const Register: React.FC = () => {
 
   const errors = useRegisterValidation(form, touched);
   const { register, loading, error, success } = useRegister();
+  const { t } = useTranslation('common');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -131,19 +132,19 @@ const Register: React.FC = () => {
         <div className="w-full max-w-md px-4 md:px-8 py-8 md:py-12 rounded-lg shadow-md relative overflow-hidden">
           {showSuccessOverlay && (
             <div className="absolute inset-0 z-20 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center text-center px-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Registration successful!</h3>
-              <p className="text-sm text-gray-600">Redirecting to login...</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('auth.registrationSuccessful')}</h3>
+              <p className="text-sm text-gray-600">{t('auth.redirectingToLogin')}</p>
             </div>
           )}
           <div className="flex flex-col items-center mb-8">
             <img src="/logo.png" alt="Logo" className="h-16 md:h-20 mb-4" />
             <h2 className="text-2xl md:text-3xl font-medium text-center" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              {messages.createAccount}
+              {t('auth.createAccount')}
             </h2>
           </div>
           <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
             <InputField
-              label="Email"
+              label={t('auth.email')}
               type="email"
               name="email"
               value={form.email}
@@ -154,7 +155,7 @@ const Register: React.FC = () => {
             />
             <FormError message={errors.email} />
             <InputField
-              label="Password"
+              label={t('auth.password')}
               type={showPassword ? 'text' : 'password'}
               name="password"
               value={form.password}
@@ -180,9 +181,9 @@ const Register: React.FC = () => {
               onRightIconMouseLeave={() => setShowPassword(false)}
             />
             <FormError message={errors.password} />
-            <span className="text-xs text-gray-500 mt-1">{messages.passwordHelper}</span>
+            <span className="text-xs text-gray-500 mt-1">{t('auth.passwordHelper')}</span>
             <InputField
-              label="Repeat Password"
+              label={t('auth.repeatPassword')}
               type={showRepeatPassword ? 'text' : 'password'}
               name="repeatPassword"
               value={form.repeatPassword}
@@ -219,11 +220,11 @@ const Register: React.FC = () => {
                 className="mt-1 w-4 h-4"
               />
               <label htmlFor="agreeTerms" className="text-sm text-gray-700">
-                I agree to the{' '}
-                <Link to="/terms" className="underline text-blue-600">Terms of Service</Link>
+                {t('auth.agreeTerms')}{' '}
+                <Link to="/terms" className="underline text-blue-600">{t('auth.termsOfService')}</Link>
               </label>
             </div>
-            <FormError message={touchedAgree && !agreeTerms ? 'You must agree to the terms of service.' : ''} />
+            <FormError message={touchedAgree && !agreeTerms ? t('auth.agreeTermsError') : ''} />
 
             <div className="flex items-start gap-3">
               <input
@@ -235,11 +236,11 @@ const Register: React.FC = () => {
                 className="mt-1 w-4 h-4"
               />
               <label htmlFor="agreePrivacy" className="text-sm text-gray-700">
-                I agree to the{' '}
-                <Link to="/privacy" className="underline text-blue-600">Privacy Policy</Link>
+                {t('auth.agreePrivacy')}{' '}
+                <Link to="/privacy" className="underline text-blue-600">{t('auth.privacyPolicy')}</Link>
               </label>
             </div>
-            <FormError message={touchedPrivacy && !agreePrivacy ? 'You must agree to the privacy policy.' : ''} />
+            <FormError message={touchedPrivacy && !agreePrivacy ? t('auth.agreePrivacyError') : ''} />
             {errors.general || error ? <ErrorState message={errors.general || error} /> : null}
             {success && <span className="text-green-600 text-sm mt-2">{success}</span>}
             <button
@@ -250,11 +251,11 @@ const Register: React.FC = () => {
                 }`}
               disabled={loading || !form.email || !form.password || !form.repeatPassword || !agreeTerms || !agreePrivacy}
             >
-              {loading ? 'Registering...' : messages.createAccount}
+              {loading ? t('auth.registering') : t('auth.createAccount')}
             </button>
           </form>
           <div className="mt-6 text-gray-700 text-base text-center">
-            {messages.alreadyHaveAccount} <Link to="/login" className="underline">{messages.login}</Link>
+            {t('auth.alreadyHaveAccount')} <Link to="/login" className="underline">{t('auth.login')}</Link>
           </div>
         </div>
       </div>

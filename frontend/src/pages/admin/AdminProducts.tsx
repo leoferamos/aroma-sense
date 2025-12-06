@@ -8,11 +8,13 @@ import type { Product } from '../../types/product';
 import ConfirmModal from '../../components/ConfirmModal';
 import { deleteProduct } from '../../services/product';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { useTranslation } from 'react-i18next';
 
 
 const AdminProducts: React.FC = () => {
   const { products, loading, error, refetch } = useProducts();
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
   const [deleting, setDeleting] = React.useState(false);
@@ -36,14 +38,14 @@ const AdminProducts: React.FC = () => {
     setDeleteError(null);
     try {
       await deleteProduct(selectedProduct.id);
-      setSuccessMsg('Product deleted successfully.');
+      setSuccessMsg(t('productDeletedSuccessfully'));
       setFadeOut(false);
       setModalOpen(false);
       setSelectedProduct(null);
       await refetch();
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string } }; message?: string };
-      setDeleteError(e?.response?.data?.error || e?.message || 'Failed to delete product.');
+      setDeleteError(e?.response?.data?.error || e?.message || t('failedToDeleteProduct'));
     } finally {
       setDeleting(false);
     }
@@ -72,21 +74,21 @@ const AdminProducts: React.FC = () => {
         to="/admin/dashboard"
         className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
       >
-        ← Dashboard
+        ← {t('nav.dashboard')}
       </Link>
       <Link
         to="/admin/products/new"
         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
       >
-        + Add New Product
+        + {t('addProduct')}
       </Link>
     </div>
   );
 
   return (
-    <AdminLayout title="Products" actions={actions}>
+    <AdminLayout actions={actions}>
       {/* Loading State */}
-      {loading && <LoadingSpinner message="Loading products..." />}
+      {loading && <LoadingSpinner message={t('loadingProducts')} />}
 
       {/* Error State */}
       {error && (
@@ -107,7 +109,7 @@ const AdminProducts: React.FC = () => {
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700 text-center font-medium">
           {deleteError}
           <button className="ml-4 text-red-800 underline" onClick={() => setDeleteError(null)}>
-            Dismiss
+            {t('dismiss')}
           </button>
         </div>
       )}
@@ -130,18 +132,17 @@ const AdminProducts: React.FC = () => {
                 />
               </svg>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No products yet
+                {t('noProductsYet')}
               </h3>
               <p className="text-gray-500">
-                Click "Add New Product" to create your first item.
+                {t('clickAddNewProduct')}
               </p>
             </div>
           ) : (
             <>
               <div className="mb-4">
                 <p className="text-gray-600">
-                  Showing <span className="font-semibold">{products.length}</span>{' '}
-                  {products.length === 1 ? 'product' : 'products'}
+                  {t('showingProducts', { count: products.length })}
                 </p>
               </div>
 
@@ -163,10 +164,10 @@ const AdminProducts: React.FC = () => {
       {/* Confirm Delete Modal */}
       <ConfirmModal
         open={modalOpen}
-        title="Delete Product"
-        description={selectedProduct ? `Are you sure you want to delete "${selectedProduct.name}"? This action cannot be undone.` : ''}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('deleteProduct')}
+        description={selectedProduct ? t('confirmDeleteProduct', { name: selectedProduct.name }) : ''}
+        confirmText={t('delete')}
+        cancelText={t('cancel')}
         onConfirm={handleConfirmDelete}
         onCancel={handleCloseModal}
         loading={deleting}

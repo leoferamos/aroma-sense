@@ -1,0 +1,23 @@
+{
+  "generic": "An unexpected error occurred. Please try again.",
+  "network": "Network error. Please check your connection and try again.",
+  "unauthorized": "You are not authorized to perform this action.",
+  "forbidden": "Access denied.",
+  "notFound": "The requested resource was not found.",
+  "validation": "Please check your input and try again.",
+  "server": "Server error. Please try again later.",
+  "tryAgain": "Try Again",
+  "goToProducts": "Go to Products",
+  "somethingWrong": "Something went wrong.",
+  "refreshOrTryLater": "Please refresh the page or try again later.",
+  "accountDeactivated": "Your account has been deactivated.",
+  "deletionRequested": "Account in cooling-off period. You can cancel the request.",
+  "deletionConfirmed": "Deletion confirmed — data retention in progress.",
+  "invalidCredentials": "Invalid email or password",
+  "emailAlreadyExists": "This email is already registered",
+  "weakPassword": "Password must be at least 8 characters with numbers and symbols",
+  "productNotFound": "Product not found",
+  "cartEmpty": "Your cart is empty",
+  "insufficientStock": "Insufficient stock for this product",
+  "paymentFailed": "Payment failed. Please try again."
+}

@@ -5,9 +5,11 @@ import type { CartResponse } from '../types/cart';
 import { addToCart as svcAddToCart, getCart as svcGetCart, removeItem as svcRemoveItem, updateItemQuantity as svcUpdateItemQuantity } from '../services/cart';
 import { getAccessToken } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isReady } = useAuth();
+  const { t } = useTranslation('common');
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,11 +28,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(data);
     } catch (err: unknown) {
       if (isAxiosError(err)) {
-        setError(err.response?.data?.error || 'Failed to load cart');
+        setError(err.response?.data?.error || t('errors.failedToLoadCart'));
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Failed to load cart');
+        setError(t('errors.failedToLoadCart'));
       }
     } finally {
       setLoading(false);
@@ -45,11 +47,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(data);
     } catch (err: unknown) {
       if (isAxiosError(err)) {
-        setError(err.response?.data?.error || 'Failed to add to cart');
+        setError(err.response?.data?.error || t('errors.failedToAddToCart'));
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Failed to add to cart');
+        setError(t('errors.failedToAddToCart'));
       }
     } finally {
       setLoading(false);
@@ -64,11 +66,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(data);
     } catch (err: unknown) {
       if (isAxiosError(err)) {
-        setError(err.response?.data?.error || 'Failed to remove item');
+        setError(err.response?.data?.error || t('errors.failedToRemoveItem'));
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Failed to remove item');
+        setError(t('errors.failedToRemoveItem'));
       }
     } finally {
       setRemovingItemIds(prev => {
@@ -88,14 +90,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null); // Clear error on success
     } catch (err: unknown) {
       if (isAxiosError(err)) {
-        const errorMsg = err.response?.data?.error || 'Failed to update quantity';
+        const errorMsg = err.response?.data?.error || t('errors.failedToUpdateQuantity');
         setError(errorMsg);
         throw new Error(errorMsg);
       } else if (err instanceof Error) {
         setError(err.message);
         throw err;
       } else {
-        const errorMsg = 'Failed to update quantity';
+        const errorMsg = t('errors.failedToUpdateQuantity');
         setError(errorMsg);
         throw new Error(errorMsg);
       }

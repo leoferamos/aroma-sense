@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AdminOrder } from '../../services/admin';
 import { formatCurrency } from '../../utils/format';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   orders: AdminOrder[];
@@ -9,6 +10,7 @@ type Props = {
 
 const OrdersTable: React.FC<Props> = ({ orders }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
 
   const onRowKeyDown = (e: React.KeyboardEvent, id: string | number) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -21,10 +23,10 @@ const OrdersTable: React.FC<Props> = ({ orders }) => {
     <table className="min-w-full bg-white border" role="table">
       <thead>
         <tr>
-          <th className="px-4 py-2 border text-left">Order ID</th>
-          <th className="px-4 py-2 border text-right">Total</th>
-          <th className="px-4 py-2 border text-left">Status</th>
-          <th className="px-4 py-2 border text-left">Date</th>
+          <th className="px-4 py-2 border text-left">{t('orderId')}</th>
+          <th className="px-4 py-2 border text-right">{t('total')}</th>
+          <th className="px-4 py-2 border text-left">{t('status')}</th>
+          <th className="px-4 py-2 border text-left">{t('date')}</th>
         </tr>
       </thead>
       <tbody>
@@ -40,7 +42,7 @@ const OrdersTable: React.FC<Props> = ({ orders }) => {
           >
             <td className="px-4 py-2 border">{o.id}</td>
             <td className="px-4 py-2 border text-right">{formatCurrency(o.total_amount ?? 0)}</td>
-            <td className="px-4 py-2 border">{o.status}</td>
+            <td className="px-4 py-2 border">{o.status || 'Unknown'}</td>
             <td className="px-4 py-2 border">{o.created_at ? new Date(o.created_at).toLocaleString() : '-'}</td>
           </tr>
         ))}

@@ -5,6 +5,7 @@ import { PLACEHOLDER_IMAGE } from '../constants/app';
 import { cn } from '../utils/cn';
 import type { CartItem as CartItemType } from '../types/cart';
 import { useCartItemQuantity } from '../hooks/useCartItemQuantity';
+import { useTranslation } from 'react-i18next';
 
 interface CartItemProps {
   item: CartItemType;
@@ -27,6 +28,7 @@ const CartItem: React.FC<CartItemProps> = ({
     itemId: item.id,
     initialQuantity: item.quantity,
   });
+  const { t } = useTranslation('common');
 
   const imageSize = compact ? 'h-12 w-12' : 'h-16 w-16';
   const textSize = compact ? 'text-xs' : 'text-sm';
@@ -49,7 +51,7 @@ const CartItem: React.FC<CartItemProps> = ({
       <div className="flex gap-3 items-center">
       <img
         src={item.product?.image_url || PLACEHOLDER_IMAGE}
-        alt={item.product?.name || 'Product image'}
+        alt={t('cart.productImage')}
         className={cn(imageSize, 'object-contain bg-gray-50 rounded border border-gray-200 p-1')}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE;
@@ -58,7 +60,7 @@ const CartItem: React.FC<CartItemProps> = ({
       
       <div className="flex-1 min-w-0">
         <p className={cn(textSize, 'font-medium text-gray-900 truncate')}>
-          {item.product?.name || 'Product'}
+          {item.product?.name || t('cart.product')}
         </p>
         
         {showQuantityControls ? (
@@ -71,7 +73,7 @@ const CartItem: React.FC<CartItemProps> = ({
                 quantityButtonBase,
                 isMinQuantity ? quantityButtonDisabled : quantityButtonActive
               )}
-              aria-label="Decrease quantity"
+              aria-label={t('cart.decreaseQuantity')}
             >
               −
             </button>
@@ -84,14 +86,14 @@ const CartItem: React.FC<CartItemProps> = ({
               type="button"
               onClick={increment}
               className={cn(quantityButtonBase, quantityButtonActive)}
-              aria-label="Increase quantity"
+              aria-label={t('cart.increaseQuantity')}
             >
               +
             </button>
           </div>
         ) : (
           <p className={cn(textSize, 'text-gray-600')}>
-            Qty: {quantity}
+            {t('cart.qty')}: {quantity}
           </p>
         )}
       </div>
@@ -106,8 +108,8 @@ const CartItem: React.FC<CartItemProps> = ({
             type="button"
             onClick={() => onRemove(item.id)}
             disabled={isRemoving}
-            title="Remove item"
-            aria-label={`Remove ${item.product?.name || 'item'}`}
+            title={t('cart.removeItem')}
+            aria-label={t('cart.removeItemName', { name: item.product?.name || t('cart.product') })}
             className={cn(
               'inline-flex items-center justify-center rounded-md border p-2 transition-colors',
               isRemoving 

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../LanguageSelector';
 
 type NavItem = {
   label: string;
@@ -8,26 +10,35 @@ type NavItem = {
 };
 
 type Props = {
-  title?: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
   navItems?: NavItem[];
 };
 
-const defaultNav: NavItem[] = [
-  { label: 'Dashboard', to: '/admin/dashboard' },
-  { label: 'Products', to: '/admin/products' },
-  { label: 'Orders', to: '/admin/orders' },
-  { label: 'Users', to: '/admin/users' },
-  { label: 'Audit Logs', to: '/admin/audit-logs' },
-  { label: 'Contestations', to: '/admin/contestations' },
-];
-
-const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) => {
-  const items = navItems ?? defaultNav;
+const AdminLayout: React.FC<Props> = ({ children, actions, navItems }) => {
+  const { t } = useTranslation('admin');
   const location = useLocation();
+  const items = navItems ?? [
+    { label: t('nav.dashboard'), to: '/admin/dashboard' },
+    { label: t('nav.products'), to: '/admin/products' },
+    { label: t('nav.orders'), to: '/admin/orders' },
+    { label: t('nav.users'), to: '/admin/users' },
+    { label: t('nav.auditLogs'), to: '/admin/audit-logs' },
+    { label: t('nav.contestations'), to: '/admin/contestations' },
+  ];
   const pathname = location.pathname;
   const [isAnimating, setIsAnimating] = React.useState(false);
+
+  // Determine page title based on current route
+  const getPageTitle = () => {
+    if (pathname.startsWith('/admin/products')) return t('nav.products');
+    if (pathname.startsWith('/admin/orders')) return t('nav.orders');
+    if (pathname.startsWith('/admin/users')) return t('nav.users');
+    if (pathname.startsWith('/admin/audit-logs')) return t('nav.auditLogs');
+    if (pathname.startsWith('/admin/contestations')) return t('nav.contestations');
+    if (pathname.startsWith('/admin/dashboard')) return t('nav.dashboard');
+    return t('title'); // fallback to "Admin"
+  };
 
   React.useEffect(() => {
     // Respect users who prefer reduced motion
@@ -60,7 +71,7 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
               <Link to="/admin/dashboard" className="flex items-center gap-3">
                 <img src="/logo.png" alt="Aroma Sense" className="h-8" />
-                <span className="text-lg font-semibold text-gray-900">{title ?? 'Admin'}</span>
+                <span className="text-lg font-semibold text-gray-900">{getPageTitle()}</span>
               </Link>
 
               <nav aria-label="Admin navigation" className="hidden md:flex items-center gap-2">
@@ -85,6 +96,8 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
             <div className="flex items-center gap-3">
               <div className="hidden md:block">{actions}</div>
 
+              <LanguageSelector />
+
               <div className="relative">
                 <button
                   onClick={toggleUserMenu}
@@ -99,8 +112,8 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20">
-                    <Link to="/admin/profile" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile</Link>
-                    <button onClick={logout} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Logout</button>
+                    <Link to="/admin/profile" className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{t('nav.profile')}</Link>
+                    <button onClick={logout} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">{t('nav.logout')}</button>
                   </div>
                 )}
               </div>
@@ -132,8 +145,8 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
                 {actions}
               </div>
               <div className="mt-2 border-t pt-2">
-                <Link to="/admin/profile" className="block py-2 text-sm text-gray-700">Profile</Link>
-                <button onClick={logout} className="w-full text-left py-2 text-sm text-gray-700">Logout</button>
+                <Link to="/admin/profile" className="block py-2 text-sm text-gray-700">{t('nav.profile')}</Link>
+                <button onClick={logout} className="w-full text-left py-2 text-sm text-gray-700">{t('nav.logout')}</button>
               </div>
             </div>
           </div>
@@ -142,7 +155,7 @@ const AdminLayout: React.FC<Props> = ({ title, children, actions, navItems }) =>
 
       <main role="main" className="max-w-7xl mx-auto p-4">
         <div
-          className={`transition-transform transition-opacity duration-200 ease-out ${isAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'}`}
+          className={`transition-all duration-200 ease-out ${isAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'}`}
         >
           {children}
         </div>

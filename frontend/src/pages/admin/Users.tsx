@@ -4,6 +4,7 @@ import { getAdminUsers } from '../../services/admin';
 import type { AdminUser } from '../../services/admin';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
+import { useTranslation } from 'react-i18next';
 
 const Roles = ['admin', 'client'];
 const Statuses = ['active', 'deactivated', 'deleted'];
@@ -19,6 +20,7 @@ const UsersPage: React.FC = () => {
   const [status, setStatus] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation('admin');
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -43,24 +45,24 @@ const UsersPage: React.FC = () => {
   
 
   return (
-    <AdminLayout title="Users" actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← Dashboard</Link></div>}>
+    <AdminLayout actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('nav.dashboard')}</Link></div>}>
       <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-4">Users</h1>
+        <h1 className="text-2xl font-semibold mb-4">{t('users')}</h1>
 
       <div className="mb-4 flex gap-3 items-center">
-        <label className="text-sm">Role:</label>
+        <label className="text-sm">{t('role')}:</label>
         <select value={role} onChange={(e) => { setOffset(0); setRole(e.target.value); }} className="border px-2 py-1 rounded">
-          <option value="">All</option>
+          <option value="">{t('all')}</option>
           {Roles.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
 
-        <label className="text-sm">Status:</label>
+        <label className="text-sm">{t('status')}:</label>
         <select value={status} onChange={(e) => { setOffset(0); setStatus(e.target.value); }} className="border px-2 py-1 rounded">
-          <option value="">All</option>
+          <option value="">{t('all')}</option>
           {Statuses.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
 
-        <label className="text-sm">Per page:</label>
+        <label className="text-sm">{t('perPage')}:</label>
         <select value={limit} onChange={(e) => { setOffset(0); setLimit(Number(e.target.value)); }} className="border px-2 py-1 rounded">
           {[5,10,20,50].map(n => <option key={n} value={n}>{n}</option>)}
         </select>
@@ -72,20 +74,20 @@ const UsersPage: React.FC = () => {
         <table className="min-w-full text-left text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2">ID</th>
-              <th className="px-4 py-2">Public ID</th>
-              <th className="px-4 py-2">Display</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Role</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2">Created</th>
+              <th className="px-4 py-2">{t('id')}</th>
+              <th className="px-4 py-2">{t('publicId')}</th>
+              <th className="px-4 py-2">{t('display')}</th>
+              <th className="px-4 py-2">{t('email')}</th>
+              <th className="px-4 py-2">{t('role')}</th>
+              <th className="px-4 py-2">{t('status')}</th>
+              <th className="px-4 py-2">{t('created')}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="px-4 py-4">Loading...</td></tr>
+              <tr><td colSpan={7} className="px-4 py-4">{t('loadingUsers')}</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-4">No users found</td></tr>
+              <tr><td colSpan={7} className="px-4 py-4">{t('noUsersFound')}</td></tr>
             ) : users.map(u => (
               <tr key={u.id} className="border-t">
                 <td className="px-4 py-2">{u.id}</td>
@@ -102,7 +104,7 @@ const UsersPage: React.FC = () => {
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <div className="text-sm text-gray-600">Showing {Math.min(total, offset + 1)} - {Math.min(total, offset + limit)} of {total}</div>
+        <div className="text-sm text-gray-600">{t('showingRange', { from: Math.min(total, offset + 1), to: Math.min(total, offset + limit), total })}</div>
         <PaginationControls
           page={currentPage}
           totalPages={totalPages}

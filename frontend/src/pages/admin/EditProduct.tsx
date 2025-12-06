@@ -9,10 +9,12 @@ import { getProductById } from "../../services/product";
 import type { CreateProductFormData, Product } from "../../types/product";
 import type { ProductFormTouched } from "../../hooks/useProductFormValidation";
 import AdminLayout from '../../components/admin/AdminLayout';
+import { useTranslation } from 'react-i18next';
 const EditProduct: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const productId = parseInt(id || "0", 10);
+  const { t } = useTranslation('common');
 
   const [loadingProduct, setLoadingProduct] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -94,7 +96,7 @@ const EditProduct: React.FC = () => {
         });
       } catch (err: unknown) {
         const e = err as { response?: { data?: { error?: string } }; message?: string };
-        setLoadError(e?.response?.data?.error || e?.message || "Failed to load product.");
+        setLoadError(e?.response?.data?.error || e?.message || t('errors.failedToLoadProduct'));
       } finally {
         setLoadingProduct(false);
       }
@@ -145,7 +147,7 @@ const EditProduct: React.FC = () => {
 
   if (loadingProduct) {
     return (
-      <AdminLayout title="Edit Product">
+      <AdminLayout>
         <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <LoadingSpinner message="Loading product..." />
         </div>
@@ -155,7 +157,7 @@ const EditProduct: React.FC = () => {
 
   if (loadError || !product) {
     return (
-      <AdminLayout title="Edit Product">
+      <AdminLayout>
         <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <ErrorState
             message={loadError || "Product not found."}
@@ -176,7 +178,7 @@ const EditProduct: React.FC = () => {
   );
 
   return (
-    <AdminLayout title="Edit Product" actions={actions}>
+    <AdminLayout actions={actions}>
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
           <div className="mb-6">
