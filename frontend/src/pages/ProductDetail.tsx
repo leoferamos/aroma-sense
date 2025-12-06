@@ -29,15 +29,15 @@ const ProductDetail: React.FC = () => {
   );
 
   const related = useMemo(
-    () => relatedProducts.filter((p) => p.id !== product?.id).slice(0, 4),
-    [relatedProducts, product?.id]
+    () => relatedProducts.filter((p) => p.slug !== product?.slug).slice(0, 4),
+    [relatedProducts, product?.slug]
   );
 
   const handleAddToCart = async () => {
     if (!product || isOutOfStock) return;
     setAddingToCart(true);
     try {
-      await addItem(product.id, 1);
+      await addItem(product.slug, 1);
     } finally {
       setAddingToCart(false);
     }
@@ -173,9 +173,9 @@ const ProductDetail: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
               {related.map((relatedProduct) => (
                 <ProductCard
-                  key={relatedProduct.id}
+                  key={relatedProduct.slug}
                   product={relatedProduct}
-                  onAddToCart={() => addItem(relatedProduct.id, 1)}
+                  onAddToCart={() => addItem(relatedProduct.slug, 1)}
                 />
               ))}
             </div>

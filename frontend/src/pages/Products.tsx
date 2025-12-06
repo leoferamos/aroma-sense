@@ -141,7 +141,7 @@ const Products: React.FC = () => {
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                           {safeSuggestions.map((p) => (
-                            <ProductCard key={p.id} product={p} showAddToCart={false} />
+                            <ProductCard key={p.slug} product={p} showAddToCart={false} />
                           ))}
                         </div>
                       )}
@@ -158,7 +158,7 @@ const Products: React.FC = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                   {safeResults.map((product) => (
-                    <ProductCard key={product.id} product={product} showAddToCart={false} />
+                    <ProductCard key={product.slug} product={product} showAddToCart={false} />
                   ))}
                 </div>
 
