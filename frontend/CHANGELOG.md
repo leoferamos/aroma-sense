@@ -1,3 +1,10 @@
+# [0.12.0](https://github.com/leoferamos/aroma-sense/compare/v0.11.0...v0.12.0) (2025-12-06)
+
+
+### Features
+
+* **frontend:** update forgot password flow ([#89](https://github.com/leoferamos/aroma-sense/issues/89)) ([9edc5e9](https://github.com/leoferamos/aroma-sense/commit/9edc5e914308dc3b681cd43caa2b7d94ad94bcdc))
+
 # [0.11.0](https://github.com/leoferamos/aroma-sense/compare/v0.10.0...v0.11.0) (2025-12-06)
 
 
