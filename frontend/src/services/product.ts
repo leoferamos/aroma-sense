@@ -153,3 +153,21 @@ export async function listProducts(params?: {
     return [];
   }
 }
+
+export async function adminListProducts(params?: {
+  limit?: number;
+  page?: number;
+}): Promise<Product[]> {
+  const { limit = 50, page = 1 } = params || {};
+  const response = await api.get("/admin/products", {
+    params: { limit, page },
+  });
+  
+  // Handle paginated format
+  const data = response.data;
+  if (data && typeof data === 'object' && Array.isArray(data.items)) {
+    return data.items;
+  } else {
+    return [];
+  }
+}
