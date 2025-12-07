@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/leoferamos/aroma-sense/compare/v1.0.0...v1.0.1) (2025-12-07)
+
+
+### Bug Fixes
+
+* code quality improvements and optimizations ([#92](https://github.com/leoferamos/aroma-sense/issues/92)) ([97361b5](https://github.com/leoferamos/aroma-sense/commit/97361b5b2d3aaf6e50167136776bbb2dc8c12c78))
+
 # [1.0.0](https://github.com/leoferamos/aroma-sense/compare/v0.13.0...v1.0.0) (2025-12-07)
 
 
