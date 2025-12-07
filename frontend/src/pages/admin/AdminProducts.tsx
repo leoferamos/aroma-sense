@@ -87,7 +87,8 @@ const AdminProducts: React.FC = () => {
   );
 
   return (
-    <AdminLayout actions={actions}>
+    <>
+      <AdminLayout actions={actions}>
       {/* Loading State */}
       {loading && <LoadingSpinner message={t('loadingProducts')} />}
 
@@ -162,18 +163,21 @@ const AdminProducts: React.FC = () => {
         </>
       )}
 
-      {/* Confirm Delete Modal */}
-      <ConfirmModal
-        open={modalOpen}
-        title={t('deleteProduct')}
-        description={selectedProduct ? t('confirmDeleteProduct', { name: selectedProduct.name }) : ''}
-        confirmText={t('delete')}
-        cancelText={t('cancel')}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCloseModal}
-        loading={deleting}
-      />
     </AdminLayout>
+
+    {/* Confirm Delete Modal */}
+    <ConfirmModal
+      open={modalOpen}
+      title={t('deleteProduct')}
+      description={selectedProduct ? t('confirmDeleteProduct', { name: selectedProduct.name }) : ''}
+      confirmText={t('delete')}
+      cancelText={t('cancel')}
+      onConfirm={handleConfirmDelete}
+      onCancel={handleCloseModal}
+      loading={deleting}
+      error={deleteError}
+    />
+  </>
   );
 };
 
