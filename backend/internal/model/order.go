@@ -25,7 +25,8 @@ const (
 
 // Order represents a customer order.
 type Order struct {
-	ID                        uint          `gorm:"primaryKey" json:"id"`
+	ID                        uint          `gorm:"primaryKey" json:"-"`
+	PublicID                  string        `gorm:"type:uuid;not null;uniqueIndex;default:gen_random_uuid()" json:"public_id"`
 	UserID                    string        `gorm:"size:255;not null;index" json:"user_id"`
 	User                      *User         `gorm:"foreignKey:UserID;references:PublicID" json:"user,omitempty"`
 	TotalAmount               float64       `gorm:"type:decimal(10,2);not null" json:"total_amount"`

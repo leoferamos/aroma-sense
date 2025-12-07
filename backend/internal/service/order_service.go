@@ -138,8 +138,7 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		}
 	}
 	return &dto.OrderResponse{
-		ID:                        order.ID,
-		UserID:                    order.UserID,
+		PublicID:                  order.PublicID,
 		TotalAmount:               order.TotalAmount,
 		Status:                    string(order.Status),
 		ShippingAddress:           order.ShippingAddress,
@@ -167,6 +166,7 @@ func (s *orderService) AdminListOrders(status *string, startDate *time.Time, end
 	for _, o := range orders {
 		items = append(items, dto.AdminOrderItem{
 			ID:          o.ID,
+			PublicID:    o.PublicID,
 			UserID:      o.UserID,
 			TotalAmount: o.TotalAmount,
 			Status:      string(o.Status),
@@ -222,8 +222,7 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 		}
 
 		resp = append(resp, dto.OrderResponse{
-			ID:                        o.ID,
-			UserID:                    o.UserID,
+			PublicID:                  o.PublicID,
 			TotalAmount:               o.TotalAmount,
 			Status:                    string(o.Status),
 			ShippingAddress:           o.ShippingAddress,
