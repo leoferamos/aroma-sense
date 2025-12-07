@@ -140,6 +140,27 @@
     "deletionRequested": "Exclusão da conta solicitada com sucesso",
     "requestDeletionFailed": "Falha ao solicitar exclusão"
   },
+  "changePassword": {
+    "title": "Alterar Senha",
+    "subtitle": "Digite sua senha atual e escolha uma nova",
+    "currentPassword": "Senha Atual",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Nova Senha",
+    "currentPasswordRequired": "Senha atual é obrigatória",
+    "newPasswordRequired": "Nova senha é obrigatória",
+    "confirmNewPassword": "Confirmação da nova senha é obrigatória",
+    "passwordsDoNotMatch": "As senhas não coincidem",
+    "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
+    "passwordUppercase": "A senha deve conter pelo menos uma letra maiúscula",
+    "passwordLowercase": "A senha deve conter pelo menos uma letra minúscula",
+    "passwordNumber": "A senha deve conter pelo menos um número",
+    "passwordHelper": "Deve ter pelo menos 8 caracteres com maiúscula, minúscula e número",
+    "changing": "Alterando...",
+    "changePassword": "Alterar Senha",
+    "successMessage": "Senha alterada com sucesso!",
+    "redirecting": "Redirecionando para o perfil...",
+    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual"
+  },
   "admin": {
     "dashboard": "Painel",
     "users": "Usuários",
@@ -242,7 +263,9 @@
     "currentPasswordRequired": "A senha atual é obrigatória",
     "newPasswordRequired": "A nova senha é obrigatória",
     "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
-    "passwordSymbol": "A senha deve conter pelo menos um símbolo"
+    "passwordSymbol": "A senha deve conter pelo menos um símbolo",
+    "currentPasswordIncorrect": "A senha atual está incorreta",
+    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual"
   },
   "order": {
     "myOrders": "Meus Pedidos",
