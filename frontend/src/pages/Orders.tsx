@@ -6,11 +6,13 @@ import ErrorState from '../components/ErrorState';
 import { getUserOrders } from '../services/order';
 import type { OrderResponse } from '../types/order';
 import OrderDetail from '../components/OrderDetail';
+import { useTranslation } from 'react-i18next';
 
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation('common');
 
   useEffect(() => {
     let mounted = true;
@@ -23,7 +25,7 @@ const OrdersPage: React.FC = () => {
         data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setOrders(data);
       } catch {
-        setError('Failed to load orders');
+        setError(t('errors.failedToLoadOrders'));
       } finally {
         setLoading(false);
       }
