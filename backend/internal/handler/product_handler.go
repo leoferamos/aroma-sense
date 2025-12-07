@@ -114,10 +114,8 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
 		publicID := rawUserID.(string)
 		if userModel, err := h.userService.GetByPublicID(publicID); err == nil {
-			// Get product ID from slug for review check
-			productID, idErr := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
-			if idErr == nil {
-				can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, productID)
+			if product.ID != nil {
+				can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, *product.ID)
 				if can && canErr == nil {
 					trueVal := true
 					product.CanReview = &trueVal
