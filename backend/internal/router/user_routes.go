@@ -24,6 +24,7 @@ func UserRoutes(r *gin.Engine, userHandler *handler.UserHandler, resetHandler *h
 		{
 			authGroup.GET("/me", userHandler.GetProfile)
 			authGroup.PATCH("/me/profile", userHandler.UpdateProfile)
+			authGroup.POST("/change-password", userHandler.ChangePassword)
 			authGroup.POST("/me/deletion", userHandler.RequestAccountDeletion)
 		}
 		// Routes that require authentication but must remain callable while the account is suspended or in cooling-off period.
