@@ -148,10 +148,10 @@ const Navbar: React.FC = () => {
                   {cart && cart.items.length > 0 ? (
                     cart.items.map((item) => (
                       <CartItem
-                        key={item.id}
+                        key={item.product?.slug || ''}
                         item={item}
                         onRemove={removeItem}
-                        isRemoving={isRemovingItem(item.id)}
+                        isRemoving={isRemovingItem(item.product?.slug || '')}
                         compact
                         showQuantityControls
                       />

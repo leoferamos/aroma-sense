@@ -8,9 +8,9 @@ export interface CartContextValue {
   error: string | null;
   refresh: () => Promise<void>;
   addItem: (productSlug: string, quantity?: number) => Promise<void>;
-  removeItem: (itemId: number) => Promise<void>;
-  isRemovingItem: (itemId: number) => boolean;
-  updateItemQuantity: (itemId: number, quantity: number) => Promise<void>;
+  removeItem: (productSlug: string) => Promise<void>;
+  isRemovingItem: (productSlug: string) => boolean;
+  updateItemQuantity: (productSlug: string, quantity: number) => Promise<void>;
 }
 
 export const CartContext = createContext<CartContextValue | undefined>(undefined);
