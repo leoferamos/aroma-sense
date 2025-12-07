@@ -1,3 +1,10 @@
+# [0.13.0](https://github.com/leoferamos/aroma-sense/compare/v0.12.0...v0.13.0) (2025-12-06)
+
+
+### Features
+
+* **admin:** improve ui ([#90](https://github.com/leoferamos/aroma-sense/issues/90)) ([245a5b4](https://github.com/leoferamos/aroma-sense/commit/245a5b4c33771de9e73ac9f005d2b1dbfc9592a8))
+
 # [0.12.0](https://github.com/leoferamos/aroma-sense/compare/v0.11.0...v0.12.0) (2025-12-06)
 
 
