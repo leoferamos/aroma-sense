@@ -18,6 +18,7 @@ type ProductRepository interface {
 	FindAll(limit int) ([]model.Product, error)
 	FindAllPaginated(limit int, offset int) ([]model.Product, int, error)
 	FindByID(id uint) (model.Product, error)
+	FindBySlug(slug string) (model.Product, error)
 	SearchProducts(ctx context.Context, query string, limit int, offset int, sort string) ([]model.Product, int, error)
 	Update(product *model.Product) error
 	Delete(id uint) error
@@ -109,6 +110,13 @@ func (r *productRepository) FindAllPaginated(limit int, offset int) ([]model.Pro
 func (r *productRepository) FindByID(id uint) (model.Product, error) {
 	var product model.Product
 	err := r.db.First(&product, id).Error
+	return product, err
+}
+
+// FindBySlug retrieves a product by its slug
+func (r *productRepository) FindBySlug(slug string) (model.Product, error) {
+	var product model.Product
+	err := r.db.Where("slug = ?", slug).First(&product).Error
 	return product, err
 }
 

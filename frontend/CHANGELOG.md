@@ -1,3 +1,36 @@
+## [1.0.1](https://github.com/leoferamos/aroma-sense/compare/v1.0.0...v1.0.1) (2025-12-07)
+
+
+### Bug Fixes
+
+* code quality improvements and optimizations ([#92](https://github.com/leoferamos/aroma-sense/issues/92)) ([97361b5](https://github.com/leoferamos/aroma-sense/commit/97361b5b2d3aaf6e50167136776bbb2dc8c12c78))
+
+# [1.0.0](https://github.com/leoferamos/aroma-sense/compare/v0.13.0...v1.0.0) (2025-12-07)
+
+
+### Features
+
+* migrate product identification from numeric IDs to SEO-friendly slugs ([dcb0c69](https://github.com/leoferamos/aroma-sense/commit/dcb0c69e987fe5e802f1873bacc25d6e14d72acb))
+
+
+### BREAKING CHANGES
+
+* Product identification changed from numeric IDs to SEO-friendly slugs
+
+# [0.13.0](https://github.com/leoferamos/aroma-sense/compare/v0.12.0...v0.13.0) (2025-12-06)
+
+
+### Features
+
+* **admin:** improve ui ([#90](https://github.com/leoferamos/aroma-sense/issues/90)) ([245a5b4](https://github.com/leoferamos/aroma-sense/commit/245a5b4c33771de9e73ac9f005d2b1dbfc9592a8))
+
+# [0.12.0](https://github.com/leoferamos/aroma-sense/compare/v0.11.0...v0.12.0) (2025-12-06)
+
+
+### Features
+
+* **frontend:** update forgot password flow ([#89](https://github.com/leoferamos/aroma-sense/issues/89)) ([9edc5e9](https://github.com/leoferamos/aroma-sense/commit/9edc5e914308dc3b681cd43caa2b7d94ad94bcdc))
+
 # [0.11.0](https://github.com/leoferamos/aroma-sense/compare/v0.10.0...v0.11.0) (2025-12-06)
 
 

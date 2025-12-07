@@ -48,6 +48,9 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		itemSubtotal := float64(cartItem.Quantity) * product.Price
 		orderItems = append(orderItems, model.OrderItem{
 			ProductID:       product.ID,
+			ProductSlug:     product.Slug,
+			ProductName:     product.Name,
+			ProductImageURL: product.ImageURL,
 			Quantity:        cartItem.Quantity,
 			PriceAtPurchase: product.Price,
 			Subtotal:        itemSubtotal,
@@ -126,16 +129,16 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 	items := make([]dto.OrderItemResponse, len(order.Items))
 	for i, item := range order.Items {
 		items[i] = dto.OrderItemResponse{
-			ID:              item.ID,
-			ProductID:       item.ProductID,
+			ProductSlug:     item.ProductSlug,
+			ProductName:     item.ProductName,
+			ProductImageURL: item.ProductImageURL,
 			Quantity:        item.Quantity,
 			PriceAtPurchase: item.PriceAtPurchase,
 			Subtotal:        item.Subtotal,
 		}
 	}
 	return &dto.OrderResponse{
-		ID:                        order.ID,
-		UserID:                    order.UserID,
+		PublicID:                  order.PublicID,
 		TotalAmount:               order.TotalAmount,
 		Status:                    string(order.Status),
 		ShippingAddress:           order.ShippingAddress,
@@ -163,6 +166,7 @@ func (s *orderService) AdminListOrders(status *string, startDate *time.Time, end
 	for _, o := range orders {
 		items = append(items, dto.AdminOrderItem{
 			ID:          o.ID,
+			PublicID:    o.PublicID,
 			UserID:      o.UserID,
 			TotalAmount: o.TotalAmount,
 			Status:      string(o.Status),
@@ -207,22 +211,18 @@ func (s *orderService) GetOrdersByUser(userID string) ([]dto.OrderResponse, erro
 		items := make([]dto.OrderItemResponse, len(o.Items))
 		for i, it := range o.Items {
 			item := dto.OrderItemResponse{
-				ID:              it.ID,
-				ProductID:       it.ProductID,
+				ProductSlug:     it.ProductSlug,
+				ProductName:     it.ProductName,
+				ProductImageURL: it.ProductImageURL,
 				Quantity:        it.Quantity,
 				PriceAtPurchase: it.PriceAtPurchase,
 				Subtotal:        it.Subtotal,
-			}
-			if it.Product != nil {
-				item.ProductName = it.Product.Name
-				item.ProductImageURL = it.Product.ImageURL
 			}
 			items[i] = item
 		}
 
 		resp = append(resp, dto.OrderResponse{
-			ID:                        o.ID,
-			UserID:                    o.UserID,
+			PublicID:                  o.PublicID,
 			TotalAmount:               o.TotalAmount,
 			Status:                    string(o.Status),
 			ShippingAddress:           o.ShippingAddress,

@@ -23,8 +23,9 @@ func AdminRoutes(r *gin.Engine, adminUserHandler *handler.AdminUserHandler,
 		adminGroup.GET("/users", adminUserHandler.AdminListUsers)
 
 		// Product management
+		adminGroup.GET("/products", productHandler.AdminListProducts)
 		adminGroup.POST("/products", productHandler.CreateProduct)
-		adminGroup.GET("/products/:id", productHandler.GetProduct)
+		adminGroup.GET("/products/:id", productHandler.GetProductByID)
 		adminGroup.PATCH("/products/:id", productHandler.UpdateProduct)
 		adminGroup.DELETE("/products/:id", productHandler.DeleteProduct)
 

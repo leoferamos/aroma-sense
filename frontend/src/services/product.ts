@@ -11,6 +11,11 @@ export async function getProductById(id: number): Promise<Product> {
   return response.data;
 }
 
+export async function getProductBySlug(slug: string): Promise<Product> {
+  const response = await api.get<Product>(`/products/${slug}`);
+  return response.data;
+}
+
 /**
  * Creates a new product with image upload
  * Sends multipart/form-data to POST /admin/products
@@ -110,6 +115,14 @@ export async function deleteProduct(id: number): Promise<void> {
   await api.delete(`/admin/products/${id}`);
 }
 
+/**
+ * Gets a product by ID for admin
+ */
+export async function getAdminProductById(id: number): Promise<Product> {
+  const response = await api.get<Product>(`/admin/products/${id}`);
+  return response.data;
+}
+
 // Searches products when `query` is provided. Returns a paginated envelope
 export async function searchProducts(params: {
   query: string;
@@ -143,6 +156,24 @@ export async function listProducts(params?: {
   if (Array.isArray(data)) {
     return data;
   } else if (data && typeof data === 'object' && Array.isArray(data.items)) {
+    return data.items;
+  } else {
+    return [];
+  }
+}
+
+export async function adminListProducts(params?: {
+  limit?: number;
+  page?: number;
+}): Promise<Product[]> {
+  const { limit = 50, page = 1 } = params || {};
+  const response = await api.get("/admin/products", {
+    params: { limit, page },
+  });
+  
+  // Handle paginated format
+  const data = response.data;
+  if (data && typeof data === 'object' && Array.isArray(data.items)) {
     return data.items;
   } else {
     return [];

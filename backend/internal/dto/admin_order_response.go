@@ -5,6 +5,7 @@ import "time"
 // AdminOrderItem represents the data for an order shown in admin listings
 type AdminOrderItem struct {
 	ID          uint      `json:"id" example:"1"`
+	PublicID    string    `json:"public_id" example:"uuid"`
 	UserID      string    `json:"user_id" example:"uuid"`
 	TotalAmount float64   `json:"total_amount" example:"123.45"`
 	Status      string    `json:"status" example:"pending"`

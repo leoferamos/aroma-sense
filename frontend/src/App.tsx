@@ -160,7 +160,7 @@ const ChatMount: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/products/:slug" element={<ProductDetail />} />
         <Route
           path="/checkout"
           element={

@@ -2,6 +2,7 @@ import React from 'react';
 import type { OrderResponse } from '../types/order';
 import { formatCurrency } from '../utils/format';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   orders: OrderResponse[];
@@ -24,6 +25,8 @@ const statusColor = (status: string) => {
 };
 
 const OrderList: React.FC<Props> = ({ orders, onSelect }) => {
+  const { t } = useTranslation('common');
+
   return (
     <div className="space-y-4">
       {orders.map((o) => {
@@ -41,23 +44,23 @@ const OrderList: React.FC<Props> = ({ orders, onSelect }) => {
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-3 items-center">
                   {thumbs.map((it) => (
-                    <Link key={it.id} to={`/products/${it.product_id}`} onClick={(e) => e.stopPropagation()} className="w-20 h-20 rounded-lg overflow-hidden bg-white ring-1 ring-gray-100 block">
+                    <Link key={it.product_slug} to={`/products/${it.product_slug}`} onClick={(e) => e.stopPropagation()} className="w-20 h-20 rounded-lg overflow-hidden bg-white ring-1 ring-gray-100 block">
                       <img src={it.product_image_url || '/placeholder.png'} alt={it.product_name || ''} className="w-full h-full object-contain" />
                     </Link>
                   ))}
                 </div>
 
                 <div>
-                  <div className="text-sm text-gray-500">Order #{o.id}</div>
+                  <div className="text-sm text-gray-500">{t('order.orderNumber', { id: o.id })}</div>
                   <div className="text-base font-semibold">{new Date(o.created_at).toLocaleString()}</div>
-                  <div className="text-sm text-gray-600 mt-1">{o.item_count} {o.item_count === 1 ? 'item' : 'items'}</div>
+                  <div className="text-sm text-gray-600 mt-1">{o.item_count} {o.item_count === 1 ? t('order.item') : t('order.item_plural')}</div>
                   <div className="text-sm text-gray-700 mt-2 truncate w-40">
                     {o.items.length > 0 ? (
-                      <Link to={`/products/${o.items[0].product_id}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+                      <Link to={`/products/${o.items[0].product_slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
                         {o.items[0].product_name}
                       </Link>
                     ) : ''}
-                    {o.items.length > 1 ? ` +${o.items.length - 1} more` : ''}
+                    {o.items.length > 1 ? ` ${t('order.moreItems', { count: o.items.length - 1 })}` : ''}
                   </div>
                 </div>
               </div>
@@ -68,7 +71,7 @@ const OrderList: React.FC<Props> = ({ orders, onSelect }) => {
                 </div>
                 <div>
                   <span className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded ${statusColor(o.status)}`}>
-                    {o.status}
+                    {t(`order.status.${o.status}`, o.status)}
                   </span>
                 </div>
               </div>

@@ -11,6 +11,7 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
+  error?: string | null;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -23,6 +24,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
   loading = false,
+  error = null,
 }) => {
   const { t } = useTranslation('common');
   const [phrase, setPhrase] = React.useState('');
@@ -32,10 +34,15 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   }, [open]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 relative animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" onClick={onCancel}>
+      <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 relative animate-fade-in" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-lg font-semibold text-gray-900 mb-2">{title}</h2>
         <p className="text-gray-700 mb-6 text-sm">{description}</p>
+        {error && (
+          <div className="mb-4 rounded-md bg-red-50 p-3 text-red-700 border border-red-200 text-sm">
+            {error}
+          </div>
+        )}
         {requirePhrase ? (
           <div className="mb-4">
             <p className="text-sm text-gray-600 mb-2" dangerouslySetInnerHTML={{ __html: t('confirmTypePhrase', { phrase: requirePhrase }) }} />
@@ -51,7 +58,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         <div className="flex justify-end gap-2">
           <button
             type="button"
-            className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium"
+            className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
             onClick={onCancel}
             disabled={loading}
           >
@@ -59,7 +66,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </button>
           <button
             type="button"
-            className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 font-medium disabled:opacity-60"
+            className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
             onClick={onConfirm}
             disabled={loading || (requirePhrase ? phrase !== requirePhrase : false)}
           >

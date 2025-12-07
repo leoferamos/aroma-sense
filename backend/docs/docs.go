@@ -532,6 +532,61 @@ const docTemplate = `{
             }
         },
         "/admin/products": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all products with IDs for admin management",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin",
+                    "products"
+                ],
+                "summary": "Admin list all products",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number (1-based)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Items per page (default 50, max 200)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated product list with IDs",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -642,65 +697,6 @@ const docTemplate = `{
             }
         },
         "/admin/products/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves a specific product by its ID (Admin only)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Get product by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Product details",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ProductResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid product ID",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Admin only",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Product not found",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -1367,7 +1363,7 @@ const docTemplate = `{
                 "summary": "Add item to cart",
                 "parameters": [
                     {
-                        "description": "Product ID and quantity to add",
+                        "description": "Product slug and quantity to add",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1460,7 +1456,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cart/items/{itemId}": {
+        "/cart/items/{productSlug}": {
             "delete": {
                 "security": [
                     {
@@ -1480,9 +1476,9 @@ const docTemplate = `{
                 "summary": "Remove item from cart",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Cart item ID",
-                        "name": "itemId",
+                        "type": "string",
+                        "description": "Product slug",
+                        "name": "productSlug",
                         "in": "path",
                         "required": true
                     }
@@ -1495,7 +1491,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid item ID",
+                        "description": "Invalid product slug",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1539,9 +1535,9 @@ const docTemplate = `{
                 "summary": "Update cart item quantity",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Cart item ID",
-                        "name": "itemId",
+                        "type": "string",
+                        "description": "Product slug",
+                        "name": "productSlug",
                         "in": "path",
                         "required": true
                     },
@@ -1563,7 +1559,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request body, item ID, or insufficient stock",
+                        "description": "Invalid request body, product slug, or insufficient stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1795,7 +1791,45 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/{id}/reviews": {
+        "/products/{slug}": {
+            "get": {
+                "description": "Retrieves a specific product by its slug for clean URLs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get product by slug",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product details",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{slug}/reviews": {
             "get": {
                 "description": "Returns published reviews for a product in descending creation order.",
                 "consumes": [
@@ -1810,9 +1844,9 @@ const docTemplate = `{
                 "summary": "List product reviews",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "Product slug",
+                        "name": "slug",
                         "in": "path",
                         "required": true
                     },
@@ -1839,7 +1873,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product id",
+                        "description": "Invalid product slug",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1871,9 +1911,9 @@ const docTemplate = `{
                 "summary": "Create product review",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "Product slug",
+                        "name": "slug",
                         "in": "path",
                         "required": true
                     },
@@ -1933,7 +1973,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/{id}/reviews/summary": {
+        "/products/{slug}/reviews/summary": {
             "get": {
                 "description": "Returns average rating, total review count, and rating distribution for a product.",
                 "consumes": [
@@ -1948,9 +1988,9 @@ const docTemplate = `{
                 "summary": "Get product review summary",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "Product slug",
+                        "name": "slug",
                         "in": "path",
                         "required": true
                     }
@@ -1963,7 +2003,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product id",
+                        "description": "Invalid product slug",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2528,12 +2574,12 @@ const docTemplate = `{
         "dto.AddToCartRequest": {
             "type": "object",
             "required": [
-                "product_id",
+                "product_slug",
                 "quantity"
             ],
             "properties": {
-                "product_id": {
-                    "type": "integer"
+                "product_slug": {
+                    "type": "string"
                 },
                 "quantity": {
                     "type": "integer",
@@ -2579,6 +2625,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 1
+                },
+                "public_id": {
+                    "type": "string",
+                    "example": "uuid"
                 },
                 "status": {
                     "type": "string",
@@ -2790,44 +2840,23 @@ const docTemplate = `{
         "dto.CartItemResponse": {
             "type": "object",
             "properties": {
-                "cart_id": {
-                    "type": "integer"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
                 "price": {
                     "type": "number"
                 },
                 "product": {
                     "$ref": "#/definitions/dto.ProductResponse"
                 },
-                "product_id": {
-                    "type": "integer"
-                },
                 "quantity": {
                     "type": "integer"
                 },
                 "total": {
                     "type": "number"
-                },
-                "updated_at": {
-                    "type": "string"
                 }
             }
         },
         "dto.CartResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
                 "item_count": {
                     "type": "integer"
                 },
@@ -2839,12 +2868,6 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "number"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
@@ -3006,19 +3029,16 @@ const docTemplate = `{
         "dto.OrderItemResponse": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "price_at_purchase": {
                     "type": "number"
-                },
-                "product_id": {
-                    "type": "integer"
                 },
                 "product_image_url": {
                     "type": "string"
                 },
                 "product_name": {
+                    "type": "string"
+                },
+                "product_slug": {
                     "type": "string"
                 },
                 "quantity": {
@@ -3035,9 +3055,6 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "item_count": {
                     "type": "integer"
                 },
@@ -3048,6 +3065,9 @@ const docTemplate = `{
                     }
                 },
                 "payment_method": {
+                    "type": "string"
+                },
+                "public_id": {
                     "type": "string"
                 },
                 "shipping_address": {
@@ -3078,9 +3098,6 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }

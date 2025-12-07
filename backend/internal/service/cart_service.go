@@ -15,9 +15,11 @@ type CartService interface {
 	CreateCartForUser(userID string) error
 	GetCartByUserID(userID string) (*model.Cart, error)
 	GetCartResponse(userID string) (*dto.CartResponse, error)
-	AddItemToCart(userID string, productID uint, quantity int) (*dto.CartResponse, error)
+	AddItemToCart(userID string, productSlug string, quantity int) (*dto.CartResponse, error)
 	UpdateItemQuantity(userID string, itemID uint, quantity int) (*dto.CartResponse, error)
+	UpdateItemQuantityBySlug(userID string, productSlug string, quantity int) (*dto.CartResponse, error)
 	RemoveItem(userID string, itemID uint) (*dto.CartResponse, error)
+	RemoveItemBySlug(userID string, productSlug string) (*dto.CartResponse, error)
 	ClearCart(userID string) (*dto.CartResponse, error)
 }
 
@@ -59,13 +61,9 @@ func (s *cartService) GetCartResponse(userID string) (*dto.CartResponse, error) 
 	}
 
 	cartResponse := &dto.CartResponse{
-		ID:        cart.ID,
-		UserID:    cart.UserID,
 		Items:     []dto.CartItemResponse{},
 		Total:     0.0,
 		ItemCount: 0,
-		CreatedAt: cart.CreatedAt,
-		UpdatedAt: cart.UpdatedAt,
 	}
 
 	// Convert cart items and calculate totals
@@ -73,19 +71,13 @@ func (s *cartService) GetCartResponse(userID string) (*dto.CartResponse, error) 
 		itemTotal := item.Price * float64(item.Quantity)
 
 		cartItemResponse := dto.CartItemResponse{
-			ID:        item.ID,
-			CartID:    item.CartID,
-			ProductID: item.ProductID,
-			Quantity:  item.Quantity,
-			Price:     item.Price,
-			Total:     itemTotal,
-			CreatedAt: item.CreatedAt,
-			UpdatedAt: item.UpdatedAt,
+			Quantity: item.Quantity,
+			Price:    item.Price,
+			Total:    itemTotal,
 		}
 
 		if item.Product != nil {
 			cartItemResponse.Product = &dto.ProductResponse{
-				ID:            item.Product.ID,
 				Name:          item.Product.Name,
 				Brand:         item.Product.Brand,
 				Weight:        item.Product.Weight,
@@ -110,7 +102,13 @@ func (s *cartService) GetCartResponse(userID string) (*dto.CartResponse, error) 
 }
 
 // AddItemToCart adds an item to the user's cart or increases quantity if exists
-func (s *cartService) AddItemToCart(userID string, productID uint, quantity int) (*dto.CartResponse, error) {
+func (s *cartService) AddItemToCart(userID string, productSlug string, quantity int) (*dto.CartResponse, error) {
+	// Get product ID by slug
+	productID, err := s.productService.GetProductIDBySlug(context.Background(), productSlug)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+
 	// Validate product exists and get product data
 	product, err := s.productService.GetProductByID(context.Background(), productID)
 	if err != nil {
@@ -253,4 +251,70 @@ func (s *cartService) ClearCart(userID string) (*dto.CartResponse, error) {
 
 	// Return empty cart response
 	return s.GetCartResponse(userID)
+}
+
+// UpdateItemQuantityBySlug updates the quantity of a cart item by product slug
+func (s *cartService) UpdateItemQuantityBySlug(userID string, productSlug string, quantity int) (*dto.CartResponse, error) {
+	// Get product ID by slug
+	productID, err := s.productService.GetProductIDBySlug(context.Background(), productSlug)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+
+	// Get user's cart
+	cart, err := s.GetCartByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the cart item by product ID
+	var itemID uint
+	found := false
+	for _, item := range cart.Items {
+		if item.ProductID == productID {
+			itemID = item.ID
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return nil, errors.New("cart item not found in user's cart")
+	}
+
+	// Use existing UpdateItemQuantity method
+	return s.UpdateItemQuantity(userID, itemID, quantity)
+}
+
+// RemoveItemBySlug removes a cart item by product slug
+func (s *cartService) RemoveItemBySlug(userID string, productSlug string) (*dto.CartResponse, error) {
+	// Get product ID by slug
+	productID, err := s.productService.GetProductIDBySlug(context.Background(), productSlug)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+
+	// Get user's cart
+	cart, err := s.GetCartByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the cart item by product ID
+	var itemID uint
+	found := false
+	for _, item := range cart.Items {
+		if item.ProductID == productID {
+			itemID = item.ID
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return nil, errors.New("cart item not found in user's cart")
+	}
+
+	// Use existing RemoveItem method
+	return s.RemoveItem(userID, itemID)
 }

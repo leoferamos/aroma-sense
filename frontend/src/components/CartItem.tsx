@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 interface CartItemProps {
   item: CartItemType;
-  onRemove?: (itemId: number) => void;
+  onRemove?: (productSlug: string) => void;
   isRemoving?: boolean;
   showRemoveButton?: boolean;
   compact?: boolean;
@@ -25,7 +25,7 @@ const CartItem: React.FC<CartItemProps> = ({
   showQuantityControls = false
 }) => {
   const { quantity, increment, decrement, error } = useCartItemQuantity({
-    itemId: item.id,
+    productSlug: item.product?.slug || '',
     initialQuantity: item.quantity,
   });
   const { t } = useTranslation('common');
@@ -106,7 +106,7 @@ const CartItem: React.FC<CartItemProps> = ({
         {showRemoveButton && onRemove && (
           <button
             type="button"
-            onClick={() => onRemove(item.id)}
+            onClick={() => onRemove(item.product?.slug || '')}
             disabled={isRemoving}
             title={t('cart.removeItem')}
             aria-label={t('cart.removeItemName', { name: item.product?.name || t('cart.product') })}

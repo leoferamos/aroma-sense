@@ -225,6 +225,8 @@
     "failedToLoadProduct": "Falha ao carregar produto.",
     "failedToLoadOrders": "Falha ao carregar pedidos",
     "failedToChangePassword": "Falha ao alterar senha",
+    "invalidOrExpiredCode": "Código inválido ou expirado. Tente novamente.",
+    "tooManyResetRequests": "Muitas tentativas de redefinição. Tente novamente mais tarde.",
     "loading": "Carregando...",
     "loadingSuggestions": "Carregando sugestões...",
     "deleting": "Excluindo...",
@@ -239,6 +241,29 @@
     "passwordsDoNotMatch": "As senhas não coincidem",
     "currentPasswordRequired": "A senha atual é obrigatória",
     "newPasswordRequired": "A nova senha é obrigatória",
-    "passwordMinLength": "A senha deve ter pelo menos 8 caracteres"
+    "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
+    "passwordSymbol": "A senha deve conter pelo menos um símbolo"
+  },
+  "order": {
+    "myOrders": "Meus Pedidos",
+    "loadingOrders": "Carregando pedidos...",
+    "noOrdersYet": "Você ainda não tem pedidos",
+    "browseProductsMessage": "Navegue pelos produtos e faça seu primeiro pedido.",
+    "orderNumber": "Pedido #{{id}}",
+    "item": "item",
+    "item_plural": "itens",
+    "moreItems": "+{{count}} mais",
+    "quantity": "Qtd: {{quantity}}",
+    "price": "Preço: {{price}}",
+    "status": {
+      "pending": "Pendente",
+      "shipped": "Enviado",
+      "delivered": "Entregue",
+      "cancelled": "Cancelado"
+    },
+    "orderAgain": "Pedir Novamente",
+    "reordering": "Repetindo...",
+    "orderAgainSuccess": "Itens adicionados ao carrinho com sucesso!",
+    "orderAgainError": "Falha ao adicionar itens ao carrinho. Tente novamente."
   }
 }

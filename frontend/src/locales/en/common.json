@@ -225,6 +225,8 @@
     "failedToLoadProduct": "Failed to load product.",
     "failedToLoadOrders": "Failed to load orders",
     "failedToChangePassword": "Failed to change password",
+    "invalidOrExpiredCode": "Invalid or expired code. Please try again.",
+    "tooManyResetRequests": "Too many reset requests. Please try again later.",
     "loading": "Loading...",
     "loadingSuggestions": "Loading suggestions...",
     "deleting": "Deleting...",
@@ -239,6 +241,29 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "currentPasswordRequired": "Current password is required",
     "newPasswordRequired": "New password is required",
-    "passwordMinLength": "Password must be at least 8 characters"
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordSymbol": "Password must contain at least one symbol"
+  },
+  "order": {
+    "myOrders": "My Orders",
+    "loadingOrders": "Loading orders...",
+    "noOrdersYet": "You have no orders yet",
+    "browseProductsMessage": "Browse products and place your first order.",
+    "orderNumber": "Order #{{id}}",
+    "item": "item",
+    "item_plural": "items",
+    "moreItems": "+{{count}} more",
+    "quantity": "Qty: {{quantity}}",
+    "price": "Price: {{price}}",
+    "status": {
+      "pending": "Pending",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "orderAgain": "Order Again",
+    "reordering": "Reordering...",
+    "orderAgainSuccess": "Items added to cart successfully!",
+    "orderAgainError": "Failed to add items to cart. Please try again."
   }
 }
