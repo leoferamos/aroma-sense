@@ -60,6 +60,6 @@ export interface ChangePasswordRequest {
 }
 
 export async function changePassword(payload: ChangePasswordRequest): Promise<{ message: string }> {
-  const { data } = await api.post('/users/me/change-password', payload);
+  const { data } = await api.post('/users/change-password', payload);
   return data as { message: string };
 }
