@@ -145,7 +145,7 @@ func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.Produ
 	}
 
 	return dto.ProductResponse{
-		ID:            &product.ID, // Include ID for admin routes
+		ID:            &product.ID,
 		Name:          product.Name,
 		Brand:         product.Brand,
 		Weight:        product.Weight,
@@ -440,7 +440,7 @@ func (s *productService) AdminListProducts(ctx context.Context, page int, limit 
 	var resp []dto.ProductResponse
 	for _, p := range products {
 		resp = append(resp, dto.ProductResponse{
-			ID:            &p.ID, // Include ID for admin
+			ID:            &p.ID,
 			Name:          p.Name,
 			Brand:         p.Brand,
 			Weight:        p.Weight,

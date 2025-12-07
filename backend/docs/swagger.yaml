@@ -2,13 +2,13 @@ basePath: /
 definitions:
   dto.AddToCartRequest:
     properties:
-      product_id:
-        type: integer
+      product_slug:
+        type: string
       quantity:
         minimum: 1
         type: integer
     required:
-    - product_id
+    - product_slug
     - quantity
     type: object
   dto.AdminDeactivateUserRequest:
@@ -40,6 +40,9 @@ definitions:
       id:
         example: 1
         type: integer
+      public_id:
+        example: uuid
+        type: string
       status:
         example: pending
         type: string
@@ -181,31 +184,17 @@ definitions:
     type: object
   dto.CartItemResponse:
     properties:
-      cart_id:
-        type: integer
-      created_at:
-        type: string
-      id:
-        type: integer
       price:
         type: number
       product:
         $ref: '#/definitions/dto.ProductResponse'
-      product_id:
-        type: integer
       quantity:
         type: integer
       total:
         type: number
-      updated_at:
-        type: string
     type: object
   dto.CartResponse:
     properties:
-      created_at:
-        type: string
-      id:
-        type: integer
       item_count:
         type: integer
       items:
@@ -214,10 +203,6 @@ definitions:
         type: array
       total:
         type: number
-      updated_at:
-        type: string
-      user_id:
-        type: string
     type: object
   dto.ChatRequest:
     properties:
@@ -329,15 +314,13 @@ definitions:
     type: object
   dto.OrderItemResponse:
     properties:
-      id:
-        type: integer
       price_at_purchase:
         type: number
-      product_id:
-        type: integer
       product_image_url:
         type: string
       product_name:
+        type: string
+      product_slug:
         type: string
       quantity:
         type: integer
@@ -348,8 +331,6 @@ definitions:
     properties:
       created_at:
         type: string
-      id:
-        type: integer
       item_count:
         type: integer
       items:
@@ -357,6 +338,8 @@ definitions:
           $ref: '#/definitions/dto.OrderItemResponse'
         type: array
       payment_method:
+        type: string
+      public_id:
         type: string
       shipping_address:
         type: string
@@ -377,8 +360,6 @@ definitions:
       total_amount:
         type: number
       updated_at:
-        type: string
-      user_id:
         type: string
     type: object
   dto.PaginationMeta:
@@ -1132,6 +1113,42 @@ paths:
       tags:
       - admin
   /admin/products:
+    get:
+      consumes:
+      - application/json
+      description: Returns all products with IDs for admin management
+      parameters:
+      - default: 1
+        description: Page number (1-based)
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Items per page (default 50, max 200)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Paginated product list with IDs
+          schema:
+            $ref: '#/definitions/dto.ProductListResponse'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Admin list all products
+      tags:
+      - admin
+      - products
     post:
       consumes:
       - multipart/form-data
@@ -1660,7 +1677,7 @@ paths:
       description: Adds a product to the user's shopping cart. If item already exists,
         increases quantity.
       parameters:
-      - description: Product ID and quantity to add
+      - description: Product slug and quantity to add
         in: body
         name: request
         required: true
@@ -1698,17 +1715,17 @@ paths:
       summary: Add item to cart
       tags:
       - cart
-  /cart/items/{itemId}:
+  /cart/items/{productSlug}:
     delete:
       consumes:
       - application/json
       description: Removes a specific item from the user's cart completely
       parameters:
-      - description: Cart item ID
+      - description: Product slug
         in: path
-        name: itemId
+        name: productSlug
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -1717,7 +1734,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.CartResponse'
         "400":
-          description: Invalid item ID
+          description: Invalid product slug
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "401":
@@ -1743,11 +1760,11 @@ paths:
       description: Updates the quantity of a specific item in the user's cart. If
         quantity is 0, removes the item.
       parameters:
-      - description: Cart item ID
+      - description: Product slug
         in: path
-        name: itemId
+        name: productSlug
         required: true
-        type: integer
+        type: string
       - description: New quantity (0 to remove item)
         in: body
         name: request
@@ -1762,7 +1779,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.CartResponse'
         "400":
-          description: Invalid request body, item ID, or insufficient stock
+          description: Invalid request body, product slug, or insufficient stock
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "401":
@@ -1845,31 +1862,6 @@ paths:
       summary: Create a new order
       tags:
       - orders
-  /product/{slug}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a specific product by its slug for clean URLs
-      parameters:
-      - description: Product slug
-        in: path
-        name: slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Product details
-          schema:
-            $ref: '#/definitions/dto.ProductResponse'
-        "404":
-          description: Product not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get product by slug
-      tags:
-      - products
   /products:
     get:
       consumes:
@@ -1944,18 +1936,43 @@ paths:
       summary: Get product by ID
       tags:
       - products
-  /products/{id}/reviews:
+  /products/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific product by its slug for clean URLs
+      parameters:
+      - description: Product slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product details
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get product by slug
+      tags:
+      - products
+  /products/{slug}/reviews:
     get:
       consumes:
       - application/json
       description: Returns published reviews for a product in descending creation
         order.
       parameters:
-      - description: Product ID
+      - description: Product slug
         in: path
-        name: id
+        name: slug
         required: true
-        type: integer
+        type: string
       - default: 1
         description: Page number
         in: query
@@ -1974,7 +1991,11 @@ paths:
           schema:
             $ref: '#/definitions/dto.ReviewListResponse'
         "400":
-          description: Invalid product id
+          description: Invalid product slug
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Product not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
@@ -1991,11 +2012,11 @@ paths:
         a display_name set, and at least one delivered order containing the product.
         One review per user/product.
       parameters:
-      - description: Product ID
+      - description: Product slug
         in: path
-        name: id
+        name: slug
         required: true
-        type: integer
+        type: string
       - description: Review payload
         in: body
         name: review
@@ -2038,18 +2059,18 @@ paths:
       summary: Create product review
       tags:
       - reviews
-  /products/{id}/reviews/summary:
+  /products/{slug}/reviews/summary:
     get:
       consumes:
       - application/json
       description: Returns average rating, total review count, and rating distribution
         for a product.
       parameters:
-      - description: Product ID
+      - description: Product slug
         in: path
-        name: id
+        name: slug
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -2058,7 +2079,11 @@ paths:
           schema:
             $ref: '#/definitions/dto.ReviewSummary'
         "400":
-          description: Invalid product id
+          description: Invalid product slug
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Product not found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
