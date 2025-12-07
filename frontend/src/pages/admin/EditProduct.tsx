@@ -5,7 +5,7 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorState from "../../components/ErrorState";
 import { useProductFormValidation } from "../../hooks/useProductFormValidation";
 import { useUpdateProduct } from "../../hooks/useUpdateProduct";
-import { getProductById } from "../../services/product";
+import { getAdminProductById } from "../../services/product";
 import type { CreateProductFormData, Product } from "../../types/product";
 import type { ProductFormTouched } from "../../hooks/useProductFormValidation";
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -72,7 +72,7 @@ const EditProduct: React.FC = () => {
     async function fetchProduct() {
       try {
         setLoadingProduct(true);
-        const data = await getProductById(productId);
+        const data = await getAdminProductById(productId);
         setProduct(data);
         // Prefill form with product data
         setForm({

@@ -115,6 +115,14 @@ export async function deleteProduct(id: number): Promise<void> {
   await api.delete(`/admin/products/${id}`);
 }
 
+/**
+ * Gets a product by ID for admin
+ */
+export async function getAdminProductById(id: number): Promise<Product> {
+  const response = await api.get<Product>(`/admin/products/${id}`);
+  return response.data;
+}
+
 // Searches products when `query` is provided. Returns a paginated envelope
 export async function searchProducts(params: {
   query: string;
