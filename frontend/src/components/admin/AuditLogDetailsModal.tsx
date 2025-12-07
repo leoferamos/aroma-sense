@@ -35,7 +35,7 @@ const AuditLogDetailsModal: React.FC<Props> = ({ open, onClose, log }) => {
   if (!open || !log) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
       <div className="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg">
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-lg font-semibold">{t('auditLogDetails')}</h3>
