@@ -1,3 +1,15 @@
+# [1.0.0](https://github.com/leoferamos/aroma-sense/compare/v0.13.0...v1.0.0) (2025-12-07)
+
+
+### Features
+
+* migrate product identification from numeric IDs to SEO-friendly slugs ([dcb0c69](https://github.com/leoferamos/aroma-sense/commit/dcb0c69e987fe5e802f1873bacc25d6e14d72acb))
+
+
+### BREAKING CHANGES
+
+* Product identification changed from numeric IDs to SEO-friendly slugs
+
 # [0.13.0](https://github.com/leoferamos/aroma-sense/compare/v0.12.0...v0.13.0) (2025-12-06)
 
 
