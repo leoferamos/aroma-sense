@@ -43,8 +43,8 @@ const OrderList: React.FC<Props> = ({ orders, onSelect }) => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-3 items-center">
-                  {thumbs.map((it, index) => (
-                    <Link key={index} to={`/products/${it.product_slug}`} onClick={(e) => e.stopPropagation()} className="w-20 h-20 rounded-lg overflow-hidden bg-white ring-1 ring-gray-100 block">
+                  {thumbs.map((it) => (
+                    <Link key={it.product_slug} to={`/products/${it.product_slug}`} onClick={(e) => e.stopPropagation()} className="w-20 h-20 rounded-lg overflow-hidden bg-white ring-1 ring-gray-100 block">
                       <img src={it.product_image_url || '/placeholder.png'} alt={it.product_name || ''} className="w-full h-full object-contain" />
                     </Link>
                   ))}

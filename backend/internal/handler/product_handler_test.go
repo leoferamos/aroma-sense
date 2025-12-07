@@ -348,8 +348,8 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 		router, mockService := setupProductRouter()
 
 		productResponses := []dto.ProductResponse{
-			{Name: "Test Fragance 1"},
-			{Name: "Test Fragance 2"},
+			{Name: "Test Fragrance 1"},
+			{Name: "Test Fragrance 2"},
 		}
 
 		mockService.On("GetLatestProducts", mock.Anything, 1, 10).Return(productResponses, 2, nil)

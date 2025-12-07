@@ -262,7 +262,7 @@
       "cancelled": "Cancelado"
     },
     "orderAgain": "Pedir Novamente",
-    "reordering": "Repedindo...",
+    "reordering": "Repetindo...",
     "orderAgainSuccess": "Itens adicionados ao carrinho com sucesso!",
     "orderAgainError": "Falha ao adicionar itens ao carrinho. Tente novamente."
   }
