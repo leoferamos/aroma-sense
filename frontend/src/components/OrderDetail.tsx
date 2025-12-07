@@ -65,7 +65,7 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {order.items.map((it, index) => (
-          <div key={index} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100">
+          <div key={`${it.product_slug}-${index}`} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100">
             <Link to={`/products/${it.product_slug}`} className="w-28 h-28 flex-shrink-0 rounded-md overflow-hidden bg-white flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               <img src={it.product_image_url || '/placeholder.png'} alt={it.product_name || `Product ${it.product_slug}`} className="max-w-full max-h-full object-contain" />
             </Link>
