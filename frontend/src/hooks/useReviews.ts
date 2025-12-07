@@ -16,7 +16,7 @@ export interface UseReviewsResult {
   createReview: (payload: ReviewRequest) => Promise<Review | null>;
 }
 
-export function useReviews(productId: number, opts?: { initialPage?: number; initialLimit?: number }) : UseReviewsResult {
+export function useReviews(productSlug: string, opts?: { initialPage?: number; initialLimit?: number }) : UseReviewsResult {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [summaryState, setSummaryState] = useState<ReviewSummary | null>(null);
   const [page, setPage] = useState(opts?.initialPage ?? 1);
@@ -30,8 +30,8 @@ export function useReviews(productId: number, opts?: { initialPage?: number; ini
     setError(null);
     try {
       const [listResp, summaryResp] = await Promise.all([
-        listReviews(productId, { page, limit, signal }),
-        getSummary(productId, { signal }),
+        listReviews(productSlug, { page, limit, signal }),
+        getSummary(productSlug, { signal }),
       ]);
       setReviews(listResp.items);
       setTotal(listResp.total);
@@ -50,7 +50,7 @@ export function useReviews(productId: number, opts?: { initialPage?: number; ini
     } finally {
       setLoading(false);
     }
-  }, [productId, page, limit]);
+  }, [productSlug, page, limit]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -64,7 +64,7 @@ export function useReviews(productId: number, opts?: { initialPage?: number; ini
 
   const doCreate = useCallback(async (payload: ReviewRequest) => {
     try {
-      const created = await createReview(productId, payload);
+      const created = await createReview(productSlug, payload);
       // Optimistic refresh: prepend or reload depending on page
       if (page === 1) {
         setReviews((prev) => [created, ...prev]);
@@ -93,7 +93,7 @@ export function useReviews(productId: number, opts?: { initialPage?: number; ini
       }
       return null;
     }
-  }, [productId, page, refresh]);
+  }, [productSlug, page, refresh]);
 
   const summary = useMemo(() => summaryState, [summaryState]);
 

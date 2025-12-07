@@ -338,10 +338,10 @@ const Checkout: React.FC = () => {
                 <ul className="divide-y divide-gray-200 mb-4">
                   {cart!.items.map((item: CartItemType) => (
                     <CartItem
-                      key={item.id}
+                      key={item.product?.slug || ''}
                       item={item}
                       onRemove={removeItem}
-                      isRemoving={isRemovingItem(item.id)}
+                      isRemoving={isRemovingItem(item.product?.slug || '')}
                       showQuantityControls={true}
                     />
                   ))}

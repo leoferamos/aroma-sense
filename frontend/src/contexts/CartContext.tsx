@@ -13,7 +13,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [removingItemIds, setRemovingItemIds] = useState<Set<number>>(new Set());
+  const [removingItemIds, setRemovingItemIds] = useState<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     const token = getAccessToken();
@@ -39,11 +39,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const addItem = useCallback(async (productId: number, quantity = 1) => {
+  const addItem = useCallback(async (productSlug: string, quantity = 1) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await svcAddToCart(productId, quantity);
+      const data = await svcAddToCart(productSlug, quantity);
       setCart(data);
     } catch (err: unknown) {
       if (isAxiosError(err)) {
@@ -58,11 +58,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const removeItem = useCallback(async (itemId: number) => {
+  const removeItem = useCallback(async (productSlug: string) => {
     try {
-      setRemovingItemIds(prev => new Set(prev).add(itemId));
+      setRemovingItemIds(prev => new Set(prev).add(productSlug));
       setError(null);
-      const data = await svcRemoveItem(itemId);
+      const data = await svcRemoveItem(productSlug);
       setCart(data);
     } catch (err: unknown) {
       if (isAxiosError(err)) {
@@ -75,17 +75,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setRemovingItemIds(prev => {
         const next = new Set(prev);
-        next.delete(itemId);
+        next.delete(productSlug);
         return next;
       });
     }
   }, []);
 
-  const isRemovingItem = useCallback((itemId: number) => removingItemIds.has(itemId), [removingItemIds]);
+  const isRemovingItem = useCallback((productSlug: string) => removingItemIds.has(productSlug), [removingItemIds]);
 
-  const updateItemQuantity = useCallback(async (itemId: number, quantity: number) => {
+  const updateItemQuantity = useCallback(async (productSlug: string, quantity: number) => {
     try {
-      const data = await svcUpdateItemQuantity(itemId, quantity);
+      const data = await svcUpdateItemQuantity(productSlug, quantity);
       setCart(data);
       setError(null); // Clear error on success
     } catch (err: unknown) {

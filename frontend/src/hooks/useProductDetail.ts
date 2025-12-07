@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { isAxiosError } from 'axios';
-import { getProductById } from '../services/product';
+import { getProductBySlug } from '../services/product';
 import type { Product } from '../types/product';
 
-export const useProductDetail = (productId: number) => {
+export const useProductDetail = (param: string) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +13,9 @@ export const useProductDetail = (productId: number) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getProductById(productId);
+        
+        // For /product/:slug route, param is always a slug
+        const data = await getProductBySlug(param);
         setProduct(data);
       } catch (err: unknown) {
         if (isAxiosError(err)) {
@@ -32,8 +34,10 @@ export const useProductDetail = (productId: number) => {
       }
     };
 
-    fetchProduct();
-  }, [productId]);
+    if (param) {
+      fetchProduct();
+    }
+  }, [param]);
 
   return { product, loading, error };
 };

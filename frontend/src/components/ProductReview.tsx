@@ -4,17 +4,17 @@ import { useReviews } from '../hooks/useReviews';
 import { useTranslation } from 'react-i18next';
 
 interface ProductReviewProps {
-    productId: number;
+    productSlug: string;
     canReview?: boolean;
 }
 
-const ProductReview: React.FC<ProductReviewProps> = ({ productId, canReview }) => {
+const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview }) => {
     const [rating, setRating] = useState<number>(0);
     const [comment, setComment] = useState<string>('');
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-    const { reviews, summary, loading, error, createReview, page, limit, total, setPage, setLimit } = useReviews(productId);
+    const { reviews, summary, loading, error, createReview, page, limit, total, setPage, setLimit } = useReviews(productSlug);
     const { t } = useTranslation('common');
 
     const handleStarClick = (value: number) => {

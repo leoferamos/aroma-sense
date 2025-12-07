@@ -21,8 +21,11 @@ import (
 type ProductService interface {
 	CreateProduct(ctx context.Context, input dto.ProductFormDTO, file dto.FileUpload) error
 	GetProductByID(ctx context.Context, id uint) (dto.ProductResponse, error)
+	GetProductBySlug(ctx context.Context, slug string) (dto.ProductResponse, error)
+	GetProductIDBySlug(ctx context.Context, slug string) (uint, error)
 	GetLatestProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error)
 	SearchProducts(ctx context.Context, query string, page int, limit int, sort string) ([]dto.ProductResponse, int, error)
+	AdminListProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error)
 	UpdateProduct(ctx context.Context, id uint, input dto.UpdateProductRequest) error
 	DeleteProduct(ctx context.Context, id uint) error
 }
@@ -142,7 +145,7 @@ func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.Produ
 	}
 
 	return dto.ProductResponse{
-		ID:            product.ID,
+		ID:            &product.ID,
 		Name:          product.Name,
 		Brand:         product.Brand,
 		Weight:        product.Weight,
@@ -165,6 +168,48 @@ func (s *productService) GetProductByID(ctx context.Context, id uint) (dto.Produ
 		CreatedAt:     product.CreatedAt,
 		UpdatedAt:     product.UpdatedAt,
 	}, nil
+}
+
+// GetProductBySlug retrieves a product by its slug
+func (s *productService) GetProductBySlug(ctx context.Context, slug string) (dto.ProductResponse, error) {
+	product, err := s.repo.FindBySlug(slug)
+	if err != nil {
+		return dto.ProductResponse{}, fmt.Errorf("failed to get product: %w", err)
+	}
+
+	return dto.ProductResponse{
+		Name:          product.Name,
+		Brand:         product.Brand,
+		Weight:        product.Weight,
+		Description:   product.Description,
+		Price:         product.Price,
+		ImageURL:      product.ImageURL,
+		ThumbnailURL:  product.ThumbnailURL,
+		Slug:          product.Slug,
+		Accords:       product.Accords,
+		Occasions:     product.Occasions,
+		Seasons:       product.Seasons,
+		Intensity:     product.Intensity,
+		Gender:        product.Gender,
+		PriceRange:    product.PriceRange,
+		NotesTop:      product.NotesTop,
+		NotesHeart:    product.NotesHeart,
+		NotesBase:     product.NotesBase,
+		Category:      product.Category,
+		StockQuantity: product.StockQuantity,
+		CreatedAt:     product.CreatedAt,
+		UpdatedAt:     product.UpdatedAt,
+	}, nil
+}
+
+// GetProductIDBySlug retrieves a product ID by its slug
+func (s *productService) GetProductIDBySlug(ctx context.Context, slug string) (uint, error) {
+	product, err := s.repo.FindBySlug(slug)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get product: %w", err)
+	}
+
+	return product.ID, nil
 }
 
 // GetLatestProducts retrieves the latest products with pagination
@@ -190,7 +235,6 @@ func (s *productService) GetLatestProducts(ctx context.Context, page int, limit 
 	var response []dto.ProductResponse
 	for _, p := range products {
 		response = append(response, dto.ProductResponse{
-			ID:            p.ID,
 			Name:          p.Name,
 			Brand:         p.Brand,
 			Weight:        p.Weight,
@@ -345,7 +389,58 @@ func (s *productService) SearchProducts(ctx context.Context, query string, page 
 	var resp []dto.ProductResponse
 	for _, p := range products {
 		resp = append(resp, dto.ProductResponse{
-			ID:            p.ID,
+			Name:          p.Name,
+			Brand:         p.Brand,
+			Weight:        p.Weight,
+			Description:   p.Description,
+			Price:         p.Price,
+			ImageURL:      p.ImageURL,
+			ThumbnailURL:  p.ThumbnailURL,
+			Slug:          p.Slug,
+			Accords:       p.Accords,
+			Occasions:     p.Occasions,
+			Seasons:       p.Seasons,
+			Intensity:     p.Intensity,
+			Gender:        p.Gender,
+			PriceRange:    p.PriceRange,
+			NotesTop:      p.NotesTop,
+			NotesHeart:    p.NotesHeart,
+			NotesBase:     p.NotesBase,
+			Category:      p.Category,
+			StockQuantity: p.StockQuantity,
+			CreatedAt:     p.CreatedAt,
+			UpdatedAt:     p.UpdatedAt,
+		})
+	}
+
+	return resp, total, nil
+}
+
+// AdminListProducts returns all products with IDs for admin management
+func (s *productService) AdminListProducts(ctx context.Context, page int, limit int) ([]dto.ProductResponse, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	// Allow higher limits for admin
+	const maxLimit = 200
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
+	offset := (page - 1) * limit
+
+	products, total, err := s.repo.FindAllPaginated(limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to list products: %w", err)
+	}
+
+	var resp []dto.ProductResponse
+	for _, p := range products {
+		resp = append(resp, dto.ProductResponse{
+			ID:            &p.ID,
 			Name:          p.Name,
 			Brand:         p.Brand,
 			Weight:        p.Weight,

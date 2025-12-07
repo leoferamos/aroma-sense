@@ -9,13 +9,14 @@ import (
 
 // ProductRoutes sets up the product-related routes
 func ProductRoutes(r *gin.Engine, productHandler *handler.ProductHandler, reviewHandler *handler.ReviewHandler) {
+	// Public routes - always use slug
 	productGroup := r.Group("/products")
 	productGroup.Use(auth.OptionalAuthMiddleware(), middleware.AccountStatusMiddleware())
 	{
 		productGroup.GET("", productHandler.GetLatestProducts)
-		productGroup.GET("/:id/reviews/summary", reviewHandler.GetSummary)
-		productGroup.POST("/:id/reviews", auth.JWTAuthMiddleware(), reviewHandler.CreateReview)
-		productGroup.GET("/:id/reviews", reviewHandler.ListReviews)
-		productGroup.GET("/:id", productHandler.GetProductByID)
+		productGroup.GET("/:slug/reviews/summary", reviewHandler.GetSummary)
+		productGroup.POST("/:slug/reviews", auth.JWTAuthMiddleware(), reviewHandler.CreateReview)
+		productGroup.GET("/:slug/reviews", reviewHandler.ListReviews)
+		productGroup.GET("/:slug", productHandler.GetProduct)
 	}
 }

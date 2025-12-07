@@ -1,5 +1,5 @@
 export interface Product {
-  id: number;
+  id?: number; // Optional for admin routes
   name: string;
   brand: string;
   weight: number;
@@ -7,7 +7,7 @@ export interface Product {
   price: number;
   image_url: string;
   thumbnail_url?: string;
-  slug?: string;
+  slug: string;
   accords?: string[];
   occasions?: string[];
   seasons?: string[];

@@ -4,8 +4,7 @@ import "time"
 
 // OrderResponse represents the order data returned to the client
 type OrderResponse struct {
-	ID                        uint                `json:"id"`
-	UserID                    string              `json:"user_id"`
+	PublicID                  string              `json:"public_id"`
 	TotalAmount               float64             `json:"total_amount"`
 	Status                    string              `json:"status"`
 	ShippingAddress           string              `json:"shipping_address"`
@@ -24,8 +23,7 @@ type OrderResponse struct {
 
 // OrderItemResponse represents an order item returned to the client
 type OrderItemResponse struct {
-	ID              uint    `json:"id"`
-	ProductID       uint    `json:"product_id"`
+	ProductSlug     string  `json:"product_slug"`
 	ProductName     string  `json:"product_name,omitempty"`
 	ProductImageURL string  `json:"product_image_url,omitempty"`
 	Quantity        int     `json:"quantity"`

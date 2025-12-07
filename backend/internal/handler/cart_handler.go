@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
@@ -55,7 +54,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        request        body    dto.AddToCartRequest  true   "Product ID and quantity to add"
+// @Param        request        body    dto.AddToCartRequest  true   "Product slug and quantity to add"
 // @Success      200  {object}  dto.CartResponse    "Updated cart with new item"
 // @Failure      400  {object}  dto.ErrorResponse   "Invalid request body or insufficient stock"
 // @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
@@ -79,7 +78,7 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	}
 
 	// Add item to cart
-	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductID, req.Quantity)
+	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductSlug, req.Quantity)
 	if err != nil {
 		// Handle different types of errors with appropriate HTTP status codes
 		if err.Error() == "product not found" {
@@ -105,15 +104,15 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        itemId         path    int                          true   "Cart item ID"
+// @Param        productSlug    path    string                       true   "Product slug"
 // @Param        request        body    dto.UpdateCartItemRequest    true   "New quantity (0 to remove item)"
 // @Success      200  {object}  dto.CartResponse    "Updated cart"
-// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body, item ID, or insufficient stock"
+// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body, product slug, or insufficient stock"
 // @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
 // @Failure      404  {object}  dto.ErrorResponse   "Cart item or product not found"
 // @Failure      409  {object}  dto.ErrorResponse   "Product out of stock"
 // @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
-// @Router       /cart/items/{itemId} [patch]
+// @Router       /cart/items/{productSlug} [patch]
 // @Security     BearerAuth
 func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 
@@ -123,14 +122,11 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 		return
 	}
 
-	// Get item ID from URL parameter
-	itemIDParam := c.Param("itemId")
-	var itemID uint
-	if id, err := strconv.ParseUint(itemIDParam, 10, 32); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid item ID"})
+	// Get product slug from URL parameter
+	productSlug := c.Param("productSlug")
+	if productSlug == "" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid product slug"})
 		return
-	} else {
-		itemID = uint(id)
 	}
 
 	var req dto.UpdateCartItemRequest
@@ -140,7 +136,7 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 	}
 
 	// Update item quantity
-	cartResponse, err := h.cartService.UpdateItemQuantity(userIDStr, itemID, req.Quantity)
+	cartResponse, err := h.cartService.UpdateItemQuantityBySlug(userIDStr, productSlug, req.Quantity)
 	if err != nil {
 		if err.Error() == "cart item not found" || err.Error() == "cart item not found in user's cart" {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
@@ -169,13 +165,13 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 // @Tags         cart
 // @Accept       json
 // @Produce      json
-// @Param        itemId         path    int     true   "Cart item ID"
+// @Param        productSlug    path    string true   "Product slug"
 // @Success      200  {object}  dto.CartResponse    "Updated cart after item removal"
-// @Failure      400  {object}  dto.ErrorResponse   "Invalid item ID"
+// @Failure      400  {object}  dto.ErrorResponse   "Invalid product slug"
 // @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
 // @Failure      404  {object}  dto.ErrorResponse   "Cart item not found"
 // @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
-// @Router       /cart/items/{itemId} [delete]
+// @Router       /cart/items/{productSlug} [delete]
 // @Security     BearerAuth
 func (h *CartHandler) RemoveItem(c *gin.Context) {
 
@@ -185,18 +181,15 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 		return
 	}
 
-	// Get item ID from URL parameter
-	itemIDParam := c.Param("itemId")
-	var itemID uint
-	if id, err := strconv.ParseUint(itemIDParam, 10, 32); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid item ID"})
+	// Get product slug from URL parameter
+	productSlug := c.Param("productSlug")
+	if productSlug == "" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid product slug"})
 		return
-	} else {
-		itemID = uint(id)
 	}
 
 	// Remove item from cart
-	cartResponse, err := h.cartService.RemoveItem(userIDStr, itemID)
+	cartResponse, err := h.cartService.RemoveItemBySlug(userIDStr, productSlug)
 	if err != nil {
 		if err.Error() == "cart item not found" || err.Error() == "cart item not found in user's cart" {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})

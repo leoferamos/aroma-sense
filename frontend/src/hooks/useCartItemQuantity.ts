@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useCart } from './useCart';
 
 interface UseCartItemQuantityOptions {
-  itemId: number;
+  productSlug: string;
   initialQuantity: number;
   debounceMs?: number;
 }
@@ -16,7 +16,7 @@ interface UseCartItemQuantityReturn {
   error: string | null;
 }
 export function useCartItemQuantity({
-  itemId,
+  productSlug,
   initialQuantity,
   debounceMs = 600,
 }: UseCartItemQuantityOptions): UseCartItemQuantityReturn {
@@ -64,7 +64,7 @@ export function useCartItemQuantity({
       setError(null);
 
       try {
-        await updateItemQuantity(itemId, newQuantity);
+        await updateItemQuantity(productSlug, newQuantity);
         lastSyncedQuantityRef.current = newQuantity;
         previousQuantityRef.current = newQuantity;
         setError(null); 
@@ -76,7 +76,7 @@ export function useCartItemQuantity({
         setIsSyncing(false);
       }
     }, debounceMs);
-  }, [itemId, updateItemQuantity, debounceMs]);
+  }, [productSlug, updateItemQuantity, debounceMs]);
 
   const increment = useCallback(() => {
     setError(null); // Clear error on new interaction

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useProducts } from '../../hooks/useProducts';
+import { useAdminProducts } from '../../hooks/useProducts';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorState from '../../components/ErrorState';
 import AdminProductCard from '../../components/admin/AdminProductCard';
@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 
 const AdminProducts: React.FC = () => {
-  const { products, loading, error, refetch } = useProducts();
+  const { products, loading, error, refetch } = useAdminProducts();
   const navigate = useNavigate();
   const { t } = useTranslation('admin');
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -23,6 +23,7 @@ const AdminProducts: React.FC = () => {
   const [deleteError, setDeleteError] = React.useState<string | null>(null);
 
   const handleEdit = (product: Product) => {
+    if (!product.id) return;
     navigate(`/admin/products/${product.id}/edit`);
   };
 
@@ -33,7 +34,7 @@ const AdminProducts: React.FC = () => {
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || !selectedProduct.id) return;
     setDeleting(true);
     setDeleteError(null);
     try {
@@ -86,7 +87,8 @@ const AdminProducts: React.FC = () => {
   );
 
   return (
-    <AdminLayout actions={actions}>
+    <>
+      <AdminLayout actions={actions}>
       {/* Loading State */}
       {loading && <LoadingSpinner message={t('loadingProducts')} />}
 
@@ -149,7 +151,7 @@ const AdminProducts: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {products.map((product) => (
                   <AdminProductCard
-                    key={product.id}
+                    key={product.id || product.slug}
                     product={product}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
@@ -161,18 +163,21 @@ const AdminProducts: React.FC = () => {
         </>
       )}
 
-      {/* Confirm Delete Modal */}
-      <ConfirmModal
-        open={modalOpen}
-        title={t('deleteProduct')}
-        description={selectedProduct ? t('confirmDeleteProduct', { name: selectedProduct.name }) : ''}
-        confirmText={t('delete')}
-        cancelText={t('cancel')}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCloseModal}
-        loading={deleting}
-      />
     </AdminLayout>
+
+    {/* Confirm Delete Modal */}
+    <ConfirmModal
+      open={modalOpen}
+      title={t('deleteProduct')}
+      description={selectedProduct ? t('confirmDeleteProduct', { name: selectedProduct.name }) : ''}
+      confirmText={t('delete')}
+      cancelText={t('cancel')}
+      onConfirm={handleConfirmDelete}
+      onCancel={handleCloseModal}
+      loading={deleting}
+      error={deleteError}
+    />
+  </>
   );
 };
 

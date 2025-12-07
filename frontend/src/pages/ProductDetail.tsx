@@ -16,9 +16,8 @@ import { useTranslation } from 'react-i18next';
 
 const ProductDetail: React.FC = () => {
   const { t } = useTranslation('common');
-  const { id } = useParams<{ id: string }>();
-  const productId = parseInt(id || '0', 10);
-  const { product, loading, error } = useProductDetail(productId);
+  const { slug } = useParams<{ slug: string }>();
+  const { product, loading, error } = useProductDetail(slug || '');
   const { products: relatedProducts } = useProducts();
   const { addItem } = useCart();
   const [addingToCart, setAddingToCart] = useState(false);
@@ -30,15 +29,15 @@ const ProductDetail: React.FC = () => {
   );
 
   const related = useMemo(
-    () => relatedProducts.filter((p) => p.id !== productId).slice(0, 4),
-    [relatedProducts, productId]
+    () => relatedProducts.filter((p) => p.slug !== product?.slug).slice(0, 4),
+    [relatedProducts, product?.slug]
   );
 
   const handleAddToCart = async () => {
     if (!product || isOutOfStock) return;
     setAddingToCart(true);
     try {
-      await addItem(product.id, 1);
+      await addItem(product.slug, 1);
     } finally {
       setAddingToCart(false);
     }
@@ -160,10 +159,12 @@ const ProductDetail: React.FC = () => {
         </div>
 
         {/* Product Review Section */}
-        <ProductReview
-          productId={productId}
-          canReview={product.can_review}
-        />
+        {product && product.slug && (
+          <ProductReview
+            productSlug={product.slug}
+            canReview={product.can_review}
+          />
+        )}
 
         {/* Related Products */}
         {related.length > 0 && (
@@ -172,9 +173,9 @@ const ProductDetail: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
               {related.map((relatedProduct) => (
                 <ProductCard
-                  key={relatedProduct.id}
+                  key={relatedProduct.slug}
                   product={relatedProduct}
-                  onAddToCart={() => addItem(relatedProduct.id, 1)}
+                  onAddToCart={() => addItem(relatedProduct.slug, 1)}
                 />
               ))}
             </div>

@@ -6,11 +6,13 @@ import ErrorState from '../components/ErrorState';
 import { getUserOrders } from '../services/order';
 import type { OrderResponse } from '../types/order';
 import OrderDetail from '../components/OrderDetail';
+import { useTranslation } from 'react-i18next';
 
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation('common');
 
   useEffect(() => {
     let mounted = true;
@@ -23,7 +25,7 @@ const OrdersPage: React.FC = () => {
         data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setOrders(data);
       } catch {
-        setError('Failed to load orders');
+        setError(t('errors.failedToLoadOrders'));
       } finally {
         setLoading(false);
       }
@@ -41,17 +43,17 @@ const OrdersPage: React.FC = () => {
         <div className="mb-4">
           <BackButton fallbackPath="/products" />
         </div>
-        <h1 className="text-2xl font-semibold mb-6">My Orders</h1>
+        <h1 className="text-2xl font-semibold mb-6">{t('myOrders')}</h1>
 
-        {loading && <LoadingSpinner message="Loading orders..." />}
+        {loading && <LoadingSpinner message={t('loadingOrders')} />}
         {error && <ErrorState message={error} onRetry={() => window.location.reload()} />}
 
         {!loading && !error && (
           <div className="space-y-6">
             {orders.length === 0 ? (
               <div className="p-6 bg-white rounded shadow-sm text-center">
-                <h2 className="text-lg font-semibold">You have no orders yet</h2>
-                <p className="text-sm text-gray-500 mt-2">Browse products and place your first order.</p>
+                <h2 className="text-lg font-semibold">{t('noOrdersYet')}</h2>
+                <p className="text-sm text-gray-500 mt-2">{t('browseProductsMessage')}</p>
               </div>
             ) : (
               orders.map((o) => (

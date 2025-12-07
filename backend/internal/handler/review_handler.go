@@ -12,12 +12,13 @@ import (
 )
 
 type ReviewHandler struct {
-	service     service.ReviewService
-	userService service.UserProfileService
+	service        service.ReviewService
+	userService    service.UserProfileService
+	productService service.ProductService
 }
 
-func NewReviewHandler(s service.ReviewService, userService service.UserProfileService) *ReviewHandler {
-	return &ReviewHandler{service: s, userService: userService}
+func NewReviewHandler(s service.ReviewService, userService service.UserProfileService, productService service.ProductService) *ReviewHandler {
+	return &ReviewHandler{service: s, userService: userService, productService: productService}
 }
 
 // Create review handles the creation of a product review
@@ -27,7 +28,7 @@ func NewReviewHandler(s service.ReviewService, userService service.UserProfileSe
 // @Tags         reviews
 // @Accept       json
 // @Produce      json
-// @Param        id      path     int               true  "Product ID"
+// @Param        slug    path     string            true  "Product slug"
 // @Param        review  body     dto.ReviewRequest true  "Review payload"
 // @Success      201  {object}  dto.ReviewResponse       "Review created"
 // @Failure      400  {object}  dto.ErrorResponse        "Validation error"
@@ -36,12 +37,15 @@ func NewReviewHandler(s service.ReviewService, userService service.UserProfileSe
 // @Failure      404  {object}  dto.ErrorResponse        "Product not found"
 // @Failure      409  {object}  dto.ErrorResponse        "Already reviewed"
 // @Failure      500  {object}  dto.ErrorResponse        "Internal error"
-// @Router       /products/{id}/reviews [post]
+// @Router       /products/{slug}/reviews [post]
 // @Security     BearerAuth
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
-	productID, err := parseProductID(c.Param("id"))
+	slug := c.Param("slug")
+
+	// Get product ID by slug
+	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid product id"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
@@ -101,17 +105,21 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 // @Tags         reviews
 // @Accept       json
 // @Produce      json
-// @Param        id     path   int   true   "Product ID"
-// @Param        page   query  int   false  "Page number"      default(1)
-// @Param        limit  query  int   false  "Items per page"   default(10)
+// @Param        slug   path   string true   "Product slug"
+// @Param        page   query  int    false  "Page number"      default(1)
+// @Param        limit  query  int    false  "Items per page"   default(10)
 // @Success      200  {object}  dto.ReviewListResponse   "Paginated reviews"
-// @Failure      400  {object}  dto.ErrorResponse        "Invalid product id"
+// @Failure      400  {object}  dto.ErrorResponse        "Invalid product slug"
+// @Failure      404  {object}  dto.ErrorResponse        "Product not found"
 // @Failure      500  {object}  dto.ErrorResponse        "Internal error"
-// @Router       /products/{id}/reviews [get]
+// @Router       /products/{slug}/reviews [get]
 func (h *ReviewHandler) ListReviews(c *gin.Context) {
-	productID, err := parseProductID(c.Param("id"))
+	slug := c.Param("slug")
+
+	// Get product ID by slug
+	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid product id"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
@@ -149,15 +157,19 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 // @Tags         reviews
 // @Accept       json
 // @Produce      json
-// @Param        id   path  int  true  "Product ID"
+// @Param        slug path  string  true  "Product slug"
 // @Success      200  {object}  dto.ReviewSummary       "Review summary"
-// @Failure      400  {object}  dto.ErrorResponse       "Invalid product id"
+// @Failure      400  {object}  dto.ErrorResponse       "Invalid product slug"
+// @Failure      404  {object}  dto.ErrorResponse       "Product not found"
 // @Failure      500  {object}  dto.ErrorResponse       "Internal error"
-// @Router       /products/{id}/reviews/summary [get]
+// @Router       /products/{slug}/reviews/summary [get]
 func (h *ReviewHandler) GetSummary(c *gin.Context) {
-	productID, err := parseProductID(c.Param("id"))
+	slug := c.Param("slug")
+
+	// Get product ID by slug
+	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid product id"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
@@ -175,14 +187,6 @@ func (h *ReviewHandler) GetSummary(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, dto.ReviewSummary{Average: avg, Count: count, Distribution: dist})
-}
-
-func parseProductID(raw string) (uint, error) {
-	id, err := strconv.Atoi(raw)
-	if err != nil || id < 1 {
-		return 0, err
-	}
-	return uint(id), nil
 }
 
 func getPtrVal(p *string) string {

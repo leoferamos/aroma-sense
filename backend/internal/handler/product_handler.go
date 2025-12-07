@@ -90,33 +90,46 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, dto.MessageResponse{Message: "Product created successfully"})
 }
 
-// GetProduct handles fetching a product by its ID
+// GetProduct handles fetching a product by its slug
 //
-// @Summary      Get product by ID
-// @Description  Retrieves a specific product by its ID (Admin only)
-// @Tags         admin
+// @Summary      Get product by slug
+// @Description  Retrieves a specific product by its slug for clean URLs
+// @Tags         products
 // @Accept       json
 // @Produce      json
-// @Param        id             path    int     true  "Product ID"
+// @Param        slug           path    string  true  "Product slug"
 // @Success      200  {object}  dto.ProductResponse  "Product details"
-// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
-// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
-// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
 // @Failure      404  {object}  dto.ErrorResponse    "Product not found"
-// @Router       /admin/products/{id} [get]
-// @Security     BearerAuth
+// @Router       /products/{slug} [get]
 func (h *ProductHandler) GetProduct(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
-		return
-	}
+	slug := c.Param("slug")
 
-	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
+	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
+	}
+
+	// Check if user can review this product
+	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
+		publicID := rawUserID.(string)
+		if userModel, err := h.userService.GetByPublicID(publicID); err == nil {
+			// Get product ID from slug for review check
+			productID, idErr := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
+			if idErr == nil {
+				can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, productID)
+				if can && canErr == nil {
+					trueVal := true
+					product.CanReview = &trueVal
+				} else if canErr == nil {
+					falseVal := false
+					product.CanReview = &falseVal
+					if reason == "profile_incomplete" || reason == "not_delivered" || reason == "already_reviewed" {
+						product.CannotReviewReason = &reason
+					}
+				}
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, product)
@@ -207,6 +220,58 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// AdminListProducts handles admin listing of all products with IDs
+//
+// @Summary      Admin list all products
+// @Description  Returns all products with IDs for admin management
+// @Tags         admin,products
+// @Accept       json
+// @Produce      json
+// @Param        page   query    int     false  "Page number (1-based)"  default(1)
+// @Param        limit  query    int     false  "Items per page (default 50, max 200)"  default(50)
+// @Success      200  {object}  dto.ProductListResponse   "Paginated product list with IDs"
+// @Failure      400  {object}  dto.ErrorResponse         "Invalid request parameters"
+// @Failure      500  {object}  dto.ErrorResponse         "Internal server error"
+// @Router       /admin/products [get]
+// @Security     BearerAuth
+func (h *ProductHandler) AdminListProducts(c *gin.Context) {
+	const maxLimit = 200
+
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "50")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
+		return
+	}
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
+	// Get products with IDs for admin
+	products, total, err := h.productService.AdminListProducts(c.Request.Context(), page, limit)
+	if err != nil {
+		log.Printf("AdminListProducts error: %v", err)
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
+		return
+	}
+
+	resp := dto.ProductListResponse{
+		Items: products,
+		Total: total,
+		Page:  page,
+		Limit: limit,
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
 // GetProductByID handles fetching a single product by ID
 //
 // @Summary      Get product by ID
@@ -231,24 +296,6 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
-	}
-
-	// Check if user can review this product
-	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
-		publicID := rawUserID.(string)
-		if userModel, err := h.userService.GetByPublicID(publicID); err == nil {
-			can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, product.ID)
-			if can && canErr == nil {
-				trueVal := true
-				product.CanReview = &trueVal
-			} else if canErr == nil {
-				falseVal := false
-				product.CanReview = &falseVal
-				if reason == "profile_incomplete" || reason == "not_delivered" || reason == "already_reviewed" {
-					product.CannotReviewReason = &reason
-				}
-			}
-		}
 	}
 
 	c.JSON(http.StatusOK, product)
