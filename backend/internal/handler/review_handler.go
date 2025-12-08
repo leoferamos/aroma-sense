@@ -140,10 +140,15 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 		if r.User != nil && r.User.DisplayName != nil {
 			display = getPtrVal(r.User.DisplayName)
 		}
+		authorID := ""
+		if r.User != nil {
+			authorID = r.User.PublicID
+		}
 		items = append(items, dto.ReviewResponse{
 			ID:            r.ID,
 			Rating:        r.Rating,
 			Comment:       r.Comment,
+			AuthorID:      authorID,
 			AuthorDisplay: display,
 			CreatedAt:     r.CreatedAt,
 		})
@@ -194,16 +199,16 @@ func (h *ReviewHandler) GetSummary(c *gin.Context) {
 // DeleteReview handles the deletion of a user's own review
 //
 // @Summary      Delete product review
-// @Description  Deletes a review created by the authenticated user. Only the review author can delete their own review.
+// @Description  Soft deletes a review created by the authenticated user. Only the review author can delete their own review. The review data is retained for compliance purposes but marked as deleted and no longer visible.
 // @Tags         reviews
 // @Accept       json
 // @Produce      json
-// @Param        reviewID  path     string  true  "Review ID"
-// @Success      200  {object}  dto.MessageResponse  "Review deleted"
-// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
-// @Failure      403  {object}  dto.ErrorResponse    "Forbidden (not the review author)"
-// @Failure      404  {object}  dto.ErrorResponse    "Review not found"
-// @Failure      500  {object}  dto.ErrorResponse    "Internal error"
+// @Param        reviewID  path     string  true  "Review ID (UUID)"
+// @Success      200  {object}  dto.MessageResponse  "Review deleted successfully"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized - authentication required"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - can only delete own reviews"
+// @Failure      404  {object}  dto.ErrorResponse    "Review not found or already deleted"
+// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
 // @Router       /reviews/{reviewID} [delete]
 // @Security     BearerAuth
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {
@@ -222,7 +227,7 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 		return
 	}
 
-	err = h.service.DeleteOwnReview(c.Request.Context(), reviewID, strconv.Itoa(int(userModel.ID)))
+	err = h.service.DeleteOwnReview(c.Request.Context(), reviewID, publicID)
 	if err != nil {
 		if status, message, ok := mapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: message})
@@ -235,7 +240,8 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	// Log the deletion
 	if h.auditService != nil {
 		h.auditService.LogDeletionAction(&userModel.ID, userModel.ID, model.AuditActionReviewDeleted, map[string]interface{}{
-			"review_id": reviewID,
+			"review_id":      reviewID,
+			"user_public_id": publicID,
 		})
 	}
 
