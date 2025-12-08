@@ -25,6 +25,8 @@ var errorMapping = map[error]struct {
 	service.ErrReviewInvalidRating:     {Status: http.StatusBadRequest, Message: "invalid rating"},
 	service.ErrReviewCommentTooLong:    {Status: http.StatusBadRequest, Message: "comment too long"},
 	service.ErrReviewProductNotFound:   {Status: http.StatusNotFound, Message: "product not found"},
+	service.ErrReviewNotFound:          {Status: http.StatusNotFound, Message: "review not found"},
+	service.ErrReviewNotFound:          {Status: http.StatusNotFound, Message: "review not found"},
 }
 
 // mapServiceError checks if an error matches a known service error and returns the appropriate HTTP mapping.
