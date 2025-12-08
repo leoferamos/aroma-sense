@@ -17,19 +17,19 @@ export function usePasswordValidation() {
     if (!touched) return '';
     
     if (!password) {
-      return t('newPasswordRequired');
+      return t('auth.passwordRequired');
     }
     if (password.length < 8) {
-      return t('passwordMinLength');
+      return t('auth.passwordMinLength');
     }
     if (!/[A-Z]/.test(password)) {
-      return t('passwordUppercase');
+      return t('auth.passwordUppercase');
     }
     if (!/[0-9]/.test(password)) {
-      return t('passwordNumber');
+      return t('auth.passwordNumber');
     }
     if (!/[!@#$%^&*(),.?":{}|<>[\]/'_;+=-]/.test(password)) {
-      return t('passwordSymbol');
+      return t('auth.passwordSymbol');
     }
     
     return '';
@@ -50,10 +50,10 @@ export function usePasswordValidation() {
     if (!touched) return '';
     
     if (!confirmPassword) {
-      return t('confirmNewPassword');
+      return t('auth.confirmPassword');
     }
     if (confirmPassword !== password) {
-      return t('passwordsDoNotMatch');
+      return t('auth.passwordsDoNotMatch');
     }
     
     return '';
