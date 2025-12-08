@@ -1,9 +1,9 @@
 package service
 
 import (
-	"errors"
 	"time"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
@@ -48,7 +48,7 @@ func (s *adminUserService) GetUserByID(id uint) (*model.User, error) {
 func (s *adminUserService) UpdateUserRole(userID uint, newRole string, adminPublicID string) error {
 	// Validate role
 	if newRole != "admin" && newRole != "client" {
-		return errors.New("invalid role")
+		return apperror.NewCodeMessage("invalid_role", "invalid role")
 	}
 
 	// Prevent admin from changing their own role
@@ -57,7 +57,7 @@ func (s *adminUserService) UpdateUserRole(userID uint, newRole string, adminPubl
 		return err
 	}
 	if user.PublicID == adminPublicID {
-		return errors.New("cannot change your own role")
+		return apperror.NewCodeMessage("cannot_change_own_role", "cannot change your own role")
 	}
 
 	// Get admin user for audit log
@@ -93,7 +93,7 @@ func (s *adminUserService) DeactivateUser(userID uint, adminPublicID string, rea
 
 	now := time.Now()
 	if suspensionUntil != nil && suspensionUntil.Before(now) {
-		return errors.New("suspensionUntil cannot be in the past")
+		return apperror.NewCodeMessage("suspension_until_past", "suspensionUntil cannot be in the past")
 	}
 	if err := s.repo.DeactivateUser(userID, adminPublicID, now, reason, notes, suspensionUntil); err != nil {
 		return err
@@ -143,7 +143,7 @@ func (s *adminUserService) AdminReactivateUser(userID uint, adminPublicID string
 
 	// Check if user is deactivated
 	if user.DeactivatedAt == nil {
-		return errors.New("user is not deactivated")
+		return apperror.NewCodeMessage("user_not_deactivated", "user is not deactivated")
 	}
 
 	// Reactivate user
