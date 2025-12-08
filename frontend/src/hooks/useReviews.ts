@@ -133,7 +133,7 @@ export function useReviews(productSlug: string, opts?: { initialPage?: number; i
 
       return false;
     }
-  }, [productSlug, refresh, t]);
+  }, [refresh, t]);
 
   const summary = useMemo(() => summaryState, [summaryState]);
 
