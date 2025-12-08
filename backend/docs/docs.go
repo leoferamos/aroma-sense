@@ -2023,6 +2023,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/reviews/{reviewID}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Soft deletes a review created by the authenticated user. Only the review author can delete their own review. The review data is retained for compliance purposes but marked as deleted and no longer visible.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Delete product review",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Review ID (UUID)",
+                        "name": "reviewID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Review deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MessageResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - authentication required",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - can only delete own reviews",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Review not found or already deleted",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/shipping/options": {
             "get": {
                 "security": [
@@ -2071,6 +2132,64 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allows authenticated users to change their password by providing current and new password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Change user password",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Password change request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or current password incorrect",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2871,6 +2990,24 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "current_password",
+                "new_password"
+            ],
+            "properties": {
+                "current_password": {
+                    "type": "string",
+                    "example": "oldpassword123"
+                },
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "newpassword123"
+                }
+            }
+        },
         "dto.ChatRequest": {
             "type": "object",
             "properties": {
@@ -3431,6 +3568,9 @@ const docTemplate = `{
                 "author_display": {
                     "type": "string"
                 },
+                "author_id": {
+                    "type": "string"
+                },
                 "comment": {
                     "type": "string"
                 },
@@ -3676,7 +3816,8 @@ const docTemplate = `{
                 "deletion_requested",
                 "deletion_confirmed",
                 "deletion_cancelled",
-                "data_anonymized"
+                "data_anonymized",
+                "review_deleted"
             ],
             "x-enum-varnames": [
                 "AuditActionUserLogin",
@@ -3692,7 +3833,8 @@ const docTemplate = `{
                 "AuditActionDeletionRequested",
                 "AuditActionDeletionConfirmed",
                 "AuditActionDeletionCancelled",
-                "AuditActionDataAnonymized"
+                "AuditActionDataAnonymized",
+                "AuditActionReviewDeleted"
             ]
         }
     },
