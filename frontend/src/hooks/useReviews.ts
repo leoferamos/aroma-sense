@@ -106,7 +106,7 @@ export function useReviews(productSlug: string, opts?: { initialPage?: number; i
 
     try {
       // Make API call first
-      await deleteReview(productSlug, reviewId);
+      await deleteReview(reviewId);
 
       // Refresh data from server to ensure consistency
       await refresh();

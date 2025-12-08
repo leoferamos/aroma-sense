@@ -63,7 +63,6 @@ export async function createReview(
 }
 
 export async function deleteReview(
-  productSlug: string,
   reviewId: string
 ): Promise<void> {
   await api.delete(`/reviews/${reviewId}`);
