@@ -21,6 +21,7 @@ var (
 	ErrReviewInvalidRating     = errors.New("invalid rating")
 	ErrReviewCommentTooLong    = errors.New("comment too long")
 	ErrReviewProductNotFound   = errors.New("product not found")
+	ErrReviewNotFound          = errors.New("review not found")
 )
 
 // ReviewService defines business logic for product reviews
@@ -198,6 +199,9 @@ func (s *reviewService) DeleteOwnReview(ctx context.Context, reviewID string, us
 	}
 
 	if err := s.reviews.SoftDeleteReview(ctx, reviewID, userID); err != nil {
+		if errors.Is(err, repository.ErrReviewNotFound) {
+			return ErrReviewNotFound
+		}
 		return fmt.Errorf("failed to delete review: %w", err)
 	}
 

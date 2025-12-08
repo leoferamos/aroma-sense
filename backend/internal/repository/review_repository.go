@@ -2,11 +2,14 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"gorm.io/gorm"
 )
+
+var ErrReviewNotFound = errors.New("review not found")
 
 type ReviewRepository interface {
 	CreateReview(ctx context.Context, review *model.Review) error
@@ -84,9 +87,16 @@ func (r *reviewRepository) ExistsByProductAndUser(ctx context.Context, productID
 
 func (r *reviewRepository) SoftDeleteReview(ctx context.Context, reviewID string, userID string) error {
 	now := time.Now()
-	return r.db.WithContext(ctx).Model(&model.Review{}).
+	result := r.db.WithContext(ctx).Model(&model.Review{}).
 		Where("id = ? AND user_id = ? AND deleted_at IS NULL", reviewID, userID).
-		Updates(map[string]interface{}{"deleted_at": now}).Error
+		Updates(map[string]interface{}{"deleted_at": now})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return ErrReviewNotFound
+	}
+	return nil
 }
 
 // GetProductIDForUserReview retrieves the product ID for a given review ID and user ID

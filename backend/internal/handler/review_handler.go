@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -15,10 +16,11 @@ type ReviewHandler struct {
 	service        service.ReviewService
 	userService    service.UserProfileService
 	productService service.ProductService
+	auditService   service.AuditLogService
 }
 
-func NewReviewHandler(s service.ReviewService, userService service.UserProfileService, productService service.ProductService) *ReviewHandler {
-	return &ReviewHandler{service: s, userService: userService, productService: productService}
+func NewReviewHandler(s service.ReviewService, userService service.UserProfileService, productService service.ProductService, auditService service.AuditLogService) *ReviewHandler {
+	return &ReviewHandler{service: s, userService: userService, productService: productService, auditService: auditService}
 }
 
 // Create review handles the creation of a product review
@@ -187,6 +189,57 @@ func (h *ReviewHandler) GetSummary(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, dto.ReviewSummary{Average: avg, Count: count, Distribution: dist})
+}
+
+// DeleteReview handles the deletion of a user's own review
+//
+// @Summary      Delete product review
+// @Description  Deletes a review created by the authenticated user. Only the review author can delete their own review.
+// @Tags         reviews
+// @Accept       json
+// @Produce      json
+// @Param        reviewID  path     string  true  "Review ID"
+// @Success      200  {object}  dto.MessageResponse  "Review deleted"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden (not the review author)"
+// @Failure      404  {object}  dto.ErrorResponse    "Review not found"
+// @Failure      500  {object}  dto.ErrorResponse    "Internal error"
+// @Router       /reviews/{reviewID} [delete]
+// @Security     BearerAuth
+func (h *ReviewHandler) DeleteReview(c *gin.Context) {
+	reviewID := c.Param("reviewID")
+
+	// Get authenticated user ID from context
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
+		return
+	}
+	publicID := rawUserID.(string)
+	userModel, err := h.userService.GetByPublicID(publicID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
+		return
+	}
+
+	err = h.service.DeleteOwnReview(c.Request.Context(), reviewID, strconv.Itoa(int(userModel.ID)))
+	if err != nil {
+		if status, message, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: message})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal error"})
+		return
+	}
+
+	// Log the deletion
+	if h.auditService != nil {
+		h.auditService.LogDeletionAction(&userModel.ID, userModel.ID, model.AuditActionReviewDeleted, map[string]interface{}{
+			"review_id": reviewID,
+		})
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "review deleted successfully"})
 }
 
 func getPtrVal(p *string) string {
