@@ -19,6 +19,8 @@ type LgpdService interface {
 	CancelAccountDeletion(publicID string) error
 	AnonymizeExpiredUser(publicID string) error
 	RequestContestation(publicID string, reason string) error
+	ProcessPendingDeletions() error
+	ProcessExpiredAnonymizations() error
 }
 
 type lgpdService struct {
@@ -127,7 +129,7 @@ func (s *lgpdService) ConfirmAccountDeletion(publicID string) error {
 
 	// Log deletion confirmation
 	if s.auditLogService != nil {
-		s.auditLogService.LogDeletionAction(nil, user.ID, model.AuditActionDeletionConfirmed,
+		s.auditLogService.LogDeletionAction(nil, user.ID, model.AuditActionUserDeleted,
 			map[string]interface{}{
 				"cooling_off_expired":    true,
 				"retention_period_years": 2,
@@ -196,7 +198,7 @@ func (s *lgpdService) AnonymizeExpiredUser(publicID string) error {
 		return errors.New("user has not confirmed account deletion")
 	}
 
-	retentionPeriod := user.DeletionConfirmedAt.Add(2 * 365 * 24 * time.Hour) // 2 years
+	retentionPeriod := user.DeletionConfirmedAt.Add(5 * 365 * 24 * time.Hour) // 5 years
 	if time.Now().Before(retentionPeriod) {
 		return errors.New("retention period not yet expired")
 	}
@@ -288,5 +290,40 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 		_ = s.notifier.SendContestationReceived(user.Email)
 	}
 
+	return nil
+}
+
+// ProcessPendingDeletions automatically confirms deletions after 7 days (daily job)
+func (s *lgpdService) ProcessPendingDeletions() error {
+	cutoff := time.Now().Add(-7 * 24 * time.Hour) // 7 days ago
+	// Find users with deletion_requested_at > 7 days ago and not yet confirmed
+	users, err := s.repo.FindUsersPendingAutoConfirm(cutoff)
+	if err != nil {
+		return fmt.Errorf("failed to find pending deletions: %w", err)
+	}
+
+	for _, user := range users {
+		if err := s.ConfirmAccountDeletion(user.PublicID); err != nil {
+			// Log error but continue processing others
+			fmt.Printf("Failed to confirm deletion for user %s: %v\n", user.PublicID, err)
+		}
+	}
+	return nil
+}
+
+// ProcessExpiredAnonymizations anonymizes users after 5 years (daily job)
+func (s *lgpdService) ProcessExpiredAnonymizations() error {
+	// Find users with deletion_confirmed_at > 5 years ago and not yet anonymized
+	users, err := s.repo.FindExpiredUsersForAnonymization()
+	if err != nil {
+		return fmt.Errorf("failed to find users for anonymization: %w", err)
+	}
+
+	for _, user := range users {
+		if err := s.AnonymizeExpiredUser(user.PublicID); err != nil {
+			// Log error but continue
+			fmt.Printf("Failed to anonymize user %s: %v\n", user.PublicID, err)
+		}
+	}
 	return nil
 }

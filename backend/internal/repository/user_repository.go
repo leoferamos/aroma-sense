@@ -161,7 +161,11 @@ func (r *userRepository) RequestAccountDeletion(publicID string, requestedAt tim
 
 // ConfirmAccountDeletion confirms account deletion after retention period
 func (r *userRepository) ConfirmAccountDeletion(publicID string, confirmedAt time.Time) error {
-	return r.db.Model(&model.User{}).Where("public_id = ?", publicID).Update("deletion_confirmed_at", confirmedAt).Error
+	updates := map[string]interface{}{
+		"deleted_at":            confirmedAt,
+		"deletion_confirmed_at": confirmedAt,
+	}
+	return r.db.Model(&model.User{}).Where("public_id = ?", publicID).Updates(updates).Error
 }
 
 // HasActiveDependencies checks if user has active orders or other dependencies that prevent deletion
@@ -182,10 +186,10 @@ func (r *userRepository) HasActiveDependencies(publicID string) (bool, error) {
 func (r *userRepository) FindExpiredUsersForAnonymization() ([]*model.User, error) {
 	var users []*model.User
 
-	// Calculate cutoff date (2 years ago from now)
-	cutoffDate := time.Now().AddDate(-2, 0, 0)
+	// Calculate cutoff date (5 years ago from now)
+	cutoffDate := time.Now().AddDate(-5, 0, 0)
 
-	// Find users who confirmed deletion more than 2 years ago
+	// Find users who confirmed deletion more than 5 years ago
 	if err := r.db.Where("deletion_confirmed_at IS NOT NULL AND deletion_confirmed_at < ?", cutoffDate).
 		Find(&users).Error; err != nil {
 		return nil, err
