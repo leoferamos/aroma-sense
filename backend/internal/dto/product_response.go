@@ -3,7 +3,6 @@ package dto
 import "time"
 
 // ProductResponse represents the product data returned to the client
-// @Description Product information returned by the API
 type ProductResponse struct {
 	ID                 *uint     `json:"id,omitempty" example:"1"`
 	Name               string    `json:"name" example:"Sauvage"`
@@ -25,8 +24,8 @@ type ProductResponse struct {
 	NotesBase          []string  `json:"notes_base,omitempty" example:"[\"ambroxan\"]"`
 	Category           string    `json:"category" example:"Eau de Parfum"`
 	StockQuantity      int       `json:"stock_quantity" example:"50"`
-	CreatedAt          time.Time `json:"created_at" example:"2025-09-28T10:00:00Z"`
-	UpdatedAt          time.Time `json:"updated_at" example:"2025-09-28T10:00:00Z"`
-	CanReview          *bool     `json:"can_review,omitempty"`
+	CreatedAt          time.Time `json:"created_at,omitempty" example:"2025-09-28T10:00:00Z"`
+	UpdatedAt          time.Time `json:"updated_at,omitempty" example:"2025-09-28T10:00:00Z"`
+	CanReview          *bool     `json:"can_review"`
 	CannotReviewReason *string   `json:"cannot_review_reason,omitempty"`
 }
