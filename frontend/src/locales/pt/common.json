@@ -257,7 +257,13 @@
     "pageOf": "Página {{page}} de {{total}}",
     "prev": "Anterior",
     "next": "Próximo",
-    "perPage": "{{count}}/página"
+    "perPage": "{{count}}/página",
+    "confirmDelete": "Tem certeza que deseja excluir esta avaliação?",
+    "confirmDeleteDescription": "Esta ação não pode ser desfeita. A avaliação será removida permanentemente.",
+    "reviewDeleted": "Avaliação excluída com sucesso!",
+    "deleteReview": "Excluir avaliação",
+    "deleteForbidden": "Você não tem permissão para excluir esta avaliação",
+    "deleteFailed": "Falha ao excluir avaliação. Tente novamente."
   },
   "errors": {
     "failedToLoadProfile": "Falha ao carregar perfil",

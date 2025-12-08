@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isAxiosError } from 'axios';
-import { listReviews, getSummary, createReview, type Review, type ReviewSummary, type ReviewRequest } from '../services/review';
+import { useTranslation } from 'react-i18next';
+import { listReviews, getSummary, createReview, deleteReview, type Review, type ReviewSummary, type ReviewRequest } from '../services/review';
 
 export interface UseReviewsResult {
   reviews: Review[];
@@ -14,9 +15,11 @@ export interface UseReviewsResult {
   setLimit: (l: number) => void;
   refresh: () => Promise<void>;
   createReview: (payload: ReviewRequest) => Promise<Review | null>;
+  deleteReview: (reviewId: string) => Promise<boolean>;
 }
 
 export function useReviews(productSlug: string, opts?: { initialPage?: number; initialLimit?: number }) : UseReviewsResult {
+  const { t } = useTranslation('common');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [summaryState, setSummaryState] = useState<ReviewSummary | null>(null);
   const [page, setPage] = useState(opts?.initialPage ?? 1);
@@ -95,7 +98,44 @@ export function useReviews(productSlug: string, opts?: { initialPage?: number; i
     }
   }, [productSlug, page, refresh]);
 
+  const doDelete = useCallback(async (reviewId: string): Promise<boolean> => {
+    // Validate input
+    if (!reviewId || typeof reviewId !== 'string') {
+      return false;
+    }
+
+    try {
+      // Make API call first
+      await deleteReview(productSlug, reviewId);
+
+      // Refresh data from server to ensure consistency
+      await refresh();
+
+      return true;
+
+    } catch (err: unknown) {
+      // Handle different error types with i18n
+      if (isAxiosError(err)) {
+        const status = err.response?.status;
+
+        if (status === 403) {
+          setError(t('reviews.deleteForbidden', 'You do not have permission to delete this review'));
+        } else if (status === 404) {
+          setError(t('reviews.notFound', 'Review not found or already deleted'));
+        } else if (status === 401) {
+          setError(t('auth.loginRequired', 'Please log in to delete reviews'));
+        } else {
+          setError(t('reviews.deleteFailed', 'Failed to delete review. Please try again.'));
+        }
+      } else {
+        setError(t('common.error', 'An unexpected error occurred'));
+      }
+
+      return false;
+    }
+  }, [productSlug, refresh, t]);
+
   const summary = useMemo(() => summaryState, [summaryState]);
 
-  return { reviews, summary, page, limit, total, loading, error, setPage, setLimit, refresh, createReview: doCreate };
+  return { reviews, summary, page, limit, total, loading, error, setPage, setLimit, refresh, createReview: doCreate, deleteReview: doDelete };
 }
