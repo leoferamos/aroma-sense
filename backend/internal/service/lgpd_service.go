@@ -129,7 +129,7 @@ func (s *lgpdService) ConfirmAccountDeletion(publicID string) error {
 
 	// Log deletion confirmation
 	if s.auditLogService != nil {
-		s.auditLogService.LogDeletionAction(nil, user.ID, model.AuditActionUserDeleted,
+		s.auditLogService.LogDeletionAction(nil, user.ID, model.AuditActionDeletionConfirmed,
 			map[string]interface{}{
 				"cooling_off_expired":    true,
 				"retention_period_years": 2,
