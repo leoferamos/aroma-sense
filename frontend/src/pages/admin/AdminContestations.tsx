@@ -5,15 +5,6 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-const navItems = [
-  { label: 'Dashboard', to: '/admin/dashboard' },
-  { label: 'Products', to: '/admin/products' },
-  { label: 'Orders', to: '/admin/orders' },
-  { label: 'Users', to: '/admin/users' },
-  { label: 'Audit Logs', to: '/admin/audit-logs' },
-  { label: 'Contestations', to: '/admin/contestations' },
-];
-
 const AdminContestations: React.FC = () => {
   const [contestations, setContestations] = useState<AdminContestation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -21,6 +12,15 @@ const AdminContestations: React.FC = () => {
   const { t } = useTranslation('admin');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [reviewNotes, setReviewNotes] = useState<{ [id: number]: string }>({});
+
+  const navItems = [
+    { label: t('dashboard'), to: '/admin/dashboard' },
+    { label: t('products'), to: '/admin/products' },
+    { label: t('orders'), to: '/admin/orders' },
+    { label: t('users'), to: '/admin/users' },
+    { label: t('auditLogs'), to: '/admin/audit-logs' },
+    { label: t('contestations'), to: '/admin/contestations' },
+  ];
 
   const fetchContestations = async () => {
     setLoading(true);
@@ -68,7 +68,7 @@ const AdminContestations: React.FC = () => {
   return (
     <AdminLayout
       navItems={navItems}
-      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('nav.dashboard')}</Link></div>}
+      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('dashboard')}</Link></div>}
     >
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-4">{t('pendingUserContestations')}</h2>
