@@ -27,6 +27,7 @@ var (
 // ReviewService defines business logic for product reviews
 type ReviewService interface {
 	CanUserReview(ctx context.Context, user *model.User, productID uint) (bool, string, error)
+	CanUserReviewBySlug(ctx context.Context, user *model.User, slug string) (bool, string, error)
 	CreateReview(ctx context.Context, user *model.User, productID uint, rating int, comment string) (*model.Review, error)
 	ListReviews(ctx context.Context, productID uint, page, perPage int) ([]model.Review, int, error)
 	GetAverage(ctx context.Context, productID uint) (float64, int, error)
@@ -86,6 +87,15 @@ func (s *reviewService) CanUserReview(ctx context.Context, user *model.User, pro
 		return false, "already_reviewed", nil
 	}
 	return true, "", nil
+}
+
+// CanUserReviewBySlug checks if a user can review a product identified by slug
+func (s *reviewService) CanUserReviewBySlug(ctx context.Context, user *model.User, slug string) (bool, string, error) {
+	prod, err := s.products.FindBySlug(slug)
+	if err != nil {
+		return false, "product_not_found", fmt.Errorf("failed to resolve product slug: %w", err)
+	}
+	return s.CanUserReview(ctx, user, prod.ID)
 }
 
 // CreateReview creates a new product review
