@@ -227,6 +227,16 @@ func (m *MockLgpdService) RequestContestation(publicID string, reason string) er
 	args := m.Called(publicID, reason)
 	return args.Error(0)
 }
+
+func (m *MockLgpdService) ProcessPendingDeletions() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) ProcessExpiredAnonymizations() error {
+	args := m.Called()
+	return args.Error(0)
+}
 func setupUserRouter() (*gin.Engine, *MockAuthService, *MockUserProfileService, *MockLgpdService) {
 	mockAuth := new(MockAuthService)
 	mockProfile := new(MockUserProfileService)
