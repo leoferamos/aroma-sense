@@ -40,14 +40,18 @@ func (h *UserHandler) UserProfile() service.UserProfileService {
 func (h *UserHandler) RegisterUser(c *gin.Context) {
 	var input dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	input.Email = strings.ToLower(input.Email)
 
 	if err := h.authService.RegisterUser(input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
@@ -68,7 +72,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 func (h *UserHandler) LoginUser(c *gin.Context) {
 	var input dto.LoginRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
@@ -76,13 +80,17 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	accessToken, refreshToken, user, err := h.authService.Login(input)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid credentials"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "invalid_credentials"})
 		return
 	}
 
 	// Set refresh token in HttpOnly cookie
 	if user.RefreshTokenExpiresAt == nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "refresh token expiration not set"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	auth.SetRefreshTokenCookie(c, refreshToken, *user.RefreshTokenExpiresAt)
@@ -115,14 +123,18 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 	// Read refresh token from HttpOnly cookie
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil || refreshToken == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "missing refresh token"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "refresh_token_missing"})
 		return
 	}
 
 	// Validate refresh token and generate new access token + rotate refresh token
 	accessToken, newRefreshToken, user, err := h.authService.RefreshAccessToken(refreshToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -154,7 +166,14 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 // @Router       /users/logout [post]
 func (h *UserHandler) LogoutUser(c *gin.Context) {
 	if refreshToken, err := c.Cookie("refresh_token"); err == nil && refreshToken != "" {
-		_ = h.authService.InvalidateRefreshToken(refreshToken)
+		if err := h.authService.InvalidateRefreshToken(refreshToken); err != nil {
+			if status, code, ok := mapServiceError(err); ok {
+				c.JSON(status, dto.ErrorResponse{Error: code})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+			return
+		}
 	}
 	auth.ClearRefreshTokenCookie(c)
 
@@ -172,15 +191,18 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 // @Router       /users/me [get]
 // @Security     BearerAuth
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	rawUserID, exists := c.Get("userID")
-	if !exists || rawUserID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
-	publicID := rawUserID.(string)
 	user, err := h.userProfileService.GetByPublicID(publicID)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	resp := dto.ProfileResponse{
@@ -207,27 +229,25 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Router       /users/me/profile [patch]
 // @Security     BearerAuth
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
-	rawUserID, exists := c.Get("userID")
-	if !exists || rawUserID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
-	publicID := rawUserID.(string)
 
 	var req dto.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	user, err := h.userProfileService.UpdateDisplayName(publicID, req.DisplayName)
 	if err != nil {
-		// simple validation mapping
-		if strings.Contains(err.Error(), "too short") || strings.Contains(err.Error(), "too long") {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to update profile"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -254,16 +274,19 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 // @Router       /users/me/export [get]
 // @Security     BearerAuth
 func (h *UserHandler) ExportUserData(c *gin.Context) {
-	rawUserID, exists := c.Get("userID")
-	if !exists || rawUserID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
-	publicID := rawUserID.(string)
 
 	data, err := h.lgpdService.ExportUserData(publicID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to export user data"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -284,42 +307,48 @@ func (h *UserHandler) ExportUserData(c *gin.Context) {
 // @Router       /users/me/deletion [post]
 // @Security     BearerAuth
 func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
-	rawUserID, exists := c.Get("userID")
-	if !exists || rawUserID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
-	publicID := rawUserID.(string)
 
 	var input dto.DeleteAccountRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	// Require explicit confirmation
 	if input.Confirmation != "DELETE_MY_ACCOUNT" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid confirmation phrase"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	if err := h.lgpdService.RequestAccountDeletion(publicID); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "account deletion requested successfully - you have 7 days to change your mind"})
 }
 func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
-	rawUserID, exists := c.Get("userID")
-	if !exists || rawUserID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
-	publicID := rawUserID.(string)
 
 	if err := h.lgpdService.ConfirmAccountDeletion(publicID); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -339,15 +368,18 @@ func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
 // @Router       /users/me/deletion/cancel [post]
 // @Security     BearerAuth
 func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
-	rawUserID, exists := c.Get("userID")
-	if !exists || rawUserID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
-	publicID := rawUserID.(string)
 
 	if err := h.lgpdService.CancelAccountDeletion(publicID); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -368,21 +400,24 @@ func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
 // @Router       /users/me/contest [post]
 // @Security     BearerAuth
 func (h *UserHandler) RequestContestation(c *gin.Context) {
-	rawUserID, exists := c.Get("userID")
-	if !exists || rawUserID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
-	publicID := rawUserID.(string)
 
 	var req dto.ContestationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	if err := h.lgpdService.RequestContestation(publicID, req.Reason); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -403,26 +438,28 @@ func (h *UserHandler) RequestContestation(c *gin.Context) {
 // @Router /users/change-password [post]
 // @Security     BearerAuth
 func (h *UserHandler) ChangePassword(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+	publicID := c.GetString("userID")
+	if publicID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
-	publicID := userID.(string)
-
 	var req dto.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	if err := h.userProfileService.ChangePassword(publicID, req.CurrentPassword, req.NewPassword); err != nil {
-		if strings.Contains(err.Error(), "current password") || strings.Contains(err.Error(), "password must") || strings.Contains(err.Error(), "new password must be different") {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to change password"})
+		if strings.Contains(err.Error(), "password must") {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,7 +45,7 @@ func NewPasswordResetHandler(s service.PasswordResetService, limiter rate.RateLi
 func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 	var input dto.ResetPasswordRequestRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid email format"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
@@ -62,21 +63,26 @@ func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 	c.Header("X-RateLimit-Reset", resetAt.Format(time.RFC3339))
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to process request"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
 	if !allowed {
-		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{
-			Error: "Too many reset requests. Please try again later.",
-		})
+		if resetAt.After(time.Now()) {
+			retryAfter := int(time.Until(resetAt).Seconds())
+			if retryAfter < 0 {
+				retryAfter = 0
+			}
+			c.Header("Retry-After", strconv.Itoa(retryAfter))
+		}
+		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{Error: "rate_limited"})
 		return
 	}
 
 	// Call service
 	if err := h.resetService.RequestReset(input.Email); err != nil {
 		// Log error internally but don't expose details to user
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to process request"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -104,7 +110,7 @@ func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 func (h *PasswordResetHandler) ConfirmReset(c *gin.Context) {
 	var input dto.ResetPasswordConfirmRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid request format"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
@@ -114,7 +120,7 @@ func (h *PasswordResetHandler) ConfirmReset(c *gin.Context) {
 
 	// Validate code format
 	if len(input.Code) != 6 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid or expired reset code"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
@@ -130,21 +136,34 @@ func (h *PasswordResetHandler) ConfirmReset(c *gin.Context) {
 	c.Header("X-RateLimit-Reset", resetAt.Format(time.RFC3339))
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to process request"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
 	if !allowed {
-		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{
-			Error: "Too many confirmation attempts. Please try again later.",
-		})
+		if resetAt.After(time.Now()) {
+			retryAfter := int(time.Until(resetAt).Seconds())
+			if retryAfter < 0 {
+				retryAfter = 0
+			}
+			c.Header("Retry-After", strconv.Itoa(retryAfter))
+		}
+		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{Error: "rate_limited"})
 		return
 	}
 
 	// Call service to reset password
 	if err := h.resetService.ConfirmReset(input.Email, input.Code, input.NewPassword); err != nil {
 		// Return generic error to avoid revealing details
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		if strings.Contains(err.Error(), "password must") {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 

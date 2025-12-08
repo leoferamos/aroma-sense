@@ -48,7 +48,7 @@ func NewProductHandler(ps service.ProductService, rs service.ReviewService, us s
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var form dto.ProductFormDTO
 	if err := c.ShouldBindWith(&form, binding.FormMultipart); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 	file, fileHeader, err := c.Request.FormFile("image")
@@ -71,7 +71,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		buf := make([]byte, 512)
 		n, err := file.Read(buf)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "failed to read file"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 			return
 		}
 
@@ -84,7 +84,11 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	if err := h.productService.CreateProduct(c.Request.Context(), form, fileUpload); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	c.JSON(http.StatusCreated, dto.MessageResponse{Message: "Product created successfully"})
@@ -106,7 +110,11 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 
 	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
 		return
 	}
 
@@ -157,13 +165,13 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid page parameter"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 	if limit > maxLimit {
@@ -196,14 +204,18 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	// parse and validate sort
 	sort := c.DefaultQuery("sort", "relevance")
 	if sort != "relevance" && sort != "latest" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid sort parameter"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	items, total, err := h.productService.SearchProducts(c.Request.Context(), query, page, limit, sort)
 	if err != nil {
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
 		log.Printf("GetLatestProducts: search error (query=%q, page=%d, limit=%d, sort=%s): %v", query, page, limit, sort, err)
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -238,13 +250,13 @@ func (h *ProductHandler) AdminListProducts(c *gin.Context) {
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid page parameter"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 	if limit > maxLimit {
@@ -255,7 +267,11 @@ func (h *ProductHandler) AdminListProducts(c *gin.Context) {
 	products, total, err := h.productService.AdminListProducts(c.Request.Context(), page, limit)
 	if err != nil {
 		log.Printf("AdminListProducts error: %v", err)
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -284,13 +300,17 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
 		return
 	}
 
@@ -317,19 +337,23 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	var input dto.UpdateProductRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	if err := h.productService.UpdateProduct(c.Request.Context(), uint(id), input); err != nil {
 		log.Printf("UpdateProduct: service error: %v", err)
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -355,13 +379,17 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	if err := h.productService.DeleteProduct(c.Request.Context(), uint(id)); err != nil {
 		log.Printf("DeleteProduct: service error: %v", err)
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 

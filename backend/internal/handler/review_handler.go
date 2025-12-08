@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -47,7 +46,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	// Get product ID by slug
 	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
 		return
 	}
 
@@ -66,7 +65,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 
 	var req dto.ReviewRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
@@ -77,16 +76,11 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 
 	review, err := h.service.CreateReview(c.Request.Context(), userModel, productID, req.Rating, req.Comment)
 	if err != nil {
-		if status, message, ok := mapServiceError(err); ok {
-			// Preserve detailed validation messages when available
-			if errors.Is(err, service.ErrReviewInvalidRating) || errors.Is(err, service.ErrReviewCommentTooLong) {
-				c.JSON(status, dto.ErrorResponse{Error: err.Error()})
-				return
-			}
-			c.JSON(status, dto.ErrorResponse{Error: message})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -122,7 +116,7 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 	// Get product ID by slug
 	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
 		return
 	}
 
@@ -131,7 +125,7 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 
 	reviews, total, err := h.service.ListReviews(c.Request.Context(), productID, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -177,13 +171,13 @@ func (h *ReviewHandler) GetSummary(c *gin.Context) {
 	// Get product ID by slug
 	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
 		return
 	}
 
 	avg, count, err := h.service.GetAverage(c.Request.Context(), productID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -230,11 +224,11 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 
 	err = h.service.DeleteOwnReview(c.Request.Context(), reviewID, publicID)
 	if err != nil {
-		if status, message, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: message})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 

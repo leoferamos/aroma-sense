@@ -247,7 +247,8 @@ func TestProductHandler_CreateProduct(t *testing.T) {
 
 		w := performMultipartRequest(t, router, http.MethodPost, "/admin/products", form, true)
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), "internal_error")
 		mockService.AssertExpectations(t)
 	})
 
@@ -287,7 +288,7 @@ func TestProductHandler_CreateProduct(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Contains(t, w.Body.String(), "failed to read file")
+		assert.Contains(t, w.Body.String(), "invalid_request")
 	})
 }
 
@@ -326,6 +327,7 @@ func TestProductHandler_GetProduct(t *testing.T) {
 		w := performProductRequest(t, router, http.MethodGet, "/products/nonexistent", nil)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.Contains(t, w.Body.String(), "product_not_found")
 		mockService.AssertExpectations(t)
 	})
 
@@ -337,6 +339,7 @@ func TestProductHandler_GetProduct(t *testing.T) {
 		w := performProductRequest(t, router, http.MethodGet, "/products/invalid-slug", nil)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.Contains(t, w.Body.String(), "product_not_found")
 		mockService.AssertExpectations(t)
 	})
 }

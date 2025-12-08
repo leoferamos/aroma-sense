@@ -37,19 +37,23 @@ const maxPerPage = 100
 func (h *OrderHandler) CreateOrderFromCart(c *gin.Context) {
 	var req dto.CreateOrderFromCartRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	userID := c.GetString("userID")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	orderResp, err := h.orderService.CreateOrderFromCart(userID, &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -84,7 +88,7 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 		case model.OrderStatusPending, model.OrderStatusProcessing, model.OrderStatusShipped, model.OrderStatusDelivered, model.OrderStatusCancelled:
 			// valid
 		default:
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid status"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 			return
 		}
 		status = &statusParam
@@ -97,7 +101,7 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 		if t, err := time.Parse(layout, s); err == nil {
 			startDatePtr = &t
 		} else {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid start_date format, use YYYY-MM-DD"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 			return
 		}
 	}
@@ -106,7 +110,7 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 			end := t.Add(24*time.Hour - time.Nanosecond)
 			endDatePtr = &end
 		} else {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid end_date format, use YYYY-MM-DD"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 			return
 		}
 	}
@@ -117,7 +121,7 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 		if v, err := strconv.Atoi(p); err == nil && v > 0 {
 			page = v
 		} else {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid page"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 			return
 		}
 	}
@@ -125,7 +129,7 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 		if v, err := strconv.Atoi(pp); err == nil && v > 0 {
 			perPage = v
 		} else {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid per_page"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 			return
 		}
 	}
@@ -137,7 +141,11 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 
 	resp, err := h.orderService.AdminListOrders(status, startDatePtr, endDatePtr, page, perPage)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to list orders"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	c.JSON(http.StatusOK, resp)
@@ -157,13 +165,17 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 func (h *OrderHandler) ListUserOrders(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	orders, err := h.orderService.GetOrdersByUser(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to fetch orders"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
