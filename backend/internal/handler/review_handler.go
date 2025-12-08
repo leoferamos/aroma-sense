@@ -94,6 +94,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 		ID:            review.ID,
 		Rating:        review.Rating,
 		Comment:       review.Comment,
+		AuthorID:      userModel.PublicID,
 		AuthorDisplay: getPtrVal(userModel.DisplayName),
 		CreatedAt:     review.CreatedAt,
 	}
