@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { AxiosError } from 'axios';
+import { Link } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import { chat as chatApi, type ChatResponse } from '../../services/ai';
-import { Link } from 'react-router-dom';
 
 interface Message {
     id: string;
@@ -81,10 +82,27 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
             };
             setMessages((prev) => [...prev, assistantMessage]);
             setLastSuggestions(resp.suggestions || []);
-        } catch {
+        } catch (err) {
+            const axiosErr = err as AxiosError<{ error?: string }>;
+            const code = axiosErr.response?.data?.error;
+            const retryAfter = axiosErr.response?.headers?.['retry-after'];
+
+            let friendly = 'Não consegui responder agora. Pode tentar novamente?';
+            if (code === 'invalid_request') {
+                friendly = 'Mensagem inválida. Conte um pouco mais do que procura.';
+            } else if (code === 'topic_restricted') {
+                friendly = 'Vamos falar de perfumes e fragrâncias. Conte suas preferências :)';
+            } else if (code === 'rate_limited') {
+                friendly = retryAfter
+                    ? `Muitas mensagens. Tente novamente em ${retryAfter} segundos.`
+                    : 'Muitas mensagens. Tente novamente em instantes.';
+            } else if (code) {
+                friendly = code;
+            }
+
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),
-                content: 'Não consegui responder agora. Pode tentar novamente?',
+                content: friendly,
                 sender: 'assistant',
                 timestamp: new Date(),
             };
