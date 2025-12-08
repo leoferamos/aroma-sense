@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
@@ -53,12 +54,12 @@ func (s *passwordResetService) RequestReset(email string) error {
 	// Generate 6-digit OTP code
 	code, err := utils.GenerateOTP()
 	if err != nil {
-		return fmt.Errorf("failed to generate OTP: %w", err)
+		return apperror.NewDomain(fmt.Errorf("failed to generate OTP: %w", err), "reset_generation_failed", "failed to generate reset code")
 	}
 
 	// Delete any existing tokens for this email
 	if err := s.resetTokenRepo.DeleteByEmail(email); err != nil {
-		return fmt.Errorf("failed to delete old tokens: %w", err)
+		return apperror.NewDomain(fmt.Errorf("failed to delete old tokens: %w", err), "reset_cleanup_failed", "failed to start password reset")
 	}
 
 	// Create new reset token
@@ -69,13 +70,13 @@ func (s *passwordResetService) RequestReset(email string) error {
 	}
 
 	if err := s.resetTokenRepo.Create(token); err != nil {
-		return fmt.Errorf("failed to create reset token: %w", err)
+		return apperror.NewDomain(fmt.Errorf("failed to create reset token: %w", err), "reset_token_create_failed", "failed to start password reset")
 	}
 
 	// Send email with code via notifier
 	if s.notifier != nil {
 		if err := s.notifier.SendPasswordResetCode(user.Email, code); err != nil {
-			return fmt.Errorf("failed to send reset email: %w", err)
+			return apperror.NewDomain(fmt.Errorf("failed to send reset email: %w", err), "reset_email_failed", "failed to send reset email")
 		}
 	}
 
@@ -93,30 +94,30 @@ func (s *passwordResetService) ConfirmReset(email, code, newPassword string) err
 	token, err := s.resetTokenRepo.FindByEmailAndCode(email, code)
 	if err != nil {
 		// Generic error message
-		return fmt.Errorf("invalid or expired reset code")
+		return apperror.NewCodeMessage("reset_code_invalid", "invalid or expired reset code")
 	}
 
 	// Double-check expiration
 	if token.IsExpired() {
-		return fmt.Errorf("invalid or expired reset code")
+		return apperror.NewCodeMessage("reset_code_invalid", "invalid or expired reset code")
 	}
 
 	// Find user
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return fmt.Errorf("invalid or expired reset code")
+		return apperror.NewCodeMessage("reset_code_invalid", "invalid or expired reset code")
 	}
 
 	// Hash new password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
+		return apperror.NewDomain(fmt.Errorf("failed to hash password: %w", err), "password_hash_failed", "failed to process password")
 	}
 
 	// Update user password
 	user.PasswordHash = string(hashedPassword)
 	if err := s.userRepo.Update(user); err != nil {
-		return fmt.Errorf("failed to update password: %w", err)
+		return apperror.NewDomain(fmt.Errorf("failed to update password: %w", err), "password_update_failed", "failed to update password")
 	}
 
 	// Delete used token
