@@ -128,7 +128,7 @@ export function useReviews(productSlug: string, opts?: { initialPage?: number; i
           setError(t('reviews.deleteFailed', 'Failed to delete review. Please try again.'));
         }
       } else {
-        setError(t('common.error', 'An unexpected error occurred'));
+        setError(t('errors.unexpected', 'An unexpected error occurred'));
       }
 
       return false;
