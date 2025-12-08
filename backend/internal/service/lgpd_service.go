@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/apperror"
@@ -305,7 +306,7 @@ func (s *lgpdService) ProcessPendingDeletions() error {
 	for _, user := range users {
 		if err := s.ConfirmAccountDeletion(user.PublicID); err != nil {
 			// Log error but continue processing others
-			fmt.Printf("Failed to confirm deletion for user %s: %v\n", user.PublicID, err)
+			log.Printf("ProcessPendingDeletions: failed to confirm deletion for user %s: %v", user.PublicID, err)
 		}
 	}
 	return nil
@@ -322,7 +323,7 @@ func (s *lgpdService) ProcessExpiredAnonymizations() error {
 	for _, user := range users {
 		if err := s.AnonymizeExpiredUser(user.PublicID); err != nil {
 			// Log error but continue
-			fmt.Printf("Failed to anonymize user %s: %v\n", user.PublicID, err)
+			log.Printf("ProcessExpiredAnonymizations: failed to anonymize user %s: %v", user.PublicID, err)
 		}
 	}
 	return nil
