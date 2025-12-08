@@ -121,7 +121,7 @@ export function useReviews(productSlug: string, opts?: { initialPage?: number; i
         if (status === 403) {
           setError(t('reviews.deleteForbidden', 'You do not have permission to delete this review'));
         } else if (status === 404) {
-          setError(t('reviews.notFound', 'Review not found or already deleted'));
+          setError(t('errors.notFound', 'Review not found or already deleted'));
         } else if (status === 401) {
           setError(t('auth.loginRequired', 'Please log in to delete reviews'));
         } else {
