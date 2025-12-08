@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/leoferamos/aroma-sense/compare/v1.0.1...v1.1.0) (2025-12-08)
+
+
+### Features
+
+* **profile:** implement change password flow on profile page ([#94](https://github.com/leoferamos/aroma-sense/issues/94)) ([1ff68b7](https://github.com/leoferamos/aroma-sense/commit/1ff68b70f1a597c4805fc6306fc5e4f00091e1af))
+
 ## [1.0.1](https://github.com/leoferamos/aroma-sense/compare/v1.0.0...v1.0.1) (2025-12-07)
 
 
