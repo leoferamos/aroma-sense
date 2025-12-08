@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/leoferamos/aroma-sense/compare/v1.1.0...v1.2.0) (2025-12-08)
+
+
+### Features
+
+* **review:** add delete review flow and full error mapping ([#95](https://github.com/leoferamos/aroma-sense/issues/95)) ([a353d4b](https://github.com/leoferamos/aroma-sense/commit/a353d4b35d65d93563d5bfedcc2e255e4f4cbe32))
+
 # [1.1.0](https://github.com/leoferamos/aroma-sense/compare/v1.0.1...v1.1.0) (2025-12-08)
 
 
