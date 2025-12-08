@@ -19,24 +19,24 @@ const AdminLayout: React.FC<Props> = ({ children, actions, navItems }) => {
   const { t } = useTranslation('admin');
   const location = useLocation();
   const items = navItems ?? [
-    { label: t('nav.dashboard'), to: '/admin/dashboard' },
-    { label: t('nav.products'), to: '/admin/products' },
-    { label: t('nav.orders'), to: '/admin/orders' },
-    { label: t('nav.users'), to: '/admin/users' },
-    { label: t('nav.auditLogs'), to: '/admin/audit-logs' },
-    { label: t('nav.contestations'), to: '/admin/contestations' },
+    { label: t('dashboard'), to: '/admin/dashboard' },
+    { label: t('products'), to: '/admin/products' },
+    { label: t('orders'), to: '/admin/orders' },
+    { label: t('users'), to: '/admin/users' },
+    { label: t('auditLogs'), to: '/admin/audit-logs' },
+    { label: t('contestations'), to: '/admin/contestations' },
   ];
   const pathname = location.pathname;
   const [isAnimating, setIsAnimating] = React.useState(false);
 
   // Determine page title based on current route
   const getPageTitle = () => {
-    if (pathname.startsWith('/admin/products')) return t('nav.products');
-    if (pathname.startsWith('/admin/orders')) return t('nav.orders');
-    if (pathname.startsWith('/admin/users')) return t('nav.users');
-    if (pathname.startsWith('/admin/audit-logs')) return t('nav.auditLogs');
-    if (pathname.startsWith('/admin/contestations')) return t('nav.contestations');
-    if (pathname.startsWith('/admin/dashboard')) return t('nav.dashboard');
+    if (pathname.startsWith('/admin/products')) return t('products');
+    if (pathname.startsWith('/admin/orders')) return t('orders');
+    if (pathname.startsWith('/admin/users')) return t('users');
+    if (pathname.startsWith('/admin/audit-logs')) return t('auditLogs');
+    if (pathname.startsWith('/admin/contestations')) return t('contestations');
+    if (pathname.startsWith('/admin/dashboard')) return t('dashboard');
     return t('title'); // fallback to "Admin"
   };
 

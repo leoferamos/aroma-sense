@@ -42,6 +42,7 @@ type Order struct {
 	Items                     []OrderItem   `gorm:"foreignKey:OrderID" json:"items"`
 	CreatedAt                 time.Time     `gorm:"autoCreateTime;index" json:"created_at"`
 	UpdatedAt                 time.Time     `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt                 *time.Time    `gorm:"index" json:"-"`
 }
 
 // OrderItem represents an item in an order.
@@ -58,4 +59,5 @@ type OrderItem struct {
 	Subtotal        float64   `gorm:"type:decimal(10,2);not null" json:"subtotal"`
 	CreatedAt       time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt       *time.Time `gorm:"index" json:"-"`
 }

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/handler"
 	"github.com/leoferamos/aroma-sense/internal/model"
@@ -227,6 +228,16 @@ func (m *MockLgpdService) RequestContestation(publicID string, reason string) er
 	args := m.Called(publicID, reason)
 	return args.Error(0)
 }
+
+func (m *MockLgpdService) ProcessPendingDeletions() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) ProcessExpiredAnonymizations() error {
+	args := m.Called()
+	return args.Error(0)
+}
 func setupUserRouter() (*gin.Engine, *MockAuthService, *MockUserProfileService, *MockLgpdService) {
 	mockAuth := new(MockAuthService)
 	mockProfile := new(MockUserProfileService)
@@ -336,12 +347,12 @@ func TestRegisterUser(t *testing.T) {
 		router, mockAuth, _, _ := setupUserRouter()
 		payload := dto.CreateUserRequest{Email: "test@example.com", Password: "StrongPass1"}
 
-		mockAuth.On("RegisterUser", mock.Anything).Return(errors.New("email already registered")).Maybe()
+		mockAuth.On("RegisterUser", mock.Anything).Return(apperror.NewCodeMessage("email_already_registered", "email already registered")).Maybe()
 
 		w := performRequest(t, router, "POST", "/users/register", payload)
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Contains(t, w.Body.String(), "email already registered")
+		assert.Equal(t, http.StatusConflict, w.Code)
+		assert.Contains(t, w.Body.String(), "email_already_registered")
 		mockAuth.AssertExpectations(t)
 	})
 

@@ -33,7 +33,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 
 	userIDStr := c.GetString("userID")
 	if userIDStr == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
@@ -67,30 +67,24 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 
 	userIDStr := c.GetString("userID")
 	if userIDStr == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	var req dto.AddToCartRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid request body"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	// Add item to cart
 	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductSlug, req.Quantity)
 	if err != nil {
-		// Handle different types of errors with appropriate HTTP status codes
-		if err.Error() == "product not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		if err.Error() == "product out of stock" {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{Error: err.Error()})
-			return
-		}
-		// For insufficient stock or other validation errors
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -118,40 +112,31 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 
 	userIDStr := c.GetString("userID")
 	if userIDStr == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	// Get product slug from URL parameter
 	productSlug := c.Param("productSlug")
 	if productSlug == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid product slug"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	var req dto.UpdateCartItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid request body"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	// Update item quantity
 	cartResponse, err := h.cartService.UpdateItemQuantityBySlug(userIDStr, productSlug, req.Quantity)
 	if err != nil {
-		if err.Error() == "cart item not found" || err.Error() == "cart item not found in user's cart" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		if err.Error() == "product not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
-			return
-		}
-		if err.Error() == "product out of stock" {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{Error: err.Error()})
-			return
-		}
-		// For insufficient stock or other validation errors
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -177,25 +162,25 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 
 	userIDStr := c.GetString("userID")
 	if userIDStr == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	// Get product slug from URL parameter
 	productSlug := c.Param("productSlug")
 	if productSlug == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid product slug"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	// Remove item from cart
 	cartResponse, err := h.cartService.RemoveItemBySlug(userIDStr, productSlug)
 	if err != nil {
-		if err.Error() == "cart item not found" || err.Error() == "cart item not found in user's cart" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -219,18 +204,18 @@ func (h *CartHandler) ClearCart(c *gin.Context) {
 
 	userIDStr := c.GetString("userID")
 	if userIDStr == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	// Clear all items from cart
 	cartResponse, err := h.cartService.ClearCart(userIDStr)
 	if err != nil {
-		if err.Error() == "cart not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to clear cart"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 

@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '../utils/cn';
 import { useReviews } from '../hooks/useReviews';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../hooks/useAuth';
+import Toast from './Toast';
+import ConfirmModal from './ConfirmModal';
 
 interface ProductReviewProps {
     productSlug: string;
@@ -13,9 +16,17 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
     const [comment, setComment] = useState<string>('');
     const [hoverRating, setHoverRating] = useState<number>(0);
     const [submitting, setSubmitting] = useState<boolean>(false);
-    const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-    const { reviews, summary, loading, error, createReview, page, limit, total, setPage, setLimit } = useReviews(productSlug);
+    const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning' | 'info'; message: string } | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ open: boolean; reviewId: string | null }>({ open: false, reviewId: null });
+    const [deletingReview, setDeletingReview] = useState(false);
+    const [canReviewVisible, setCanReviewVisible] = useState<boolean>(!!canReview);
+    const { reviews, summary, loading, error, createReview, deleteReview, page, limit, total, setPage, setLimit } = useReviews(productSlug);
     const { t } = useTranslation('common');
+    const { user } = useAuth();
+
+    useEffect(() => {
+        setCanReviewVisible(!!canReview);
+    }, [canReview]);
 
     const handleStarClick = (value: number) => {
         setRating(value);
@@ -29,8 +40,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
         e.preventDefault();
 
         if (rating === 0) {
-            setToast({ type: 'error', message: t('reviews.selectRating') });
-            setTimeout(() => setToast(null), 2500);
+            setToast({ type: 'warning', message: t('reviews.selectRating') });
             return;
         }
 
@@ -38,23 +48,48 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
         const created = await createReview({ rating, comment });
         if (created) {
             setToast({ type: 'success', message: t('reviews.reviewSubmitted') });
-            setTimeout(() => setToast(null), 2500);
             setRating(0);
             setComment('');
+            setCanReviewVisible(false);
         }
         setSubmitting(false);
+    };
+
+    const handleDeleteReview = async (reviewId: string) => {
+        setConfirmModal({ open: true, reviewId });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!confirmModal.reviewId) return;
+
+        setDeletingReview(true);
+        const deleted = await deleteReview(confirmModal.reviewId);
+        setDeletingReview(false);
+
+        if (deleted) {
+            setToast({ type: 'success', message: t('reviews.reviewDeleted') });
+            setConfirmModal({ open: false, reviewId: null });
+            setRating(0);
+            setComment('');
+            setCanReviewVisible(true);
+        } else if (error) {
+            setToast({ type: 'error', message: error });
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setConfirmModal({ open: false, reviewId: null });
     };
 
     const displayRating = hoverRating || rating;
 
     return (
         <section className="bg-white shadow rounded-lg p-8 mb-12">
-            {canReview === true && (
+            {canReviewVisible && (
                 <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('reviews.rateThisProduct')}</h2>
             )}
 
-            {/* Summary and errors */}
-            {error && <div className="mb-4 p-3 rounded-md bg-red-50 text-red-700 text-sm">{error}</div>}
+            {/* Summary */}
             {summary && (
                 <div className="mb-6">
                     <div className="flex items-center gap-3 mb-3">
@@ -82,7 +117,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
 
             {/* No gating banner: when cannot review, simply hide the form (silent) */}
 
-            {canReview === true && (
+            {canReviewVisible && (
             <form onSubmit={handleSubmit} noValidate className="space-y-6">
                 {/* Star Rating */}
                 <div className="space-y-3">
@@ -177,15 +212,12 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
 
             {/* Toast */}
             {toast && (
-                <div
-                    role="status"
-                    className={cn(
-                        'fixed top-4 right-4 z-50 px-4 py-3 rounded shadow-lg text-sm',
-                        toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                    )}
-                >
-                    {toast.message}
-                </div>
+                <Toast
+                    type={toast.type}
+                    message={toast.message}
+                    onClose={() => setToast(null)}
+                    duration={toast.type === 'error' ? 5000 : 3000}
+                />
             )}
 
             {/* Reviews List */}
@@ -196,11 +228,28 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
                     <div className="text-sm text-gray-500">{t('reviews.noReviewsYet')}</div>
                 )}
                 <ul className="space-y-4">
-                    {reviews.map((r) => (
+                    {reviews.map((r) => {
+                        // Show delete button only if user is the author of the review
+                        const canDelete = user && r.author_id === user.public_id;
+                        
+                        return (
                         <li key={r.id} className="border border-gray-200 rounded-md p-4">
                             <div className="flex items-center justify-between">
                                 <div className="font-semibold text-gray-900">{r.author_display || 'Anonymous'}</div>
-                                <div className="text-xs text-gray-500">{new Date(r.created_at).toLocaleDateString()}</div>
+                                <div className="flex items-center gap-2">
+                                    <div className="text-xs text-gray-500">{new Date(r.created_at).toLocaleDateString()}</div>
+                                    {canDelete && (
+                                        <button
+                                            onClick={() => handleDeleteReview(r.id)}
+                                            className="text-red-600 hover:text-red-800 p-1 rounded transition-colors"
+                                            title={t('reviews.deleteReview')}
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                                 {[1,2,3,4,5].map((s) => (
@@ -211,7 +260,8 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
                             </div>
                             <div className="mt-2 text-sm text-gray-900 whitespace-pre-line">{r.comment}</div>
                         </li>
-                    ))}
+                        );
+                    })}
                 </ul>
                 {/* Pagination */}
                 {total > limit && (
@@ -243,6 +293,18 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
                     </div>
                 )}
             </div>
+
+            {/* Confirm Delete Modal */}
+            <ConfirmModal
+                open={confirmModal.open}
+                title={t('reviews.confirmDelete')}
+                description={t('reviews.confirmDeleteDescription', 'Esta ação não pode ser desfeita. A avaliação será removida permanentemente.')}
+                confirmText={t('common.delete')}
+                cancelText={t('common.cancel')}
+                onConfirm={handleConfirmDelete}
+                onCancel={handleCancelDelete}
+                loading={deletingReview}
+            />
         </section>
     );
 };

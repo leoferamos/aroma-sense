@@ -9,6 +9,7 @@ export interface Review {
   id: string;
   rating: number;
   comment: string;
+  author_id: string;
   author_display: string;
   created_at: string;
 }
@@ -59,4 +60,10 @@ export async function createReview(
     payload
   );
   return data;
+}
+
+export async function deleteReview(
+  reviewId: string
+): Promise<void> {
+  await api.delete(`/reviews/${reviewId}`);
 }

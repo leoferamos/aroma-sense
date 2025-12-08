@@ -2,12 +2,12 @@ package service
 
 import (
 	"crypto/subtle"
-	"errors"
 	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
@@ -43,13 +43,13 @@ func (s *authService) RegisterUser(input dto.CreateUserRequest) error {
 	}
 	// Check if email already exists
 	if _, err := s.repo.FindByEmail(input.Email); err == nil {
-		return errors.New("email already registered")
+		return apperror.NewCodeMessage("email_already_registered", "email already registered")
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return errors.New("failed to hash password")
+		return apperror.NewCodeMessage("password_hash_failed", "failed to hash password")
 	}
 
 	user := model.User{
@@ -73,7 +73,7 @@ func (s *authService) RegisterUser(input dto.CreateUserRequest) error {
 
 	// Create a cart for the new user
 	if err := s.cartService.CreateCartForUser(user.PublicID); err != nil {
-		return errors.New("failed to create cart for user")
+		return apperror.NewCodeMessage("cart_create_failed", "failed to create cart for user")
 	}
 
 	return nil
@@ -92,7 +92,7 @@ func (s *authService) Login(input dto.LoginRequest) (string, string, *model.User
 					"reason":          "invalid_credentials",
 				})
 		}
-		return "", "", nil, errors.New("invalid credentials")
+		return "", "", nil, apperror.NewCodeMessage("invalid_credentials", "invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password)); err != nil {
@@ -105,30 +105,30 @@ func (s *authService) Login(input dto.LoginRequest) (string, string, *model.User
 					"reason":  "invalid_password",
 				})
 		}
-		return "", "", nil, errors.New("invalid credentials")
+		return "", "", nil, apperror.NewCodeMessage("invalid_credentials", "invalid credentials")
 	}
 
 	// Ensure user has a cart
 	if err := s.cartService.CreateCartForUser(user.PublicID); err != nil {
-		return "", "", nil, errors.New("failed to ensure cart exists")
+		return "", "", nil, apperror.NewCodeMessage("cart_create_failed", "failed to ensure cart exists")
 	}
 
 	// Generate access token
 	accessToken, err := auth.GenerateJWT(user.PublicID, user.Role)
 	if err != nil {
-		return "", "", nil, errors.New("failed to generate access token")
+		return "", "", nil, apperror.NewCodeMessage("access_token_failed", "failed to generate access token")
 	}
 
 	// Generate refresh token
 	refreshToken, expiresAt, err := auth.GenerateRefreshToken()
 	if err != nil {
-		return "", "", nil, errors.New("failed to generate refresh token")
+		return "", "", nil, apperror.NewCodeMessage("refresh_token_failed", "failed to generate refresh token")
 	}
 
 	// Save refresh token hash in DB
 	refreshTokenHash := auth.HashRefreshToken(refreshToken)
 	if err := s.repo.UpdateRefreshToken(user.ID, &refreshTokenHash, &expiresAt); err != nil {
-		return "", "", nil, errors.New("failed to save refresh token")
+		return "", "", nil, apperror.NewCodeMessage("refresh_token_save_failed", "failed to save refresh token")
 	}
 	user.RefreshTokenExpiresAt = &expiresAt
 
@@ -150,32 +150,32 @@ func (s *authService) RefreshAccessToken(refreshToken string) (string, string, *
 
 	user, err := s.repo.FindByRefreshTokenHash(refreshTokenHash)
 	if err != nil {
-		return "", "", nil, errors.New("invalid refresh token")
+		return "", "", nil, apperror.NewCodeMessage("invalid_refresh_token", "invalid refresh token")
 	}
 
 	if user.RefreshTokenHash == nil {
-		return "", "", nil, errors.New("invalid refresh token")
+		return "", "", nil, apperror.NewCodeMessage("invalid_refresh_token", "invalid refresh token")
 	}
 	if subtle.ConstantTimeCompare([]byte(*user.RefreshTokenHash), []byte(refreshTokenHash)) != 1 {
-		return "", "", nil, errors.New("invalid refresh token")
+		return "", "", nil, apperror.NewCodeMessage("invalid_refresh_token", "invalid refresh token")
 	}
 
 	if user.RefreshTokenExpiresAt == nil || user.RefreshTokenExpiresAt.Before(time.Now()) {
-		return "", "", nil, errors.New("refresh token expired")
+		return "", "", nil, apperror.NewCodeMessage("refresh_token_expired", "refresh token expired")
 	}
 
 	accessToken, err := auth.GenerateJWT(user.PublicID, user.Role)
 	if err != nil {
-		return "", "", nil, errors.New("failed to generate access token")
+		return "", "", nil, apperror.NewCodeMessage("access_token_failed", "failed to generate access token")
 	}
 
 	newRefreshToken, newExpiresAt, err := auth.GenerateRefreshToken()
 	if err != nil {
-		return "", "", nil, errors.New("failed to generate refresh token")
+		return "", "", nil, apperror.NewCodeMessage("refresh_token_failed", "failed to generate refresh token")
 	}
 	newHash := auth.HashRefreshToken(newRefreshToken)
 	if err := s.repo.UpdateRefreshToken(user.ID, &newHash, &newExpiresAt); err != nil {
-		return "", "", nil, errors.New("failed to save refresh token")
+		return "", "", nil, apperror.NewCodeMessage("refresh_token_save_failed", "failed to save refresh token")
 	}
 
 	return accessToken, newRefreshToken, user, nil
@@ -184,7 +184,7 @@ func (s *authService) RefreshAccessToken(refreshToken string) (string, string, *
 // Logout handles user logout by invalidating refresh token
 func (s *authService) Logout(refreshToken string) error {
 	if refreshToken == "" {
-		return errors.New("no refresh token provided")
+		return apperror.NewCodeMessage("refresh_token_missing", "no refresh token provided")
 	}
 
 	hash := auth.HashRefreshToken(refreshToken)
@@ -198,20 +198,26 @@ func (s *authService) Logout(refreshToken string) error {
 		}
 	}
 
-	return s.repo.UpdateRefreshToken(user.ID, nil, nil)
+	if err := s.repo.UpdateRefreshToken(user.ID, nil, nil); err != nil {
+		return apperror.NewDomain(err, "refresh_token_save_failed", "failed to save refresh token")
+	}
+	return nil
 }
 
 // InvalidateRefreshToken invalidates a refresh token by clearing it from the database
 func (s *authService) InvalidateRefreshToken(refreshToken string) error {
 	if refreshToken == "" {
-		return errors.New("no refresh token provided")
+		return apperror.NewCodeMessage("refresh_token_missing", "no refresh token provided")
 	}
 
 	hash := auth.HashRefreshToken(refreshToken)
 	user, err := s.repo.FindByRefreshTokenHash(hash)
 	if err != nil {
-		return fmt.Errorf("invalid refresh token: %w", err)
+		return apperror.NewDomain(fmt.Errorf("invalid refresh token: %w", err), "invalid_refresh_token", "invalid refresh token")
 	}
 
-	return s.repo.UpdateRefreshToken(user.ID, nil, nil)
+	if err := s.repo.UpdateRefreshToken(user.ID, nil, nil); err != nil {
+		return apperror.NewDomain(err, "refresh_token_save_failed", "failed to save refresh token")
+	}
+	return nil
 }

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"errors"
 	"strings"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/validation"
@@ -30,7 +30,7 @@ func NewUserProfileService(repo repository.UserRepository, auditLogService Audit
 // GetByPublicID returns the user by public id
 func (s *userProfileService) GetByPublicID(publicID string) (*model.User, error) {
 	if publicID == "" {
-		return nil, errors.New("unauthenticated")
+		return nil, apperror.NewCodeMessage("unauthenticated", "unauthenticated")
 	}
 	return s.repo.FindByPublicID(publicID)
 }
@@ -38,14 +38,14 @@ func (s *userProfileService) GetByPublicID(publicID string) (*model.User, error)
 // UpdateDisplayName updates the user's display name with validation
 func (s *userProfileService) UpdateDisplayName(publicID string, displayName string) (*model.User, error) {
 	if publicID == "" {
-		return nil, errors.New("unauthenticated")
+		return nil, apperror.NewCodeMessage("unauthenticated", "unauthenticated")
 	}
 	trimmed := strings.TrimSpace(displayName)
 	if len(trimmed) < 2 {
-		return nil, errors.New("display_name too short")
+		return nil, apperror.NewCodeMessage("display_name_too_short", "display_name too short")
 	}
 	if len(trimmed) > 50 {
-		return nil, errors.New("display_name too long")
+		return nil, apperror.NewCodeMessage("display_name_too_long", "display_name too long")
 	}
 	user, err := s.repo.FindByPublicID(publicID)
 	if err != nil {
@@ -101,7 +101,7 @@ func (s *userProfileService) ChangePassword(publicID string, currentPassword str
 
 	// Verify current password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(currentPassword)); err != nil {
-		return errors.New("current password is incorrect")
+		return apperror.NewCodeMessage("current_password_incorrect", "current password is incorrect")
 	}
 
 	// Validate new password
@@ -111,13 +111,13 @@ func (s *userProfileService) ChangePassword(publicID string, currentPassword str
 
 	// Check if new password is the same as current password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(newPassword)); err == nil {
-		return errors.New("new password must be different from current password")
+		return apperror.NewCodeMessage("new_password_same", "new password must be different from current password")
 	}
 
 	// Hash new password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return errors.New("failed to process password")
+		return apperror.NewCodeMessage("password_process_failed", "failed to process password")
 	}
 
 	// Update password

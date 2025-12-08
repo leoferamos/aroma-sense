@@ -13,6 +13,7 @@ type ReviewResponse struct {
 	ID            string    `json:"id"`
 	Rating        int       `json:"rating"`
 	Comment       string    `json:"comment"`
+	AuthorID      string    `json:"author_id"`
 	AuthorDisplay string    `json:"author_display"`
 	CreatedAt     time.Time `json:"created_at"`
 }
