@@ -161,11 +161,9 @@ func (r *userRepository) RequestAccountDeletion(publicID string, requestedAt tim
 
 // ConfirmAccountDeletion confirms account deletion after retention period
 func (r *userRepository) ConfirmAccountDeletion(publicID string, confirmedAt time.Time) error {
-	updates := map[string]interface{}{
-		"deleted_at":            confirmedAt,
-		"deletion_confirmed_at": confirmedAt,
-	}
-	return r.db.Model(&model.User{}).Where("public_id = ?", publicID).Updates(updates).Error
+	return r.db.Model(&model.User{}).
+		Where("public_id = ?", publicID).
+		Update("deletion_confirmed_at", confirmedAt).Error
 }
 
 // HasActiveDependencies checks if user has active orders or other dependencies that prevent deletion
