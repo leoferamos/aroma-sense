@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from '../utils/cn';
 import { useReviews } from '../hooks/useReviews';
 import { useTranslation } from 'react-i18next';
@@ -19,9 +19,14 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
     const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning' | 'info'; message: string } | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; reviewId: string | null }>({ open: false, reviewId: null });
     const [deletingReview, setDeletingReview] = useState(false);
+    const [canReviewVisible, setCanReviewVisible] = useState<boolean>(!!canReview);
     const { reviews, summary, loading, error, createReview, deleteReview, page, limit, total, setPage, setLimit } = useReviews(productSlug);
     const { t } = useTranslation('common');
     const { user } = useAuth();
+
+    useEffect(() => {
+        setCanReviewVisible(!!canReview);
+    }, [canReview]);
 
     const handleStarClick = (value: number) => {
         setRating(value);
@@ -45,6 +50,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
             setToast({ type: 'success', message: t('reviews.reviewSubmitted') });
             setRating(0);
             setComment('');
+            setCanReviewVisible(false);
         }
         setSubmitting(false);
     };
@@ -63,6 +69,9 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
         if (deleted) {
             setToast({ type: 'success', message: t('reviews.reviewDeleted') });
             setConfirmModal({ open: false, reviewId: null });
+            setRating(0);
+            setComment('');
+            setCanReviewVisible(true);
         } else if (error) {
             setToast({ type: 'error', message: error });
         }
@@ -76,7 +85,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
 
     return (
         <section className="bg-white shadow rounded-lg p-8 mb-12">
-            {canReview === true && (
+            {canReviewVisible && (
                 <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('reviews.rateThisProduct')}</h2>
             )}
 
@@ -108,7 +117,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
 
             {/* No gating banner: when cannot review, simply hide the form (silent) */}
 
-            {canReview === true && (
+            {canReviewVisible && (
             <form onSubmit={handleSubmit} noValidate className="space-y-6">
                 {/* Star Rating */}
                 <div className="space-y-3">
