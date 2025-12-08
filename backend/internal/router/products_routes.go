@@ -10,20 +10,23 @@ import (
 // ProductRoutes sets up the product-related routes
 func ProductRoutes(r *gin.Engine, productHandler *handler.ProductHandler, reviewHandler *handler.ReviewHandler) {
 	// Public routes
-	productGroup := r.Group("/products")
-	productGroup.Use(auth.OptionalAuthMiddleware(), middleware.AccountStatusMiddleware())
+	publicProductGroup := r.Group("/products")
+	publicProductGroup.Use(auth.OptionalAuthMiddleware(), middleware.AccountStatusMiddleware())
 	{
-		productGroup.GET("", productHandler.GetLatestProducts)
-		productGroup.GET("/:slug/reviews/summary", reviewHandler.GetSummary)
-		productGroup.GET("/:slug/reviews", reviewHandler.ListReviews)
-		productGroup.GET("/:slug", productHandler.GetProduct)
+		// Product listing and details
+		publicProductGroup.GET("", productHandler.GetLatestProducts)
+		publicProductGroup.GET("/:slug", productHandler.GetProduct)
+
+		// Public review operations
+		publicProductGroup.GET("/:slug/reviews", reviewHandler.ListReviews)
+		publicProductGroup.GET("/:slug/reviews/summary", reviewHandler.GetSummary)
 	}
 
-	// Review management routes
-	reviewGroup := r.Group("/reviews")
-	reviewGroup.Use(auth.JWTAuthMiddleware())
+	// Authenticated routes
+	authenticatedGroup := r.Group("")
+	authenticatedGroup.Use(auth.JWTAuthMiddleware())
 	{
-		productGroup.POST("/:slug/reviews", reviewHandler.CreateReview)
-		reviewGroup.DELETE("/:reviewID", reviewHandler.DeleteReview)
+		authenticatedGroup.POST("/products/:slug/reviews", reviewHandler.CreateReview)
+		authenticatedGroup.DELETE("/reviews/:reviewID", reviewHandler.DeleteReview)
 	}
 }
