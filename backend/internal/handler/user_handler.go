@@ -388,3 +388,43 @@ func (h *UserHandler) RequestContestation(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "contestation request submitted successfully - our team will review it within 5 business days"})
 }
+
+// ChangePassword allows authenticated users to change their password
+// @Summary Change user password
+// @Description Allows authenticated users to change their password by providing current and new password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer token"
+// @Param request body dto.ChangePasswordRequest true "Password change request"
+// @Success 200 {object} dto.MessageResponse "Password changed successfully"
+// @Failure 400 {object} dto.ErrorResponse "Invalid request or current password incorrect"
+// @Failure 401 {object} dto.ErrorResponse "Unauthorized"
+// @Router /users/change-password [post]
+// @Security     BearerAuth
+func (h *UserHandler) ChangePassword(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		return
+	}
+
+	publicID := userID.(string)
+
+	var req dto.ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if err := h.userProfileService.ChangePassword(publicID, req.CurrentPassword, req.NewPassword); err != nil {
+		if strings.Contains(err.Error(), "current password") || strings.Contains(err.Error(), "password must") || strings.Contains(err.Error(), "new password must be different") {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to change password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "password changed successfully"})
+}

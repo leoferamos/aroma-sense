@@ -43,7 +43,20 @@
     "agreePrivacyError": "Você deve concordar com a política de privacidade.",
     "alreadyHaveAccount": "Já tem uma conta?",
     "passwordHelper": "Use pelo menos 8 caracteres, números e símbolos",
-    "createAccount": "Criar Conta"
+    "createAccount": "Criar Conta",
+    "emailRequired": "E-mail é obrigatório",
+    "emailInvalid": "Digite um e-mail válido",
+    "passwordRequired": "Senha é obrigatória",
+    "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
+    "passwordUppercase": "A senha deve conter pelo menos uma letra maiúscula",
+    "passwordLowercase": "A senha deve conter pelo menos uma letra minúscula",
+    "passwordNumber": "A senha deve conter pelo menos um número",
+    "passwordSymbol": "A senha deve conter pelo menos um símbolo",
+    "repeatPasswordRequired": "Repetir senha é obrigatório",
+    "passwordsDoNotMatch": "As senhas não coincidem",
+    "emailAlreadyRegistered": "Este e-mail já está cadastrado. Faça login ou use outro e-mail.",
+    "invalidCredentials": "E-mail ou senha inválidos",
+    "fullNameRequired": "Nome completo é obrigatório"
   },
   "navbar": {
     "home": "Início",
@@ -139,6 +152,27 @@
     "cancel": "Cancelar",
     "deletionRequested": "Exclusão da conta solicitada com sucesso",
     "requestDeletionFailed": "Falha ao solicitar exclusão"
+  },
+  "changePassword": {
+    "title": "Alterar Senha",
+    "subtitle": "Digite sua senha atual e escolha uma nova",
+    "currentPassword": "Senha Atual",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Nova Senha",
+    "currentPasswordRequired": "Senha atual é obrigatória",
+    "newPasswordRequired": "Nova senha é obrigatória",
+    "confirmNewPassword": "Confirmação da nova senha é obrigatória",
+    "passwordsDoNotMatch": "As senhas não coincidem",
+    "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
+    "passwordUppercase": "A senha deve conter pelo menos uma letra maiúscula",
+    "passwordLowercase": "A senha deve conter pelo menos uma letra minúscula",
+    "passwordNumber": "A senha deve conter pelo menos um número",
+    "passwordHelper": "Deve ter pelo menos 8 caracteres com maiúscula, minúscula e número",
+    "changing": "Alterando...",
+    "changePassword": "Alterar Senha",
+    "successMessage": "Senha alterada com sucesso!",
+    "redirecting": "Redirecionando para o perfil...",
+    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual"
   },
   "admin": {
     "dashboard": "Painel",
@@ -242,7 +276,9 @@
     "currentPasswordRequired": "A senha atual é obrigatória",
     "newPasswordRequired": "A nova senha é obrigatória",
     "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
-    "passwordSymbol": "A senha deve conter pelo menos um símbolo"
+    "passwordSymbol": "A senha deve conter pelo menos um símbolo",
+    "currentPasswordIncorrect": "A senha atual está incorreta",
+    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual"
   },
   "order": {
     "myOrders": "Meus Pedidos",

@@ -35,3 +35,9 @@ type ContestationRequest struct {
 type AdminReactivateUserRequest struct {
 	Reason string `json:"reason" binding:"required,min=10,max=200" example:"Contestation reviewed and approved - account reactivated"`
 }
+
+// ChangePasswordRequest represents the payload for authenticated user password change
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" binding:"required" example:"oldpassword123"`
+	NewPassword     string `json:"new_password" binding:"required,min=8" example:"newpassword123"`
+}

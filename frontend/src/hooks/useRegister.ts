@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { isAxiosError } from "axios";
 import { registerUser } from "../services/auth";
-import { messages } from "../constants/messages";
+import { useTranslation } from 'react-i18next';
 import type { RegisterRequest, RegisterResponse } from "../types/auth";
 
 export function useRegister() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { t } = useTranslation('common');
 
   async function register(data: RegisterRequest) {
     setLoading(true);
@@ -15,19 +16,19 @@ export function useRegister() {
     setSuccess("");
     try {
       const res: RegisterResponse = await registerUser(data);
-      setSuccess(res.message || messages.registrationSuccess);
+      setSuccess(res.message || t('auth.registerSuccess'));
     } catch (err: unknown) {
       if (isAxiosError(err)) {
         const errorMsg = err.response?.data?.error?.toLowerCase() || "";
         if (errorMsg.includes("email already registered")) {
-          setError(messages.emailAlreadyRegistered);
+          setError(t('auth.emailAlreadyRegistered'));
         } else {
-          setError(err.response?.data?.error || messages.genericError);
+          setError(err.response?.data?.error || t('errors.failedToLoadProfile'));
         }
       } else if (err instanceof Error) {
-        setError(err.message || messages.genericError);
+        setError(err.message || t('errors.failedToLoadProfile'));
       } else {
-        setError(messages.genericError);
+        setError(t('errors.failedToLoadProfile'));
       }
     } finally {
       setLoading(false);

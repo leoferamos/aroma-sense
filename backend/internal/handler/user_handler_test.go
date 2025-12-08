@@ -182,6 +182,16 @@ func (m *MockUserProfileService) UpdateDisplayName(publicID string, displayName 
 	return user, args.Error(1)
 }
 
+func (m *MockUserProfileService) SetPasswordHash(publicID string, hashedPassword string) error {
+	args := m.Called(publicID, hashedPassword)
+	return args.Error(0)
+}
+
+func (m *MockUserProfileService) ChangePassword(publicID string, currentPassword string, newPassword string) error {
+	args := m.Called(publicID, currentPassword, newPassword)
+	return args.Error(0)
+}
+
 type MockLgpdService struct{ mock.Mock }
 
 func (m *MockLgpdService) ExportUserData(publicID string) (*dto.UserExportResponse, error) {

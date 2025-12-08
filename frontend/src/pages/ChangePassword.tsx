@@ -40,28 +40,30 @@ const ChangePassword: React.FC = () => {
         const errors: Record<string, string> = {};
 
         if (touched.currentPassword && !form.currentPassword) {
-            errors.currentPassword = t('currentPasswordRequired');
+            errors.currentPassword = t('changePassword.currentPasswordRequired');
         }
 
         if (touched.newPassword) {
             if (!form.newPassword) {
-                errors.newPassword = t('newPasswordRequired');
+                errors.newPassword = t('changePassword.newPasswordRequired');
             } else if (form.newPassword.length < 8) {
-                errors.newPassword = t('passwordMinLength');
+                errors.newPassword = t('changePassword.passwordMinLength');
             } else if (!/[A-Z]/.test(form.newPassword)) {
-                errors.newPassword = t('passwordUppercase');
+                errors.newPassword = t('changePassword.passwordUppercase');
             } else if (!/[a-z]/.test(form.newPassword)) {
-                errors.newPassword = t('passwordLowercase');
+                errors.newPassword = t('changePassword.passwordLowercase');
             } else if (!/[0-9]/.test(form.newPassword)) {
-                errors.newPassword = t('passwordNumber');
+                errors.newPassword = t('changePassword.passwordNumber');
+            } else if (form.currentPassword && form.newPassword === form.currentPassword) {
+                errors.newPassword = t('changePassword.newPasswordMustBeDifferent');
             }
         }
 
         if (touched.confirmPassword) {
             if (!form.confirmPassword) {
-                errors.confirmPassword = t('confirmNewPassword');
+                errors.confirmPassword = t('changePassword.confirmNewPassword');
             } else if (form.newPassword !== form.confirmPassword) {
-                errors.confirmPassword = t('passwordsDoNotMatch');
+                errors.confirmPassword = t('changePassword.passwordsDoNotMatch');
             }
         }
 
@@ -99,7 +101,16 @@ const ChangePassword: React.FC = () => {
             }, 2000);
         } catch (e: unknown) {
             if (isAxiosError(e)) {
-                setError(e.response?.data?.error || t('errors.failedToChangePassword'));
+                const errorMessage = e.response?.data?.error;
+                if (errorMessage === 'current password is incorrect') {
+                    setError(t('errors.currentPasswordIncorrect'));
+                } else if (errorMessage === 'new password must be different from current password') {
+                    setError(t('errors.newPasswordMustBeDifferent'));
+                } else if (errorMessage?.includes('password must contain')) {
+                    setError(errorMessage);
+                } else {
+                    setError(errorMessage || t('errors.failedToChangePassword'));
+                }
             } else if (e instanceof Error) {
                 setError(e.message);
             } else {
@@ -122,8 +133,8 @@ const ChangePassword: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Password changed successfully!</h3>
-                            <p className="text-sm text-gray-600">Redirecting to profile...</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('changePassword.successMessage')}</h3>
+                            <p className="text-sm text-gray-600">{t('changePassword.redirecting')}</p>
                         </div>
                     </div>
                 </main>
@@ -137,8 +148,8 @@ const ChangePassword: React.FC = () => {
             <main className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
                     <div className="mb-6">
-                        <h1 className="text-2xl font-semibold text-gray-900">Change Password</h1>
-                        <p className="text-sm text-gray-600 mt-1">Enter your current password and choose a new one</p>
+                        <h1 className="text-2xl font-semibold text-gray-900">{t('changePassword.title')}</h1>
+                        <p className="text-sm text-gray-600 mt-1">{t('changePassword.subtitle')}</p>
                     </div>
 
                     {error && (
@@ -150,7 +161,7 @@ const ChangePassword: React.FC = () => {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <InputField
-                                label="Current Password"
+                                label={t('changePassword.currentPassword')}
                                 type={showCurrentPassword ? 'text' : 'password'}
                                 name="currentPassword"
                                 value={form.currentPassword}
@@ -178,7 +189,7 @@ const ChangePassword: React.FC = () => {
 
                         <div>
                             <InputField
-                                label="New Password"
+                                label={t('changePassword.newPassword')}
                                 type={showNewPassword ? 'text' : 'password'}
                                 name="newPassword"
                                 value={form.newPassword}
@@ -203,13 +214,13 @@ const ChangePassword: React.FC = () => {
                             />
                             <FormError message={errors.newPassword} />
                             <p className="text-xs text-gray-500 mt-1">
-                                Must be at least 8 characters with uppercase, lowercase, and number
+                                {t('changePassword.passwordHelper')}
                             </p>
                         </div>
 
                         <div>
                             <InputField
-                                label="Confirm New Password"
+                                label={t('changePassword.confirmPassword')}
                                 type={showConfirmPassword ? 'text' : 'password'}
                                 name="confirmPassword"
                                 value={form.confirmPassword}
@@ -241,7 +252,7 @@ const ChangePassword: React.FC = () => {
                                 onClick={() => navigate('/profile')}
                                 className="flex-1 px-6 py-3 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -254,10 +265,10 @@ const ChangePassword: React.FC = () => {
                                 {loading ? (
                                     <span className="flex items-center justify-center">
                                         <LoadingSpinner />
-                                        <span className="ml-2">Changing...</span>
+                                        <span className="ml-2">{t('changePassword.changing')}</span>
                                     </span>
                                 ) : (
-                                    'Change Password'
+                                    t('changePassword.changePassword')
                                 )}
                             </button>
                         </div>
