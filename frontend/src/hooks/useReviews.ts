@@ -123,7 +123,7 @@ export function useReviews(productSlug: string, opts?: { initialPage?: number; i
         } else if (status === 404) {
           setError(t('errors.notFound', 'Review not found or already deleted'));
         } else if (status === 401) {
-          setError(t('auth.loginRequired', 'Please log in to delete reviews'));
+          setError(t('errors.unauthorized', 'Please log in to delete reviews'));
         } else {
           setError(t('reviews.deleteFailed', 'Failed to delete review. Please try again.'));
         }
