@@ -20,12 +20,12 @@ import { createOrder, type OrderCreateRequest } from '../services/order';
 const Checkout: React.FC = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const { cart, loading, removeItem, error, isRemovingItem } = useCart();
+  const { cart, loading, removeItem, error, isRemovingItem, refresh: refreshCart } = useCart();
 
   const [address, setAddress] = useState<AddressForm>({
     fullName: '',
     address1: '',
-    address2: '',
+    number: '',
     city: '',
     state: '',
     postalCode: '',
@@ -57,7 +57,7 @@ const Checkout: React.FC = () => {
     }
     setSubmitting(true);
     try {
-      const shipping_address = `${address.address1}${address.address2 ? ', ' + address.address2 : ''}, ${address.city} - ${address.state}, ${address.postalCode}`;
+      const shipping_address = `${address.address1}, ${address.number}, ${address.city} - ${address.state}, ${address.postalCode}`;
       const payload: OrderCreateRequest = {
         payment_method: 'pix',
         shipping_address,
@@ -70,6 +70,8 @@ const Checkout: React.FC = () => {
         },
       };
       const order = await createOrder(payload);
+      // Refresh cart client-side to reflect server cart clear
+      await refreshCart();
       navigate('/order-confirmation', {
         replace: true,
         state: {
@@ -174,14 +176,15 @@ const Checkout: React.FC = () => {
                     />
                     <FormError message={errors.address1} />
                   </div>
-                  <div className="sm:col-span-2">
+                  <div>
                     <InputField
-                      label="Address line 2 (optional)"
-                      name="address2"
-                      value={address.address2 || ''}
-                      onChange={(e) => setAddress({ ...address, address2: e.target.value })}
+                      label="Number"
+                      name="number"
+                      value={address.number}
+                      onChange={(e) => setAddress({ ...address, number: e.target.value })}
                       autoComplete="address-line2"
                     />
+                    <FormError message={errors.number} />
                   </div>
                   <div>
                     <InputField
