@@ -39,6 +39,7 @@ func SetupRouter(handlers *bootstrap.AppHandlers) *gin.Engine {
 	OrderRoutes(r, handlers.OrderHandler)
 	ShippingRoutes(r, handlers.ShippingHandler)
 	AIRoutes(r, handlers.AIHandler, handlers.ChatHandler)
+	PaymentRoutes(r, handlers.PaymentHandler)
 
 	return r
 }
