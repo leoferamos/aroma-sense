@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/paymentintent"
-	"github.com/stripe/stripe-go/v76/webhook"
+	stripe "github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v78/paymentintent"
+	"github.com/stripe/stripe-go/v78/webhook"
 
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
-// Provider implements a minimal Stripe payment provider for PaymentIntent creation and webhook parsing.
+// Provider implements a Stripe payment provider for PaymentIntent creation and webhook parsing.
 type Provider struct {
 	webhookSecret string
 }
@@ -23,7 +23,6 @@ func NewProvider(cfg *Config) *Provider {
 	return &Provider{webhookSecret: cfg.WebhookSecret}
 }
 
-// PaymentIntentResult contains the minimal fields returned to callers.
 // CreatePaymentIntent creates a payment intent for the given amount and currency.
 func (p *Provider) CreatePaymentIntent(ctx context.Context, params service.PaymentIntentParams) (*service.PaymentIntentResult, error) {
 	piParams := &stripe.PaymentIntentParams{
@@ -49,7 +48,7 @@ func (p *Provider) ParseWebhook(payload []byte, signature string) (*service.Paym
 	if p.webhookSecret == "" {
 		return nil, fmt.Errorf("stripe webhook secret not configured")
 	}
-	event, err := webhook.ConstructEvent(payload, signature, p.webhookSecret)
+	event, err := webhook.ConstructEventWithOptions(payload, signature, p.webhookSecret, webhook.ConstructEventOptions{IgnoreAPIVersionMismatch: true})
 	if err != nil {
 		return nil, fmt.Errorf("stripe webhook validation failed: %w", err)
 	}
@@ -68,6 +67,28 @@ func (p *Provider) ParseWebhook(payload []byte, signature string) (*service.Paym
 			Currency:      string(pi.Currency),
 			CustomerEmail: pi.ReceiptEmail,
 			Metadata:      pi.Metadata,
+		}, nil
+	case "charge.succeeded", "charge.failed", "charge.captured", "charge.refunded":
+		var ch stripe.Charge
+		if err := json.Unmarshal(event.Data.Raw, &ch); err != nil {
+			return nil, fmt.Errorf("stripe webhook unmarshal charge: %w", err)
+		}
+		status := string(ch.Status)
+		intentID := ""
+		if ch.PaymentIntent != nil {
+			intentID = ch.PaymentIntent.ID
+		}
+		meta := map[string]string{}
+		for k, v := range ch.Metadata {
+			meta[k] = v
+		}
+		return &service.PaymentWebhookPayload{
+			IntentID:      intentID,
+			Status:        status,
+			Amount:        ch.Amount,
+			Currency:      string(ch.Currency),
+			CustomerEmail: ch.ReceiptEmail,
+			Metadata:      meta,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported webhook event: %s", event.Type)
