@@ -65,7 +65,7 @@ func (p *Provider) ParseWebhook(payload []byte, signature string) (*service.Paym
 			IntentID:      pi.ID,
 			Status:        status,
 			Amount:        pi.Amount,
-			Currency:      pi.Currency,
+			Currency:      string(pi.Currency),
 			CustomerEmail: pi.ReceiptEmail,
 			Metadata:      pi.Metadata,
 		}, nil
