@@ -100,13 +100,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -148,13 +154,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -202,13 +208,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -251,13 +257,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Error code: not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -300,13 +306,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Error code: not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -349,7 +355,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -394,13 +400,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -445,13 +451,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -517,13 +523,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -574,13 +586,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request parameters",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -676,19 +688,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request data or missing image",
+                        "description": "Error code: invalid_request (includes missing image)",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Admin only",
+                        "description": "Error code: unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -731,25 +743,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product ID",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Admin only",
+                        "description": "Error code: unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -799,25 +811,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product ID or request data",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Admin only",
+                        "description": "Error code: unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -879,13 +891,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Error code: invalid_request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -927,14 +945,26 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.AdminUserResponse"
                         }
                     },
+                    "400": {
+                        "description": "Error code: invalid_request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Error code: unauthenticated",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "404": {
-                        "description": "User not found",
+                        "description": "Error code: not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -989,13 +1019,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Error code: not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1047,19 +1077,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Error code: invalid_request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "User not found",
+                        "description": "Error code: not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1111,19 +1147,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Error code: invalid_request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "User not found",
+                        "description": "Error code: not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1175,19 +1217,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Error code: invalid_request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "403": {
-                        "description": "Cannot change own role",
+                        "description": "Error code: cannot_change_own_role",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "User not found",
+                        "description": "Error code: not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1227,19 +1275,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request or empty message",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "429": {
-                        "description": "Rate limit exceeded",
+                        "description": "Error code: rate_limited",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1279,19 +1327,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request or non-perfume related query",
+                        "description": "Error code: invalid_request or topic_restricted",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "429": {
-                        "description": "Rate limit exceeded",
+                        "description": "Error code: rate_limited",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1325,19 +1373,19 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Cart not found",
+                        "description": "Error code: cart_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1380,31 +1428,31 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request body or insufficient stock",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Product not found",
+                        "description": "Error code: product_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "409": {
-                        "description": "Product out of stock",
+                        "description": "Error code: insufficient_stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1436,19 +1484,19 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Cart not found",
+                        "description": "Error code: cart_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1491,25 +1539,25 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product slug",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Cart item not found",
+                        "description": "Error code: cart_item_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1559,31 +1607,31 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request body, product slug, or insufficient stock",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Cart item or product not found",
+                        "description": "Error code: cart_item_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "409": {
-                        "description": "Product out of stock",
+                        "description": "Error code: insufficient_stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1620,13 +1668,13 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1669,13 +1717,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request data or empty cart",
+                        "description": "Error code: invalid_request or cart_empty or insufficient_stock",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1733,13 +1787,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request parameters",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1777,13 +1831,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product ID",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Product not found",
+                        "description": "Error code: product_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1821,7 +1875,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Product not found",
+                        "description": "Error code: product_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1873,19 +1927,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product slug",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Product not found",
+                        "description": "Error code: product_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1935,37 +1989,37 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Validation error",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden (not delivered or profile incomplete)",
+                        "description": "Error code: profile_incomplete or not_delivered",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Product not found",
+                        "description": "Error code: product_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "409": {
-                        "description": "Already reviewed",
+                        "description": "Error code: already_reviewed",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2003,19 +2057,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid product slug",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Product not found",
+                        "description": "Error code: product_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2058,25 +2112,25 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized - authentication required",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden - can only delete own reviews",
+                        "description": "Error code: unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
-                        "description": "Review not found or already deleted",
+                        "description": "Error code: review_not_found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2119,19 +2173,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2183,13 +2237,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request or current password incorrect",
+                        "description": "Error code: invalid_request or current_password_incorrect",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2229,7 +2283,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2277,7 +2331,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2322,13 +2376,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "403": {
-                        "description": "No active deactivation or deadline expired",
+                        "description": "Error code: contestation_deadline_expired or account_not_deactivated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2373,13 +2427,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid confirmation or active dependencies",
+                        "description": "Error code: invalid_request or active_orders_block_deletion",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2413,13 +2467,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "No deletion request to cancel",
+                        "description": "Error code: deletion_not_requested",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2453,13 +2507,13 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2504,13 +2558,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Validation error",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Error code: unauthenticated",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2535,8 +2589,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.LoginResponse"
                         }
                     },
+                    "400": {
+                        "description": "Error code: refresh_token_missing",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "401": {
-                        "description": "Missing or invalid refresh token",
+                        "description": "Error code: invalid_refresh_token or refresh_token_expired",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2576,7 +2636,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request (missing fields, invalid email) or email already registered",
+                        "description": "Error code: invalid_request or email_already_registered",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2616,19 +2676,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request, invalid/expired code, or weak password",
+                        "description": "Error code: invalid_request or reset_code_invalid",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "429": {
-                        "description": "Rate limit exceeded",
+                        "description": "Error code: rate_limited",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -2668,19 +2728,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request (missing or malformed email)",
+                        "description": "Error code: invalid_request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "429": {
-                        "description": "Rate limit exceeded",
+                        "description": "Error code: rate_limited",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Error code: internal_error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -3281,7 +3341,6 @@ const docTemplate = `{
             }
         },
         "dto.ProductResponse": {
-            "description": "Product information returned by the API",
             "type": "object",
             "properties": {
                 "accords": {
