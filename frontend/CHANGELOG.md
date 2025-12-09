@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/leoferamos/aroma-sense/compare/v1.2.1...v1.3.0) (2025-12-09)
+
+
+### Features
+
+* **payment:** implement stripe gateway ([#97](https://github.com/leoferamos/aroma-sense/issues/97)) ([27f8995](https://github.com/leoferamos/aroma-sense/commit/27f8995a7f1a3f0993d15e9a7166039234a614c8))
+
 ## [1.2.1](https://github.com/leoferamos/aroma-sense/compare/v1.2.0...v1.2.1) (2025-12-09)
 
 
