@@ -228,7 +228,54 @@
     "fullName": "Nome completo",
     "payment": "Pagamento",
     "placeOrder": "Fazer Pedido",
-    "placingOrder": "Fazendo pedido..."
+    "placingOrder": "Fazendo pedido...",
+    "loadingCart": "Carregando seu carrinho...",
+    "shippingLabel": "Frete",
+    "totalLabel": "Total",
+    "fields": {
+      "postalCode": "CEP",
+      "address1": "Endereço",
+      "number": "Número",
+      "city": "Cidade",
+      "state": "Estado/Região",
+      "country": "País"
+    },
+    "shipping": {
+      "title": "Frete",
+      "enterPostalCode": "Informe o CEP para ver as opções disponíveis.",
+      "eta": "Prazo: {{count}} dia",
+      "eta_plural": "Prazo: {{count}} dias",
+      "noOptions": "Nenhuma opção de frete para este CEP."
+    },
+    "cep": {
+      "searching": "Buscando..."
+    },
+    "paymentStep": {
+      "instructions": "Complete o endereço e escolha o frete para gerar o pagamento seguro.",
+      "orderLabel": "Pedido",
+      "totalLabel": "Total",
+      "confirming": "Confirmando...",
+      "confirmPayment": "Confirmar pagamento",
+      "confirmError": "Não foi possível confirmar o pagamento.",
+      "notCompleted": "Pagamento não foi finalizado. Tente novamente."
+    },
+    "buttons": {
+      "continueToPayment": "Continuar para pagamento"
+    },
+    "validation": {
+      "selectShipping": "Selecione uma opção de frete",
+      "fullNameRequired": "Nome completo é obrigatório.",
+      "addressRequired": "Endereço é obrigatório.",
+      "numberRequired": "Número é obrigatório.",
+      "cityRequired": "Cidade é obrigatória.",
+      "stateRequired": "Estado/Região é obrigatório.",
+      "postalCodeRequired": "CEP é obrigatório.",
+      "countryRequired": "País é obrigatório."
+    },
+    "shippingOptions": {
+      "label": "Frete",
+      "loading": "Carregando opções de frete..."
+    }
   },
   "userMenu": {
     "profile": "Perfil",
