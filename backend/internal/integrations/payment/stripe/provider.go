@@ -29,7 +29,7 @@ func (p *Provider) CreatePaymentIntent(ctx context.Context, params service.Payme
 	piParams := &stripe.PaymentIntentParams{
 		Amount:             stripe.Int64(params.Amount),
 		Currency:           stripe.String(params.Currency),
-		PaymentMethodTypes: stripe.StringSlice([]string{"card", "pix"}),
+		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
 		Metadata:           params.Metadata,
 	}
 
