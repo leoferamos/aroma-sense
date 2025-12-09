@@ -29,9 +29,9 @@ func NewChatHandler(chat *service.ChatService, limiter rate.RateLimiter) *ChatHa
 // @Produce      json
 // @Param        request  body  dto.ChatRequest  true  "Chat message with optional session ID"
 // @Success      200  {object}  dto.ChatResponse  "AI response with reply and product suggestions"
-// @Failure      400  {object}  dto.ErrorResponse "Invalid request or empty message"
-// @Failure      429  {object}  dto.ErrorResponse "Rate limit exceeded"
-// @Failure      500  {object}  dto.ErrorResponse "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      429  {object}  dto.ErrorResponse "Error code: rate_limited"
+// @Failure      500  {object}  dto.ErrorResponse "Error code: internal_error"
 // @Router       /ai/chat [post]
 func (h *ChatHandler) Chat(c *gin.Context) {
 	var req dto.ChatRequest

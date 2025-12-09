@@ -32,12 +32,12 @@ func NewReviewHandler(s service.ReviewService, userService service.UserProfileSe
 // @Param        slug    path     string            true  "Product slug"
 // @Param        review  body     dto.ReviewRequest true  "Review payload"
 // @Success      201  {object}  dto.ReviewResponse       "Review created"
-// @Failure      400  {object}  dto.ErrorResponse        "Validation error"
-// @Failure      401  {object}  dto.ErrorResponse        "Unauthorized"
-// @Failure      403  {object}  dto.ErrorResponse        "Forbidden (not delivered or profile incomplete)"
-// @Failure      404  {object}  dto.ErrorResponse        "Product not found"
-// @Failure      409  {object}  dto.ErrorResponse        "Already reviewed"
-// @Failure      500  {object}  dto.ErrorResponse        "Internal error"
+// @Failure      400  {object}  dto.ErrorResponse        "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse        "Error code: unauthenticated"
+// @Failure      403  {object}  dto.ErrorResponse        "Error code: profile_incomplete or not_delivered"
+// @Failure      404  {object}  dto.ErrorResponse        "Error code: product_not_found"
+// @Failure      409  {object}  dto.ErrorResponse        "Error code: already_reviewed"
+// @Failure      500  {object}  dto.ErrorResponse        "Error code: internal_error"
 // @Router       /products/{slug}/reviews [post]
 // @Security     BearerAuth
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
@@ -106,9 +106,9 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 // @Param        page   query  int    false  "Page number"      default(1)
 // @Param        limit  query  int    false  "Items per page"   default(10)
 // @Success      200  {object}  dto.ReviewListResponse   "Paginated reviews"
-// @Failure      400  {object}  dto.ErrorResponse        "Invalid product slug"
-// @Failure      404  {object}  dto.ErrorResponse        "Product not found"
-// @Failure      500  {object}  dto.ErrorResponse        "Internal error"
+// @Failure      400  {object}  dto.ErrorResponse        "Error code: invalid_request"
+// @Failure      404  {object}  dto.ErrorResponse        "Error code: product_not_found"
+// @Failure      500  {object}  dto.ErrorResponse        "Error code: internal_error"
 // @Router       /products/{slug}/reviews [get]
 func (h *ReviewHandler) ListReviews(c *gin.Context) {
 	slug := c.Param("slug")
@@ -161,9 +161,9 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 // @Produce      json
 // @Param        slug path  string  true  "Product slug"
 // @Success      200  {object}  dto.ReviewSummary       "Review summary"
-// @Failure      400  {object}  dto.ErrorResponse       "Invalid product slug"
-// @Failure      404  {object}  dto.ErrorResponse       "Product not found"
-// @Failure      500  {object}  dto.ErrorResponse       "Internal error"
+// @Failure      400  {object}  dto.ErrorResponse       "Error code: invalid_request"
+// @Failure      404  {object}  dto.ErrorResponse       "Error code: product_not_found"
+// @Failure      500  {object}  dto.ErrorResponse       "Error code: internal_error"
 // @Router       /products/{slug}/reviews/summary [get]
 func (h *ReviewHandler) GetSummary(c *gin.Context) {
 	slug := c.Param("slug")
@@ -200,10 +200,10 @@ func (h *ReviewHandler) GetSummary(c *gin.Context) {
 // @Produce      json
 // @Param        reviewID  path     string  true  "Review ID (UUID)"
 // @Success      200  {object}  dto.MessageResponse  "Review deleted successfully"
-// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized - authentication required"
-// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - can only delete own reviews"
-// @Failure      404  {object}  dto.ErrorResponse    "Review not found or already deleted"
-// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
+// @Failure      401  {object}  dto.ErrorResponse    "Error code: unauthenticated"
+// @Failure      403  {object}  dto.ErrorResponse    "Error code: unauthorized"
+// @Failure      404  {object}  dto.ErrorResponse    "Error code: review_not_found"
+// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
 // @Router       /reviews/{reviewID} [delete]
 // @Security     BearerAuth
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {

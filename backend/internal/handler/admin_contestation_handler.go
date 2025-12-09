@@ -25,7 +25,7 @@ func NewAdminContestationHandler(s service.UserContestationService) *AdminContes
 // @Param limit query int false "Limit"
 // @Param offset query int false "Offset"
 // @Success 200 {object} map[string]interface{} "List of contestations and total count"
-// @Failure 500 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse "Error code: internal_error"
 // @Router /admin/contestations [get]
 // @Security BearerAuth
 func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
@@ -55,8 +55,8 @@ func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
 // @Param id path int true "Contestation ID"
 // @Param body body object false "Review notes (optional)"
 // @Success 200 {object} dto.MessageResponse "Contestation approved"
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse "Error code: invalid_request"
+// @Failure 401 {object} dto.ErrorResponse "Error code: unauthenticated"
 // @Router /admin/contestations/{id}/approve [post]
 // @Security BearerAuth
 func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
@@ -96,8 +96,8 @@ func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 // @Param id path int true "Contestation ID"
 // @Param body body object false "Review notes (optional)"
 // @Success 200 {object} dto.MessageResponse "Contestation rejected"
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse "Error code: invalid_request"
+// @Failure 401 {object} dto.ErrorResponse "Error code: unauthenticated"
 // @Router /admin/contestations/{id}/reject [post]
 // @Security BearerAuth
 func (h *AdminContestationHandler) RejectContestation(c *gin.Context) {

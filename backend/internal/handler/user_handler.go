@@ -35,7 +35,7 @@ func (h *UserHandler) UserProfile() service.UserProfileService {
 // @Produce      json
 // @Param        input  body  dto.CreateUserRequest  true  "User registration data"
 // @Success      201  {object}  dto.MessageResponse  "User registered successfully"
-// @Failure      400  {object}  dto.ErrorResponse    "Invalid request (missing fields, invalid email) or email already registered"
+// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request or email_already_registered"
 // @Router       /users/register [post]
 func (h *UserHandler) RegisterUser(c *gin.Context) {
 	var input dto.CreateUserRequest
@@ -67,7 +67,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 // @Produce      json
 // @Param        input  body  dto.LoginRequest  true  "Login credentials"
 // @Success      200  {object}  dto.LoginResponse   "Authentication successful"
-// @Failure      400  {object}  dto.ErrorResponse  "Invalid request"
+// @Failure      400  {object}  dto.ErrorResponse  "Error code: invalid_request"
 // @Router       /users/login [post]
 func (h *UserHandler) LoginUser(c *gin.Context) {
 	var input dto.LoginRequest
@@ -117,7 +117,8 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 // @Tags         auth
 // @Produce      json
 // @Success      200  {object}  dto.LoginResponse   "Token refreshed"
-// @Failure      401  {object}  dto.ErrorResponse   "Missing or invalid refresh token"
+// @Failure      400  {object}  dto.ErrorResponse   "Error code: refresh_token_missing"
+// @Failure      401  {object}  dto.ErrorResponse   "Error code: invalid_refresh_token or refresh_token_expired"
 // @Router       /users/refresh [post]
 func (h *UserHandler) RefreshToken(c *gin.Context) {
 	// Read refresh token from HttpOnly cookie
@@ -187,7 +188,7 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 // @Tags         users
 // @Produce      json
 // @Success      200  {object}  dto.ProfileResponse   "User profile"
-// @Failure      401  {object}  dto.ErrorResponse      "Unauthorized"
+// @Failure      401  {object}  dto.ErrorResponse      "Error code: unauthenticated"
 // @Router       /users/me [get]
 // @Security     BearerAuth
 func (h *UserHandler) GetProfile(c *gin.Context) {
@@ -224,8 +225,8 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Produce      json
 // @Param        input  body  dto.UpdateProfileRequest  true  "Profile update"
 // @Success      200  {object}  dto.ProfileResponse     "Updated profile"
-// @Failure      400  {object}  dto.ErrorResponse       "Validation error"
-// @Failure      401  {object}  dto.ErrorResponse       "Unauthorized"
+// @Failure      400  {object}  dto.ErrorResponse       "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse       "Error code: unauthenticated"
 // @Router       /users/me/profile [patch]
 // @Security     BearerAuth
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
@@ -269,8 +270,8 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  dto.UserExportResponse "User data exported"
-// @Failure      401  {object}  dto.ErrorResponse      "Unauthorized"
-// @Failure      500  {object}  dto.ErrorResponse      "Internal server error"
+// @Failure      401  {object}  dto.ErrorResponse      "Error code: unauthenticated"
+// @Failure      500  {object}  dto.ErrorResponse      "Error code: internal_error"
 // @Router       /users/me/export [get]
 // @Security     BearerAuth
 func (h *UserHandler) ExportUserData(c *gin.Context) {
@@ -302,8 +303,8 @@ func (h *UserHandler) ExportUserData(c *gin.Context) {
 // @Produce      json
 // @Param        request body   dto.DeleteAccountRequest true "Deletion confirmation"
 // @Success      200      {object}  dto.MessageResponse   "Deletion request initiated successfully"
-// @Failure      400      {object}  dto.ErrorResponse     "Invalid confirmation or active dependencies"
-// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
+// @Failure      400      {object}  dto.ErrorResponse     "Error code: invalid_request or active_orders_block_deletion"
+// @Failure      401      {object}  dto.ErrorResponse     "Error code: unauthenticated"
 // @Router       /users/me/deletion [post]
 // @Security     BearerAuth
 func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
@@ -363,8 +364,8 @@ func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Success      200      {object}  dto.MessageResponse   "Account deletion cancelled"
-// @Failure      400      {object}  dto.ErrorResponse     "No deletion request to cancel"
-// @Failure      401      {object}  dto.ErrorResponse     "Unauthorized"
+// @Failure      400      {object}  dto.ErrorResponse     "Error code: deletion_not_requested"
+// @Failure      401      {object}  dto.ErrorResponse     "Error code: unauthenticated"
 // @Router       /users/me/deletion/cancel [post]
 // @Security     BearerAuth
 func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
@@ -395,8 +396,8 @@ func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
 // @Produce      json
 // @Param        request body   dto.ContestationRequest true "Contestation details"
 // @Success      200  {object}  dto.MessageResponse "Contestation requested successfully"
-// @Failure      400  {object}  dto.ErrorResponse "Invalid request"
-// @Failure      403  {object}  dto.ErrorResponse "No active deactivation or deadline expired"
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      403  {object}  dto.ErrorResponse "Error code: contestation_deadline_expired or account_not_deactivated"
 // @Router       /users/me/contest [post]
 // @Security     BearerAuth
 func (h *UserHandler) RequestContestation(c *gin.Context) {
@@ -433,8 +434,8 @@ func (h *UserHandler) RequestContestation(c *gin.Context) {
 // @Param Authorization header string true "Bearer token"
 // @Param request body dto.ChangePasswordRequest true "Password change request"
 // @Success 200 {object} dto.MessageResponse "Password changed successfully"
-// @Failure 400 {object} dto.ErrorResponse "Invalid request or current password incorrect"
-// @Failure 401 {object} dto.ErrorResponse "Unauthorized"
+// @Failure 400 {object} dto.ErrorResponse "Error code: invalid_request or current_password_incorrect"
+// @Failure 401 {object} dto.ErrorResponse "Error code: unauthenticated"
 // @Router /users/change-password [post]
 // @Security     BearerAuth
 func (h *UserHandler) ChangePassword(c *gin.Context) {
