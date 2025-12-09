@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/leoferamos/aroma-sense/compare/v1.2.0...v1.2.1) (2025-12-09)
+
+
+### Bug Fixes
+
+* **order:** update full order flow ([#96](https://github.com/leoferamos/aroma-sense/issues/96)) ([67560fa](https://github.com/leoferamos/aroma-sense/commit/67560fa7dc78d0938cef599408432e9c0ca2ad68))
+
 # [1.2.0](https://github.com/leoferamos/aroma-sense/compare/v1.1.0...v1.2.0) (2025-12-08)
 
 
