@@ -113,13 +113,6 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		return nil, err
 	}
 
-	// Deduct stock
-	for _, cartItem := range cart.Items {
-		if err := s.productRepo.DecrementStock(cartItem.ProductID, cartItem.Quantity); err != nil {
-			return nil, apperror.NewDomain(fmt.Errorf("failed to update stock for product %d: %w", cartItem.ProductID, err), "stock_update_failed", "order created but failed to update stock")
-		}
-	}
-
 	// Clear cart
 	if err := s.cartRepo.ClearCartItems(cart.ID); err != nil {
 		return nil, apperror.NewCodeMessage("cart_clear_failed", "order created, but failed to clear cart")

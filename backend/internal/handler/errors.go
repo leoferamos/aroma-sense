@@ -66,6 +66,7 @@ var domainCodeStatus = map[string]int{
 	"cannot_change_own_role":         http.StatusForbidden,
 	"suspension_until_past":          http.StatusBadRequest,
 	"user_not_deactivated":           http.StatusBadRequest,
+	"invalid_webhook":                http.StatusBadRequest,
 	"internal_error":                 http.StatusInternalServerError,
 }
 
