@@ -38,9 +38,9 @@ func NewPasswordResetHandler(s service.PasswordResetService, limiter rate.RateLi
 // @Produce      json
 // @Param        input  body  dto.ResetPasswordRequestRequest  true  "Email address"
 // @Success      200  {object}  dto.MessageResponse  "If the email exists, a reset code has been sent"
-// @Failure      400  {object}  dto.ErrorResponse    "Invalid request (missing or malformed email)"
-// @Failure      429  {object}  dto.ErrorResponse    "Rate limit exceeded"
-// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request"
+// @Failure      429  {object}  dto.ErrorResponse    "Error code: rate_limited"
+// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
 // @Router       /users/reset/request [post]
 func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 	var input dto.ResetPasswordRequestRequest
@@ -103,9 +103,9 @@ func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 // @Produce      json
 // @Param        input  body  dto.ResetPasswordConfirmRequest  true  "Reset confirmation data"
 // @Success      200  {object}  dto.MessageResponse  "Password reset successfully"
-// @Failure      400  {object}  dto.ErrorResponse    "Invalid request, invalid/expired code, or weak password"
-// @Failure      429  {object}  dto.ErrorResponse    "Rate limit exceeded"
-// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request or reset_code_invalid"
+// @Failure      429  {object}  dto.ErrorResponse    "Error code: rate_limited"
+// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
 // @Router       /users/reset/confirm [post]
 func (h *PasswordResetHandler) ConfirmReset(c *gin.Context) {
 	var input dto.ResetPasswordConfirmRequest

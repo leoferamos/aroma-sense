@@ -32,8 +32,9 @@ func NewAdminUserHandler(s service.AdminUserService) *AdminUserHandler {
 // @Param        role    query     string               false  "Filter by role (admin, client)"
 // @Param        status  query     string               false  "Filter by status (active, deactivated, deleted)"
 // @Success      200     {object}  dto.UserListResponse "Users list"
-// @Failure      400     {object}  dto.ErrorResponse    "Invalid request"
-// @Failure      500     {object}  dto.ErrorResponse    "Internal server error"
+// @Failure      400     {object}  dto.ErrorResponse    "Error code: invalid_request"
+// @Failure      401     {object}  dto.ErrorResponse    "Error code: unauthenticated"
+// @Failure      500     {object}  dto.ErrorResponse    "Error code: internal_error"
 // @Router       /admin/users [get]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
@@ -116,8 +117,10 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      int                  true  "User ID"
 // @Success      200  {object}  dto.AdminUserResponse "User details"
-// @Failure      404  {object}  dto.ErrorResponse     "User not found"
-// @Failure      500  {object}  dto.ErrorResponse     "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse     "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse     "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse     "Error code: not_found"
+// @Failure      500  {object}  dto.ErrorResponse     "Error code: internal_error"
 // @Router       /admin/users/{id} [get]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
@@ -168,9 +171,10 @@ func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 // @Param        id       path      int                  true  "User ID"
 // @Param        role     body      dto.UpdateRoleRequest true "New role"
 // @Success      200      {object}  dto.MessageResponse   "Role updated successfully"
-// @Failure      400      {object}  dto.ErrorResponse     "Invalid request"
-// @Failure      403      {object}  dto.ErrorResponse     "Cannot change own role"
-// @Failure      404      {object}  dto.ErrorResponse     "User not found"
+// @Failure      400      {object}  dto.ErrorResponse     "Error code: invalid_request"
+// @Failure      401      {object}  dto.ErrorResponse     "Error code: unauthenticated"
+// @Failure      403      {object}  dto.ErrorResponse     "Error code: cannot_change_own_role"
+// @Failure      404      {object}  dto.ErrorResponse     "Error code: not_found"
 // @Router       /admin/users/{id}/role [patch]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
@@ -216,9 +220,10 @@ func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
 // @Param        id   path      int                           true  "User ID"
 // @Param        request body   dto.AdminDeactivateUserRequest true "Deactivation details"
 // @Success      200  {object}  dto.MessageResponse           "User deactivated successfully"
-// @Failure      400  {object}  dto.ErrorResponse             "Invalid request"
-// @Failure      404  {object}  dto.ErrorResponse             "User not found"
-// @Failure      500  {object}  dto.ErrorResponse             "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse             "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse             "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse             "Error code: not_found"
+// @Failure      500  {object}  dto.ErrorResponse             "Error code: internal_error"
 // @Router       /admin/users/{id}/deactivate [post]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
@@ -265,9 +270,10 @@ func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
 // @Param        id       path      int                        true  "User ID"
 // @Param        request  body      dto.AdminReactivateUserRequest true "Reactivation details"
 // @Success      200      {object}  dto.MessageResponse        "User reactivated successfully"
-// @Failure      400      {object}  dto.ErrorResponse          "Invalid request"
-// @Failure      404      {object}  dto.ErrorResponse          "User not found"
-// @Failure      500      {object}  dto.ErrorResponse          "Internal server error"
+// @Failure      400      {object}  dto.ErrorResponse          "Error code: invalid_request"
+// @Failure      401      {object}  dto.ErrorResponse          "Error code: unauthenticated"
+// @Failure      404      {object}  dto.ErrorResponse          "Error code: not_found"
+// @Failure      500      {object}  dto.ErrorResponse          "Error code: internal_error"
 // @Router       /admin/users/{id}/reactivate [post]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminReactivateUser(c *gin.Context) {

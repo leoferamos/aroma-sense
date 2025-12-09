@@ -29,9 +29,9 @@ func NewAIHandler(svc *service.AIService, limiter rate.RateLimiter) *AIHandler {
 // @Produce      json
 // @Param        request  body  dto.RecommendRequest  true  "Recommendation request with user message and limit"
 // @Success      200  {object}  dto.RecommendResponse  "Product recommendations with reasoning"
-// @Failure      400  {object}  dto.ErrorResponse     "Invalid request or non-perfume related query"
-// @Failure      429  {object}  dto.ErrorResponse     "Rate limit exceeded"
-// @Failure      500  {object}  dto.ErrorResponse     "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse     "Error code: invalid_request or topic_restricted"
+// @Failure      429  {object}  dto.ErrorResponse     "Error code: rate_limited"
+// @Failure      500  {object}  dto.ErrorResponse     "Error code: internal_error"
 // @Router       /ai/recommend [post]
 func (h *AIHandler) Recommend(c *gin.Context) {
 	var req dto.RecommendRequest

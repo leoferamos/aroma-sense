@@ -24,9 +24,9 @@ func NewCartHandler(cartService service.CartService) *CartHandler {
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  dto.CartResponse  "User's cart with items and totals"
-// @Failure      401  {object}  dto.ErrorResponse  "Unauthorized"
-// @Failure      404  {object}  dto.ErrorResponse  "Cart not found"
-// @Failure      500  {object}  dto.ErrorResponse  "Internal server error"
+// @Failure      401  {object}  dto.ErrorResponse  "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse  "Error code: cart_not_found"
+// @Failure      500  {object}  dto.ErrorResponse  "Error code: internal_error"
 // @Router       /cart [get]
 // @Security     BearerAuth
 func (h *CartHandler) GetCart(c *gin.Context) {
@@ -56,11 +56,11 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // @Produce      json
 // @Param        request        body    dto.AddToCartRequest  true   "Product slug and quantity to add"
 // @Success      200  {object}  dto.CartResponse    "Updated cart with new item"
-// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body or insufficient stock"
-// @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
-// @Failure      404  {object}  dto.ErrorResponse   "Product not found"
-// @Failure      409  {object}  dto.ErrorResponse   "Product out of stock"
-// @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse   "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse   "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse   "Error code: product_not_found"
+// @Failure      409  {object}  dto.ErrorResponse   "Error code: insufficient_stock"
+// @Failure      500  {object}  dto.ErrorResponse   "Error code: internal_error"
 // @Router       /cart [post]
 // @Security     BearerAuth
 func (h *CartHandler) AddItem(c *gin.Context) {
@@ -101,11 +101,11 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 // @Param        productSlug    path    string                       true   "Product slug"
 // @Param        request        body    dto.UpdateCartItemRequest    true   "New quantity (0 to remove item)"
 // @Success      200  {object}  dto.CartResponse    "Updated cart"
-// @Failure      400  {object}  dto.ErrorResponse   "Invalid request body, product slug, or insufficient stock"
-// @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
-// @Failure      404  {object}  dto.ErrorResponse   "Cart item or product not found"
-// @Failure      409  {object}  dto.ErrorResponse   "Product out of stock"
-// @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse   "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse   "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse   "Error code: cart_item_not_found"
+// @Failure      409  {object}  dto.ErrorResponse   "Error code: insufficient_stock"
+// @Failure      500  {object}  dto.ErrorResponse   "Error code: internal_error"
 // @Router       /cart/items/{productSlug} [patch]
 // @Security     BearerAuth
 func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
@@ -152,10 +152,10 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 // @Produce      json
 // @Param        productSlug    path    string true   "Product slug"
 // @Success      200  {object}  dto.CartResponse    "Updated cart after item removal"
-// @Failure      400  {object}  dto.ErrorResponse   "Invalid product slug"
-// @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
-// @Failure      404  {object}  dto.ErrorResponse   "Cart item not found"
-// @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse   "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse   "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse   "Error code: cart_item_not_found"
+// @Failure      500  {object}  dto.ErrorResponse   "Error code: internal_error"
 // @Router       /cart/items/{productSlug} [delete]
 // @Security     BearerAuth
 func (h *CartHandler) RemoveItem(c *gin.Context) {
@@ -195,9 +195,9 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  dto.CartResponse    "Empty cart after clearing all items"
-// @Failure      401  {object}  dto.ErrorResponse   "Unauthorized"
-// @Failure      404  {object}  dto.ErrorResponse   "Cart not found"
-// @Failure      500  {object}  dto.ErrorResponse   "Internal server error"
+// @Failure      401  {object}  dto.ErrorResponse   "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse   "Error code: cart_not_found"
+// @Failure      500  {object}  dto.ErrorResponse   "Error code: internal_error"
 // @Router       /cart [delete]
 // @Security     BearerAuth
 func (h *CartHandler) ClearCart(c *gin.Context) {

@@ -24,9 +24,9 @@ func NewShippingHandler(shippingService service.ShippingService) *ShippingHandle
 // @Produce      json
 // @Param        postal_code query string true "Destination postal code (CEP)"
 // @Success      200   {array} dto.ShippingOption
-// @Failure      400   {object} dto.ErrorResponse
-// @Failure      401   {object} dto.ErrorResponse
-// @Failure      500   {object} dto.ErrorResponse
+// @Failure      400   {object} dto.ErrorResponse "Error code: invalid_request"
+// @Failure      401   {object} dto.ErrorResponse "Error code: unauthenticated"
+// @Failure      500   {object} dto.ErrorResponse "Error code: internal_error"
 // @Router       /shipping/options [get]
 // @Security     BearerAuth
 func (h *ShippingHandler) GetShippingOptions(c *gin.Context) {

@@ -30,8 +30,9 @@ const maxPerPage = 100
 // @Produce      json
 // @Param        order  body  dto.CreateOrderFromCartRequest  true  "Order data (shipping address, payment method)"
 // @Success      201  {object}  dto.OrderResponse      "Order created successfully"
-// @Failure      400  {object}  dto.ErrorResponse      "Invalid request data or empty cart"
-// @Failure      401  {object}  dto.ErrorResponse      "Unauthorized"
+// @Failure      400  {object}  dto.ErrorResponse      "Error code: invalid_request or cart_empty or insufficient_stock"
+// @Failure      401  {object}  dto.ErrorResponse      "Error code: unauthenticated"
+// @Failure      500  {object}  dto.ErrorResponse      "Error code: internal_error"
 // @Router       /orders [post]
 // @Security     BearerAuth
 func (h *OrderHandler) CreateOrderFromCart(c *gin.Context) {
@@ -72,8 +73,9 @@ func (h *OrderHandler) CreateOrderFromCart(c *gin.Context) {
 // @Param        page       query    int     false  "Page number (1-based)"
 // @Param        per_page   query    int     false  "Items per page"
 // @Success      200  {object}  dto.AdminOrdersResponse
-// @Failure      400  {object}  dto.ErrorResponse
-// @Failure      401  {object}  dto.ErrorResponse
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse "Error code: unauthenticated"
+// @Failure      500  {object}  dto.ErrorResponse "Error code: internal_error"
 // @Router       /admin/orders [get]
 // @Security     BearerAuth
 func (h *OrderHandler) ListOrders(c *gin.Context) {
@@ -158,8 +160,8 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Success      200  {array}   dto.OrderResponse
-// @Failure      401  {object}  dto.ErrorResponse
-// @Failure      500  {object}  dto.ErrorResponse
+// @Failure      401  {object}  dto.ErrorResponse "Error code: unauthenticated"
+// @Failure      500  {object}  dto.ErrorResponse "Error code: internal_error"
 // @Router       /orders [get]
 // @Security     BearerAuth
 func (h *OrderHandler) ListUserOrders(c *gin.Context) {
