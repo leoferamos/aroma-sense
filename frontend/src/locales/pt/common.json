@@ -310,7 +310,22 @@
     "reviewDeleted": "Avaliação excluída com sucesso!",
     "deleteReview": "Excluir avaliação",
     "deleteForbidden": "Você não tem permissão para excluir esta avaliação",
-    "deleteFailed": "Falha ao excluir avaliação. Tente novamente."
+    "deleteFailed": "Falha ao excluir avaliação. Tente novamente.",
+    "report": "Denunciar",
+    "reportReview": "Reportar avaliação",
+    "reportCategory": "Categoria",
+    "reportSpam": "Spam ou promoção",
+    "reportAbuse": "Assédio ou discurso de ódio",
+    "reportOffensive": "Conteúdo ofensivo",
+    "reportOther": "Outro",
+    "reportReason": "Descreva o problema",
+    "reportPlaceholder": "Explique por que esta avaliação deve ser revisada...",
+    "submitReport": "Enviar denúncia",
+    "reportSubmitted": "Denúncia enviada. Vamos analisar em breve.",
+    "reportFailed": "Falha ao enviar denúncia. Tente novamente.",
+    "provideReportReason": "Forneça um motivo para esta denúncia.",
+    "reportAlreadySubmitted": "Você já denunciou esta avaliação.",
+    "reportRateLimited": "Muitas denúncias. Tente novamente mais tarde."
   },
   "errors": {
     "failedToLoadProfile": "Falha ao carregar perfil",
@@ -347,7 +362,8 @@
     "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
     "passwordSymbol": "A senha deve conter pelo menos um símbolo",
     "currentPasswordIncorrect": "A senha atual está incorreta",
-    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual"
+    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual",
+    "already_reported": "Você já denunciou esta avaliação."
   },
   "order": {
     "myOrders": "Meus Pedidos",
