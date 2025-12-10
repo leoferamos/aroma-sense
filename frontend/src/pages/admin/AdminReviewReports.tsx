@@ -20,15 +20,6 @@ const AdminReviewReports: React.FC = () => {
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / limit)), [total, limit]);
   const currentPage = useMemo(() => Math.floor(offset / limit) + 1, [offset, limit]);
 
-  const navItems = [
-    { label: t('dashboard'), to: '/admin/dashboard' },
-    { label: t('products'), to: '/admin/products' },
-    { label: t('orders'), to: '/admin/orders' },
-    { label: t('users'), to: '/admin/users' },
-    { label: t('auditLogs'), to: '/admin/audit-logs' },
-    { label: t('contestations'), to: '/admin/contestations' },
-    { label: t('reviewReports'), to: '/admin/review-reports' },
-  ];
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -73,8 +64,7 @@ const AdminReviewReports: React.FC = () => {
 
   return (
     <AdminLayout
-      navItems={navItems}
-      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('dashboard')}</Link></div>}
+      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="h-9 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('dashboard')}</Link></div>}
     >
       <div className="p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">

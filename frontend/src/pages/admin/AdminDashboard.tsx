@@ -7,25 +7,13 @@ import type { AuditLog, AuditLogSummary } from '../../types/audit';
 import { useTranslation } from 'react-i18next';
 
 const AdminDashboard: React.FC = () => {
-  const { role, logout } = useAuth();
+  const { role } = useAuth();
   const { t } = useTranslation('admin');
   const { t: tCommon } = useTranslation('common');
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
   const actions = (
-    <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-500">
-        <span className="font-medium text-blue-600">{role}</span>
-      </span>
-      <button
-        onClick={handleLogout}
-        className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors uppercase"
-      >
-        {t('nav.logout')}
-      </button>
+    <div className="flex items-center gap-2 text-sm text-gray-600">
+      <span className="px-2 py-1 rounded bg-gray-100 border border-gray-200 font-medium text-gray-800">{role}</span>
     </div>
   );
 
