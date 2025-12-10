@@ -10,16 +10,21 @@ import { listProducts } from '../services/product';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import ProductFilters from '../components/ProductFilters';
 
 const Products: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Product[] | null>(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [filters, setFilters] = useState<{ genders: string[]; priceRange: [number, number] }>({
+    genders: [],
+    priceRange: [0, 1000],
+  });
   const { query, setQuery, page, setPage, limit, results, total, isLoading, error, submitNow, isSearching, hasMore, loadMore, isLoadingMore } = useProductSearch({ limit: 12, debounceMs: 600, enableInfiniteScroll: true });
   const [searchParams] = useSearchParams();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const { t } = useTranslation('common');
-  
+
 
   // Sync state from URL
   useEffect(() => {
@@ -82,6 +87,17 @@ const Products: React.FC = () => {
   const safeResults = useMemo(() => results, [results]);
   const safeSuggestions = useMemo(() => (suggestions ?? []).filter(Boolean) as Product[], [suggestions]);
 
+  const matchesFilters = (product: Product) => {
+    const gender = (product.gender || '').toLowerCase();
+    const price = Number(product.price) || 0;
+    const genderOk = filters.genders.length === 0 || filters.genders.some((g) => g.toLowerCase() === gender);
+    const priceOk = price >= filters.priceRange[0] && price <= filters.priceRange[1];
+    return genderOk && priceOk;
+  };
+
+  const filteredResults = useMemo(() => safeResults.filter(matchesFilters), [safeResults, filters]);
+  const filteredSuggestions = useMemo(() => safeSuggestions.filter(matchesFilters), [safeSuggestions, filters]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -98,98 +114,115 @@ const Products: React.FC = () => {
           </div>
         </div>
 
-        {/* Loading State */}
-        {(isLoading || (safeResults.length === 0 && query.trim() === '' && !error)) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" aria-live="polite">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
+        {/* Content with sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:col-span-1">
+            <ProductFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              minPrice={0}
+              maxPrice={1000}
+            />
           </div>
-        )}
 
-        {/* Error State */}
-        {error && <ErrorState message={error} onRetry={submitNow} />}
+          {/* Products Section */}
+          <div className="lg:col-span-3">
 
-        {/* Products Grid */}
-        {!isLoading && !error && (
-          <>
-            {(() => {
-              const showEmpty = safeResults.length === 0;
-              return showEmpty;
-            })() ? (
-              <div className="text-center py-20">
-                <svg
-                  className="w-16 h-16 text-gray-400 mx-auto mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                  />
-                </svg>
-                {query.trim().length >= 2 ? (
-                  <>
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">We couldn’t find “{query.trim()}”.</h3>
-                    <p className="text-gray-500">Here are some suggestions you might like:</p>
-                    <div className="mt-8">
-                      {loadingSuggestions ? (
-                        <LoadingSpinner message={t('errors.loadingSuggestions')} />
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                          {safeSuggestions.map((p) => (
-                            <ProductCard key={p.slug} product={p} showAddToCart={false} />
-                          ))}
+            {/* Loading State */}
+            {(isLoading || (filteredResults.length === 0 && query.trim() === '' && !error)) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" aria-live="polite">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && <ErrorState message={error} onRetry={submitNow} />}
+
+            {/* Products Grid */}
+            {!isLoading && !error && (
+              <>
+                {(() => {
+                  const showEmpty = filteredResults.length === 0;
+                  return showEmpty;
+                })() ? (
+                  <div className="text-center py-20">
+                    <svg
+                      className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                      />
+                    </svg>
+                    {query.trim().length >= 2 ? (
+                      <>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">We couldn’t find “{query.trim()}”.</h3>
+                        <p className="text-gray-500">Here are some suggestions you might like:</p>
+                        <div className="mt-8">
+                          {loadingSuggestions ? (
+                            <LoadingSpinner message={t('errors.loadingSuggestions')} />
+                          ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                              {filteredSuggestions.map((p) => (
+                                <ProductCard key={p.slug} product={p} showAddToCart={false} />
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('products.noProducts')}</h3>
+                        <p className="text-gray-500">{t('products.checkBackSoon')}</p>
+                      </>
+                    )}
+                  </div>
                 ) : (
                   <>
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('products.noProducts')}</h3>
-                    <p className="text-gray-500">{t('products.checkBackSoon')}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                      {filteredResults.map((product) => (
+                        <ProductCard key={product.slug} product={product} showAddToCart={false} />
+                      ))}
+                    </div>
+
+                    {/* Infinite scroll sentinel */}
+                    {!isSearching && hasMore && (
+                      <div ref={sentinelRef} className="flex justify-center py-8">
+                        <div className="h-4" /> {/* Invisible sentinel for smooth infinite scroll */}
+                      </div>
+                    )}
+
+                    {/* Loading indicator at the end of the list*/}
+                    {!isSearching && isLoadingMore && results.length > 0 && (
+                      <div className="flex justify-center py-8">
+                        <LoadingSpinner message={t('products.loadingMore')} />
+                      </div>
+                    )}
+
+                    {isSearching && Number(total) > Number(limit) && (
+                      <Pagination
+                        page={Number(page) || 1}
+                        pageSize={Number(limit) || 12}
+                        total={Number(total) || 0}
+                        onPageChange={setPage}
+                      />
+                    )}
                   </>
-                )}
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {safeResults.map((product) => (
-                    <ProductCard key={product.slug} product={product} showAddToCart={false} />
-                  ))}
-                </div>
-
-                {/* Infinite scroll sentinel */}
-                {!isSearching && hasMore && (
-                  <div ref={sentinelRef} className="flex justify-center py-8">
-                    <div className="h-4" /> {/* Invisible sentinel for smooth infinite scroll */}
-                  </div>
-                )}
-
-                {/* Loading indicator at the end of the list*/}
-                {!isSearching && isLoadingMore && results.length > 0 && (
-                  <div className="flex justify-center py-8">
-                    <LoadingSpinner message={t('products.loadingMore')} />
-                  </div>
-                )}
-
-                {isSearching && Number(total) > Number(limit) && (
-                  <Pagination
-                    page={Number(page) || 1}
-                    pageSize={Number(limit) || 12}
-                    total={Number(total) || 0}
-                    onPageChange={setPage}
-                  />
                 )}
               </>
             )}
-          </>
-        )}
+          </div>
+        </div>
       </main>
-  {/* ChatBubble is mounted globally in App; avoid duplicate here. */}
+      {/* ChatBubble is mounted globally in App; avoid duplicate here. */}
     </div>
   );
 };

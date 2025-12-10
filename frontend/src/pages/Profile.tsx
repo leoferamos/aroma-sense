@@ -57,7 +57,7 @@ const Profile: React.FC = () => {
       setSuccess('Profile updated successfully');
     } catch (e: unknown) {
       if (isAxiosError(e) && e.response?.status === 401) {
-        setError(t('sessionExpired'));
+        setError(t('errors.sessionExpired'));
       } else {
         if (isAxiosError(e)) {
           setError(e.response?.data?.error || t('errors.failedToUpdateProfile'));

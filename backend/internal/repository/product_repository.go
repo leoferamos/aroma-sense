@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"sort"
 	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/dto"
@@ -20,6 +21,7 @@ type ProductRepository interface {
 	FindByID(id uint) (model.Product, error)
 	FindBySlug(slug string) (model.Product, error)
 	SearchProducts(ctx context.Context, query string, limit int, offset int, sort string) ([]model.Product, int, error)
+	SearchProductsByGender(ctx context.Context, query string, limit int, offset int, sort string, gender string) ([]model.Product, int, error)
 	Update(product *model.Product) error
 	Delete(id uint) error
 	DecrementStock(productID uint, quantity int) error
@@ -27,6 +29,7 @@ type ProductRepository interface {
 	UpsertProductEmbedding(productID uint, embedding []float32) error
 	HasProductEmbedding(productID uint) (bool, error)
 	FindSimilarProductsByEmbedding(ctx context.Context, embedding []float32, limit int) ([]model.Product, error)
+	FindSimilarProductsByEmbeddingAndGender(ctx context.Context, embedding []float32, limit int, gender string) ([]model.Product, error)
 }
 
 type productRepository struct {
@@ -180,6 +183,65 @@ func (r *productRepository) SearchProducts(ctx context.Context, query string, li
 	return products, int(total), nil
 }
 
+// SearchProductsByGender performs a search with gender filtering, pagination and sort.
+func (r *productRepository) SearchProductsByGender(ctx context.Context, query string, limit int, offset int, sort string, gender string) ([]model.Product, int, error) {
+	var products []model.Product
+	var selectSQL string
+	var args []interface{}
+
+	genderClause := ""
+	genderArgs := []interface{}{}
+	switch gender {
+	case "Masculino":
+		genderClause = " AND (p.gender = ? OR p.gender = ?)"
+		genderArgs = append(genderArgs, "Masculino", "Unissex")
+	case "Feminino":
+		genderClause = " AND (p.gender = ? OR p.gender = ?)"
+		genderArgs = append(genderArgs, "Feminino", "Unissex")
+	case "Unissex":
+		genderClause = " AND p.gender = ?"
+		genderArgs = append(genderArgs, "Unissex")
+	}
+
+	if sort == "latest" {
+		selectSQL = `
+		SELECT p.*
+		FROM products p
+		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderClause + `
+		ORDER BY p.created_at DESC
+		LIMIT ? OFFSET ?
+		`
+		args = []interface{}{query}
+		args = append(args, genderArgs...)
+		args = append(args, limit, offset)
+	} else {
+		selectSQL = `
+		SELECT p.*
+		FROM products p
+		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderClause + `
+		ORDER BY ts_rank_cd(p.search_vector, websearch_to_tsquery('portuguese', unaccent(?))) DESC, p.created_at DESC
+		LIMIT ? OFFSET ?
+		`
+		args = []interface{}{query, query}
+		args = append(args, genderArgs...)
+		args = append(args, limit, offset)
+	}
+
+	if err := r.db.WithContext(ctx).Raw(selectSQL, args...).Scan(&products).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var total int64
+	countSQL := `SELECT COUNT(*) FROM products p WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderClause
+	countArgs := []interface{}{query}
+	countArgs = append(countArgs, genderArgs...)
+	if err := r.db.WithContext(ctx).Raw(countSQL, countArgs...).Scan(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return products, int(total), nil
+}
+
 // uniqueSlug ensures the provided base slug is unique.
 func (r *productRepository) uniqueSlug(base string) (string, error) {
 	candidate := base
@@ -274,6 +336,58 @@ func (r *productRepository) FindSimilarProductsByEmbedding(ctx context.Context, 
 	}
 
 	// Sort by score descending and take top limit
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].score > candidates[j].score
+	})
+
+	var results []model.Product
+	for i := 0; i < len(candidates) && i < limit; i++ {
+		results = append(results, candidates[i].product)
+	}
+
+	return results, nil
+}
+
+// FindSimilarProductsByEmbeddingAndGender finds top-k products similar to the given embedding, respecting gender preference.
+func (r *productRepository) FindSimilarProductsByEmbeddingAndGender(ctx context.Context, embedding []float32, limit int, gender string) ([]model.Product, error) {
+	if len(embedding) == 0 {
+		return []model.Product{}, nil
+	}
+
+	var rows []struct {
+		ProductID uint   `json:"product_id"`
+		Embedding string `json:"embedding"`
+	}
+	if err := r.db.WithContext(ctx).Table("product_embeddings").Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	type scoredProduct struct {
+		product model.Product
+		score   float32
+	}
+
+	var candidates []scoredProduct
+	for _, row := range rows {
+		var emb []float32
+		if err := json.Unmarshal([]byte(row.Embedding), &emb); err != nil {
+			continue
+		}
+		if len(emb) != len(embedding) {
+			continue
+		}
+		score := cosineSimilarity(embedding, emb)
+		if score > 0 {
+			var prod model.Product
+			if err := r.db.Raw("SELECT * FROM products WHERE id = ?", row.ProductID).Scan(&prod).Error; err != nil {
+				continue
+			}
+			if genderMatches(prod.Gender, gender) {
+				candidates = append(candidates, scoredProduct{product: prod, score: score})
+			}
+		}
+	}
+
 	for i := 0; i < len(candidates)-1; i++ {
 		for j := i + 1; j < len(candidates); j++ {
 			if candidates[i].score < candidates[j].score {
@@ -288,6 +402,22 @@ func (r *productRepository) FindSimilarProductsByEmbedding(ctx context.Context, 
 	}
 
 	return results, nil
+}
+
+func genderMatches(productGender, preferredGender string) bool {
+	if preferredGender == "" {
+		return true
+	}
+	if preferredGender == "Masculino" {
+		return productGender == "Masculino" || productGender == "Unissex"
+	}
+	if preferredGender == "Feminino" {
+		return productGender == "Feminino" || productGender == "Unissex"
+	}
+	if preferredGender == "Unissex" {
+		return productGender == "Unissex"
+	}
+	return false
 }
 
 // cosineSimilarity computes cosine similarity between two vectors.

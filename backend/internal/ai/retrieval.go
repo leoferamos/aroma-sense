@@ -2,6 +2,8 @@ package ai
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"sync"
@@ -40,7 +42,9 @@ func NewRetrievalService(repo repository.ProductRepository, embProvider embeddin
 
 // GetSuggestions retrieves product suggestions using hybrid search.
 func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg string) []dto.RecommendSuggestion {
-	key := ProfileHash(prefs)
+	msg = SanitizeUserMessage(msg, 0)
+	q := strings.TrimSpace(BuildSearchQuery(prefs, msg))
+	key := ProfileHash(prefs) + ":" + queryHash(q)
 	if out, ok := r.getFromCache(key); ok {
 		return out
 	}
@@ -51,7 +55,8 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg 
 		q := BuildSearchQuery(prefs, msg)
 		q = strings.TrimSpace(q)
 		if q != "" {
-			prods, _, _ := r.products.SearchProducts(ctx, q, 5, 0, "relevance")
+			gender := getGenderFilter(prefs)
+			prods, _, _ := r.products.SearchProductsByGender(ctx, q, 3, 0, "relevance", gender)
 			for _, p := range prods {
 				reason := shortReason(prefs, p)
 				sugs = append(sugs, dto.RecommendSuggestion{
@@ -65,7 +70,7 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg 
 	}
 
 	// Parallel retrieval: FTS, Embeddings, and direct slot matching
-	topK := 5
+	topK := 3
 	acc := make([]dto.RecommendSuggestion, 0, topK*3)
 	seen := make(map[uint]bool)
 
@@ -81,7 +86,8 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg 
 		q := BuildSearchQuery(prefs, msg)
 		q = strings.TrimSpace(q)
 		if q != "" {
-			prods, _, _ := r.products.SearchProducts(ctx, q, topK, 0, "relevance")
+			gender := getGenderFilter(prefs)
+			prods, _, _ := r.products.SearchProductsByGender(ctx, q, topK, 0, "relevance", gender)
 			for _, p := range prods {
 				reason := shortReason(prefs, p)
 				sugs = append(sugs, dto.RecommendSuggestion{
@@ -101,7 +107,8 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg 
 			if queryText != "" {
 				emb, err := r.emb.EmbedQuery(queryText)
 				if err == nil && len(emb) > 0 {
-					similar, err := r.products.FindSimilarProductsByEmbedding(ctx, emb, topK)
+					gender := getGenderFilter(prefs)
+					similar, err := r.products.FindSimilarProductsByEmbeddingAndGender(ctx, emb, topK, gender)
 					if err == nil {
 						for _, p := range similar {
 							reason := "Similaridade semântica com sua consulta"
@@ -124,7 +131,8 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg 
 		if len(prefs.Accords) > 0 {
 			accordStr := strings.Join(prefs.Accords, " | ")
 			q := fmt.Sprintf("(%s)", accordStr)
-			prods, _, _ := r.products.SearchProducts(ctx, q, topK, 0, "relevance")
+			gender := getGenderFilter(prefs)
+			prods, _, _ := r.products.SearchProductsByGender(ctx, q, topK, 0, "relevance", gender)
 			for _, p := range prods {
 				reason := "Correspondência direta de acordes"
 				reason = shortReason(prefs, p) + " • " + reason
@@ -158,6 +166,21 @@ func (r *RetrievalService) GetSuggestions(ctx context.Context, prefs Slots, msg 
 	return acc
 }
 
+func queryHash(q string) string {
+	if q == "" {
+		q = "empty"
+	}
+	h := sha1.Sum([]byte(q))
+	return hex.EncodeToString(h[:8])
+}
+
+func getGenderFilter(prefs Slots) string {
+	if len(prefs.Gender) > 0 {
+		return prefs.Gender[0]
+	}
+	return ""
+}
+
 func (r *RetrievalService) getFromCache(key string) ([]dto.RecommendSuggestion, bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -174,6 +197,13 @@ func (r *RetrievalService) setCache(key string, val []dto.RecommendSuggestion) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.cache[key] = cacheEntry{suggestions: val, expiresAt: time.Now().Add(r.ttl)}
+}
+
+// ClearCache clears all cached suggestions.
+func (r *RetrievalService) ClearCache() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.cache = make(map[string]cacheEntry)
 }
 
 func shortReason(p Slots, prod model.Product) string {

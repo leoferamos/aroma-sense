@@ -87,6 +87,18 @@
     "buyNow": "Comprar Agora",
     "relatedProducts": "Produtos Relacionados"
   },
+  "filters": {
+    "title": "Filtros",
+    "reset": "Limpar Tudo",
+    "gender": "Gênero",
+    "masculine": "Masculino",
+    "feminine": "Feminino",
+    "unisex": "Unissex",
+    "price": "Preço",
+    "minPrice": "Preço Mínimo",
+    "maxPrice": "Preço Máximo",
+    "range": "Intervalo de Preço"
+  },
   "search": {
     "placeholder": "Buscar produtos...",
     "ariaLabel": "Buscar produtos",
@@ -326,6 +338,11 @@
     "provideReportReason": "Forneça um motivo para esta denúncia.",
     "reportAlreadySubmitted": "Você já denunciou esta avaliação.",
     "reportRateLimited": "Muitas denúncias. Tente novamente mais tarde."
+  },
+  "chat": {
+    "placeholder": "Digite sua preferência… (/clear-recs para limpar)",
+    "clearRecommendations": "Limpar recomendações",
+    "suggestions": "Sugestões"
   },
   "errors": {
     "failedToLoadProfile": "Falha ao carregar perfil",

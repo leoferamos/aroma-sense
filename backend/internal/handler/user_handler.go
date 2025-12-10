@@ -14,11 +14,12 @@ type UserHandler struct {
 	authService        service.AuthService
 	userProfileService service.UserProfileService
 	lgpdService        service.LgpdService
+	chatService        service.ChatServiceInterface
 }
 
 // NewUserHandler creates a new instance of UserHandler
-func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService) *UserHandler {
-	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd}
+func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService, chat service.ChatServiceInterface) *UserHandler {
+	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd, chatService: chat}
 }
 
 // UserProfile exposes the internal UserProfileService for middleware/router wiring

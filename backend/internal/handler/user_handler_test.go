@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -209,6 +210,16 @@ func (m *MockLgpdService) RequestAccountDeletion(publicID string) error {
 	return args.Error(0)
 }
 
+func (m *MockLgpdService) ProcessPendingDeletions() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) ProcessExpiredAnonymizations() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockLgpdService) ConfirmAccountDeletion(publicID string) error {
 	args := m.Called(publicID)
 	return args.Error(0)
@@ -229,20 +240,23 @@ func (m *MockLgpdService) RequestContestation(publicID string, reason string) er
 	return args.Error(0)
 }
 
-func (m *MockLgpdService) ProcessPendingDeletions() error {
-	args := m.Called()
-	return args.Error(0)
+type MockChatService struct{ mock.Mock }
+
+func (m *MockChatService) Chat(ctx context.Context, sessionID string, msg string) (dto.ChatResponse, error) {
+	args := m.Called(ctx, sessionID, msg)
+	return args.Get(0).(dto.ChatResponse), args.Error(1)
 }
 
-func (m *MockLgpdService) ProcessExpiredAnonymizations() error {
-	args := m.Called()
-	return args.Error(0)
+func (m *MockChatService) ClearRetrievalCache() {
+	m.Called()
 }
+
 func setupUserRouter() (*gin.Engine, *MockAuthService, *MockUserProfileService, *MockLgpdService) {
 	mockAuth := new(MockAuthService)
 	mockProfile := new(MockUserProfileService)
 	mockLgpd := new(MockLgpdService)
-	userHandler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd)
+	mockChat := new(MockChatService)
+	userHandler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd, mockChat)
 
 	router := gin.Default()
 	router.POST("/users/register", userHandler.RegisterUser)
@@ -257,6 +271,7 @@ func TestGetProfile(t *testing.T) {
 	mockAuth := new(MockAuthService)
 	mockProfile := new(MockUserProfileService)
 	mockLgpd := new(MockLgpdService)
+	mockChat := new(MockChatService)
 	user := &model.User{
 		PublicID:    "uuid",
 		Email:       "test@example.com",
@@ -270,7 +285,7 @@ func TestGetProfile(t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "/users/me", nil)
 	c.Set("userID", "uuid")
-	handler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd)
+	handler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd, mockChat)
 	handler.GetProfile(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -283,6 +298,7 @@ func TestUpdateProfile(t *testing.T) {
 	mockAuth := new(MockAuthService)
 	mockProfile := new(MockUserProfileService)
 	mockLgpd := new(MockLgpdService)
+	mockChat := new(MockChatService)
 	user := &model.User{
 		PublicID:    "uuid",
 		Email:       "test@example.com",
@@ -299,7 +315,7 @@ func TestUpdateProfile(t *testing.T) {
 	c.Request, _ = http.NewRequest("PATCH", "/users/me/profile", bytes.NewBuffer(body))
 	c.Request.Header.Set("Content-Type", "application/json")
 	c.Set("userID", "uuid")
-	handler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd)
+	handler := handler.NewUserHandler(mockAuth, mockProfile, mockLgpd, mockChat)
 	handler.UpdateProfile(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
