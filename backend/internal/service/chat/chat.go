@@ -69,6 +69,13 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 		return dto.ChatResponse{Reply: reply, FollowUpHint: follow}, nil
 	}
 
+	// Only suggest products if user has provided enough preferences
+	if !hasMinimumPrefs(conv.Prefs) {
+		reply := "Para te sugerir perfumes, preciso saber um pouco mais sobre suas preferências. Me diga, por exemplo: ocasião (trabalho, festa), acordes que curte (cítrico, floral, amadeirado), intensidade (suave, moderada, forte) ou gênero."
+		follow := ai.BuildFollowUpHint(conv.Prefs)
+		return dto.ChatResponse{Reply: reply, Suggestions: nil, FollowUpHint: follow}, nil
+	}
+
 	// Retrieve candidate products
 	suggestions := s.retrieval.GetSuggestions(ctx, conv.Prefs, sanitized)
 
