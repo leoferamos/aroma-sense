@@ -4,10 +4,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
+	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -16,10 +18,12 @@ type ReviewHandler struct {
 	userService    service.UserProfileService
 	productService service.ProductService
 	auditService   service.AuditLogService
+	reportService  service.ReviewReportService
+	rateLimiter    rate.RateLimiter
 }
 
-func NewReviewHandler(s service.ReviewService, userService service.UserProfileService, productService service.ProductService, auditService service.AuditLogService) *ReviewHandler {
-	return &ReviewHandler{service: s, userService: userService, productService: productService, auditService: auditService}
+func NewReviewHandler(s service.ReviewService, reportService service.ReviewReportService, userService service.UserProfileService, productService service.ProductService, auditService service.AuditLogService, limiter rate.RateLimiter) *ReviewHandler {
+	return &ReviewHandler{service: s, reportService: reportService, userService: userService, productService: productService, auditService: auditService, rateLimiter: limiter}
 }
 
 // Create review handles the creation of a product review
@@ -241,6 +245,66 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "review deleted successfully"})
+}
+
+// ReportReview handles reporting an abusive or inappropriate review
+//
+// @Summary      Report a review
+// @Description  Allows an authenticated user to report a review for abuse (spam/offensive/improper/other). Prevents self-reporting and duplicate reports per user.
+// @Tags         reviews
+// @Accept       json
+// @Produce      json
+// @Param        reviewID  path     string                     true  "Review ID (UUID)"
+// @Param        report    body     dto.ReviewReportRequest    true  "Report payload"
+// @Success      201  {object}  dto.MessageResponse  "Review reported successfully"
+// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request or invalid_category or reason_too_long"
+// @Failure      401  {object}  dto.ErrorResponse    "Error code: unauthenticated"
+// @Failure      403  {object}  dto.ErrorResponse    "Error code: cannot_report_own_review"
+// @Failure      404  {object}  dto.ErrorResponse    "Error code: review_not_found"
+// @Failure      409  {object}  dto.ErrorResponse    "Error code: already_reported"
+// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
+// @Router       /reviews/{reviewID}/report [post]
+// @Security     BearerAuth
+func (h *ReviewHandler) ReportReview(c *gin.Context) {
+	reviewID := c.Param("reviewID")
+
+	if h.rateLimiter != nil {
+		bucket := "review_report:" + c.ClientIP() + ":" + c.GetString("userID")
+		allowed, _, _, err := h.rateLimiter.Allow(c.Request.Context(), bucket, 5, time.Hour)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+			return
+		}
+		if !allowed {
+			c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{Error: "rate_limited"})
+			return
+		}
+	}
+
+	// Get authenticated user ID from context
+	rawUserID, exists := c.Get("userID")
+	if !exists || rawUserID == "" {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
+		return
+	}
+	reporterID := rawUserID.(string)
+
+	var req dto.ReviewReportRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		return
+	}
+
+	if err := h.reportService.Report(c.Request.Context(), reviewID, reporterID, req.Category, req.Reason); err != nil {
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, dto.MessageResponse{Message: "review reported successfully"})
 }
 
 func getPtrVal(p *string) string {
