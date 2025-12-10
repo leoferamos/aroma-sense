@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import type { User } from '../types/auth';
 
-export type UserRole = 'admin' | 'client';
+export type UserRole = 'admin' | 'super_admin' | 'client';
 
 export interface AuthContextType {
   user: User | null;

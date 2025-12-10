@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-export type UserRole = 'admin' | 'client' | null | undefined;
+export type UserRole = 'admin' | 'super_admin' | 'client' | null | undefined;
 
 interface UserMenuProps {
   open: boolean;
@@ -22,7 +22,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ open, role, isAuthenticated, onClos
       <nav className="py-2" aria-label="User menu">
         <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.profile')}</Link>
         <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.myOrders')}</Link>
-        {role === 'admin' && (
+        {(role === 'admin' || role === 'super_admin') && (
           <Link to="/admin/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={onClose}>{t('userMenu.adminDashboard')}</Link>
         )}
         <div className="my-1 border-t border-gray-100" />

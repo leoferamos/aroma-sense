@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: Array<'admin' | 'client'>;
+  allowedRoles?: Array<'admin' | 'super_admin' | 'client'>;
 }
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { isAuthenticated, isReady, role } = useAuth();
