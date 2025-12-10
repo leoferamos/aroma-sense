@@ -10,7 +10,8 @@ import (
 func AdminRoutes(r *gin.Engine, adminUserHandler *handler.AdminUserHandler,
 	productHandler *handler.ProductHandler, orderHandler *handler.OrderHandler,
 	auditLogHandler *handler.AuditLogHandler,
-	adminContestationHandler *handler.AdminContestationHandler) {
+	adminContestationHandler *handler.AdminContestationHandler,
+	adminReviewReportHandler *handler.AdminReviewReportHandler) {
 	adminGroup := r.Group("/admin")
 	adminGroup.Use(auth.JWTAuthMiddleware(), auth.AdminOnly())
 	{
@@ -43,5 +44,9 @@ func AdminRoutes(r *gin.Engine, adminUserHandler *handler.AdminUserHandler,
 		adminGroup.GET("/contestations", adminContestationHandler.ListPendingContestions)
 		adminGroup.POST("/contestations/:id/approve", adminContestationHandler.ApproveContestation)
 		adminGroup.POST("/contestations/:id/reject", adminContestationHandler.RejectContestation)
+
+		// Review reports
+		adminGroup.GET("/review-reports", adminReviewReportHandler.ListReports)
+		adminGroup.POST("/review-reports/:id/resolve", adminReviewReportHandler.ResolveReport)
 	}
 }
