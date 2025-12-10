@@ -3,12 +3,12 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/auth"
-	"github.com/leoferamos/aroma-sense/internal/handler"
+	shipping "github.com/leoferamos/aroma-sense/internal/handler/shipping"
 	"github.com/leoferamos/aroma-sense/internal/middleware"
 )
 
 // ShippingRoutes sets up the shipping-related routes
-func ShippingRoutes(r *gin.Engine, shippingHandler *handler.ShippingHandler) {
+func ShippingRoutes(r *gin.Engine, shippingHandler *shipping.ShippingHandler) {
 	grp := r.Group("/shipping")
 	grp.Use(auth.JWTAuthMiddleware(), middleware.AccountStatusMiddleware())
 	{

@@ -1,10 +1,11 @@
-package handler
+package shipping
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -42,7 +43,7 @@ func (h *ShippingHandler) GetShippingOptions(c *gin.Context) {
 	}
 	options, err := h.shippingService.CalculateOptions(c.Request.Context(), userID, postalCode)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
