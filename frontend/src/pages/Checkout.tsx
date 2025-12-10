@@ -69,7 +69,7 @@ const Checkout: React.FC = () => {
         setAddress(data.address ?? address);
         setSelectedShipping(data.selectedShipping ?? null);
       }
-    } catch (err) {
+    } catch {
       sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

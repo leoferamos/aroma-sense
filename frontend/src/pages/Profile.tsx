@@ -44,7 +44,7 @@ const Profile: React.FC = () => {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [t]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

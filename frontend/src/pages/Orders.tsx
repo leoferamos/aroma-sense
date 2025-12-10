@@ -31,7 +31,7 @@ const OrdersPage: React.FC = () => {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [t]);
 
   // render all orders as full cards (single-column)
 

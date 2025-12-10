@@ -37,7 +37,7 @@ const AdminContestations: React.FC = () => {
 
   useEffect(() => {
     fetchContestations();
-  }, []);
+  }, [fetchContestations]);
 
   const handleApprove = async (id: number) => {
     setActionLoading(id);
