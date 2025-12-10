@@ -1,28 +1,38 @@
 package validation
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestValidatePassword(t *testing.T) {
+	t.Parallel()
+
 	cases := []struct {
 		name  string
 		pw    string
 		email string
 		ok    bool
 	}{
-		{"valid basic", "Abcdef1G", "user@example.com", true},
-		{"too short", "Ab1g", "user@example.com", false},
-		{"no upper", "abcdef12", "user@example.com", false},
-		{"no lower", "ABCDEFG1", "user@example.com", false},
-		{"no digit", "Abcdefgh", "user@example.com", false},
+		{name: "valid basic", pw: "Abcdef1G", email: "user@example.com", ok: true},
+		{name: "too short", pw: "Ab1g", email: "user@example.com", ok: false},
+		{name: "no upper", pw: "abcdef12", email: "user@example.com", ok: false},
+		{name: "no lower", pw: "ABCDEFG1", email: "user@example.com", ok: false},
+		{name: "no digit", pw: "Abcdefgh", email: "user@example.com", ok: false},
 	}
+
 	for _, tc := range cases {
-		err := ValidatePassword(tc.pw, tc.email)
-		if tc.ok && err != nil {
-			// report unexpected error
-			t.Errorf("%s expected success got error %v", tc.name, err)
-		}
-		if !tc.ok && err == nil {
-			t.Errorf("%s expected failure got success", tc.name)
-		}
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := ValidatePassword(tc.pw, tc.email)
+			if tc.ok {
+				require.NoError(t, err)
+				return
+			}
+			require.Error(t, err)
+		})
 	}
 }

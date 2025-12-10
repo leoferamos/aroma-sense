@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -11,15 +12,17 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/service"
+	productservice "github.com/leoferamos/aroma-sense/internal/service/product"
+	reviewservice "github.com/leoferamos/aroma-sense/internal/service/review"
 )
 
 type ProductHandler struct {
-	productService service.ProductService
-	reviewService  service.ReviewService
+	productService productservice.ProductService
+	reviewService  reviewservice.ReviewService
 	userService    service.UserProfileService
 }
 
-func NewProductHandler(ps service.ProductService, rs service.ReviewService, us service.UserProfileService) *ProductHandler {
+func NewProductHandler(ps productservice.ProductService, rs reviewservice.ReviewService, us service.UserProfileService) *ProductHandler {
 	return &ProductHandler{productService: ps, reviewService: rs, userService: us}
 }
 
@@ -40,15 +43,15 @@ func NewProductHandler(ps service.ProductService, rs service.ReviewService, us s
 // @Param        stock_quantity formData  integer  true   "Stock quantity"
 // @Param        image          formData  file     true   "Product image"
 // @Success      201  {object}  dto.MessageResponse  "Product created successfully"
-// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request (includes missing image)"
-// @Failure      401  {object}  dto.ErrorResponse    "Error code: unauthenticated"
-// @Failure      403  {object}  dto.ErrorResponse    "Error code: unauthorized"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid request data or missing image"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
 // @Router       /admin/products [post]
 // @Security     BearerAuth
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var form dto.ProductFormDTO
 	if err := c.ShouldBindWith(&form, binding.FormMultipart); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 	file, fileHeader, err := c.Request.FormFile("image")
@@ -71,7 +74,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		buf := make([]byte, 512)
 		n, err := file.Read(buf)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "failed to read file"})
 			return
 		}
 
@@ -84,11 +87,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	if err := h.productService.CreateProduct(c.Request.Context(), form, fileUpload); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: code})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, dto.MessageResponse{Message: "Product created successfully"})
@@ -103,37 +102,62 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 // @Produce      json
 // @Param        slug           path    string  true  "Product slug"
 // @Success      200  {object}  dto.ProductResponse  "Product details"
-// @Failure      404  {object}  dto.ErrorResponse    "Error code: product_not_found"
+// @Failure      404  {object}  dto.ErrorResponse    "Product not found"
 // @Router       /products/{slug} [get]
 func (h *ProductHandler) GetProduct(c *gin.Context) {
 	slug := c.Param("slug")
 
 	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: code})
-			return
-		}
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
 	// Check if user can review this product
-	if rawUserID, exists := c.Get("userID"); exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
+	rawUserID, exists := c.Get("userID")
+	fmt.Printf("DEBUG: rawUserID exists=%v, value='%v'\n", exists, rawUserID)
+	if exists && rawUserID != "" && h.reviewService != nil && h.userService != nil {
 		publicID := rawUserID.(string)
 		if userModel, err := h.userService.GetByPublicID(publicID); err == nil {
-			can, reason, canErr := h.reviewService.CanUserReviewBySlug(c.Request.Context(), userModel, product.Slug)
-			if can && canErr == nil {
-				trueVal := true
-				product.CanReview = &trueVal
-			} else if canErr == nil {
+			fmt.Printf("DEBUG: userModel found, ID=%v, DisplayName=%v\n", userModel.ID, userModel.DisplayName)
+			if product.ID != nil {
+				fmt.Printf("DEBUG: product.ID=%d\n", *product.ID)
+				can, reason, canErr := h.reviewService.CanUserReview(c.Request.Context(), userModel, *product.ID)
+				// Debug logging
+				fmt.Printf("DEBUG: CanUserReview for user %s, product %d: can=%v, reason=%s, err=%v\n", publicID, *product.ID, can, reason, canErr)
+				if can && canErr == nil {
+					trueVal := true
+					product.CanReview = &trueVal
+				} else if canErr == nil {
+					falseVal := false
+					product.CanReview = &falseVal
+					if reason == "profile_incomplete" || reason == "not_delivered" || reason == "already_reviewed" {
+						product.CannotReviewReason = &reason
+					}
+				} else {
+					// Error occurred, default to false
+					falseVal := false
+					product.CanReview = &falseVal
+					product.CannotReviewReason = nil
+				}
+			} else {
+				fmt.Printf("DEBUG: product.ID is nil\n")
+				// Product ID is nil, cannot review
 				falseVal := false
 				product.CanReview = &falseVal
-				if reason == "profile_incomplete" || reason == "not_delivered" || reason == "already_reviewed" {
-					product.CannotReviewReason = &reason
-				}
+				reason := "product_id_missing"
+				product.CannotReviewReason = &reason
 			}
+		} else {
+			fmt.Printf("DEBUG: userModel not found, err=%v\n", err)
+			// User not found, cannot review
+			falseVal := false
+			product.CanReview = &falseVal
 		}
+	} else {
+		fmt.Printf("DEBUG: no userID or services nil\n")
+		// No authenticated user, unknown if can review
+		product.CanReview = nil
 	}
 
 	c.JSON(http.StatusOK, product)
@@ -153,8 +177,8 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 // @Param        sort   query    string  false  "Sort order: relevance|latest"  default(relevance)
 // @Success      200  {array}   dto.ProductResponse        "List of latest products (when query is absent and page=1)"
 // @Success      200  {object}  dto.ProductListResponse   "Search results envelope (when query is present) or paginated latest (when query absent and page>1)"
-// @Failure      400  {object}  dto.ErrorResponse         "Error code: invalid_request"
-// @Failure      500  {object}  dto.ErrorResponse         "Error code: internal_error"
+// @Failure      400  {object}  dto.ErrorResponse         "Invalid request parameters"
+// @Failure      500  {object}  dto.ErrorResponse         "Internal server error"
 // @Router       /products [get]
 func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	const maxLimit = 100
@@ -165,13 +189,13 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid page parameter"})
 		return
 	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
 		return
 	}
 	if limit > maxLimit {
@@ -204,18 +228,14 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 	// parse and validate sort
 	sort := c.DefaultQuery("sort", "relevance")
 	if sort != "relevance" && sort != "latest" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid sort parameter"})
 		return
 	}
 
 	items, total, err := h.productService.SearchProducts(c.Request.Context(), query, page, limit, sort)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: code})
-			return
-		}
 		log.Printf("GetLatestProducts: search error (query=%q, page=%d, limit=%d, sort=%s): %v", query, page, limit, sort, err)
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
 		return
 	}
 
@@ -238,8 +258,8 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 // @Param        page   query    int     false  "Page number (1-based)"  default(1)
 // @Param        limit  query    int     false  "Items per page (default 50, max 200)"  default(50)
 // @Success      200  {object}  dto.ProductListResponse   "Paginated product list with IDs"
-// @Failure      400  {object}  dto.ErrorResponse         "Error code: invalid_request"
-// @Failure      500  {object}  dto.ErrorResponse         "Error code: internal_error"
+// @Failure      400  {object}  dto.ErrorResponse         "Invalid request parameters"
+// @Failure      500  {object}  dto.ErrorResponse         "Internal server error"
 // @Router       /admin/products [get]
 // @Security     BearerAuth
 func (h *ProductHandler) AdminListProducts(c *gin.Context) {
@@ -250,13 +270,13 @@ func (h *ProductHandler) AdminListProducts(c *gin.Context) {
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid page parameter"})
 		return
 	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid limit parameter"})
 		return
 	}
 	if limit > maxLimit {
@@ -267,11 +287,7 @@ func (h *ProductHandler) AdminListProducts(c *gin.Context) {
 	products, total, err := h.productService.AdminListProducts(c.Request.Context(), page, limit)
 	if err != nil {
 		log.Printf("AdminListProducts error: %v", err)
-		if status, code, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: code})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
 		return
 	}
 
@@ -293,24 +309,20 @@ func (h *ProductHandler) AdminListProducts(c *gin.Context) {
 // @Produce      json
 // @Param        id  path  int  true  "Product ID"
 // @Success      200  {object}  dto.ProductResponse  "Product details"
-// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request"
-// @Failure      404  {object}  dto.ErrorResponse    "Error code: product_not_found"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
+// @Failure      404  {object}  dto.ErrorResponse    "Product not found"
 // @Router       /products/{id} [get]
 func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
 		return
 	}
 
 	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: code})
-			return
-		}
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Product not found"})
 		return
 	}
 
@@ -327,33 +339,29 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 // @Param        id             path    int                         true  "Product ID"
 // @Param        product        body    dto.UpdateProductRequest    true  "Product update data"
 // @Success      200  {object}  dto.MessageResponse  "Product updated successfully"
-// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request"
-// @Failure      401  {object}  dto.ErrorResponse    "Error code: unauthenticated"
-// @Failure      403  {object}  dto.ErrorResponse    "Error code: unauthorized"
-// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID or request data"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
+// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
 // @Router       /admin/products/{id} [patch]
 // @Security     BearerAuth
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
 		return
 	}
 
 	var input dto.UpdateProductRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if err := h.productService.UpdateProduct(c.Request.Context(), uint(id), input); err != nil {
 		log.Printf("UpdateProduct: service error: %v", err)
-		if status, code, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: code})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
 		return
 	}
 
@@ -369,27 +377,23 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 // @Produce      json
 // @Param        id             path    int     true  "Product ID"
 // @Success      200  {object}  dto.MessageResponse  "Product deleted successfully"
-// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request"
-// @Failure      401  {object}  dto.ErrorResponse    "Error code: unauthenticated"
-// @Failure      403  {object}  dto.ErrorResponse    "Error code: unauthorized"
-// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
+// @Failure      400  {object}  dto.ErrorResponse    "Invalid product ID"
+// @Failure      401  {object}  dto.ErrorResponse    "Unauthorized"
+// @Failure      403  {object}  dto.ErrorResponse    "Forbidden - Admin only"
+// @Failure      500  {object}  dto.ErrorResponse    "Internal server error"
 // @Router       /admin/products/{id} [delete]
 // @Security     BearerAuth
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid product ID"})
 		return
 	}
 
 	if err := h.productService.DeleteProduct(c.Request.Context(), uint(id)); err != nil {
 		log.Printf("DeleteProduct: service error: %v", err)
-		if status, code, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: code})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal server error"})
 		return
 	}
 

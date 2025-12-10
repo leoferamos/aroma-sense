@@ -1,37 +1,49 @@
 package bootstrap
 
 import (
-	"github.com/leoferamos/aroma-sense/internal/handler"
+	admin "github.com/leoferamos/aroma-sense/internal/handler/admin"
+	auth "github.com/leoferamos/aroma-sense/internal/handler/auth"
+	carthandler "github.com/leoferamos/aroma-sense/internal/handler/cart"
+	chathandler "github.com/leoferamos/aroma-sense/internal/handler/chat"
+	loghandler "github.com/leoferamos/aroma-sense/internal/handler/log"
+	orderhandler "github.com/leoferamos/aroma-sense/internal/handler/order"
+	paymenthandler "github.com/leoferamos/aroma-sense/internal/handler/payment"
+	product "github.com/leoferamos/aroma-sense/internal/handler/product"
+	reviewhandler "github.com/leoferamos/aroma-sense/internal/handler/review"
+	shipping "github.com/leoferamos/aroma-sense/internal/handler/shipping"
+	userhandler "github.com/leoferamos/aroma-sense/internal/handler/user"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/repository"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	serviceadmin "github.com/leoferamos/aroma-sense/internal/service/admin"
+	servicelgpd "github.com/leoferamos/aroma-sense/internal/service/lgpd"
+	servicelog "github.com/leoferamos/aroma-sense/internal/service/log"
 	"github.com/leoferamos/aroma-sense/internal/storage"
 	"gorm.io/gorm"
 )
 
 // AppHandlers contains all initialized handlers
 type AppHandlers struct {
-	UserHandler              *handler.UserHandler
-	AdminUserHandler         *handler.AdminUserHandler
-	ProductHandler           *handler.ProductHandler
-	CartHandler              *handler.CartHandler
-	OrderHandler             *handler.OrderHandler
-	PasswordResetHandler     *handler.PasswordResetHandler
-	ShippingHandler          *handler.ShippingHandler
-	ReviewHandler            *handler.ReviewHandler
-	AIHandler                *handler.AIHandler
-	ChatHandler              *handler.ChatHandler
-	AuditLogHandler          *handler.AuditLogHandler
-	AdminContestationHandler *handler.AdminContestationHandler
-	AdminReviewReportHandler *handler.AdminReviewReportHandler
-	PaymentHandler           *handler.PaymentHandler
+	UserHandler              *userhandler.UserHandler
+	AdminUserHandler         *admin.AdminUserHandler
+	ProductHandler           *product.ProductHandler
+	CartHandler              *carthandler.CartHandler
+	OrderHandler             *orderhandler.OrderHandler
+	PasswordResetHandler     *auth.PasswordResetHandler
+	ShippingHandler          *shipping.ShippingHandler
+	ReviewHandler            *reviewhandler.ReviewHandler
+	AIHandler                *chathandler.AIHandler
+	ChatHandler              *chathandler.ChatHandler
+	AuditLogHandler          *loghandler.AuditLogHandler
+	AdminContestationHandler *admin.AdminContestationHandler
+	AdminReviewReportHandler *admin.AdminReviewReportHandler
+	PaymentHandler           *paymenthandler.PaymentHandler
 }
 
 // AppServices contains service instances needed for jobs
 type AppServices struct {
-	AdminUserService service.AdminUserService
-	AuditLogService  service.AuditLogService
-	LgpdService      service.LgpdService
+	AdminUserService serviceadmin.AdminUserService
+	AuditLogService  servicelog.AuditLogService
+	LgpdService      servicelgpd.LgpdService
 }
 
 // AppRepos contains repository instances needed for jobs

@@ -6,18 +6,19 @@ import (
 
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	lgpdservice "github.com/leoferamos/aroma-sense/internal/service/lgpd"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
 )
 
 // AutoConfirmJob handles automatic confirmation of account deletion after the cooling-off period
 type AutoConfirmJob struct {
 	userRepo        repository.UserRepository
-	lgpdService     service.LgpdService
-	auditLogService service.AuditLogService
+	lgpdService     lgpdservice.LgpdService
+	auditLogService logservice.AuditLogService
 }
 
 // NewAutoConfirmJob creates a new auto-confirm job instance
-func NewAutoConfirmJob(userRepo repository.UserRepository, lgpdService service.LgpdService, auditLogService service.AuditLogService) *AutoConfirmJob {
+func NewAutoConfirmJob(userRepo repository.UserRepository, lgpdService lgpdservice.LgpdService, auditLogService logservice.AuditLogService) *AutoConfirmJob {
 	return &AutoConfirmJob{
 		userRepo:        userRepo,
 		lgpdService:     lgpdService,

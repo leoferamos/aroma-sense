@@ -8,22 +8,26 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/rate"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	userservice "github.com/leoferamos/aroma-sense/internal/service"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
+	productservice "github.com/leoferamos/aroma-sense/internal/service/product"
+	reviewservice "github.com/leoferamos/aroma-sense/internal/service/review"
 )
 
 type ReviewHandler struct {
-	service        service.ReviewService
-	userService    service.UserProfileService
-	productService service.ProductService
-	auditService   service.AuditLogService
-	reportService  service.ReviewReportService
+	reviewService  reviewservice.ReviewService
+	userService    userservice.UserProfileService
+	productService productservice.ProductService
+	auditService   logservice.AuditLogService
+	reportService  reviewservice.ReviewReportService
 	rateLimiter    rate.RateLimiter
 }
 
-func NewReviewHandler(s service.ReviewService, reportService service.ReviewReportService, userService service.UserProfileService, productService service.ProductService, auditService service.AuditLogService, limiter rate.RateLimiter) *ReviewHandler {
-	return &ReviewHandler{service: s, reportService: reportService, userService: userService, productService: productService, auditService: auditService, rateLimiter: limiter}
+func NewReviewHandler(s reviewservice.ReviewService, reportService reviewservice.ReviewReportService, userService userservice.UserProfileService, productService productservice.ProductService, auditService logservice.AuditLogService, limiter rate.RateLimiter) *ReviewHandler {
+	return &ReviewHandler{reviewService: s, reportService: reportService, userService: userService, productService: productService, auditService: auditService, rateLimiter: limiter}
 }
 
 // Create review handles the creation of a product review
@@ -78,9 +82,9 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 		return
 	}
 
-	review, err := h.service.CreateReview(c.Request.Context(), userModel, productID, req.Rating, req.Comment)
+	review, err := h.reviewService.CreateReview(c.Request.Context(), userModel, productID, req.Rating, req.Comment)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -127,7 +131,7 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	reviews, total, err := h.service.ListReviews(c.Request.Context(), productID, page, limit)
+	reviews, total, err := h.reviewService.ListReviews(c.Request.Context(), productID, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
@@ -179,14 +183,14 @@ func (h *ReviewHandler) GetSummary(c *gin.Context) {
 		return
 	}
 
-	avg, count, err := h.service.GetAverage(c.Request.Context(), productID)
+	avg, count, err := h.reviewService.GetAverage(c.Request.Context(), productID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
 	dist := map[int]int{}
-	reviews, _, err := h.service.ListReviews(c.Request.Context(), productID, 1, 1000)
+	reviews, _, err := h.reviewService.ListReviews(c.Request.Context(), productID, 1, 1000)
 	if err == nil {
 		for _, r := range reviews {
 			dist[r.Rating]++
@@ -226,9 +230,9 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 		return
 	}
 
-	err = h.service.DeleteOwnReview(c.Request.Context(), reviewID, publicID)
+	err = h.reviewService.DeleteOwnReview(c.Request.Context(), reviewID, publicID)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -296,7 +300,7 @@ func (h *ReviewHandler) ReportReview(c *gin.Context) {
 	}
 
 	if err := h.reportService.Report(c.Request.Context(), reviewID, reporterID, req.Category, req.Reason); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

@@ -6,18 +6,19 @@ import (
 
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	lgpdservice "github.com/leoferamos/aroma-sense/internal/service/lgpd"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
 )
 
 // DataCleanupJob handles automated data cleanup tasks for LGPD compliance
 type DataCleanupJob struct {
 	userRepo        repository.UserRepository
-	lgpdService     service.LgpdService
-	auditLogService service.AuditLogService
+	lgpdService     lgpdservice.LgpdService
+	auditLogService logservice.AuditLogService
 }
 
 // NewDataCleanupJob creates a new data cleanup job instance
-func NewDataCleanupJob(userRepo repository.UserRepository, lgpdService service.LgpdService, auditLogService service.AuditLogService) *DataCleanupJob {
+func NewDataCleanupJob(userRepo repository.UserRepository, lgpdService lgpdservice.LgpdService, auditLogService logservice.AuditLogService) *DataCleanupJob {
 	return &DataCleanupJob{
 		userRepo:        userRepo,
 		lgpdService:     lgpdService,
