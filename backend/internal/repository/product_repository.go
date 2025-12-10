@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"sort"
 	"time"
 
 	"github.com/leoferamos/aroma-sense/internal/dto"
@@ -335,13 +336,9 @@ func (r *productRepository) FindSimilarProductsByEmbedding(ctx context.Context, 
 	}
 
 	// Sort by score descending and take top limit
-	for i := 0; i < len(candidates)-1; i++ {
-		for j := i + 1; j < len(candidates); j++ {
-			if candidates[i].score < candidates[j].score {
-				candidates[i], candidates[j] = candidates[j], candidates[i]
-			}
-		}
-	}
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].score > candidates[j].score
+	})
 
 	var results []model.Product
 	for i := 0; i < len(candidates) && i < limit; i++ {
