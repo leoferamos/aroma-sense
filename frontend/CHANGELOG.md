@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/leoferamos/aroma-sense/compare/v1.3.1...v1.3.2) (2025-12-10)
+
+
+### Bug Fixes
+
+* **checkout:** add plural portuguese translatio and thumbnail product cache in summary ([#99](https://github.com/leoferamos/aroma-sense/issues/99)) ([0a2c70d](https://github.com/leoferamos/aroma-sense/commit/0a2c70d275a857b2313eec8c699a4c1d23c166f2))
+
 ## [1.3.1](https://github.com/leoferamos/aroma-sense/compare/v1.3.0...v1.3.1) (2025-12-10)
 
 
