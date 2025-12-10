@@ -1,4 +1,4 @@
-package handler
+package admin
 
 import (
 	"net/http"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -42,7 +43,7 @@ func (h *AdminReviewReportHandler) ListReports(c *gin.Context) {
 
 	reports, total, err := h.service.List(c.Request.Context(), status, limit, offset)
 	if err != nil {
-		if statusCode, code, ok := mapServiceError(err); ok {
+		if statusCode, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(statusCode, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -105,7 +106,7 @@ func (h *AdminReviewReportHandler) ResolveReport(c *gin.Context) {
 	}
 
 	if err := h.service.Resolve(c.Request.Context(), reportID, req.Action, req.DeactivateUser, adminPublicID.(string), suspensionUntil, req.Notes); err != nil {
-		if statusCode, code, ok := mapServiceError(err); ok {
+		if statusCode, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(statusCode, dto.ErrorResponse{Error: code})
 			return
 		}

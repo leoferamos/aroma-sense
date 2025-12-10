@@ -1,4 +1,4 @@
-package handler
+package admin
 
 import (
 	"net/http"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -31,7 +32,7 @@ func (h *AdminUserHandler) AdminCreateAdmin(c *gin.Context) {
 	superID := c.GetString("userID")
 	user, err := h.userService.CreateAdminUser(input.Email, input.Password, input.Name, superID)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -98,7 +99,7 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 	// Get users
 	users, total, err := h.userService.ListUsers(limit, offset, filters)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -162,7 +163,7 @@ func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 
 	user, err := h.userService.GetUserByID(uint(id))
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -228,7 +229,7 @@ func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
 	}
 
 	if err := h.userService.UpdateUserRole(uint(id), input.Role, adminPublicID.(string)); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -278,7 +279,7 @@ func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
 	}
 
 	if err := h.userService.DeactivateUser(uint(id), adminPublicID.(string), req.Reason, req.Notes, req.SuspensionUntil); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -328,7 +329,7 @@ func (h *AdminUserHandler) AdminReactivateUser(c *gin.Context) {
 	}
 
 	if err := h.userService.AdminReactivateUser(uint(id), adminPublicID.(string), req.Reason); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

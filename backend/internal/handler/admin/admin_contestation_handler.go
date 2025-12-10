@@ -1,4 +1,4 @@
-package handler
+package admin
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -33,7 +34,7 @@ func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 	contestations, total, err := h.service.ListPending(limit, offset)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -78,7 +79,7 @@ func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 		return
 	}
 	if err := h.service.Approve(uint(id), adminPublicID.(string), req.Notes); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -119,7 +120,7 @@ func (h *AdminContestationHandler) RejectContestation(c *gin.Context) {
 		return
 	}
 	if err := h.service.Reject(uint(id), adminPublicID.(string), req.Notes); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
