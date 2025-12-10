@@ -117,8 +117,7 @@
   "reject": "Rejeitar",
   "startDate": "Data de Início",
   "endDate": "Data de Fim",
-  "showingRange": "Exibindo de {{start}} a {{end}} de {{total}}"
-}
+  "showingRange": "Exibindo de {{start}} a {{end}} de {{total}}",
   "reviewReportsTitle": "Denúncias de avaliações",
   "review": "Avaliação",
   "reporter": "Denunciante",

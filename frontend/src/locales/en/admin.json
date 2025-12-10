@@ -115,8 +115,7 @@
   "reject": "Reject",
   "startDate": "Start Date",
   "endDate": "End Date",
-  "showingRange": "Showing {{start}} to {{end}} of {{total}}"
-}
+  "showingRange": "Showing {{start}} to {{end}} of {{total}}",
   "reviewReportsTitle": "Review reports",
   "review": "Review",
   "reporter": "Reporter",
