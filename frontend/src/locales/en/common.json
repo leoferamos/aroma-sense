@@ -178,7 +178,54 @@
     "fullName": "Full name",
     "payment": "Payment",
     "placeOrder": "Place Order",
-    "placingOrder": "Placing order..."
+    "placingOrder": "Placing order...",
+    "loadingCart": "Loading your cart...",
+    "shippingLabel": "Shipping",
+    "totalLabel": "Total",
+    "fields": {
+      "postalCode": "Postal code",
+      "address1": "Address line 1",
+      "number": "Number",
+      "city": "City",
+      "state": "State/Region",
+      "country": "Country"
+    },
+    "shipping": {
+      "title": "Shipping",
+      "enterPostalCode": "Enter your postal code to see available options.",
+      "eta": "ETA: {{count}} day",
+      "eta_plural": "ETA: {{count}} days",
+      "noOptions": "No shipping options for this postal code."
+    },
+    "cep": {
+      "searching": "Searching..."
+    },
+    "paymentStep": {
+      "instructions": "Complete the address and choose shipping to generate a secure payment.",
+      "orderLabel": "Order",
+      "totalLabel": "Total",
+      "confirming": "Confirming...",
+      "confirmPayment": "Confirm payment",
+      "confirmError": "Could not confirm the payment.",
+      "notCompleted": "Payment was not completed. Please try again."
+    },
+    "buttons": {
+      "continueToPayment": "Continue to payment"
+    },
+    "validation": {
+      "selectShipping": "Select a shipping option",
+      "fullNameRequired": "Full name is required.",
+      "addressRequired": "Address is required.",
+      "numberRequired": "Number is required.",
+      "cityRequired": "City is required.",
+      "stateRequired": "State/Region is required.",
+      "postalCodeRequired": "Postal code is required.",
+      "countryRequired": "Country is required."
+    },
+    "shippingOptions": {
+      "label": "Shipping",
+      "loading": "Loading shipping options..."
+    }
   },
   "userMenu": {
     "profile": "Profile",
