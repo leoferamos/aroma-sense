@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -20,6 +20,14 @@ import type { ShippingOption } from '../types/shipping';
 import { createOrder, type OrderCreateRequest } from '../services/order';
 import { createPaymentIntent } from '../services/payment';
 import type { OrderResponse } from '../types/order';
+
+const CHECKOUT_STORAGE_KEY = 'checkout_session';
+type PersistedCheckout = {
+  clientSecret: string;
+  order: OrderResponse;
+  address: AddressForm;
+  selectedShipping: ShippingOption | null;
+};
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? '');
 
@@ -45,9 +53,27 @@ const Checkout: React.FC = () => {
   const { errors, validateAll, setErrors } = useCheckoutValidation();
   const [submitting, setSubmitting] = useState(false);
   const cartIsEmpty = useMemo(() => !cart || cart.items.length === 0, [cart]);
+  const hasPersistedOrder = !!orderResponse;
   const { options: shippingOptions, loading: shippingLoading, error: shippingError } = useShippingOptions(address.postalCode);
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const { lookupCep, loading: cepLoading, error: cepError } = useCepLookup();
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem(CHECKOUT_STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw) as PersistedCheckout;
+      if (data?.clientSecret && data?.order) {
+        setClientSecret(data.clientSecret);
+        setOrderResponse(data.order);
+        setAddress(data.address ?? address);
+        setSelectedShipping(data.selectedShipping ?? null);
+      }
+    } catch (err) {
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
@@ -59,6 +85,7 @@ const Checkout: React.FC = () => {
       setErrors((prev) => ({ ...prev, postalCode: prev.postalCode || t('checkout.validation.selectShipping') }));
       return;
     }
+    sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
     setPaymentError(null);
     setSubmitting(true);
     try {
@@ -83,11 +110,19 @@ const Checkout: React.FC = () => {
         customer_email: undefined,
       });
       setClientSecret(intent.client_secret);
+      const snapshot: PersistedCheckout = {
+        clientSecret: intent.client_secret,
+        order,
+        address,
+        selectedShipping,
+      };
+      sessionStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(snapshot));
     } catch (err) {
       console.error('Failed to create order', err);
       setErrors((prev) => ({ ...prev, address1: t('errors.failedToCreateOrder') }));
       setClientSecret(null);
       setOrderResponse(null);
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
     } finally {
       setSubmitting(false);
     }
@@ -104,7 +139,7 @@ const Checkout: React.FC = () => {
 
         {loading ? (
           <LoadingSpinner message={t('checkout.loadingCart')} />
-        ) : cartIsEmpty ? (
+        ) : (cartIsEmpty && !hasPersistedOrder) ? (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100">
             <p className="text-gray-700 mb-4">{t('checkout.cartEmpty')}</p>
             <Link to="/products" className="text-blue-600 hover:underline font-medium">{t('checkout.continueShopping')}</Link>
@@ -312,20 +347,37 @@ const Checkout: React.FC = () => {
                   <ErrorState message={error} />
                 )}
 
-                <ul className="divide-y divide-gray-200 mb-4">
-                  {cart!.items.map((item: CartItemType) => (
-                    <CartItem
-                      key={item.product?.slug || ''}
-                      item={item}
-                      onRemove={removeItem}
-                      isRemoving={isRemovingItem(item.product?.slug || '')}
-                      showQuantityControls={true}
-                    />
-                  ))}
-                </ul>
+                {cart?.items?.length ? (
+                  <ul className="divide-y divide-gray-200 mb-4">
+                    {cart.items.map((item: CartItemType) => (
+                      <CartItem
+                        key={item.product?.slug || ''}
+                        item={item}
+                        onRemove={removeItem}
+                        isRemoving={isRemovingItem(item.product?.slug || '')}
+                        showQuantityControls={true}
+                      />
+                    ))}
+                  </ul>
+                ) : orderResponse?.items?.length ? (
+                  <ul className="divide-y divide-gray-200 mb-4">
+                    {orderResponse.items.map((item) => (
+                      <li key={`${item.product_slug}-${item.product_name ?? ''}`} className="py-3 flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{item.product_name ?? item.product_slug}</div>
+                          <div className="text-sm text-gray-600">{t('cart.quantity')}: {item.quantity}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-gray-900">{formatCurrency(item.subtotal)}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
                 <div className="flex justify-between text-gray-700">
                   <span>{t('cart.subtotal')}</span>
-                  <span className="font-semibold">{formatCurrency(cart!.total)}</span>
+                  <span className="font-semibold">{formatCurrency(cart?.total ?? Math.max((orderResponse?.total_amount ?? 0) - (selectedShipping?.price ?? 0), 0))}</span>
                 </div>
                 <div className="flex justify-between text-gray-700 mt-2">
                   <span>{t('checkout.shippingLabel')}</span>
@@ -333,7 +385,7 @@ const Checkout: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-gray-900 mt-2 border-t pt-2">
                   <span>{t('cart.total')}</span>
-                  <span className="font-bold">{formatCurrency(cart!.total + (selectedShipping?.price ?? 0))}</span>
+                  <span className="font-bold">{formatCurrency(cart?.total ? cart.total + (selectedShipping?.price ?? 0) : (orderResponse?.total_amount ?? 0))}</span>
                 </div>
               </div>
             </aside>
@@ -383,6 +435,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({ order, customerName, onSucces
 
     const status = result.paymentIntent?.status;
     if (status === 'succeeded' || status === 'processing' || status === 'requires_capture') {
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
       await onSuccess();
     } else {
       onError(t('checkout.paymentStep.notCompleted'));
