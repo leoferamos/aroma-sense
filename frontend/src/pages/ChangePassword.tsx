@@ -40,28 +40,28 @@ const ChangePassword: React.FC = () => {
         const errors: Record<string, string> = {};
 
         if (touched.currentPassword && !form.currentPassword) {
-            errors.currentPassword = t('currentPasswordRequired');
+            errors.currentPassword = t('errors.currentPasswordRequired');
         }
 
         if (touched.newPassword) {
             if (!form.newPassword) {
-                errors.newPassword = t('newPasswordRequired');
+                errors.newPassword = t('errors.newPasswordRequired');
             } else if (form.newPassword.length < 8) {
-                errors.newPassword = t('passwordMinLength');
+                errors.newPassword = t('errors.passwordMinLength');
             } else if (!/[A-Z]/.test(form.newPassword)) {
-                errors.newPassword = t('passwordUppercase');
+                errors.newPassword = t('errors.passwordUppercase');
             } else if (!/[a-z]/.test(form.newPassword)) {
-                errors.newPassword = t('passwordLowercase');
+                errors.newPassword = t('errors.passwordLowercase');
             } else if (!/[0-9]/.test(form.newPassword)) {
-                errors.newPassword = t('passwordNumber');
+                errors.newPassword = t('errors.passwordNumber');
             }
         }
 
         if (touched.confirmPassword) {
             if (!form.confirmPassword) {
-                errors.confirmPassword = t('confirmNewPassword');
+                errors.confirmPassword = t('errors.confirmNewPassword');
             } else if (form.newPassword !== form.confirmPassword) {
-                errors.confirmPassword = t('passwordsDoNotMatch');
+                errors.confirmPassword = t('errors.passwordsDoNotMatch');
             }
         }
 
@@ -247,8 +247,8 @@ const ChangePassword: React.FC = () => {
                                 type="submit"
                                 disabled={loading || !isFormValid}
                                 className={`flex-1 px-6 py-3 text-sm font-medium rounded-xl text-white transition-all ${loading || !isFormValid
-                                        ? 'bg-gray-300 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-lg hover:from-blue-700 hover:to-blue-800 active:scale-95'
+                                    ? 'bg-gray-300 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-lg hover:from-blue-700 hover:to-blue-800 active:scale-95'
                                     }`}
                             >
                                 {loading ? (

@@ -43,13 +43,20 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 	}
 	sanitized := ai.SanitizeUserMessage(rawMsg, 500)
 
-	// Lightweight NLU shortcuts
 	if isGreetingOnly(sanitized) {
 		reply := "Olá! Eu sou a assistente da Aroma Sense. Posso te ajudar a escolher perfumes por ocasião, estação, acordes (cítrico, floral, amadeirado), intensidade e orçamento. Como você quer começar?"
 		return dto.ChatResponse{Reply: reply, Suggestions: nil, FollowUpHint: "Prefere algo cítrico, floral ou amadeirado?"}, nil
 	}
 	if isFarewell(sanitized) {
 		reply := "Até logo! Quando quiser, volto a te ajudar com recomendações de perfumes."
+		return dto.ChatResponse{Reply: reply}, nil
+	}
+
+	normalizedMsg := strings.TrimSpace(strings.ToLower(sanitized))
+	if normalizedMsg == "/clear" || normalizedMsg == "/clear-recs" || normalizedMsg == "limpar recomendações" || normalizedMsg == "limpar recomendacoes" {
+		s.retrieval.ClearCache()
+		s.resetConversation(sid)
+		reply := "Pronto! Limpei suas recomendações. Pode me dizer o que você procura agora 😊"
 		return dto.ChatResponse{Reply: reply}, nil
 	}
 
@@ -82,8 +89,14 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 		reply = base
 	}
 
-	// Append suggestions if not mentioned in reply
+	// Return up to 2 suggestions
+	var limitedSuggestions []dto.RecommendSuggestion
 	if len(suggestions) > 0 {
+		if len(suggestions) > 2 {
+			limitedSuggestions = suggestions[:2]
+		} else {
+			limitedSuggestions = suggestions
+		}
 		mentioned := false
 		for _, s := range suggestions {
 			if strings.Contains(strings.ToLower(reply), strings.ToLower(s.Name)) {
@@ -93,14 +106,20 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 		}
 		if !mentioned {
 			reply += "\n\nBaseado no que você disse, tenho uma sugestão: " + suggestions[0].Name + " da " + suggestions[0].Brand + "."
-			if len(suggestions) > 1 {
-				reply += " Ou " + suggestions[1].Name + " da " + suggestions[1].Brand + "."
+			if len(limitedSuggestions) > 1 {
+				reply += " Ou " + limitedSuggestions[1].Name + " da " + limitedSuggestions[1].Brand + "."
 			}
 		}
+		conv.LastSuggestions = true
 	}
 
-	follow := ai.BuildFollowUpHint(conv.Prefs)
-	return dto.ChatResponse{Reply: reply, Suggestions: suggestions, FollowUpHint: follow}, nil
+	var follow string
+	if len(suggestions) > 0 || conv.TurnCount > 2 || hasMinimumPrefs(conv.Prefs) {
+		follow = ""
+	} else {
+		follow = ai.BuildFollowUpHint(conv.Prefs)
+	}
+	return dto.ChatResponse{Reply: reply, Suggestions: limitedSuggestions, FollowUpHint: follow}, nil
 }
 
 func (s *ChatService) getOrCreate(id string) *ai.Conversation {
@@ -114,6 +133,12 @@ func (s *ChatService) getOrCreate(id string) *ai.Conversation {
 	c := ai.NewConversation()
 	s.state[id] = c
 	return c
+}
+
+func (s *ChatService) resetConversation(id string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.state, id)
 }
 
 // --- lightweight intent/topic helpers ---
@@ -155,6 +180,27 @@ func isOnTopic(s string) bool {
 	return false
 }
 
+func (s *ChatService) ClearRetrievalCache() {
+	s.retrieval.ClearCache()
+}
+
 func isEmptyPrefs(p ai.Slots) bool {
 	return len(p.Occasions) == 0 && len(p.Seasons) == 0 && len(p.Accords) == 0 && len(p.Intensity) == 0 && len(p.Climate) == 0 && len(p.Budget) == 0 && len(p.Longevity) == 0
+}
+
+func hasMinimumPrefs(p ai.Slots) bool {
+	count := 0
+	if len(p.Occasions) > 0 {
+		count++
+	}
+	if len(p.Accords) > 0 {
+		count++
+	}
+	if len(p.Gender) > 0 {
+		count++
+	}
+	if len(p.Intensity) > 0 {
+		count++
+	}
+	return count >= 2
 }

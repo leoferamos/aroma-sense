@@ -110,4 +110,8 @@
   "actions": "Actions",
   "reviewNotesPlaceholder": "Review notes",
   "approve": "Approve",
-  "reject": "Reject"}
+  "reject": "Reject",
+  "startDate": "Start Date",
+  "endDate": "End Date",
+  "showingRange": "Showing {{start}} to {{end}} of {{total}}"
+}

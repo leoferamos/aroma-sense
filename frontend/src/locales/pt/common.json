@@ -74,6 +74,18 @@
     "buyNow": "Comprar Agora",
     "relatedProducts": "Produtos Relacionados"
   },
+  "filters": {
+    "title": "Filtros",
+    "reset": "Limpar Tudo",
+    "gender": "Gênero",
+    "masculine": "Masculino",
+    "feminine": "Feminino",
+    "unisex": "Unissex",
+    "price": "Preço",
+    "minPrice": "Preço Mínimo",
+    "maxPrice": "Preço Máximo",
+    "range": "Intervalo de Preço"
+  },
   "search": {
     "placeholder": "Buscar produtos...",
     "ariaLabel": "Buscar produtos",

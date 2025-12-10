@@ -14,11 +14,12 @@ type UserHandler struct {
 	authService        service.AuthService
 	userProfileService service.UserProfileService
 	lgpdService        service.LgpdService
+	chatService        *service.ChatService
 }
 
 // NewUserHandler creates a new instance of UserHandler
-func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService) *UserHandler {
-	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd}
+func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService, chat *service.ChatService) *UserHandler {
+	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd, chatService: chat}
 }
 
 // UserProfile exposes the internal UserProfileService for middleware/router wiring
@@ -156,6 +157,7 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 	if refreshToken, err := c.Cookie("refresh_token"); err == nil && refreshToken != "" {
 		_ = h.authService.InvalidateRefreshToken(refreshToken)
 	}
+	h.chatService.ClearRetrievalCache()
 	auth.ClearRefreshTokenCookie(c)
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Logout successful"})

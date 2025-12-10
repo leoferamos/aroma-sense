@@ -50,29 +50,30 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
 
         if (!inputValue.trim()) return;
 
-        // Add user message
+        await sendMessage(inputValue);
+        setInputValue('');
+    };
+
+    const sendMessage = async (content: string) => {
         const userMessage: Message = {
             id: Date.now().toString(),
-            content: inputValue,
+            content,
             sender: 'user',
             timestamp: new Date(),
         };
 
         setMessages((prev) => [...prev, userMessage]);
-        setInputValue('');
         setIsLoading(true);
 
         try {
-            // Persist/obtain session id
             let sessionId = localStorage.getItem('chat_session_id');
             if (!sessionId) {
                 sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
                 localStorage.setItem('chat_session_id', sessionId);
             }
 
-            // Minimal history just last few contents
             const history = messages.slice(-6).map(m => m.content);
-            const resp = await chatApi(userMessage.content, sessionId, history);
+            const resp = await chatApi(content, sessionId, history);
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 content: resp.reply || 'Tudo certo! Pode me dizer mais sobre o que procura?',
@@ -92,6 +93,11 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleClearRecommendations = () => {
+        setLastSuggestions([]);
+        sendMessage('/clear-recs');
     };
 
     if (!isOpen) return null;
@@ -194,29 +200,39 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                     onSubmit={handleSendMessage}
                     className="border-t border-gray-200 p-4 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] bg-gray-50"
                 >
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            placeholder="Type your message..."
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[15px]"
-                            disabled={isLoading}
-                        />
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                placeholder="Digite sua preferência… (/clear-recs para limpar)"
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[15px]"
+                                disabled={isLoading}
+                            />
+                            <button
+                                type="submit"
+                                disabled={isLoading || !inputValue.trim()}
+                                className={cn(
+                                    'p-2 rounded-md transition-colors',
+                                    isLoading || !inputValue.trim()
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                )}
+                                aria-label="Send message"
+                            >
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16141721 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.42274535 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99701575 L3.03521743,10.4380088 C3.03521743,10.5951061 3.34915502,10.7522035 3.50612381,10.7522035 L16.6915026,11.5376905 C16.6915026,11.5376905 17.1624089,11.5376905 17.1624089,12.0089827 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z" />
+                                </svg>
+                            </button>
+                        </div>
                         <button
-                            type="submit"
-                            disabled={isLoading || !inputValue.trim()}
-                            className={cn(
-                                'p-2 rounded-md transition-colors',
-                                isLoading || !inputValue.trim()
-                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                            )}
-                            aria-label="Send message"
+                            type="button"
+                            onClick={handleClearRecommendations}
+                            disabled={isLoading}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                         >
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16141721 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.42274535 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99701575 L3.03521743,10.4380088 C3.03521743,10.5951061 3.34915502,10.7522035 3.50612381,10.7522035 L16.6915026,11.5376905 C16.6915026,11.5376905 17.1624089,11.5376905 17.1624089,12.0089827 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z" />
-                            </svg>
+                            Limpar recomendações
                         </button>
                     </div>
                 </form>
