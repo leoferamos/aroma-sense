@@ -25,6 +25,7 @@ const AdminLayout: React.FC<Props> = ({ children, actions, navItems }) => {
     { label: t('users'), to: '/admin/users' },
     { label: t('auditLogs'), to: '/admin/audit-logs' },
     { label: t('contestations'), to: '/admin/contestations' },
+    { label: t('reviewReports'), to: '/admin/review-reports' },
   ];
   const pathname = location.pathname;
   const [isAnimating, setIsAnimating] = React.useState(false);
@@ -36,6 +37,7 @@ const AdminLayout: React.FC<Props> = ({ children, actions, navItems }) => {
     if (pathname.startsWith('/admin/users')) return t('users');
     if (pathname.startsWith('/admin/audit-logs')) return t('auditLogs');
     if (pathname.startsWith('/admin/contestations')) return t('contestations');
+    if (pathname.startsWith('/admin/review-reports')) return t('reviewReports');
     if (pathname.startsWith('/admin/dashboard')) return t('dashboard');
     return t('title'); // fallback to "Admin"
   };

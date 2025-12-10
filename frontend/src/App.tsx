@@ -10,6 +10,7 @@ import AccountBlockOverlay from './components/AccountBlockOverlay';
 import { useTranslation } from 'react-i18next';
 // Lazy load pages for better performance
 const AdminContestations = lazy(() => import('./pages/admin/AdminContestations'));
+const AdminReviewReports = lazy(() => import('./pages/admin/AdminReviewReports'));
 const Register = lazy(() => import('./pages/Register'));
 const Login = lazy(() => import('./pages/Login'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -125,6 +126,14 @@ const ChatMount: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminContestations />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/review-reports"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminReviewReports />
             </ProtectedRoute>
           }
         />
