@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"github.com/leoferamos/aroma-sense/internal/handler"
 	admin "github.com/leoferamos/aroma-sense/internal/handler/admin"
+	auth "github.com/leoferamos/aroma-sense/internal/handler/auth"
 	product "github.com/leoferamos/aroma-sense/internal/handler/product"
 	shipping "github.com/leoferamos/aroma-sense/internal/handler/shipping"
 	"github.com/leoferamos/aroma-sense/internal/rate"
@@ -19,7 +20,7 @@ type AppHandlers struct {
 	ProductHandler           *product.ProductHandler
 	CartHandler              *handler.CartHandler
 	OrderHandler             *handler.OrderHandler
-	PasswordResetHandler     *handler.PasswordResetHandler
+	PasswordResetHandler     *auth.PasswordResetHandler
 	ShippingHandler          *shipping.ShippingHandler
 	ReviewHandler            *product.ReviewHandler
 	AIHandler                *handler.AIHandler

@@ -1,4 +1,4 @@
-package product
+package review
 
 import (
 	"net/http"

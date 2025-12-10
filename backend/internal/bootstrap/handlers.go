@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"github.com/leoferamos/aroma-sense/internal/handler"
 	admin "github.com/leoferamos/aroma-sense/internal/handler/admin"
+	auth "github.com/leoferamos/aroma-sense/internal/handler/auth"
 	product "github.com/leoferamos/aroma-sense/internal/handler/product"
 	shipping "github.com/leoferamos/aroma-sense/internal/handler/shipping"
 	"github.com/leoferamos/aroma-sense/internal/rate"
@@ -17,7 +18,7 @@ func initializeHandlers(services *services, rateLimiter rate.RateLimiter) *AppHa
 		ProductHandler:           product.NewProductHandler(services.product, services.review, services.userProfile),
 		CartHandler:              handler.NewCartHandler(services.cart),
 		OrderHandler:             handler.NewOrderHandler(services.order),
-		PasswordResetHandler:     handler.NewPasswordResetHandler(services.passwordReset, rateLimiter),
+		PasswordResetHandler:     auth.NewPasswordResetHandler(services.passwordReset, rateLimiter),
 		ShippingHandler:          shipping.NewShippingHandler(services.shipping),
 		ReviewHandler:            product.NewReviewHandler(services.review, services.reviewReport, services.userProfile, services.product, services.auditLog, rateLimiter),
 		AIHandler:                handler.NewAIHandler(services.ai, rateLimiter),

@@ -1,4 +1,4 @@
-package handler
+package auth
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
@@ -155,7 +156,7 @@ func (h *PasswordResetHandler) ConfirmReset(c *gin.Context) {
 	// Call service to reset password
 	if err := h.resetService.ConfirmReset(input.Email, input.Code, input.NewPassword); err != nil {
 		// Return generic error to avoid revealing details
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
