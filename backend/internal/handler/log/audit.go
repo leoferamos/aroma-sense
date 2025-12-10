@@ -8,15 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
 )
 
 type AuditLogHandler struct {
-	auditLogService service.AuditLogService
+	auditLogService logservice.AuditLogService
 }
 
 // NewAuditLogHandler creates a new audit log handler
-func NewAuditLogHandler(auditLogService service.AuditLogService) *AuditLogHandler {
+func NewAuditLogHandler(auditLogService logservice.AuditLogService) *AuditLogHandler {
 	return &AuditLogHandler{
 		auditLogService: auditLogService,
 	}

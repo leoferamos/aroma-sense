@@ -9,14 +9,14 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/model"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	orderservice "github.com/leoferamos/aroma-sense/internal/service/order"
 )
 
 type OrderHandler struct {
-	orderService service.OrderService
+	orderService orderservice.OrderService
 }
 
-func NewOrderHandler(orderService service.OrderService) *OrderHandler {
+func NewOrderHandler(orderService orderservice.OrderService) *OrderHandler {
 	return &OrderHandler{orderService}
 }
 

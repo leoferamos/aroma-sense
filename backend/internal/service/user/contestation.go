@@ -5,6 +5,7 @@ import (
 
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	adminservice "github.com/leoferamos/aroma-sense/internal/service/admin"
 )
 
 type UserContestationService interface {
@@ -17,10 +18,10 @@ type UserContestationService interface {
 type userContestationService struct {
 	repo     repository.UserContestationRepository
 	userRepo repository.UserRepository
-	adminSvc AdminUserService
+	adminSvc adminservice.AdminUserService
 }
 
-func NewUserContestationService(repo repository.UserContestationRepository, userRepo repository.UserRepository, adminSvc AdminUserService) UserContestationService {
+func NewUserContestationService(repo repository.UserContestationRepository, userRepo repository.UserRepository, adminSvc adminservice.AdminUserService) UserContestationService {
 	return &userContestationService{repo: repo, userRepo: userRepo, adminSvc: adminSvc}
 }
 

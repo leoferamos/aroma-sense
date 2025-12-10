@@ -9,7 +9,7 @@ import (
 	"github.com/stripe/stripe-go/v78/paymentintent"
 	"github.com/stripe/stripe-go/v78/webhook"
 
-	"github.com/leoferamos/aroma-sense/internal/service"
+	paymentservice "github.com/leoferamos/aroma-sense/internal/service/payment"
 )
 
 // Provider implements a Stripe payment provider for PaymentIntent creation and webhook parsing.
@@ -24,7 +24,7 @@ func NewProvider(cfg *Config) *Provider {
 }
 
 // CreatePaymentIntent creates a payment intent for the given amount and currency.
-func (p *Provider) CreatePaymentIntent(ctx context.Context, params service.PaymentIntentParams) (*service.PaymentIntentResult, error) {
+func (p *Provider) CreatePaymentIntent(ctx context.Context, params paymentservice.PaymentIntentParams) (*paymentservice.PaymentIntentResult, error) {
 	piParams := &stripe.PaymentIntentParams{
 		Amount:             stripe.Int64(params.Amount),
 		Currency:           stripe.String(params.Currency),
@@ -40,11 +40,11 @@ func (p *Provider) CreatePaymentIntent(ctx context.Context, params service.Payme
 	if err != nil {
 		return nil, fmt.Errorf("stripe create payment intent: %w", err)
 	}
-	return &service.PaymentIntentResult{ID: intent.ID, ClientSecret: intent.ClientSecret}, nil
+	return &paymentservice.PaymentIntentResult{ID: intent.ID, ClientSecret: intent.ClientSecret}, nil
 }
 
 // ParseWebhook validates signature and returns a normalized payload.
-func (p *Provider) ParseWebhook(payload []byte, signature string) (*service.PaymentWebhookPayload, error) {
+func (p *Provider) ParseWebhook(payload []byte, signature string) (*paymentservice.PaymentWebhookPayload, error) {
 	if p.webhookSecret == "" {
 		return nil, fmt.Errorf("stripe webhook secret not configured")
 	}
@@ -60,7 +60,7 @@ func (p *Provider) ParseWebhook(payload []byte, signature string) (*service.Paym
 			return nil, fmt.Errorf("stripe webhook unmarshal: %w", err)
 		}
 		status := string(pi.Status)
-		return &service.PaymentWebhookPayload{
+		return &paymentservice.PaymentWebhookPayload{
 			IntentID:      pi.ID,
 			Status:        status,
 			Amount:        pi.Amount,
@@ -82,7 +82,7 @@ func (p *Provider) ParseWebhook(payload []byte, signature string) (*service.Paym
 		for k, v := range ch.Metadata {
 			meta[k] = v
 		}
-		return &service.PaymentWebhookPayload{
+		return &paymentservice.PaymentWebhookPayload{
 			IntentID:      intentID,
 			Status:        status,
 			Amount:        ch.Amount,

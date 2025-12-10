@@ -8,23 +8,26 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	authservice "github.com/leoferamos/aroma-sense/internal/service/auth"
+	chatservice "github.com/leoferamos/aroma-sense/internal/service/chat"
+	lgpdservice "github.com/leoferamos/aroma-sense/internal/service/lgpd"
+	userservice "github.com/leoferamos/aroma-sense/internal/service/user"
 )
 
 type UserHandler struct {
-	authService        service.AuthService
-	userProfileService service.UserProfileService
-	lgpdService        service.LgpdService
-	chatService        service.ChatServiceInterface
+	authService        authservice.AuthService
+	userProfileService userservice.UserProfileService
+	lgpdService        lgpdservice.LgpdService
+	chatService        chatservice.ChatServiceInterface
 }
 
 // NewUserHandler creates a new instance of UserHandler
-func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService, chat service.ChatServiceInterface) *UserHandler {
+func NewUserHandler(auth authservice.AuthService, profile userservice.UserProfileService, lgpd lgpdservice.LgpdService, chat chatservice.ChatServiceInterface) *UserHandler {
 	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd, chatService: chat}
 }
 
 // UserProfile exposes the internal UserProfileService for middleware/router wiring
-func (h *UserHandler) UserProfile() service.UserProfileService {
+func (h *UserHandler) UserProfile() userservice.UserProfileService {
 	return h.userProfileService
 }
 

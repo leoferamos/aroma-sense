@@ -7,14 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	userservice "github.com/leoferamos/aroma-sense/internal/service/user"
 )
 
 type AdminContestationHandler struct {
-	service service.UserContestationService
+	service userservice.UserContestationService
 }
 
-func NewAdminContestationHandler(s service.UserContestationService) *AdminContestationHandler {
+func NewAdminContestationHandler(s userservice.UserContestationService) *AdminContestationHandler {
 	return &AdminContestationHandler{service: s}
 }
 

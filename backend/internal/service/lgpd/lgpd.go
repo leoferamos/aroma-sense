@@ -10,6 +10,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
 )
 
 // LgpdService defines the interface for LGPD/GDPR compliance business logic
@@ -27,11 +28,11 @@ type LgpdService interface {
 type lgpdService struct {
 	repo             repository.UserRepository
 	userContestation repository.UserContestationRepository
-	auditLogService  AuditLogService
+	auditLogService  logservice.AuditLogService
 	notifier         notification.NotificationService
 }
 
-func NewLgpdService(repo repository.UserRepository, userContestationRepo repository.UserContestationRepository, auditLogService AuditLogService, notifier notification.NotificationService) LgpdService {
+func NewLgpdService(repo repository.UserRepository, userContestationRepo repository.UserContestationRepository, auditLogService logservice.AuditLogService, notifier notification.NotificationService) LgpdService {
 	return &lgpdService{repo: repo, userContestation: userContestationRepo, auditLogService: auditLogService, notifier: notifier}
 }
 

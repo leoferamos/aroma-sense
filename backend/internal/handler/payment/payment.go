@@ -7,15 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	paymentservice "github.com/leoferamos/aroma-sense/internal/service/payment"
 )
 
 // PaymentHandler handles payment-related endpoints.
 type PaymentHandler struct {
-	paymentService service.PaymentService
+	paymentService paymentservice.PaymentService
 }
 
-func NewPaymentHandler(paymentService service.PaymentService) *PaymentHandler {
+func NewPaymentHandler(paymentService paymentservice.PaymentService) *PaymentHandler {
 	return &PaymentHandler{paymentService: paymentService}
 }
 

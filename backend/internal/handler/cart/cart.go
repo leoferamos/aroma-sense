@@ -6,14 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	cartservice "github.com/leoferamos/aroma-sense/internal/service/cart"
 )
 
 type CartHandler struct {
-	cartService service.CartService
+	cartService cartservice.CartService
 }
 
-func NewCartHandler(cartService service.CartService) *CartHandler {
+func NewCartHandler(cartService cartservice.CartService) *CartHandler {
 	return &CartHandler{cartService: cartService}
 }
 

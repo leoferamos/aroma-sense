@@ -8,6 +8,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	shippingservice "github.com/leoferamos/aroma-sense/internal/service/shipping"
 	"gorm.io/datatypes"
 )
 
@@ -51,11 +52,11 @@ type paymentService struct {
 	productRepo repository.ProductRepository
 	orderRepo   repository.OrderRepository
 	paymentRepo repository.PaymentRepository
-	shippingSvc ShippingService
+	shippingSvc shippingservice.ShippingService
 	provider    PaymentProvider
 }
 
-func NewPaymentService(cartRepo repository.CartRepository, productRepo repository.ProductRepository, orderRepo repository.OrderRepository, paymentRepo repository.PaymentRepository, shippingSvc ShippingService, provider PaymentProvider) PaymentService {
+func NewPaymentService(cartRepo repository.CartRepository, productRepo repository.ProductRepository, orderRepo repository.OrderRepository, paymentRepo repository.PaymentRepository, shippingSvc shippingservice.ShippingService, provider PaymentProvider) PaymentService {
 	return &paymentService{cartRepo: cartRepo, productRepo: productRepo, orderRepo: orderRepo, paymentRepo: paymentRepo, shippingSvc: shippingSvc, provider: provider}
 }
 

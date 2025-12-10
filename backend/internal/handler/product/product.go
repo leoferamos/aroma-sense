@@ -11,16 +11,18 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	productservice "github.com/leoferamos/aroma-sense/internal/service/product"
+	reviewservice "github.com/leoferamos/aroma-sense/internal/service/review"
+	userservice "github.com/leoferamos/aroma-sense/internal/service/user"
 )
 
 type ProductHandler struct {
-	productService service.ProductService
-	reviewService  service.ReviewService
-	userService    service.UserProfileService
+	productService productservice.ProductService
+	reviewService  reviewservice.ReviewService
+	userService    userservice.UserProfileService
 }
 
-func NewProductHandler(ps service.ProductService, rs service.ReviewService, us service.UserProfileService) *ProductHandler {
+func NewProductHandler(ps productservice.ProductService, rs reviewservice.ReviewService, us userservice.UserProfileService) *ProductHandler {
 	return &ProductHandler{productService: ps, reviewService: rs, userService: us}
 }
 

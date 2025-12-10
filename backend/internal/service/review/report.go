@@ -9,6 +9,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	adminservice "github.com/leoferamos/aroma-sense/internal/service/admin"
 	"gorm.io/gorm"
 )
 
@@ -22,10 +23,10 @@ type reviewReportService struct {
 	reports   repository.ReviewReportRepository
 	reviews   repository.ReviewRepository
 	users     repository.UserRepository
-	adminUser AdminUserService
+	adminUser adminservice.AdminUserService
 }
 
-func NewReviewReportService(reports repository.ReviewReportRepository, reviews repository.ReviewRepository, users repository.UserRepository, adminUser AdminUserService) ReviewReportService {
+func NewReviewReportService(reports repository.ReviewReportRepository, reviews repository.ReviewRepository, users repository.UserRepository, adminUser adminservice.AdminUserService) ReviewReportService {
 	return &reviewReportService{reports: reports, reviews: reviews, users: users, adminUser: adminUser}
 }
 

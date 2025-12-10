@@ -9,6 +9,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	shippingservice "github.com/leoferamos/aroma-sense/internal/service/shipping"
 	"github.com/leoferamos/aroma-sense/internal/validation"
 )
 
@@ -22,10 +23,10 @@ type orderService struct {
 	orderRepo   repository.OrderRepository
 	cartRepo    repository.CartRepository
 	productRepo repository.ProductRepository
-	shippingSvc ShippingService
+	shippingSvc shippingservice.ShippingService
 }
 
-func NewOrderService(orderRepo repository.OrderRepository, cartRepo repository.CartRepository, productRepo repository.ProductRepository, shippingSvc ShippingService) OrderService {
+func NewOrderService(orderRepo repository.OrderRepository, cartRepo repository.CartRepository, productRepo repository.ProductRepository, shippingSvc shippingservice.ShippingService) OrderService {
 	return &orderService{orderRepo: orderRepo, cartRepo: cartRepo, productRepo: productRepo, shippingSvc: shippingSvc}
 }
 

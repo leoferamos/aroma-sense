@@ -9,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	reviewservice "github.com/leoferamos/aroma-sense/internal/service/review"
 )
 
 // AdminReviewReportHandler handles admin review report operations
 type AdminReviewReportHandler struct {
-	service service.ReviewReportService
+	service reviewservice.ReviewReportService
 }
 
-func NewAdminReviewReportHandler(s service.ReviewReportService) *AdminReviewReportHandler {
+func NewAdminReviewReportHandler(s reviewservice.ReviewReportService) *AdminReviewReportHandler {
 	return &AdminReviewReportHandler{service: s}
 }
 

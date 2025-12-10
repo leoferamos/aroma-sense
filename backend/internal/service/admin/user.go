@@ -10,6 +10,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
 	"github.com/leoferamos/aroma-sense/internal/utils"
 	"github.com/leoferamos/aroma-sense/internal/validation"
 )
@@ -26,11 +27,11 @@ type AdminUserService interface {
 
 type adminUserService struct {
 	repo            repository.UserRepository
-	auditLogService AuditLogService
+	auditLogService logservice.AuditLogService
 	notifier        notification.NotificationService
 }
 
-func NewAdminUserService(repo repository.UserRepository, auditLogService AuditLogService, notifier notification.NotificationService) AdminUserService {
+func NewAdminUserService(repo repository.UserRepository, auditLogService logservice.AuditLogService, notifier notification.NotificationService) AdminUserService {
 	return &adminUserService{repo: repo, auditLogService: auditLogService, notifier: notifier}
 }
 

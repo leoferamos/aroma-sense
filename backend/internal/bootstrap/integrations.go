@@ -11,7 +11,8 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/llm"
 	gatewaypayment "github.com/leoferamos/aroma-sense/internal/integrations/payment/stripe"
 	shippingprovider "github.com/leoferamos/aroma-sense/internal/integrations/shipping"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	paymentservice "github.com/leoferamos/aroma-sense/internal/service/payment"
+	shippingservice "github.com/leoferamos/aroma-sense/internal/service/shipping"
 )
 
 // integrations holds all external integration instances
@@ -27,8 +28,8 @@ var emailAsyncWrapper *email.AsyncEmailService
 
 // shippingIntegration holds shipping-related services
 type shippingIntegration struct {
-	provider  service.ShippingProvider
-	service   service.ShippingService
+	provider  shippingservice.ShippingProvider
+	service   shippingservice.ShippingService
 	originCEP string
 }
 
@@ -39,7 +40,7 @@ type aiIntegration struct {
 }
 
 type paymentIntegration struct {
-	provider service.PaymentProvider
+	provider paymentservice.PaymentProvider
 }
 
 // initializeIntegrations creates all external integration instances

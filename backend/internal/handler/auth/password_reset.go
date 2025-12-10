@@ -12,16 +12,16 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/rate"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	authservice "github.com/leoferamos/aroma-sense/internal/service/auth"
 )
 
 type PasswordResetHandler struct {
-	resetService service.PasswordResetService
+	resetService authservice.PasswordResetService
 	rateLimiter  rate.RateLimiter
 }
 
 // NewPasswordResetHandler creates a new instance of PasswordResetHandler
-func NewPasswordResetHandler(s service.PasswordResetService, limiter rate.RateLimiter) *PasswordResetHandler {
+func NewPasswordResetHandler(s authservice.PasswordResetService, limiter rate.RateLimiter) *PasswordResetHandler {
 	return &PasswordResetHandler{
 		resetService: s,
 		rateLimiter:  limiter,

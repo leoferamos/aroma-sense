@@ -9,15 +9,15 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/rate"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	chatservice "github.com/leoferamos/aroma-sense/internal/service/chat"
 )
 
 type ChatHandler struct {
-	chat  *service.ChatService
+	chat  *chatservice.ChatService
 	limit rate.RateLimiter
 }
 
-func NewChatHandler(chat *service.ChatService, limiter rate.RateLimiter) *ChatHandler {
+func NewChatHandler(chat *chatservice.ChatService, limiter rate.RateLimiter) *ChatHandler {
 	return &ChatHandler{chat: chat, limit: limiter}
 }
 

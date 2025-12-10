@@ -11,19 +11,22 @@ import (
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/rate"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
+	productservice "github.com/leoferamos/aroma-sense/internal/service/product"
+	reviewservice "github.com/leoferamos/aroma-sense/internal/service/review"
+	userservice "github.com/leoferamos/aroma-sense/internal/service/user"
 )
 
 type ReviewHandler struct {
-	service        service.ReviewService
-	userService    service.UserProfileService
-	productService service.ProductService
-	auditService   service.AuditLogService
-	reportService  service.ReviewReportService
+	service        reviewservice.ReviewService
+	userService    userservice.UserProfileService
+	productService productservice.ProductService
+	auditService   logservice.AuditLogService
+	reportService  reviewservice.ReviewReportService
 	rateLimiter    rate.RateLimiter
 }
 
-func NewReviewHandler(s service.ReviewService, reportService service.ReviewReportService, userService service.UserProfileService, productService service.ProductService, auditService service.AuditLogService, limiter rate.RateLimiter) *ReviewHandler {
+func NewReviewHandler(s reviewservice.ReviewService, reportService reviewservice.ReviewReportService, userService userservice.UserProfileService, productService productservice.ProductService, auditService logservice.AuditLogService, limiter rate.RateLimiter) *ReviewHandler {
 	return &ReviewHandler{service: s, reportService: reportService, userService: userService, productService: productService, auditService: auditService, rateLimiter: limiter}
 }
 

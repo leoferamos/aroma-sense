@@ -9,15 +9,15 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/rate"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	chatservice "github.com/leoferamos/aroma-sense/internal/service/chat"
 )
 
 type AIHandler struct {
-	svc   *service.AIService
+	svc   *chatservice.AIService
 	limit rate.RateLimiter
 }
 
-func NewAIHandler(svc *service.AIService, limiter rate.RateLimiter) *AIHandler {
+func NewAIHandler(svc *chatservice.AIService, limiter rate.RateLimiter) *AIHandler {
 	return &AIHandler{svc: svc, limit: limiter}
 }
 

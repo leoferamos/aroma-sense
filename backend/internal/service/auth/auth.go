@@ -12,6 +12,8 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	cartservice "github.com/leoferamos/aroma-sense/internal/service/cart"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
 	"github.com/leoferamos/aroma-sense/internal/utils"
 	"github.com/leoferamos/aroma-sense/internal/validation"
 )
@@ -27,12 +29,12 @@ type AuthService interface {
 
 type authService struct {
 	repo            repository.UserRepository
-	cartService     CartService
-	auditLogService AuditLogService
+	cartService     cartservice.CartService
+	auditLogService logservice.AuditLogService
 }
 
 // NewAuthService cria uma nova instância de AuthService
-func NewAuthService(repo repository.UserRepository, cartService CartService, auditLogService AuditLogService) AuthService {
+func NewAuthService(repo repository.UserRepository, cartService cartservice.CartService, auditLogService logservice.AuditLogService) AuthService {
 	return &authService{repo: repo, cartService: cartService, auditLogService: auditLogService}
 }
 

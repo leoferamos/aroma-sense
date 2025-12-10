@@ -6,6 +6,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	logservice "github.com/leoferamos/aroma-sense/internal/service/log"
 	"github.com/leoferamos/aroma-sense/internal/validation"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,10 +21,10 @@ type UserProfileService interface {
 
 type userProfileService struct {
 	repo            repository.UserRepository
-	auditLogService AuditLogService
+	auditLogService logservice.AuditLogService
 }
 
-func NewUserProfileService(repo repository.UserRepository, auditLogService AuditLogService) UserProfileService {
+func NewUserProfileService(repo repository.UserRepository, auditLogService logservice.AuditLogService) UserProfileService {
 	return &userProfileService{repo: repo, auditLogService: auditLogService}
 }
 

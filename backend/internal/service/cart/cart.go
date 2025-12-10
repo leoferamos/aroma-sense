@@ -8,6 +8,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	productservice "github.com/leoferamos/aroma-sense/internal/service/product"
 )
 
 // CartService defines the interface for cart-related business logic
@@ -25,11 +26,11 @@ type CartService interface {
 
 type cartService struct {
 	repo           repository.CartRepository
-	productService ProductService
+	productService productservice.ProductService
 }
 
 // NewCartService creates a new instance of CartService
-func NewCartService(repo repository.CartRepository, productService ProductService) CartService {
+func NewCartService(repo repository.CartRepository, productService productservice.ProductService) CartService {
 	return &cartService{repo: repo, productService: productService}
 }
 

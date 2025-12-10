@@ -6,15 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	shippingservice "github.com/leoferamos/aroma-sense/internal/service/shipping"
 )
 
 // ShippingHandler handles shipping quotation endpoints.
 type ShippingHandler struct {
-	shippingService service.ShippingService
+	shippingService shippingservice.ShippingService
 }
 
-func NewShippingHandler(shippingService service.ShippingService) *ShippingHandler {
+func NewShippingHandler(shippingService shippingservice.ShippingService) *ShippingHandler {
 	return &ShippingHandler{shippingService: shippingService}
 }
 

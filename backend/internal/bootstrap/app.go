@@ -14,7 +14,9 @@ import (
 	userhandler "github.com/leoferamos/aroma-sense/internal/handler/user"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/repository"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	serviceadmin "github.com/leoferamos/aroma-sense/internal/service/admin"
+	servicelgpd "github.com/leoferamos/aroma-sense/internal/service/lgpd"
+	servicelog "github.com/leoferamos/aroma-sense/internal/service/log"
 	"github.com/leoferamos/aroma-sense/internal/storage"
 	"gorm.io/gorm"
 )
@@ -39,9 +41,9 @@ type AppHandlers struct {
 
 // AppServices contains service instances needed for jobs
 type AppServices struct {
-	AdminUserService service.AdminUserService
-	AuditLogService  service.AuditLogService
-	LgpdService      service.LgpdService
+	AdminUserService serviceadmin.AdminUserService
+	AuditLogService  servicelog.AuditLogService
+	LgpdService      servicelgpd.LgpdService
 }
 
 // AppRepos contains repository instances needed for jobs

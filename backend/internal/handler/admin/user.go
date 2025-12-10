@@ -9,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
-	"github.com/leoferamos/aroma-sense/internal/service"
+	serviceadmin "github.com/leoferamos/aroma-sense/internal/service/admin"
 )
 
 type AdminUserHandler struct {
-	userService service.AdminUserService
+	userService serviceadmin.AdminUserService
 }
 
 // NewAdminUserHandler creates a new instance of AdminUserHandler
-func NewAdminUserHandler(s service.AdminUserService) *AdminUserHandler {
+func NewAdminUserHandler(s serviceadmin.AdminUserService) *AdminUserHandler {
 	return &AdminUserHandler{userService: s}
 }
 
