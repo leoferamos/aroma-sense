@@ -31,6 +31,7 @@ export interface OrderItemResponse {
 
 export interface OrderResponse {
   id: number;
+  public_id?: string;
   user_id: string;
   total_amount: number;
   status: string;

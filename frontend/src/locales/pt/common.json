@@ -43,7 +43,20 @@
     "agreePrivacyError": "Você deve concordar com a política de privacidade.",
     "alreadyHaveAccount": "Já tem uma conta?",
     "passwordHelper": "Use pelo menos 8 caracteres, números e símbolos",
-    "createAccount": "Criar Conta"
+    "createAccount": "Criar Conta",
+    "emailRequired": "E-mail é obrigatório",
+    "emailInvalid": "Digite um e-mail válido",
+    "passwordRequired": "Senha é obrigatória",
+    "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
+    "passwordUppercase": "A senha deve conter pelo menos uma letra maiúscula",
+    "passwordLowercase": "A senha deve conter pelo menos uma letra minúscula",
+    "passwordNumber": "A senha deve conter pelo menos um número",
+    "passwordSymbol": "A senha deve conter pelo menos um símbolo",
+    "repeatPasswordRequired": "Repetir senha é obrigatório",
+    "passwordsDoNotMatch": "As senhas não coincidem",
+    "emailAlreadyRegistered": "Este e-mail já está cadastrado. Faça login ou use outro e-mail.",
+    "invalidCredentials": "E-mail ou senha inválidos",
+    "fullNameRequired": "Nome completo é obrigatório"
   },
   "navbar": {
     "home": "Início",
@@ -152,14 +165,51 @@
     "deletionRequested": "Exclusão da conta solicitada com sucesso",
     "requestDeletionFailed": "Falha ao solicitar exclusão"
   },
+  "changePassword": {
+    "title": "Alterar Senha",
+    "subtitle": "Digite sua senha atual e escolha uma nova",
+    "currentPassword": "Senha Atual",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Nova Senha",
+    "currentPasswordRequired": "Senha atual é obrigatória",
+    "newPasswordRequired": "Nova senha é obrigatória",
+    "confirmNewPassword": "Confirmação da nova senha é obrigatória",
+    "passwordsDoNotMatch": "As senhas não coincidem",
+    "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
+    "passwordUppercase": "A senha deve conter pelo menos uma letra maiúscula",
+    "passwordLowercase": "A senha deve conter pelo menos uma letra minúscula",
+    "passwordNumber": "A senha deve conter pelo menos um número",
+    "passwordHelper": "Deve ter pelo menos 8 caracteres com maiúscula, minúscula e número",
+    "changing": "Alterando...",
+    "changePassword": "Alterar Senha",
+    "successMessage": "Senha alterada com sucesso!",
+    "redirecting": "Redirecionando para o perfil...",
+    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual"
+  },
   "admin": {
     "dashboard": "Painel",
     "users": "Usuários",
     "orders": "Pedidos",
     "products": "Produtos",
     "contestations": "Contestações",
+    "auditLogs": "Logs de Auditoria",
     "loading": "Carregando…",
-    "totalActions": "Total de ações"
+    "totalActions": "Total de ações",
+    "pendingUserContestations": "Contestações de Usuários Pendentes",
+    "loadingContestations": "Carregando contestações...",
+    "noPendingContestations": "Nenhuma contestação pendente.",
+    "failedToLoadContestations": "Falha ao carregar contestações",
+    "failedToApproveContestation": "Falha ao aprovar contestação",
+    "failedToRejectContestation": "Falha ao rejeitar contestação",
+    "contestationId": "ID da Contestação",
+    "userId": "ID do Usuário",
+    "reason": "Motivo",
+    "requestedAt": "Solicitado em",
+    "reviewNotes": "Notas de Revisão",
+    "reviewNotesPlaceholder": "Notas de revisão",
+    "actions": "Ações",
+    "approve": "Aprovar",
+    "reject": "Rejeitar"
   },
   "forgotPassword": {
     "title": "Esqueceu a Senha",
@@ -190,7 +240,54 @@
     "fullName": "Nome completo",
     "payment": "Pagamento",
     "placeOrder": "Fazer Pedido",
-    "placingOrder": "Fazendo pedido..."
+    "placingOrder": "Fazendo pedido...",
+    "loadingCart": "Carregando seu carrinho...",
+    "shippingLabel": "Frete",
+    "totalLabel": "Total",
+    "fields": {
+      "postalCode": "CEP",
+      "address1": "Endereço",
+      "number": "Número",
+      "city": "Cidade",
+      "state": "Estado/Região",
+      "country": "País"
+    },
+    "shipping": {
+      "title": "Frete",
+      "enterPostalCode": "Informe o CEP para ver as opções disponíveis.",
+      "eta": "Prazo: {{count}} dia",
+      "eta_plural": "Prazo: {{count}} dias",
+      "noOptions": "Nenhuma opção de frete para este CEP."
+    },
+    "cep": {
+      "searching": "Buscando..."
+    },
+    "paymentStep": {
+      "instructions": "Complete o endereço e escolha o frete para gerar o pagamento seguro.",
+      "orderLabel": "Pedido",
+      "totalLabel": "Total",
+      "confirming": "Confirmando...",
+      "confirmPayment": "Confirmar pagamento",
+      "confirmError": "Não foi possível confirmar o pagamento.",
+      "notCompleted": "Pagamento não foi finalizado. Tente novamente."
+    },
+    "buttons": {
+      "continueToPayment": "Continuar para pagamento"
+    },
+    "validation": {
+      "selectShipping": "Selecione uma opção de frete",
+      "fullNameRequired": "Nome completo é obrigatório.",
+      "addressRequired": "Endereço é obrigatório.",
+      "numberRequired": "Número é obrigatório.",
+      "cityRequired": "Cidade é obrigatória.",
+      "stateRequired": "Estado/Região é obrigatório.",
+      "postalCodeRequired": "CEP é obrigatório.",
+      "countryRequired": "País é obrigatório."
+    },
+    "shippingOptions": {
+      "label": "Frete",
+      "loading": "Carregando opções de frete..."
+    }
   },
   "userMenu": {
     "profile": "Perfil",
@@ -219,7 +316,28 @@
     "pageOf": "Página {{page}} de {{total}}",
     "prev": "Anterior",
     "next": "Próximo",
-    "perPage": "{{count}}/página"
+    "perPage": "{{count}}/página",
+    "confirmDelete": "Tem certeza que deseja excluir esta avaliação?",
+    "confirmDeleteDescription": "Esta ação não pode ser desfeita. A avaliação será removida permanentemente.",
+    "reviewDeleted": "Avaliação excluída com sucesso!",
+    "deleteReview": "Excluir avaliação",
+    "deleteForbidden": "Você não tem permissão para excluir esta avaliação",
+    "deleteFailed": "Falha ao excluir avaliação. Tente novamente.",
+    "report": "Denunciar",
+    "reportReview": "Reportar avaliação",
+    "reportCategory": "Categoria",
+    "reportSpam": "Spam ou promoção",
+    "reportAbuse": "Assédio ou discurso de ódio",
+    "reportOffensive": "Conteúdo ofensivo",
+    "reportOther": "Outro",
+    "reportReason": "Descreva o problema",
+    "reportPlaceholder": "Explique por que esta avaliação deve ser revisada...",
+    "submitReport": "Enviar denúncia",
+    "reportSubmitted": "Denúncia enviada. Vamos analisar em breve.",
+    "reportFailed": "Falha ao enviar denúncia. Tente novamente.",
+    "provideReportReason": "Forneça um motivo para esta denúncia.",
+    "reportAlreadySubmitted": "Você já denunciou esta avaliação.",
+    "reportRateLimited": "Muitas denúncias. Tente novamente mais tarde."
   },
   "errors": {
     "failedToLoadProfile": "Falha ao carregar perfil",
@@ -254,7 +372,10 @@
     "currentPasswordRequired": "A senha atual é obrigatória",
     "newPasswordRequired": "A nova senha é obrigatória",
     "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
-    "passwordSymbol": "A senha deve conter pelo menos um símbolo"
+    "passwordSymbol": "A senha deve conter pelo menos um símbolo",
+    "currentPasswordIncorrect": "A senha atual está incorreta",
+    "newPasswordMustBeDifferent": "A nova senha deve ser diferente da senha atual",
+    "already_reported": "Você já denunciou esta avaliação."
   },
   "order": {
     "myOrders": "Meus Pedidos",

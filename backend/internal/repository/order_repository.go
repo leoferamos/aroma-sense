@@ -11,8 +11,10 @@ type OrderRepository interface {
 	Create(order *model.Order) error
 	FindByID(id uint) (*model.Order, error)
 	FindByUserID(userID string) ([]model.Order, error)
+	FindByPublicIDWithItems(publicID string) (*model.Order, error)
 	ListOrders(status *string, startDate *time.Time, endDate *time.Time, page int, perPage int) ([]model.Order, int64, float64, error)
 	HasUserDeliveredOrderWithProduct(userID string, productID uint) (bool, error)
+	UpdateStatusByPublicID(publicID string, status model.OrderStatus) error
 }
 
 type orderRepository struct {
@@ -43,6 +45,19 @@ func (r *orderRepository) FindByUserID(userID string) ([]model.Order, error) {
 		return nil, err
 	}
 	return orders, nil
+}
+
+// FindByPublicIDWithItems retrieves an order by public_id including items.
+func (r *orderRepository) FindByPublicIDWithItems(publicID string) (*model.Order, error) {
+	var order model.Order
+	err := r.db.Preload("Items").Where("public_id = ?", publicID).First(&order).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &order, nil
 }
 
 // ListOrders implements OrderRepository.ListOrders
@@ -126,4 +141,11 @@ func (r *orderRepository) HasUserDeliveredOrderWithProduct(userID string, produc
 		return false, err
 	}
 	return exists, nil
+}
+
+// UpdateStatusByPublicID updates the status of an order identified by its public_id.
+func (r *orderRepository) UpdateStatusByPublicID(publicID string, status model.OrderStatus) error {
+	return r.db.Model(&model.Order{}).
+		Where("public_id = ?", publicID).
+		Update("status", status).Error
 }

@@ -14,4 +14,5 @@ type UserContestation struct {
 	ReviewedAt  *time.Time `gorm:"column:reviewed_at"`
 	ReviewedBy  *uint      `gorm:"column:reviewed_by"`
 	ReviewNotes *string    `gorm:"type:text;column:review_notes"`
+	DeletedAt   *time.Time `gorm:"index" json:"-"`
 }

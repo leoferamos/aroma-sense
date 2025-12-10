@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
@@ -32,7 +32,7 @@ func NewOrderService(orderRepo repository.OrderRepository, cartRepo repository.C
 func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFromCartRequest) (*dto.OrderResponse, error) {
 	cart, err := s.cartRepo.FindByUserID(userID)
 	if err != nil || cart == nil || len(cart.Items) == 0 {
-		return nil, errors.New("cart is empty")
+		return nil, apperror.NewCodeMessage("cart_empty", "cart is empty")
 	}
 
 	var orderItems []model.OrderItem
@@ -40,10 +40,10 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 	for _, cartItem := range cart.Items {
 		product, err := s.productRepo.FindByID(cartItem.ProductID)
 		if err != nil {
-			return nil, fmt.Errorf("product not found: %d", cartItem.ProductID)
+			return nil, apperror.NewDomain(fmt.Errorf("product not found: %d", cartItem.ProductID), "product_not_found", "product not found")
 		}
 		if product.StockQuantity < cartItem.Quantity {
-			return nil, fmt.Errorf("insufficient stock for product: %s", product.Name)
+			return nil, apperror.NewDomain(fmt.Errorf("insufficient stock for product: %s", product.Name), "insufficient_stock", "insufficient stock")
 		}
 		itemSubtotal := float64(cartItem.Quantity) * product.Price
 		orderItems = append(orderItems, model.OrderItem{
@@ -74,11 +74,11 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 	if req.ShippingSelection != nil {
 		cep := validation.ExtractCEPFromString(req.ShippingAddress)
 		if cep == "" {
-			return nil, ErrInvalidPostalCode
+			return nil, apperror.NewCodeMessage("invalid_postal_code", "invalid destination postal code")
 		}
 
 		if s.shippingSvc == nil {
-			return nil, ErrProviderUnavailable
+			return nil, apperror.NewCodeMessage("provider_unavailable", "shipping provider not configured")
 		}
 
 		// Re-quote to validate selection.
@@ -95,7 +95,7 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 			}
 		}
 		if matched == nil {
-			return nil, errors.New("invalid shipping selection")
+			return nil, apperror.NewCodeMessage("invalid_shipping_selection", "invalid shipping selection")
 		}
 
 		order.ShippingCarrier = matched.Carrier
@@ -113,16 +113,9 @@ func (s *orderService) CreateOrderFromCart(userID string, req *dto.CreateOrderFr
 		return nil, err
 	}
 
-	// Deduct stock
-	for _, cartItem := range cart.Items {
-		if err := s.productRepo.DecrementStock(cartItem.ProductID, cartItem.Quantity); err != nil {
-			return nil, fmt.Errorf("failed to update stock for product %d", cartItem.ProductID)
-		}
-	}
-
 	// Clear cart
 	if err := s.cartRepo.ClearCartItems(cart.ID); err != nil {
-		return nil, errors.New("order created, but failed to clear cart")
+		return nil, apperror.NewCodeMessage("cart_clear_failed", "order created, but failed to clear cart")
 	}
 
 	// Map order items to response

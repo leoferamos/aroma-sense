@@ -9,6 +9,7 @@ export interface Review {
   id: string;
   rating: number;
   comment: string;
+  author_id: string;
   author_display: string;
   created_at: string;
 }
@@ -24,6 +25,11 @@ export interface ReviewSummary {
   average: number;
   count: number;
   distribution: Record<number, number>;
+}
+
+export interface ReportReviewRequest {
+  category?: string;
+  reason: string;
 }
 
 export async function listReviews(
@@ -59,4 +65,14 @@ export async function createReview(
     payload
   );
   return data;
+}
+
+export async function deleteReview(
+  reviewId: string
+): Promise<void> {
+  await api.delete(`/reviews/${reviewId}`);
+}
+
+export async function reportReview(reviewId: string, payload: ReportReviewRequest): Promise<void> {
+  await api.post(`/reviews/${reviewId}/report`, payload);
 }

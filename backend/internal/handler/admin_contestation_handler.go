@@ -25,7 +25,7 @@ func NewAdminContestationHandler(s service.UserContestationService) *AdminContes
 // @Param limit query int false "Limit"
 // @Param offset query int false "Offset"
 // @Success 200 {object} map[string]interface{} "List of contestations and total count"
-// @Failure 500 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse "Error code: internal_error"
 // @Router /admin/contestations [get]
 // @Security BearerAuth
 func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
@@ -33,7 +33,11 @@ func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 	contestations, total, err := h.service.ListPending(limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	var dtos []dto.UserContestationResponse
@@ -51,27 +55,34 @@ func (h *AdminContestationHandler) ListPendingContestions(c *gin.Context) {
 // @Param id path int true "Contestation ID"
 // @Param body body object false "Review notes (optional)"
 // @Success 200 {object} dto.MessageResponse "Contestation approved"
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse "Error code: invalid_request"
+// @Failure 401 {object} dto.ErrorResponse "Error code: unauthenticated"
 // @Router /admin/contestations/{id}/approve [post]
 // @Security BearerAuth
 func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid id"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 	adminPublicID, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 	var req struct {
 		Notes *string `json:"notes"`
 	}
-	_ = c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		return
+	}
 	if err := h.service.Approve(uint(id), adminPublicID.(string), req.Notes); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "contestation approved"})
@@ -85,27 +96,34 @@ func (h *AdminContestationHandler) ApproveContestation(c *gin.Context) {
 // @Param id path int true "Contestation ID"
 // @Param body body object false "Review notes (optional)"
 // @Success 200 {object} dto.MessageResponse "Contestation rejected"
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse "Error code: invalid_request"
+// @Failure 401 {object} dto.ErrorResponse "Error code: unauthenticated"
 // @Router /admin/contestations/{id}/reject [post]
 // @Security BearerAuth
 func (h *AdminContestationHandler) RejectContestation(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid id"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 	adminPublicID, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 	var req struct {
 		Notes *string `json:"notes"`
 	}
-	_ = c.ShouldBindJSON(&req)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		return
+	}
 	if err := h.service.Reject(uint(id), adminPublicID.(string), req.Notes); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "contestation rejected"})

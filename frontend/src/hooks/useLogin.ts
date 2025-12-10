@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { loginUser } from "../services/auth";
-import { messages } from "../constants/messages";
+import { useTranslation } from 'react-i18next';
 import { useAuth } from "../hooks/useAuth";
 import type { LoginRequest } from "../types/auth";
 
@@ -11,6 +11,7 @@ export function useLogin() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setAuth } = useAuth();
+  const { t } = useTranslation('common');
 
   async function login(data: LoginRequest) {
     setLoading(true);
@@ -31,14 +32,14 @@ export function useLogin() {
       if (isAxiosError(err)) {
         const errorMsg = err.response?.data?.error?.toLowerCase() || "";
         if (errorMsg.includes("invalid credentials")) {
-          setError(messages.invalidCredentials || "Invalid email or password.");
+          setError(t('auth.invalidCredentials'));
         } else {
-          setError(err.response?.data?.error || messages.genericError);
+          setError(err.response?.data?.error || t('errors.failedToLoadProfile'));
         }
       } else if (err instanceof Error) {
-        setError(err.message || messages.genericError);
+        setError(err.message || t('errors.failedToLoadProfile'));
       } else {
-        setError(messages.genericError);
+        setError(t('errors.failedToLoadProfile'));
       }
     } finally {
       setLoading(false);

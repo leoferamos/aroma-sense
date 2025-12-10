@@ -5,6 +5,7 @@
     "orders": "Pedidos",
     "products": "Produtos",
     "contestations": "Contestações",
+    "reviewReports": "Denúncias de avaliações",
     "auditLogs": "Logs de Auditoria",
     "profile": "Perfil",
     "logout": "Sair"
@@ -15,6 +16,7 @@
   "orders": "Pedidos",
   "products": "Produtos",
   "contestations": "Contestações",
+  "reviewReports": "Denúncias de avaliações",
   "loading": "Carregando…",
   "totalActions": "Total de ações",
   "addProduct": "Adicionar Produto",
@@ -116,4 +118,25 @@
   "startDate": "Data de Início",
   "endDate": "Data de Fim",
   "showingRange": "Exibindo de {{start}} a {{end}} de {{total}}"
+}
+  "reviewReportsTitle": "Denúncias de avaliações",
+  "review": "Avaliação",
+  "reporter": "Denunciante",
+  "rating": "Nota",
+  "noComment": "Sem comentário",
+  "unknownUser": "Usuário desconhecido",
+  "reviewCategory": {
+    "spam": "Spam ou promoção",
+    "abuse": "Assédio ou ódio",
+    "offensive": "Conteúdo ofensivo",
+    "other": "Outro"
+  },
+  "accepted": "Aceita",
+  "rejected": "Rejeitada",
+  "failedToLoadReviewReports": "Falha ao carregar denúncias",
+  "failedToResolveReviewReport": "Falha ao resolver denúncia",
+  "noReviewReports": "Nenhuma denúncia para este status.",
+  "deactivateUser": "Desativar usuário",
+  "suspensionUntil": "Suspensão até",
+  "alreadyResolved": "Já resolvida"
 }

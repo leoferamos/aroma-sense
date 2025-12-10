@@ -1,3 +1,52 @@
+# [1.4.0](https://github.com/leoferamos/aroma-sense/compare/v1.3.2...v1.4.0) (2025-12-10)
+
+
+### Features
+
+* **review:** add full review report flow ([#100](https://github.com/leoferamos/aroma-sense/issues/100)) ([c7e7805](https://github.com/leoferamos/aroma-sense/commit/c7e7805afe38fe4ec01770a096764a3ee09b7457))
+
+## [1.3.2](https://github.com/leoferamos/aroma-sense/compare/v1.3.1...v1.3.2) (2025-12-10)
+
+
+### Bug Fixes
+
+* **checkout:** add plural portuguese translatio and thumbnail product cache in summary ([#99](https://github.com/leoferamos/aroma-sense/issues/99)) ([0a2c70d](https://github.com/leoferamos/aroma-sense/commit/0a2c70d275a857b2313eec8c699a4c1d23c166f2))
+
+## [1.3.1](https://github.com/leoferamos/aroma-sense/compare/v1.3.0...v1.3.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* **checkout:** persist checkout and add Internalization  ([#98](https://github.com/leoferamos/aroma-sense/issues/98)) ([0037be2](https://github.com/leoferamos/aroma-sense/commit/0037be2f21b475ba269091cb188df96cc078b9f8))
+
+# [1.3.0](https://github.com/leoferamos/aroma-sense/compare/v1.2.1...v1.3.0) (2025-12-09)
+
+
+### Features
+
+* **payment:** implement stripe gateway ([#97](https://github.com/leoferamos/aroma-sense/issues/97)) ([27f8995](https://github.com/leoferamos/aroma-sense/commit/27f8995a7f1a3f0993d15e9a7166039234a614c8))
+
+## [1.2.1](https://github.com/leoferamos/aroma-sense/compare/v1.2.0...v1.2.1) (2025-12-09)
+
+
+### Bug Fixes
+
+* **order:** update full order flow ([#96](https://github.com/leoferamos/aroma-sense/issues/96)) ([67560fa](https://github.com/leoferamos/aroma-sense/commit/67560fa7dc78d0938cef599408432e9c0ca2ad68))
+
+# [1.2.0](https://github.com/leoferamos/aroma-sense/compare/v1.1.0...v1.2.0) (2025-12-08)
+
+
+### Features
+
+* **review:** add delete review flow and full error mapping ([#95](https://github.com/leoferamos/aroma-sense/issues/95)) ([a353d4b](https://github.com/leoferamos/aroma-sense/commit/a353d4b35d65d93563d5bfedcc2e255e4f4cbe32))
+
+# [1.1.0](https://github.com/leoferamos/aroma-sense/compare/v1.0.1...v1.1.0) (2025-12-08)
+
+
+### Features
+
+* **profile:** implement change password flow on profile page ([#94](https://github.com/leoferamos/aroma-sense/issues/94)) ([1ff68b7](https://github.com/leoferamos/aroma-sense/commit/1ff68b70f1a597c4805fc6306fc5e4f00091e1af))
+
 ## [1.0.1](https://github.com/leoferamos/aroma-sense/compare/v1.0.0...v1.0.1) (2025-12-07)
 
 

@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
@@ -106,21 +106,21 @@ func (s *cartService) AddItemToCart(userID string, productSlug string, quantity 
 	// Get product ID by slug
 	productID, err := s.productService.GetProductIDBySlug(context.Background(), productSlug)
 	if err != nil {
-		return nil, errors.New("product not found")
+		return nil, apperror.NewCodeMessage("product_not_found", "product not found")
 	}
 
 	// Validate product exists and get product data
 	product, err := s.productService.GetProductByID(context.Background(), productID)
 	if err != nil {
-		return nil, errors.New("product not found")
+		return nil, apperror.NewCodeMessage("product_not_found", "product not found")
 	}
 
 	// Check stock availability
 	if product.StockQuantity <= 0 {
-		return nil, errors.New("product out of stock")
+		return nil, apperror.NewCodeMessage("insufficient_stock", "product out of stock")
 	}
 	if product.StockQuantity < quantity {
-		return nil, fmt.Errorf("insufficient stock - only %d items available", product.StockQuantity)
+		return nil, apperror.NewCodeMessage("insufficient_stock", fmt.Sprintf("insufficient stock - only %d items available", product.StockQuantity))
 	}
 
 	// Get user's cart
@@ -139,10 +139,10 @@ func (s *cartService) AddItemToCart(userID string, productSlug string, quantity 
 			// Calculate new total quantity and validate stock
 			newQuantity := item.Quantity + quantity
 			if product.StockQuantity <= 0 {
-				return nil, errors.New("product out of stock")
+				return nil, apperror.NewCodeMessage("insufficient_stock", "product out of stock")
 			}
 			if product.StockQuantity < newQuantity {
-				return nil, fmt.Errorf("insufficient stock - only %d items available, you already have %d in cart", product.StockQuantity, item.Quantity)
+				return nil, apperror.NewCodeMessage("insufficient_stock", fmt.Sprintf("insufficient stock - only %d items available, you already have %d in cart", product.StockQuantity, item.Quantity))
 			}
 			break
 		}
@@ -152,7 +152,7 @@ func (s *cartService) AddItemToCart(userID string, productSlug string, quantity 
 		// Get current quantity and add the new quantity
 		currentItem, err := s.repo.FindCartItemByID(existingItemID)
 		if err != nil {
-			return nil, errors.New("failed to find existing cart item")
+			return nil, apperror.NewDomain(err, "cart_item_not_found", "cart item not found")
 		}
 		newQuantity := currentItem.Quantity + quantity
 		return s.UpdateItemQuantity(userID, existingItemID, newQuantity)
@@ -167,7 +167,7 @@ func (s *cartService) AddItemToCart(userID string, productSlug string, quantity 
 
 		// Save to database
 		if err := s.repo.CreateCartItem(&newItem); err != nil {
-			return nil, errors.New("failed to add item to cart")
+			return nil, apperror.NewDomain(err, "cart_update_failed", "failed to add item to cart")
 		}
 	}
 
@@ -180,7 +180,7 @@ func (s *cartService) UpdateItemQuantity(userID string, itemID uint, quantity in
 	// Get the cart item
 	cartItem, err := s.repo.FindCartItemByID(itemID)
 	if err != nil {
-		return nil, errors.New("cart item not found")
+		return nil, apperror.NewCodeMessage("cart_item_not_found", "cart item not found")
 	}
 
 	// Verify the item belongs to the user's cart
@@ -199,32 +199,32 @@ func (s *cartService) UpdateItemQuantity(userID string, itemID uint, quantity in
 	}
 
 	if !itemBelongsToUser {
-		return nil, errors.New("cart item not found in user's cart")
+		return nil, apperror.NewCodeMessage("cart_item_not_found", "cart item not found in user's cart")
 	}
 
 	// If quantity is 0, remove the item
 	if quantity == 0 {
 		if err := s.repo.DeleteCartItem(itemID); err != nil {
-			return nil, errors.New("failed to remove cart item")
+			return nil, apperror.NewDomain(err, "cart_update_failed", "failed to remove cart item")
 		}
 	} else {
 		// Validate stock availability for the new quantity
 		product, err := s.productService.GetProductByID(context.Background(), cartItem.ProductID)
 		if err != nil {
-			return nil, errors.New("product not found")
+			return nil, apperror.NewCodeMessage("product_not_found", "product not found")
 		}
 
 		if product.StockQuantity <= 0 {
-			return nil, errors.New("product out of stock")
+			return nil, apperror.NewCodeMessage("insufficient_stock", "product out of stock")
 		}
 		if product.StockQuantity < quantity {
-			return nil, fmt.Errorf("insufficient stock - only %d items available", product.StockQuantity)
+			return nil, apperror.NewCodeMessage("insufficient_stock", fmt.Sprintf("insufficient stock - only %d items available", product.StockQuantity))
 		}
 
 		// Update the quantity
 		cartItem.Quantity = quantity
 		if err := s.repo.UpdateCartItem(cartItem); err != nil {
-			return nil, errors.New("failed to update cart item quantity")
+			return nil, apperror.NewDomain(err, "cart_update_failed", "failed to update cart item quantity")
 		}
 	}
 
@@ -246,7 +246,7 @@ func (s *cartService) ClearCart(userID string) (*dto.CartResponse, error) {
 	}
 
 	if err := s.repo.ClearCartItems(cart.ID); err != nil {
-		return nil, errors.New("failed to clear cart")
+		return nil, apperror.NewCodeMessage("cart_clear_failed", "failed to clear cart")
 	}
 
 	// Return empty cart response
@@ -258,7 +258,7 @@ func (s *cartService) UpdateItemQuantityBySlug(userID string, productSlug string
 	// Get product ID by slug
 	productID, err := s.productService.GetProductIDBySlug(context.Background(), productSlug)
 	if err != nil {
-		return nil, errors.New("product not found")
+		return nil, apperror.NewCodeMessage("product_not_found", "product not found")
 	}
 
 	// Get user's cart
@@ -279,7 +279,7 @@ func (s *cartService) UpdateItemQuantityBySlug(userID string, productSlug string
 	}
 
 	if !found {
-		return nil, errors.New("cart item not found in user's cart")
+		return nil, apperror.NewCodeMessage("cart_item_not_found", "cart item not found in user's cart")
 	}
 
 	// Use existing UpdateItemQuantity method
@@ -291,7 +291,7 @@ func (s *cartService) RemoveItemBySlug(userID string, productSlug string) (*dto.
 	// Get product ID by slug
 	productID, err := s.productService.GetProductIDBySlug(context.Background(), productSlug)
 	if err != nil {
-		return nil, errors.New("product not found")
+		return nil, apperror.NewCodeMessage("product_not_found", "product not found")
 	}
 
 	// Get user's cart
@@ -312,7 +312,7 @@ func (s *cartService) RemoveItemBySlug(userID string, productSlug string) (*dto.
 	}
 
 	if !found {
-		return nil, errors.New("cart item not found in user's cart")
+		return nil, apperror.NewCodeMessage("cart_item_not_found", "cart item not found in user's cart")
 	}
 
 	// Use existing RemoveItem method

@@ -24,29 +24,29 @@ func NewShippingHandler(shippingService service.ShippingService) *ShippingHandle
 // @Produce      json
 // @Param        postal_code query string true "Destination postal code (CEP)"
 // @Success      200   {array} dto.ShippingOption
-// @Failure      400   {object} dto.ErrorResponse
-// @Failure      401   {object} dto.ErrorResponse
-// @Failure      500   {object} dto.ErrorResponse
+// @Failure      400   {object} dto.ErrorResponse "Error code: invalid_request"
+// @Failure      401   {object} dto.ErrorResponse "Error code: unauthenticated"
+// @Failure      500   {object} dto.ErrorResponse "Error code: internal_error"
 // @Router       /shipping/options [get]
 // @Security     BearerAuth
 func (h *ShippingHandler) GetShippingOptions(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 	postalCode := c.Query("postal_code")
 	if postalCode == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "postal_code required"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 	options, err := h.shippingService.CalculateOptions(c.Request.Context(), userID, postalCode)
 	if err != nil {
-		if status, msg, ok := mapServiceError(err); ok {
-			c.JSON(status, dto.ErrorResponse{Error: msg})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to quote shipping"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 	c.JSON(http.StatusOK, options)

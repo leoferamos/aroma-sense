@@ -190,7 +190,54 @@
     "fullName": "Full name",
     "payment": "Payment",
     "placeOrder": "Place Order",
-    "placingOrder": "Placing order..."
+    "placingOrder": "Placing order...",
+    "loadingCart": "Loading your cart...",
+    "shippingLabel": "Shipping",
+    "totalLabel": "Total",
+    "fields": {
+      "postalCode": "Postal code",
+      "address1": "Address line 1",
+      "number": "Number",
+      "city": "City",
+      "state": "State/Region",
+      "country": "Country"
+    },
+    "shipping": {
+      "title": "Shipping",
+      "enterPostalCode": "Enter your postal code to see available options.",
+      "eta": "ETA: {{count}} day",
+      "eta_plural": "ETA: {{count}} days",
+      "noOptions": "No shipping options for this postal code."
+    },
+    "cep": {
+      "searching": "Searching..."
+    },
+    "paymentStep": {
+      "instructions": "Complete the address and choose shipping to generate a secure payment.",
+      "orderLabel": "Order",
+      "totalLabel": "Total",
+      "confirming": "Confirming...",
+      "confirmPayment": "Confirm payment",
+      "confirmError": "Could not confirm the payment.",
+      "notCompleted": "Payment was not completed. Please try again."
+    },
+    "buttons": {
+      "continueToPayment": "Continue to payment"
+    },
+    "validation": {
+      "selectShipping": "Select a shipping option",
+      "fullNameRequired": "Full name is required.",
+      "addressRequired": "Address is required.",
+      "numberRequired": "Number is required.",
+      "cityRequired": "City is required.",
+      "stateRequired": "State/Region is required.",
+      "postalCodeRequired": "Postal code is required.",
+      "countryRequired": "Country is required."
+    },
+    "shippingOptions": {
+      "label": "Shipping",
+      "loading": "Loading shipping options..."
+    }
   },
   "userMenu": {
     "profile": "Profile",
@@ -219,7 +266,28 @@
     "pageOf": "Page {{page}} of {{total}}",
     "prev": "Prev",
     "next": "Next",
-    "perPage": "{{count}}/page"
+    "perPage": "{{count}}/page",
+    "confirmDelete": "Are you sure you want to delete this review?",
+    "confirmDeleteDescription": "This action cannot be undone. The review will be permanently removed.",
+    "reviewDeleted": "Review deleted successfully!",
+    "deleteReview": "Delete review",
+    "deleteForbidden": "You don't have permission to delete this review",
+    "deleteFailed": "Failed to delete review. Please try again.",
+    "report": "Report",
+    "reportReview": "Report review",
+    "reportCategory": "Category",
+    "reportSpam": "Spam or promotion",
+    "reportAbuse": "Harassment or hate",
+    "reportOffensive": "Offensive content",
+    "reportOther": "Other",
+    "reportReason": "Describe the issue",
+    "reportPlaceholder": "Explain why this review should be reviewed...",
+    "submitReport": "Submit report",
+    "reportSubmitted": "Report submitted. We will review it shortly.",
+    "reportFailed": "Failed to submit report. Please try again.",
+    "provideReportReason": "Please provide a reason for this report.",
+    "reportAlreadySubmitted": "You have already reported this review.",
+    "reportRateLimited": "Too many reports. Please try again later."
   },
   "errors": {
     "failedToLoadProfile": "Failed to load profile",
@@ -254,7 +322,8 @@
     "currentPasswordRequired": "Current password is required",
     "newPasswordRequired": "New password is required",
     "passwordMinLength": "Password must be at least 8 characters",
-    "passwordSymbol": "Password must contain at least one symbol"
+    "passwordSymbol": "Password must contain at least one symbol",
+    "already_reported": "You have already reported this review."
   },
   "order": {
     "myOrders": "My Orders",

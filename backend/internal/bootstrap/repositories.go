@@ -11,8 +11,10 @@ type repositories struct {
 	product          repository.ProductRepository
 	cart             repository.CartRepository
 	order            repository.OrderRepository
+	payment          repository.PaymentRepository
 	resetToken       repository.ResetTokenRepository
 	review           repository.ReviewRepository
+	reviewReport     repository.ReviewReportRepository
 	auditLog         repository.AuditLogRepository
 	userContestation repository.UserContestationRepository
 }
@@ -24,8 +26,10 @@ func initializeRepositories(db *gorm.DB) *repositories {
 		product:          repository.NewProductRepository(db),
 		cart:             repository.NewCartRepository(db),
 		order:            repository.NewOrderRepository(db),
+		payment:          repository.NewPaymentRepository(db),
 		resetToken:       repository.NewResetTokenRepository(db),
 		review:           repository.NewReviewRepository(db),
+		reviewReport:     repository.NewReviewReportRepository(db),
 		auditLog:         repository.NewAuditLogRepository(db),
 		userContestation: repository.NewUserContestationRepository(db),
 	}

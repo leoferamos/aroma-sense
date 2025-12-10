@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { messages } from '../constants/messages';
+import { useTranslation } from 'react-i18next';
 
 export interface LoginFormData {
   email: string;
@@ -18,16 +18,17 @@ export const useLoginValidation = () => {
     password: '',
     general: ''
   });
+  const { t } = useTranslation('common');
 
   const validateEmail = (email: string): boolean => {
     if (!email.trim()) {
-      setErrors(prev => ({ ...prev, email: messages.emailRequired }));
+      setErrors(prev => ({ ...prev, email: t('auth.emailRequired') }));
       return false;
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setErrors(prev => ({ ...prev, email: messages.emailInvalid }));
+      setErrors(prev => ({ ...prev, email: t('auth.emailInvalid') }));
       return false;
     }
     
@@ -37,7 +38,7 @@ export const useLoginValidation = () => {
 
   const validatePassword = (password: string): boolean => {
     if (!password) {
-      setErrors(prev => ({ ...prev, password: messages.passwordRequired }));
+      setErrors(prev => ({ ...prev, password: t('auth.passwordRequired') }));
       return false;
     }
     

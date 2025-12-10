@@ -29,21 +29,21 @@ func NewAIHandler(svc *service.AIService, limiter rate.RateLimiter) *AIHandler {
 // @Produce      json
 // @Param        request  body  dto.RecommendRequest  true  "Recommendation request with user message and limit"
 // @Success      200  {object}  dto.RecommendResponse  "Product recommendations with reasoning"
-// @Failure      400  {object}  dto.ErrorResponse     "Invalid request or non-perfume related query"
-// @Failure      429  {object}  dto.ErrorResponse     "Rate limit exceeded"
-// @Failure      500  {object}  dto.ErrorResponse     "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse     "Error code: invalid_request or topic_restricted"
+// @Failure      429  {object}  dto.ErrorResponse     "Error code: rate_limited"
+// @Failure      500  {object}  dto.ErrorResponse     "Error code: internal_error"
 // @Router       /ai/recommend [post]
 func (h *AIHandler) Recommend(c *gin.Context) {
 	var req dto.RecommendRequest
 	if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.Message) == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "mensagem inválida"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
-	// Basic topic guard: we keep it perfume-related to avoid abuse.
+	// Basic topic guard: keep conversation perfume-related.
 	lower := strings.ToLower(req.Message)
 	if !containsAny(lower, []string{"perfume", "fragr", "cheiro", "aroma", "odor", "eau"}) {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Vamos falar de perfumes e fragrâncias. Conte suas preferências :)"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "topic_restricted"})
 		return
 	}
 
@@ -55,13 +55,17 @@ func (h *AIHandler) Recommend(c *gin.Context) {
 			retry = 5
 		}
 		c.Header("Retry-After", "5")
-		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{Error: "muitas requisições, tente novamente em alguns segundos"})
+		c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{Error: "rate_limited"})
 		return
 	}
 
 	suggestions, reason, err := h.svc.Recommend(c.Request.Context(), req.Message, req.Limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "não foi possível gerar recomendações"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 

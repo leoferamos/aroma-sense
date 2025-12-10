@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { messages } from '../constants/messages';
+import { useTranslation } from 'react-i18next';
 import { usePasswordValidation } from './usePasswordValidation';
 
 export interface RegisterForm {
@@ -28,6 +28,7 @@ export function useRegisterValidation(form: RegisterForm, touched: RegisterTouch
     repeatPassword: '',
     general: '',
   });
+  const { t } = useTranslation('common');
   
   const { validatePassword, validatePasswordConfirmation } = usePasswordValidation();
 
@@ -37,9 +38,9 @@ export function useRegisterValidation(form: RegisterForm, touched: RegisterTouch
     // Email validation
     if (touched.email) {
       if (!form.email) {
-        newErrors.email = messages.emailRequired;
+        newErrors.email = t('auth.emailRequired');
       } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
-        newErrors.email = messages.emailInvalid;
+        newErrors.email = t('auth.emailInvalid');
       }
     }
     
@@ -54,7 +55,7 @@ export function useRegisterValidation(form: RegisterForm, touched: RegisterTouch
     );
     
     setErrors(newErrors);
-  }, [form, touched, validatePassword, validatePasswordConfirmation]);
+  }, [form, touched, validatePassword, validatePasswordConfirmation, t]);
 
   return errors;
 }

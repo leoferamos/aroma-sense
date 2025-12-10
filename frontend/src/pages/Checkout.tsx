@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import Navbar from '../components/Navbar';
 import BackButton from '../components/BackButton';
 import InputField from '../components/InputField';
@@ -9,55 +11,88 @@ import { useCart } from '../hooks/useCart';
 import { formatCurrency } from '../utils/format';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorState from '../components/ErrorState';
-import { useCheckoutValidation, type AddressForm, type PaymentForm } from '../hooks/useCheckoutValidation';
+import { useCheckoutValidation, type AddressForm } from '../hooks/useCheckoutValidation';
 import useShippingOptions from '../hooks/useShippingOptions';
 import useCepLookup from '../hooks/useCepLookup';
 import type { CartItem as CartItemType } from '../types/cart';
 import { useTranslation } from 'react-i18next';
 import type { ShippingOption } from '../types/shipping';
 import { createOrder, type OrderCreateRequest } from '../services/order';
+import { createPaymentIntent } from '../services/payment';
+import type { OrderResponse } from '../types/order';
+
+const CHECKOUT_STORAGE_KEY = 'checkout_session';
+type PersistedCheckout = {
+  clientSecret: string;
+  order: OrderResponse;
+  address: AddressForm;
+  selectedShipping: ShippingOption | null;
+  cartItems: CartItemType[];
+};
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? '');
 
 const Checkout: React.FC = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'errors']);
   const navigate = useNavigate();
-  const { cart, loading, removeItem, error, isRemovingItem } = useCart();
+  const { cart, loading, removeItem, error, isRemovingItem, refresh: refreshCart } = useCart();
 
   const [address, setAddress] = useState<AddressForm>({
     fullName: '',
     address1: '',
-    address2: '',
+    number: '',
     city: '',
     state: '',
     postalCode: '',
     country: 'Brazil',
   });
 
-  const [payment, setPayment] = useState<PaymentForm>({
-    cardName: '',
-    cardNumber: '',
-    expiry: '',
-    cvc: '',
-  });
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [orderResponse, setOrderResponse] = useState<OrderResponse | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [fallbackCartItems, setFallbackCartItems] = useState<CartItemType[] | null>(null);
 
   const { errors, validateAll, setErrors } = useCheckoutValidation();
   const [submitting, setSubmitting] = useState(false);
   const cartIsEmpty = useMemo(() => !cart || cart.items.length === 0, [cart]);
+  const hasPersistedOrder = !!orderResponse;
   const { options: shippingOptions, loading: shippingLoading, error: shippingError } = useShippingOptions(address.postalCode);
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const { lookupCep, loading: cepLoading, error: cepError } = useCepLookup();
 
+  useEffect(() => {
+    const raw = sessionStorage.getItem(CHECKOUT_STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw) as PersistedCheckout;
+      if (data?.clientSecret && data?.order) {
+        setClientSecret(data.clientSecret);
+        setOrderResponse(data.order);
+        setAddress(data.address ?? address);
+        setSelectedShipping(data.selectedShipping ?? null);
+        setFallbackCartItems(data.cartItems ?? null);
+      }
+    } catch {
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    if (clientSecret) return;
     if (cartIsEmpty) return;
-    if (!validateAll(address, payment)) return;
+    if (!validateAll(address)) return;
     if (!selectedShipping) {
-      setErrors((prev) => ({ ...prev, postalCode: prev.postalCode || 'Select a shipping option' }));
+      setErrors((prev) => ({ ...prev, postalCode: prev.postalCode || t('checkout.validation.selectShipping') }));
       return;
     }
+    sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
+    setPaymentError(null);
     setSubmitting(true);
     try {
-      const shipping_address = `${address.address1}${address.address2 ? ', ' + address.address2 : ''}, ${address.city} - ${address.state}, ${address.postalCode}`;
+      const shipping_address = `${address.address1}, ${address.number}, ${address.city} - ${address.state}, ${address.postalCode}`;
       const payload: OrderCreateRequest = {
         payment_method: 'pix',
         shipping_address,
@@ -70,17 +105,28 @@ const Checkout: React.FC = () => {
         },
       };
       const order = await createOrder(payload);
-      navigate('/order-confirmation', {
-        replace: true,
-        state: {
-          orderTotal: order.total_amount,
-          itemsCount: order.item_count,
-          customerName: address.fullName,
-        },
+      setOrderResponse(order);
+      const intent = await createPaymentIntent({
+        order_public_id: order.public_id,
+        shipping_address,
+        shipping_selection: payload.shipping_selection,
+        customer_email: undefined,
       });
+      setClientSecret(intent.client_secret);
+      const snapshot: PersistedCheckout = {
+        clientSecret: intent.client_secret,
+        order,
+        address,
+        selectedShipping,
+        cartItems: cart?.items ?? [],
+      };
+      sessionStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(snapshot));
     } catch (err) {
       console.error('Failed to create order', err);
       setErrors((prev) => ({ ...prev, address1: t('errors.failedToCreateOrder') }));
+      setClientSecret(null);
+      setOrderResponse(null);
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
     } finally {
       setSubmitting(false);
     }
@@ -96,8 +142,8 @@ const Checkout: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('cart.checkout')}</h1>
 
         {loading ? (
-          <LoadingSpinner message="Loading your cart..." />
-        ) : cartIsEmpty ? (
+          <LoadingSpinner message={t('checkout.loadingCart')} />
+        ) : (cartIsEmpty && !hasPersistedOrder) ? (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100">
             <p className="text-gray-700 mb-4">{t('checkout.cartEmpty')}</p>
             <Link to="/products" className="text-blue-600 hover:underline font-medium">{t('checkout.continueShopping')}</Link>
@@ -123,7 +169,7 @@ const Checkout: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <InputField
-                        label="Postal code"
+                        label={t('checkout.fields.postalCode')}
                         name="postalCode"
                         value={address.postalCode}
                         onChange={(e) => {
@@ -160,13 +206,13 @@ const Checkout: React.FC = () => {
                         }}
                         autoComplete="postal-code"
                       />
-                      {cepLoading && <span className="text-sm text-gray-500">Buscando...</span>}
+                      {cepLoading && <span className="text-sm text-gray-500">{t('checkout.cep.searching')}</span>}
                     </div>
                     <FormError message={cepError || errors.postalCode} />
                   </div>
                   <div className="sm:col-span-2">
                     <InputField
-                      label="Address line 1"
+                      label={t('checkout.fields.address1')}
                       name="address1"
                       value={address.address1}
                       onChange={(e) => setAddress({ ...address, address1: e.target.value })}
@@ -174,18 +220,19 @@ const Checkout: React.FC = () => {
                     />
                     <FormError message={errors.address1} />
                   </div>
-                  <div className="sm:col-span-2">
+                  <div>
                     <InputField
-                      label="Address line 2 (optional)"
-                      name="address2"
-                      value={address.address2 || ''}
-                      onChange={(e) => setAddress({ ...address, address2: e.target.value })}
+                      label={t('checkout.fields.number')}
+                      name="number"
+                      value={address.number}
+                      onChange={(e) => setAddress({ ...address, number: e.target.value })}
                       autoComplete="address-line2"
                     />
+                    <FormError message={errors.number} />
                   </div>
                   <div>
                     <InputField
-                      label="City"
+                      label={t('checkout.fields.city')}
                       name="city"
                       value={address.city}
                       onChange={(e) => setAddress({ ...address, city: e.target.value })}
@@ -195,7 +242,7 @@ const Checkout: React.FC = () => {
                   </div>
                   <div>
                     <InputField
-                      label="State/Region"
+                      label={t('checkout.fields.state')}
                       name="state"
                       value={address.state}
                       onChange={(e) => setAddress({ ...address, state: e.target.value })}
@@ -205,7 +252,7 @@ const Checkout: React.FC = () => {
                   </div>
                   <div>
                     <InputField
-                      label="Country"
+                      label={t('checkout.fields.country')}
                       name="country"
                       value={address.country}
                       onChange={(e) => setAddress({ ...address, country: e.target.value })}
@@ -218,10 +265,10 @@ const Checkout: React.FC = () => {
 
               {/* Shipping options */}
               <section className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Shipping</h2>
-                <p className="text-sm text-gray-600 mb-4">Enter your postal code to see available options.</p>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('checkout.shipping.title')}</h2>
+                <p className="text-sm text-gray-600 mb-4">{t('checkout.shipping.enterPostalCode')}</p>
                 {shippingError && <ErrorState message={shippingError} />}
-                {shippingLoading && <LoadingSpinner message="Loading shipping options..." />}
+                {shippingLoading && <LoadingSpinner message={t('checkout.shippingOptions.loading')} />}
                 {!shippingLoading && shippingOptions.length > 0 && (
                   <div className="space-y-2">
                     {shippingOptions.map((opt, idx) => (
@@ -236,7 +283,7 @@ const Checkout: React.FC = () => {
                           />
                           <div>
                             <div className="font-medium text-gray-900">{opt.carrier} — {opt.service_code}</div>
-                            <div className="text-sm text-gray-600">ETA: {opt.estimated_days} day{opt.estimated_days === 1 ? '' : 's'}</div>
+                            <div className="text-sm text-gray-600">{t('checkout.shipping.eta', { count: Number(opt.estimated_days) })}</div>
                           </div>
                         </div>
                         <div className="font-semibold">{formatCurrency(opt.price)}</div>
@@ -245,84 +292,53 @@ const Checkout: React.FC = () => {
                   </div>
                 )}
                 {!shippingLoading && shippingOptions.length === 0 && address.postalCode && address.postalCode.replace(/\D/g, '').length >= 8 && (
-                  <p className="text-sm text-gray-600">No shipping options for this postal code.</p>
+                  <p className="text-sm text-gray-600">{t('checkout.shipping.noOptions')}</p>
                 )}
               </section>
 
               {/* Payment */}
               <section className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('checkout.payment')}</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <InputField
-                      label="Name on card"
-                      name="cardName"
-                      value={payment.cardName}
-                      onChange={(e) => setPayment({ ...payment, cardName: e.target.value })}
-                      autoComplete="cc-name"
-                    />
-                    <FormError message={errors.cardName} />
+                {!clientSecret ? (
+                  <p className="text-sm text-gray-700">{t('checkout.paymentStep.instructions')}</p>
+                ) : (
+                  <div className="space-y-4">
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                      <PaymentStep
+                        order={orderResponse}
+                        customerName={address.fullName}
+                        onSuccess={async () => {
+                          await refreshCart();
+                          navigate('/order-confirmation', {
+                            replace: true,
+                            state: {
+                              orderTotal: orderResponse?.total_amount ?? 0,
+                              itemsCount: orderResponse?.item_count ?? 0,
+                              customerName: address.fullName,
+                            },
+                          });
+                        }}
+                        onError={(message: string) => setPaymentError(message)}
+                      />
+                    </Elements>
+                    {paymentError && <FormError message={paymentError} />}
                   </div>
-                  <div className="sm:col-span-2">
-                    <InputField
-                      label="Card number"
-                      name="cardNumber"
-                      value={payment.cardNumber}
-                      onChange={(e) => {
-                        const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 19);
-                        const formatted = digitsOnly.replace(/(\d{4})(?=\d)/g, '$1 ');
-                        setPayment({ ...payment, cardNumber: formatted });
-                      }}
-                      placeholder="1234 5678 9012 3456"
-                      autoComplete="cc-number"
-                    />
-                    <FormError message={errors.cardNumber} />
-                  </div>
-                  <div>
-                    <InputField
-                      label="Expiry (MM/YY)"
-                      name="expiry"
-                      value={payment.expiry}
-                      onChange={(e) => {
-                        let value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                        if (value.length >= 2) {
-                          value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                        }
-                        setPayment({ ...payment, expiry: value });
-                      }}
-                      placeholder="MM/YY"
-                      autoComplete="cc-exp"
-                    />
-                    <FormError message={errors.expiry} />
-                  </div>
-                  <div>
-                    <InputField
-                      label="CVC"
-                      name="cvc"
-                      value={payment.cvc}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                        setPayment({ ...payment, cvc: value });
-                      }}
-                      placeholder="123"
-                      autoComplete="cc-csc"
-                    />
-                    <FormError message={errors.cvc} />
-                  </div>
-                </div>
+                )}
               </section>
 
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={submitting || cartIsEmpty || !selectedShipping}
-                  aria-disabled={submitting || cartIsEmpty || !selectedShipping}
-                  aria-busy={submitting}
-                  className={`inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {submitting ? t('checkout.placingOrder') : t('checkout.placeOrder')}
-                </button>
-              </div>
+              {!clientSecret && (
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={submitting || cartIsEmpty || !selectedShipping}
+                    aria-disabled={submitting || cartIsEmpty || !selectedShipping}
+                    aria-busy={submitting}
+                    className={`inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {submitting ? t('checkout.placingOrder') : t('checkout.buttons.continueToPayment')}
+                  </button>
+                </div>
+              )}
             </form>
 
             {/* Right: Cart Summary */}
@@ -335,34 +351,128 @@ const Checkout: React.FC = () => {
                   <ErrorState message={error} />
                 )}
 
-                <ul className="divide-y divide-gray-200 mb-4">
-                  {cart!.items.map((item: CartItemType) => (
-                    <CartItem
-                      key={item.product?.slug || ''}
-                      item={item}
-                      onRemove={removeItem}
-                      isRemoving={isRemovingItem(item.product?.slug || '')}
-                      showQuantityControls={true}
-                    />
-                  ))}
-                </ul>
+                {cart?.items?.length ? (
+                  <ul className="divide-y divide-gray-200 mb-4">
+                    {cart.items.map((item: CartItemType) => (
+                      <CartItem
+                        key={item.product?.slug || ''}
+                        item={item}
+                        onRemove={removeItem}
+                        isRemoving={isRemovingItem(item.product?.slug || '')}
+                        showQuantityControls={true}
+                      />
+                    ))}
+                  </ul>
+                ) : orderResponse?.items?.length ? (
+                  <ul className="divide-y divide-gray-200 mb-4">
+                    {orderResponse.items.map((item) => (
+                      <li key={`${item.product_slug}-${item.product_name ?? ''}`} className="py-3 flex items-start justify-between gap-3">
+                        { (item.product_image_url || fallbackCartItems?.find((ci) => ci.product?.slug === item.product_slug)?.product?.image_url) && (
+                          <img
+                            src={item.product_image_url || fallbackCartItems?.find((ci) => ci.product?.slug === item.product_slug)?.product?.image_url || ''}
+                            alt={item.product_name ?? item.product_slug}
+                            className="h-14 w-14 object-cover rounded border border-gray-200"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{item.product_name ?? item.product_slug}</div>
+                          <div className="text-sm text-gray-600">{t('cart.quantity')}: {item.quantity}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-gray-900">{formatCurrency(item.subtotal)}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
                 <div className="flex justify-between text-gray-700">
                   <span>{t('cart.subtotal')}</span>
-                  <span className="font-semibold">{formatCurrency(cart!.total)}</span>
+                  <span className="font-semibold">{formatCurrency(cart?.total ?? Math.max((orderResponse?.total_amount ?? 0) - (selectedShipping?.price ?? 0), 0))}</span>
                 </div>
                 <div className="flex justify-between text-gray-700 mt-2">
-                  <span>Shipping</span>
+                  <span>{t('checkout.shippingLabel')}</span>
                   <span className="font-semibold">{selectedShipping ? formatCurrency(selectedShipping.price) : '-'}</span>
                 </div>
                 <div className="flex justify-between text-gray-900 mt-2 border-t pt-2">
                   <span>{t('cart.total')}</span>
-                  <span className="font-bold">{formatCurrency(cart!.total + (selectedShipping?.price ?? 0))}</span>
+                  <span className="font-bold">{formatCurrency(cart?.total ? cart.total + (selectedShipping?.price ?? 0) : (orderResponse?.total_amount ?? 0))}</span>
                 </div>
               </div>
             </aside>
           </div>
         )}
       </main>
+    </div>
+  );
+};
+
+type PaymentStepProps = {
+  order: OrderResponse | null;
+  customerName: string;
+  onSuccess: () => Promise<void> | void;
+  onError: (message: string) => void;
+};
+
+const PaymentStep: React.FC<PaymentStepProps> = ({ order, customerName, onSuccess, onError }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const { t } = useTranslation('common');
+  const [confirming, setConfirming] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!stripe || !elements) return;
+    setConfirming(true);
+    onError('');
+
+    const result = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: window.location.origin,
+        payment_method_data: {
+          billing_details: {
+            name: customerName,
+          },
+        },
+      },
+      redirect: 'if_required',
+    });
+
+    if (result.error) {
+      onError(result.error.message ?? t('checkout.paymentStep.confirmError'));
+      setConfirming(false);
+      return;
+    }
+
+    const status = result.paymentIntent?.status;
+    if (status === 'succeeded' || status === 'processing' || status === 'requires_capture') {
+      sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
+      await onSuccess();
+    } else {
+      onError(t('checkout.paymentStep.notCompleted'));
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <PaymentElement options={{ layout: 'tabs' }} />
+      <div className="flex justify-between text-sm text-gray-700">
+        <span>{t('checkout.paymentStep.orderLabel')}: {order?.public_id ?? '—'}</span>
+        <span>{t('checkout.paymentStep.totalLabel')}: {order ? formatCurrency(order.total_amount) : '—'}</span>
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          disabled={!stripe || confirming}
+          aria-disabled={!stripe || confirming}
+          aria-busy={confirming}
+          onClick={() => { void handleConfirm(); }}
+          className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-white font-semibold shadow-sm hover:bg-green-700 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {confirming ? t('checkout.paymentStep.confirming') : t('checkout.paymentStep.confirmPayment')}
+        </button>
+      </div>
     </div>
   );
 };

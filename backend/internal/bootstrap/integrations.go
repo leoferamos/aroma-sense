@@ -9,6 +9,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/config"
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/embeddings"
 	"github.com/leoferamos/aroma-sense/internal/integrations/ai/llm"
+	gatewaypayment "github.com/leoferamos/aroma-sense/internal/integrations/payment/stripe"
 	shippingprovider "github.com/leoferamos/aroma-sense/internal/integrations/shipping"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
@@ -18,6 +19,7 @@ type integrations struct {
 	email    email.EmailService
 	shipping *shippingIntegration
 	ai       *aiIntegration
+	payment  *paymentIntegration
 }
 
 // emailAsyncWrapper is used to gracefully shutdown async email service
@@ -36,12 +38,17 @@ type aiIntegration struct {
 	embProvider embeddings.Provider
 }
 
+type paymentIntegration struct {
+	provider service.PaymentProvider
+}
+
 // initializeIntegrations creates all external integration instances
 func initializeIntegrations() *integrations {
 	return &integrations{
 		email:    initializeEmailIntegration(),
 		shipping: initializeShippingIntegration(),
 		ai:       initializeAIIntegration(),
+		payment:  initializePaymentIntegration(),
 	}
 }
 
@@ -104,7 +111,6 @@ func initializeShippingIntegration() *shippingIntegration {
 	return &shippingIntegration{
 		provider:  provider,
 		originCEP: cfg.OriginCEP,
-		// service will be initialized later with repositories
 	}
 }
 
@@ -147,4 +153,15 @@ func initializeAIIntegration() *aiIntegration {
 		llmProvider: llmProvider,
 		embProvider: embProvider,
 	}
+}
+
+// initializePaymentIntegration configures Stripe provider if env is present.
+func initializePaymentIntegration() *paymentIntegration {
+	cfg, err := gatewaypayment.LoadConfigFromEnv()
+	if err != nil {
+		log.Printf("Stripe payment configuration not available: %v", err)
+		return nil
+	}
+	provider := gatewaypayment.NewProvider(cfg)
+	return &paymentIntegration{provider: provider}
 }

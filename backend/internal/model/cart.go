@@ -9,6 +9,7 @@ type Cart struct {
 	Items     []CartItem `gorm:"foreignKey:CartID" json:"items"`
 	CreatedAt time.Time  `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time  `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt *time.Time `gorm:"index" json:"-"`
 }
 
 // CartItem represents an item in a shopping cart.
@@ -21,4 +22,5 @@ type CartItem struct {
 	Price     float64   `gorm:"type:decimal(10,2);not null" json:"price"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt *time.Time `gorm:"index" json:"-"`
 }

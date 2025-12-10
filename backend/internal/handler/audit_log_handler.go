@@ -38,8 +38,9 @@ func NewAuditLogHandler(auditLogService service.AuditLogService) *AuditLogHandle
 // @Param        limit        query     int     false  "Limit"
 // @Param        offset       query     int     false  "Offset"
 // @Success      200  {object}  dto.AuditLogListResponse
-// @Failure      400  {object}  dto.ErrorResponse
-// @Failure      500  {object}  dto.ErrorResponse
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse "Error code: unauthenticated"
+// @Failure      500  {object}  dto.ErrorResponse "Error code: internal_error"
 // @Router       /admin/audit-logs [get]
 // @Security     BearerAuth
 func (h *AuditLogHandler) ListAuditLogs(c *gin.Context) {
@@ -126,7 +127,7 @@ func (h *AuditLogHandler) ListAuditLogs(c *gin.Context) {
 	// Get audit logs
 	auditLogs, total, err := h.auditLogService.ListAuditLogs(modelFilter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to retrieve audit logs"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -149,21 +150,21 @@ func (h *AuditLogHandler) ListAuditLogs(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      int  true  "Audit Log ID"
 // @Success      200  {object}  dto.AuditLogResponse
-// @Failure      400  {object}  dto.ErrorResponse
-// @Failure      404  {object}  dto.ErrorResponse
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      404  {object}  dto.ErrorResponse "Error code: not_found"
 // @Router       /admin/audit-logs/{id} [get]
 // @Security     BearerAuth
 func (h *AuditLogHandler) GetAuditLog(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid audit log ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	auditLog, err := h.auditLogService.GetAuditLogByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Audit log not found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "not_found"})
 		return
 	}
 
@@ -179,21 +180,21 @@ func (h *AuditLogHandler) GetAuditLog(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      int  true  "Audit Log ID"
 // @Success      200  {object}  dto.AuditLogResponse
-// @Failure      400  {object}  dto.ErrorResponse
-// @Failure      404  {object}  dto.ErrorResponse
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      404  {object}  dto.ErrorResponse "Error code: not_found"
 // @Router       /admin/audit-logs/{id}/detailed [get]
 // @Security     BearerAuth
 func (h *AuditLogHandler) GetAuditLogDetailed(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid audit log ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	auditLog, err := h.auditLogService.GetAuditLogByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "Audit log not found"})
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "not_found"})
 		return
 	}
 
@@ -211,15 +212,15 @@ func (h *AuditLogHandler) GetAuditLogDetailed(c *gin.Context) {
 // @Param        limit  query     int  false "Limit"
 // @Param        offset query     int  false "Offset"
 // @Success      200  {object}  dto.AuditLogListResponse
-// @Failure      400  {object}  dto.ErrorResponse
-// @Failure      404  {object}  dto.ErrorResponse
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      404  {object}  dto.ErrorResponse "Error code: not_found"
 // @Router       /admin/users/{id}/audit-logs [get]
 // @Security     BearerAuth
 func (h *AuditLogHandler) GetUserAuditLogs(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := strconv.ParseUint(userIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
@@ -239,7 +240,7 @@ func (h *AuditLogHandler) GetUserAuditLogs(c *gin.Context) {
 
 	auditLogs, total, err := h.auditLogService.GetUserAuditLogs(uint(userID), limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to retrieve user audit logs"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -262,8 +263,8 @@ func (h *AuditLogHandler) GetUserAuditLogs(c *gin.Context) {
 // @Param        start_date  query     string  false  "Start date (RFC3339)"
 // @Param        end_date    query     string  false  "End date (RFC3339)"
 // @Success      200  {object}  dto.AuditLogSummaryResponse
-// @Failure      400  {object}  dto.ErrorResponse
-// @Failure      500  {object}  dto.ErrorResponse
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      500  {object}  dto.ErrorResponse "Error code: internal_error"
 // @Router       /admin/audit-logs/summary [get]
 // @Security     BearerAuth
 func (h *AuditLogHandler) GetAuditSummary(c *gin.Context) {
@@ -283,7 +284,7 @@ func (h *AuditLogHandler) GetAuditSummary(c *gin.Context) {
 
 	summary, err := h.auditLogService.GetAuditSummary(startDate, endDate)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to generate audit summary"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -299,8 +300,8 @@ func (h *AuditLogHandler) GetAuditSummary(c *gin.Context) {
 // @Produce      json
 // @Param        retention_days  query     int  false  "Retention period in days"
 // @Success      200  {object}  dto.MessageResponse
-// @Failure      400  {object}  dto.ErrorResponse
-// @Failure      500  {object}  dto.ErrorResponse
+// @Failure      400  {object}  dto.ErrorResponse "Error code: invalid_request"
+// @Failure      500  {object}  dto.ErrorResponse "Error code: internal_error"
 // @Router       /admin/audit-logs/cleanup [post]
 // @Security     BearerAuth
 func (h *AuditLogHandler) CleanupOldLogs(c *gin.Context) {
@@ -313,7 +314,7 @@ func (h *AuditLogHandler) CleanupOldLogs(c *gin.Context) {
 
 	err := h.auditLogService.CleanupOldLogs(retentionDays)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to cleanup old audit logs"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 

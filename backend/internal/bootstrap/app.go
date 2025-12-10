@@ -23,6 +23,8 @@ type AppHandlers struct {
 	ChatHandler              *handler.ChatHandler
 	AuditLogHandler          *handler.AuditLogHandler
 	AdminContestationHandler *handler.AdminContestationHandler
+	AdminReviewReportHandler *handler.AdminReviewReportHandler
+	PaymentHandler           *handler.PaymentHandler
 }
 
 // AppServices contains service instances needed for jobs

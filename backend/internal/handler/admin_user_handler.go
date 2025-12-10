@@ -32,8 +32,9 @@ func NewAdminUserHandler(s service.AdminUserService) *AdminUserHandler {
 // @Param        role    query     string               false  "Filter by role (admin, client)"
 // @Param        status  query     string               false  "Filter by status (active, deactivated, deleted)"
 // @Success      200     {object}  dto.UserListResponse "Users list"
-// @Failure      400     {object}  dto.ErrorResponse    "Invalid request"
-// @Failure      500     {object}  dto.ErrorResponse    "Internal server error"
+// @Failure      400     {object}  dto.ErrorResponse    "Error code: invalid_request"
+// @Failure      401     {object}  dto.ErrorResponse    "Error code: unauthenticated"
+// @Failure      500     {object}  dto.ErrorResponse    "Error code: internal_error"
 // @Router       /admin/users [get]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
@@ -68,7 +69,11 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 	// Get users
 	users, total, err := h.userService.ListUsers(limit, offset, filters)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to fetch users"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -112,21 +117,27 @@ func (h *AdminUserHandler) AdminListUsers(c *gin.Context) {
 // @Produce      json
 // @Param        id   path      int                  true  "User ID"
 // @Success      200  {object}  dto.AdminUserResponse "User details"
-// @Failure      404  {object}  dto.ErrorResponse     "User not found"
-// @Failure      500  {object}  dto.ErrorResponse     "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse     "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse     "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse     "Error code: not_found"
+// @Failure      500  {object}  dto.ErrorResponse     "Error code: internal_error"
 // @Router       /admin/users/{id} [get]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	user, err := h.userService.GetUserByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "User not found"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "not_found"})
 		return
 	}
 
@@ -160,40 +171,39 @@ func (h *AdminUserHandler) AdminGetUser(c *gin.Context) {
 // @Param        id       path      int                  true  "User ID"
 // @Param        role     body      dto.UpdateRoleRequest true "New role"
 // @Success      200      {object}  dto.MessageResponse   "Role updated successfully"
-// @Failure      400      {object}  dto.ErrorResponse     "Invalid request"
-// @Failure      403      {object}  dto.ErrorResponse     "Cannot change own role"
-// @Failure      404      {object}  dto.ErrorResponse     "User not found"
+// @Failure      400      {object}  dto.ErrorResponse     "Error code: invalid_request"
+// @Failure      401      {object}  dto.ErrorResponse     "Error code: unauthenticated"
+// @Failure      403      {object}  dto.ErrorResponse     "Error code: cannot_change_own_role"
+// @Failure      404      {object}  dto.ErrorResponse     "Error code: not_found"
 // @Router       /admin/users/{id}/role [patch]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	var input dto.UpdateRoleRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	// Get admin public ID from context
 	adminPublicID, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	if err := h.userService.UpdateUserRole(uint(id), input.Role, adminPublicID.(string)); err != nil {
-		status := http.StatusInternalServerError
-		if err.Error() == "cannot change your own role" {
-			status = http.StatusForbidden
-		} else if err.Error() == "invalid role" {
-			status = http.StatusBadRequest
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
 		}
-		c.JSON(status, dto.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -210,35 +220,40 @@ func (h *AdminUserHandler) AdminUpdateUserRole(c *gin.Context) {
 // @Param        id   path      int                           true  "User ID"
 // @Param        request body   dto.AdminDeactivateUserRequest true "Deactivation details"
 // @Success      200  {object}  dto.MessageResponse           "User deactivated successfully"
-// @Failure      400  {object}  dto.ErrorResponse             "Invalid request"
-// @Failure      404  {object}  dto.ErrorResponse             "User not found"
-// @Failure      500  {object}  dto.ErrorResponse             "Internal server error"
+// @Failure      400  {object}  dto.ErrorResponse             "Error code: invalid_request"
+// @Failure      401  {object}  dto.ErrorResponse             "Error code: unauthenticated"
+// @Failure      404  {object}  dto.ErrorResponse             "Error code: not_found"
+// @Failure      500  {object}  dto.ErrorResponse             "Error code: internal_error"
 // @Router       /admin/users/{id}/deactivate [post]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	// Get admin public ID from context
 	adminPublicID, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	// Parse request body
 	var req dto.AdminDeactivateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid request body"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	if err := h.userService.DeactivateUser(uint(id), adminPublicID.(string), req.Reason, req.Notes, req.SuspensionUntil); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to deactivate user"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 
@@ -255,35 +270,40 @@ func (h *AdminUserHandler) AdminDeactivateUser(c *gin.Context) {
 // @Param        id       path      int                        true  "User ID"
 // @Param        request  body      dto.AdminReactivateUserRequest true "Reactivation details"
 // @Success      200      {object}  dto.MessageResponse        "User reactivated successfully"
-// @Failure      400      {object}  dto.ErrorResponse          "Invalid request"
-// @Failure      404      {object}  dto.ErrorResponse          "User not found"
-// @Failure      500      {object}  dto.ErrorResponse          "Internal server error"
+// @Failure      400      {object}  dto.ErrorResponse          "Error code: invalid_request"
+// @Failure      401      {object}  dto.ErrorResponse          "Error code: unauthenticated"
+// @Failure      404      {object}  dto.ErrorResponse          "Error code: not_found"
+// @Failure      500      {object}  dto.ErrorResponse          "Error code: internal_error"
 // @Router       /admin/users/{id}/reactivate [post]
 // @Security     BearerAuth
 func (h *AdminUserHandler) AdminReactivateUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	// Get admin public ID from context
 	adminPublicID, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
 		return
 	}
 
 	// Parse request body
 	var req dto.AdminReactivateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid request body"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
 		return
 	}
 
 	if err := h.userService.AdminReactivateUser(uint(id), adminPublicID.(string), req.Reason); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Failed to reactivate user"})
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "internal_error"})
 		return
 	}
 

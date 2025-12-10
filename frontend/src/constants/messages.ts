@@ -21,6 +21,7 @@ export const messages = {
   invalidCredentials: 'Invalid email or password.',
   fullNameRequired: 'Full name is required.',
   addressRequired: 'Address is required.',
+  numberRequired: 'Number is required.',
   cityRequired: 'City is required.',
   stateRequired: 'State/Region is required.',
   postalCodeRequired: 'Postal code is required.',

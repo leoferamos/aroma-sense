@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isReady } = useAuth();
+  const { isReady, accessToken } = useAuth();
   const { t } = useTranslation('common');
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const addItem = useCallback(async (productSlug: string, quantity = 1) => {
     try {
@@ -56,7 +56,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const removeItem = useCallback(async (productSlug: string) => {
     try {
@@ -79,7 +79,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return next;
       });
     }
-  }, []);
+  }, [t]);
 
   const isRemovingItem = useCallback((productSlug: string) => removingItemIds.has(productSlug), [removingItemIds]);
 
@@ -102,14 +102,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(errorMsg);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
-    // Only fetch cart when auth is ready
-    if (isReady) {
-      refresh();
-    }
-  }, [isReady, refresh]);
+    // Fetch cart when auth layer has determined session status or token changes
+    if (!isReady) return;
+    refresh();
+  }, [isReady, accessToken, refresh]);
 
   const value = useMemo(
     () => ({

@@ -25,24 +25,25 @@ const (
 	AuditActionDeletionConfirmed AuditAction = "deletion_confirmed"
 	AuditActionDeletionCancelled AuditAction = "deletion_cancelled"
 	AuditActionDataAnonymized    AuditAction = "data_anonymized"
+	AuditActionReviewDeleted     AuditAction = "review_deleted"
 )
 
 // AuditLog represents an audit log entry for LGPD compliance
 type AuditLog struct {
 	ID         uint        `json:"id" gorm:"primaryKey"`
 	PublicID   uuid.UUID   `json:"public_id" gorm:"type:uuid;uniqueIndex"`
-	UserID     *uint       `json:"user_id,omitempty" gorm:"index"`           // User being acted upon (nullable for system actions)
-	ActorID    *uint       `json:"actor_id,omitempty" gorm:"index"`          // User performing the action (nullable for system actions)
-	ActorType  string      `json:"actor_type" gorm:"size:50;default:'user'"` // 'user', 'admin', 'system'
+	UserID     *uint       `json:"user_id,omitempty" gorm:"index"`
+	ActorID    *uint       `json:"actor_id,omitempty" gorm:"index"`
+	ActorType  string      `json:"actor_type" gorm:"size:50;default:'user'"`
 	Action     AuditAction `json:"action" gorm:"size:50;not null"`
-	Resource   string      `json:"resource" gorm:"size:100;not null"`           // 'user', 'order', 'product', etc.
-	ResourceID *string     `json:"resource_id,omitempty" gorm:"size:100;index"` // ID of the resource
-	Details    string      `json:"details" gorm:"type:text"`                    // JSON string with additional details
-	OldValues  string      `json:"old_values,omitempty" gorm:"type:text"`       // JSON string of old values (for updates)
-	NewValues  string      `json:"new_values,omitempty" gorm:"type:text"`       // JSON string of new values (for updates)
+	Resource   string      `json:"resource" gorm:"size:100;not null"`
+	ResourceID *string     `json:"resource_id,omitempty" gorm:"size:100;index"`
+	Details    string      `json:"details" gorm:"type:text"`
+	OldValues  string      `json:"old_values,omitempty" gorm:"type:text"`
+	NewValues  string      `json:"new_values,omitempty" gorm:"type:text"`
 	Timestamp  time.Time   `json:"timestamp" gorm:"not null;index"`
-	Compliance string      `json:"compliance,omitempty" gorm:"size:100"`   // LGPD, GDPR, etc.
-	Severity   string      `json:"severity" gorm:"size:20;default:'info'"` // 'info', 'warning', 'error', 'critical'
+	Compliance string      `json:"compliance,omitempty" gorm:"size:100"`
+	Severity   string      `json:"severity" gorm:"size:20;default:'info'"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
 

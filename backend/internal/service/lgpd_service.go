@@ -1,10 +1,11 @@
 package service
 
 import (
-	"errors"
 	"fmt"
+	"log"
 	"time"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/notification"
@@ -19,6 +20,8 @@ type LgpdService interface {
 	CancelAccountDeletion(publicID string) error
 	AnonymizeExpiredUser(publicID string) error
 	RequestContestation(publicID string, reason string) error
+	ProcessPendingDeletions() error
+	ProcessExpiredAnonymizations() error
 }
 
 type lgpdService struct {
@@ -55,16 +58,16 @@ func (s *lgpdService) ExportUserData(publicID string) (*dto.UserExportResponse, 
 // RequestAccountDeletion initiates account deletion process with 7-day cooling off period (LGPD compliance)
 func (s *lgpdService) RequestAccountDeletion(publicID string) error {
 	if publicID == "" {
-		return errors.New("unauthenticated")
+		return apperror.NewCodeMessage("unauthenticated", "unauthenticated")
 	}
 
 	// Check if user has active dependencies
 	hasDependencies, err := s.repo.HasActiveDependencies(publicID)
 	if err != nil {
-		return errors.New("failed to check account dependencies")
+		return apperror.NewDomain(fmt.Errorf("failed to check account dependencies: %w", err), "internal_error", "internal error")
 	}
 	if hasDependencies {
-		return errors.New("cannot delete account with active orders - please cancel or complete all orders first")
+		return apperror.NewCodeMessage("active_orders_block_deletion", "cannot delete account with active orders")
 	}
 
 	// Check if already requested deletion
@@ -73,7 +76,7 @@ func (s *lgpdService) RequestAccountDeletion(publicID string) error {
 		return err
 	}
 	if user.DeletionRequestedAt != nil {
-		return errors.New("account deletion already requested")
+		return apperror.NewCodeMessage("deletion_already_requested", "account deletion already requested")
 	}
 
 	now := time.Now()
@@ -101,7 +104,7 @@ func (s *lgpdService) RequestAccountDeletion(publicID string) error {
 // ConfirmAccountDeletion confirms account deletion after cooling off period (LGPD compliance)
 func (s *lgpdService) ConfirmAccountDeletion(publicID string) error {
 	if publicID == "" {
-		return errors.New("unauthenticated")
+		return apperror.NewCodeMessage("unauthenticated", "unauthenticated")
 	}
 
 	user, err := s.repo.FindByPublicID(publicID)
@@ -111,13 +114,13 @@ func (s *lgpdService) ConfirmAccountDeletion(publicID string) error {
 
 	// Check if deletion was requested
 	if user.DeletionRequestedAt == nil {
-		return errors.New("no deletion request found")
+		return apperror.NewCodeMessage("deletion_not_requested", "no deletion request found")
 	}
 
 	// Check if cooling off period (7 days) has passed
 	coolingOffPeriod := user.DeletionRequestedAt.Add(7 * 24 * time.Hour)
 	if time.Now().Before(coolingOffPeriod) {
-		return errors.New("cooling off period not yet expired - please wait 7 days from request")
+		return apperror.NewCodeMessage("cooling_off_not_expired", "cooling off period not yet expired")
 	}
 
 	now := time.Now()
@@ -146,7 +149,7 @@ func (s *lgpdService) ConfirmAccountDeletion(publicID string) error {
 // CancelAccountDeletion cancels a pending account deletion request
 func (s *lgpdService) CancelAccountDeletion(publicID string) error {
 	if publicID == "" {
-		return errors.New("unauthenticated")
+		return apperror.NewCodeMessage("unauthenticated", "unauthenticated")
 	}
 
 	user, err := s.repo.FindByPublicID(publicID)
@@ -155,7 +158,7 @@ func (s *lgpdService) CancelAccountDeletion(publicID string) error {
 	}
 
 	if user.DeletionRequestedAt == nil {
-		return errors.New("no deletion request to cancel")
+		return apperror.NewCodeMessage("deletion_not_requested", "no deletion request to cancel")
 	}
 
 	// capture requested time before clearing
@@ -193,12 +196,12 @@ func (s *lgpdService) AnonymizeExpiredUser(publicID string) error {
 
 	// Verify deletion was confirmed and retention period has passed (2 years)
 	if user.DeletionConfirmedAt == nil {
-		return errors.New("user has not confirmed account deletion")
+		return apperror.NewCodeMessage("deletion_not_confirmed", "user has not confirmed account deletion")
 	}
 
-	retentionPeriod := user.DeletionConfirmedAt.Add(2 * 365 * 24 * time.Hour) // 2 years
+	retentionPeriod := user.DeletionConfirmedAt.Add(5 * 365 * 24 * time.Hour) // 5 years
 	if time.Now().Before(retentionPeriod) {
-		return errors.New("retention period not yet expired")
+		return apperror.NewCodeMessage("retention_not_expired", "retention period not yet expired")
 	}
 
 	// Anonymize personal data while keeping necessary records for compliance
@@ -233,7 +236,7 @@ func (s *lgpdService) AnonymizeExpiredUser(publicID string) error {
 // RequestContestation allows user to contest account deactivation (LGPD compliance)
 func (s *lgpdService) RequestContestation(publicID string, reason string) error {
 	if publicID == "" {
-		return errors.New("unauthenticated")
+		return apperror.NewCodeMessage("unauthenticated", "unauthenticated")
 	}
 
 	user, err := s.repo.FindByPublicID(publicID)
@@ -243,17 +246,17 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 
 	// Check if user is deactivated
 	if user.DeactivatedAt == nil {
-		return errors.New("account is not deactivated")
+		return apperror.NewCodeMessage("account_not_deactivated", "account is not deactivated")
 	}
 
 	// Check if contestation deadline has passed
 	if user.ContestationDeadline != nil && user.ContestationDeadline.Before(time.Now()) {
-		return errors.New("contestation deadline has expired")
+		return apperror.NewCodeMessage("contestation_deadline_expired", "contestation deadline has expired")
 	}
 
 	// Check if already requested reactivation
 	if user.ReactivationRequested {
-		return errors.New("reactivation already requested")
+		return apperror.NewCodeMessage("reactivation_already_requested", "reactivation already requested")
 	}
 
 	// Set contestation deadline if not set (7 days from deactivation)
@@ -288,5 +291,40 @@ func (s *lgpdService) RequestContestation(publicID string, reason string) error 
 		_ = s.notifier.SendContestationReceived(user.Email)
 	}
 
+	return nil
+}
+
+// ProcessPendingDeletions automatically confirms deletions after 7 days (daily job)
+func (s *lgpdService) ProcessPendingDeletions() error {
+	cutoff := time.Now().Add(-7 * 24 * time.Hour) // 7 days ago
+	// Find users with deletion_requested_at > 7 days ago and not yet confirmed
+	users, err := s.repo.FindUsersPendingAutoConfirm(cutoff)
+	if err != nil {
+		return apperror.NewDomain(fmt.Errorf("failed to find pending deletions: %w", err), "internal_error", "internal error")
+	}
+
+	for _, user := range users {
+		if err := s.ConfirmAccountDeletion(user.PublicID); err != nil {
+			// Log error but continue processing others
+			log.Printf("ProcessPendingDeletions: failed to confirm deletion for user %s: %v", user.PublicID, err)
+		}
+	}
+	return nil
+}
+
+// ProcessExpiredAnonymizations anonymizes users after 5 years (daily job)
+func (s *lgpdService) ProcessExpiredAnonymizations() error {
+	// Find users with deletion_confirmed_at > 5 years ago and not yet anonymized
+	users, err := s.repo.FindExpiredUsersForAnonymization()
+	if err != nil {
+		return apperror.NewDomain(fmt.Errorf("failed to find users for anonymization: %w", err), "internal_error", "internal error")
+	}
+
+	for _, user := range users {
+		if err := s.AnonymizeExpiredUser(user.PublicID); err != nil {
+			// Log error but continue
+			log.Printf("ProcessExpiredAnonymizations: failed to anonymize user %s: %v", user.PublicID, err)
+		}
+	}
 	return nil
 }

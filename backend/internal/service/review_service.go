@@ -8,24 +8,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/repository"
-)
-
-// Sentinel errors for review flow to avoid string matching in handlers.
-var (
-	ErrReviewUnauthenticated   = errors.New("unauthenticated")
-	ErrReviewProfileIncomplete = errors.New("profile incomplete")
-	ErrReviewNotDelivered      = errors.New("not delivered")
-	ErrReviewAlreadyReviewed   = errors.New("already reviewed")
-	ErrReviewInvalidRating     = errors.New("invalid rating")
-	ErrReviewCommentTooLong    = errors.New("comment too long")
-	ErrReviewProductNotFound   = errors.New("product not found")
 )
 
 // ReviewService defines business logic for product reviews
 type ReviewService interface {
 	CanUserReview(ctx context.Context, user *model.User, productID uint) (bool, string, error)
+	CanUserReviewBySlug(ctx context.Context, user *model.User, slug string) (bool, string, error)
 	CreateReview(ctx context.Context, user *model.User, productID uint, rating int, comment string) (*model.Review, error)
 	ListReviews(ctx context.Context, productID uint, page, perPage int) ([]model.Review, int, error)
 	GetAverage(ctx context.Context, productID uint) (float64, int, error)
@@ -71,7 +62,7 @@ func (s *reviewService) CanUserReview(ctx context.Context, user *model.User, pro
 	// Must have a delivered order with the product
 	delivered, err := s.orders.HasUserDeliveredOrderWithProduct(user.PublicID, productID)
 	if err != nil {
-		return false, "internal_error", fmt.Errorf("failed to verify delivered orders: %w", err)
+		return false, "internal_error", apperror.NewDomain(fmt.Errorf("failed to verify delivered orders: %w", err), "internal_error", "internal error")
 	}
 	if !delivered {
 		return false, "not_delivered", nil
@@ -79,7 +70,7 @@ func (s *reviewService) CanUserReview(ctx context.Context, user *model.User, pro
 	// Must not have an existing review
 	exists, err := s.reviews.ExistsByProductAndUser(ctx, productID, user.PublicID)
 	if err != nil {
-		return false, "internal_error", fmt.Errorf("failed to check existing review: %w", err)
+		return false, "internal_error", apperror.NewDomain(fmt.Errorf("failed to check existing review: %w", err), "internal_error", "internal error")
 	}
 	if exists {
 		return false, "already_reviewed", nil
@@ -87,43 +78,52 @@ func (s *reviewService) CanUserReview(ctx context.Context, user *model.User, pro
 	return true, "", nil
 }
 
+// CanUserReviewBySlug checks if a user can review a product identified by slug
+func (s *reviewService) CanUserReviewBySlug(ctx context.Context, user *model.User, slug string) (bool, string, error) {
+	prod, err := s.products.FindBySlug(slug)
+	if err != nil {
+		return false, "product_not_found", apperror.NewDomain(fmt.Errorf("failed to resolve product slug: %w", err), "product_not_found", "product not found")
+	}
+	return s.CanUserReview(ctx, user, prod.ID)
+}
+
 // CreateReview creates a new product review
 func (s *reviewService) CreateReview(ctx context.Context, user *model.User, productID uint, rating int, comment string) (*model.Review, error) {
 	if user == nil || user.PublicID == "" {
-		return nil, ErrReviewUnauthenticated
+		return nil, apperror.NewCodeMessage("unauthenticated", "authentication required")
 	}
 	// Validate rating bounds
 	if rating < 1 || rating > 5 {
-		return nil, fmt.Errorf("%w: %d", ErrReviewInvalidRating, rating)
+		return nil, apperror.NewDomain(fmt.Errorf("invalid rating: %d", rating), "invalid_rating", "invalid rating")
 	}
 	// Validate comment length (<=500)
 	if len(comment) > 500 {
-		return nil, fmt.Errorf("%w: %d", ErrReviewCommentTooLong, len(comment))
+		return nil, apperror.NewDomain(fmt.Errorf("comment too long: %d", len(comment)), "comment_too_long", "comment too long")
 	}
 	// Require display name
 	if user.DisplayName == nil || strings.TrimSpace(*user.DisplayName) == "" {
-		return nil, ErrReviewProfileIncomplete
+		return nil, apperror.NewCodeMessage("profile_incomplete", "profile incomplete")
 	}
 	// Check delivered order
 	delivered, err := s.orders.HasUserDeliveredOrderWithProduct(user.PublicID, productID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to verify delivered orders: %w", err)
+		return nil, apperror.NewDomain(fmt.Errorf("failed to verify delivered orders: %w", err), "internal_error", "internal error")
 	}
 	if !delivered {
-		return nil, ErrReviewNotDelivered
+		return nil, apperror.NewCodeMessage("not_delivered", "product not delivered")
 	}
 	// Prevent duplicate review
 	exists, err := s.reviews.ExistsByProductAndUser(ctx, productID, user.PublicID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check existing review: %w", err)
+		return nil, apperror.NewDomain(fmt.Errorf("failed to check existing review: %w", err), "internal_error", "internal error")
 	}
 	if exists {
-		return nil, ErrReviewAlreadyReviewed
+		return nil, apperror.NewCodeMessage("already_reviewed", "already reviewed")
 	}
 
 	// Verify product exists
 	if _, err := s.products.FindByID(productID); err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrReviewProductNotFound, err)
+		return nil, apperror.NewDomain(fmt.Errorf("product not found: %v", err), "product_not_found", "product not found")
 	}
 
 	rv := &model.Review{
@@ -134,7 +134,7 @@ func (s *reviewService) CreateReview(ctx context.Context, user *model.User, prod
 		Status:    model.ReviewStatusPublished,
 	}
 	if err := s.reviews.CreateReview(ctx, rv); err != nil {
-		return nil, fmt.Errorf("failed to create review: %w", err)
+		return nil, apperror.NewDomain(fmt.Errorf("failed to create review: %w", err), "internal_error", "internal error")
 	}
 
 	// Invalidate cache
@@ -182,7 +182,7 @@ func (s *reviewService) GetAverage(ctx context.Context, productID uint) (float64
 	avg, count, err := s.reviews.AverageRating(ctx, productID)
 	if err != nil {
 		s.mu.Unlock()
-		return 0, 0, fmt.Errorf("failed to compute average rating: %w", err)
+		return 0, 0, apperror.NewDomain(fmt.Errorf("failed to compute average rating: %w", err), "internal_error", "internal error")
 	}
 	s.cache[productID] = ratingCacheEntry{avg: avg, count: count, staleAt: time.Now().Add(s.ttl)}
 	s.mu.Unlock()
@@ -198,7 +198,10 @@ func (s *reviewService) DeleteOwnReview(ctx context.Context, reviewID string, us
 	}
 
 	if err := s.reviews.SoftDeleteReview(ctx, reviewID, userID); err != nil {
-		return fmt.Errorf("failed to delete review: %w", err)
+		if errors.Is(err, repository.ErrReviewNotFound) {
+			return apperror.NewCodeMessage("review_not_found", "review not found")
+		}
+		return apperror.NewDomain(fmt.Errorf("failed to delete review: %w", err), "internal_error", "internal error")
 	}
 
 	if productID != 0 {

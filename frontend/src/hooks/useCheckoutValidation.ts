@@ -1,51 +1,38 @@
 import { useState } from 'react';
-import { messages } from '../constants/messages';
+import { useTranslation } from 'react-i18next';
 
 export interface AddressForm {
   fullName: string;
   address1: string;
-  address2?: string;
+  number: string;
   city: string;
   state: string;
   postalCode: string;
   country: string;
 }
 
-export interface PaymentForm {
-  cardName: string;
-  cardNumber: string;
-  expiry: string; 
-  cvc: string;
-}
-
 export type CheckoutErrors = Partial<
   Record<
-    | keyof AddressForm
-    | keyof PaymentForm,
+    keyof AddressForm,
     string
   >
 >;
 
 export const useCheckoutValidation = () => {
   const [errors, setErrors] = useState<CheckoutErrors>({});
+  const { t } = useTranslation('common');
 
-  const validateAll = (address: AddressForm, payment: PaymentForm): boolean => {
+  const validateAll = (address: AddressForm): boolean => {
     const newErrors: CheckoutErrors = {};
 
     // Address
-    if (!address.fullName.trim()) newErrors.fullName = messages.fullNameRequired;
-    if (!address.address1.trim()) newErrors.address1 = messages.addressRequired;
-    if (!address.city.trim()) newErrors.city = messages.cityRequired;
-    if (!address.state.trim()) newErrors.state = messages.stateRequired;
-    if (!address.postalCode.trim()) newErrors.postalCode = messages.postalCodeRequired;
-    if (!address.country.trim()) newErrors.country = messages.countryRequired;
-
-    // Payment
-    if (!payment.cardName.trim()) newErrors.cardName = messages.nameOnCardRequired;
-    const digitsOnly = payment.cardNumber.replace(/\s+/g, '');
-    if (!/^\d{13,19}$/.test(digitsOnly)) newErrors.cardNumber = messages.cardNumberInvalid;
-    if (!/^(0[1-9]|1[0-2])\/(\d{2})$/.test(payment.expiry)) newErrors.expiry = messages.expiryInvalid;
-    if (!/^\d{3,4}$/.test(payment.cvc)) newErrors.cvc = messages.cvcInvalid;
+    if (!address.fullName.trim()) newErrors.fullName = t('checkout.validation.fullNameRequired');
+    if (!address.address1.trim()) newErrors.address1 = t('checkout.validation.addressRequired');
+    if (!address.number.trim()) newErrors.number = t('checkout.validation.numberRequired');
+    if (!address.city.trim()) newErrors.city = t('checkout.validation.cityRequired');
+    if (!address.state.trim()) newErrors.state = t('checkout.validation.stateRequired');
+    if (!address.postalCode.trim()) newErrors.postalCode = t('checkout.validation.postalCodeRequired');
+    if (!address.country.trim()) newErrors.country = t('checkout.validation.countryRequired');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

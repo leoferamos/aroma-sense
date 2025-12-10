@@ -1,16 +1,15 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"context"
-
 	"github.com/gin-gonic/gin"
+	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/dto"
-	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
 type mockShippingService struct {
@@ -61,7 +60,7 @@ func TestGetShippingOptions_Success(t *testing.T) {
 func TestGetShippingOptions_ErrorMapping(t *testing.T) {
 	mockSvc := mockShippingService{
 		options: nil,
-		err:     service.ErrInvalidPostalCode,
+		err:     apperror.NewCodeMessage("invalid_postal_code", "invalid destination postal code"),
 	}
 	h := NewShippingHandler(mockSvc)
 	r := setupRouterWithUser(h)
@@ -77,7 +76,7 @@ func TestGetShippingOptions_ErrorMapping(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &errResp); err != nil {
 		t.Fatalf("failed to unmarshal error response: %v", err)
 	}
-	if errResp.Error != "invalid postal_code" {
+	if errResp.Error != "invalid_postal_code" {
 		t.Fatalf("unexpected error message: %s", errResp.Error)
 	}
 }
