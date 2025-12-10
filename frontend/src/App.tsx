@@ -64,7 +64,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/users"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
               <AdminUsers />
             </ProtectedRoute>
           }
@@ -76,7 +76,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <AdminDashboard />
             </ProtectedRoute>
           }
@@ -84,7 +84,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/products/new"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <AddProduct />
             </ProtectedRoute>
           }
@@ -92,7 +92,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/products/:id/edit"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <EditProduct />
             </ProtectedRoute>
           }
@@ -100,7 +100,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/products"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <AdminProducts />
             </ProtectedRoute>
           }
@@ -108,7 +108,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/orders"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <AdminOrders />
             </ProtectedRoute>
           }
@@ -116,7 +116,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/audit-logs"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <AdminAuditLogs />
             </ProtectedRoute>
           }
@@ -124,7 +124,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/contestations"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
               <AdminContestations />
             </ProtectedRoute>
           }
@@ -132,7 +132,7 @@ const ChatMount: React.FC = () => {
         <Route
           path="/admin/review-reports"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
               <AdminReviewReports />
             </ProtectedRoute>
           }
