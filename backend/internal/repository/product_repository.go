@@ -188,35 +188,42 @@ func (r *productRepository) SearchProductsByGender(ctx context.Context, query st
 	var selectSQL string
 	var args []interface{}
 
-	genderFilter := ""
-	if gender != "" {
-		if gender == "Masculino" {
-			genderFilter = ` AND (p.gender = 'Masculino' OR p.gender = 'Unissex')`
-		} else if gender == "Feminino" {
-			genderFilter = ` AND (p.gender = 'Feminino' OR p.gender = 'Unissex')`
-		} else if gender == "Unissex" {
-			genderFilter = ` AND p.gender = 'Unissex'`
-		}
+	genderClause := ""
+	genderArgs := []interface{}{}
+	switch gender {
+	case "Masculino":
+		genderClause = " AND (p.gender = ? OR p.gender = ?)"
+		genderArgs = append(genderArgs, "Masculino", "Unissex")
+	case "Feminino":
+		genderClause = " AND (p.gender = ? OR p.gender = ?)"
+		genderArgs = append(genderArgs, "Feminino", "Unissex")
+	case "Unissex":
+		genderClause = " AND p.gender = ?"
+		genderArgs = append(genderArgs, "Unissex")
 	}
 
 	if sort == "latest" {
 		selectSQL = `
 		SELECT p.*
 		FROM products p
-		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderFilter + `
+		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderClause + `
 		ORDER BY p.created_at DESC
 		LIMIT ? OFFSET ?
 		`
-		args = []interface{}{query, limit, offset}
+		args = []interface{}{query}
+		args = append(args, genderArgs...)
+		args = append(args, limit, offset)
 	} else {
 		selectSQL = `
 		SELECT p.*
 		FROM products p
-		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderFilter + `
+		WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderClause + `
 		ORDER BY ts_rank_cd(p.search_vector, websearch_to_tsquery('portuguese', unaccent(?))) DESC, p.created_at DESC
 		LIMIT ? OFFSET ?
 		`
-		args = []interface{}{query, query, limit, offset}
+		args = []interface{}{query, query}
+		args = append(args, genderArgs...)
+		args = append(args, limit, offset)
 	}
 
 	if err := r.db.WithContext(ctx).Raw(selectSQL, args...).Scan(&products).Error; err != nil {
@@ -224,8 +231,9 @@ func (r *productRepository) SearchProductsByGender(ctx context.Context, query st
 	}
 
 	var total int64
-	countSQL := `SELECT COUNT(*) FROM products p WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderFilter
+	countSQL := `SELECT COUNT(*) FROM products p WHERE p.search_vector @@ websearch_to_tsquery('portuguese', unaccent(?))` + genderClause
 	countArgs := []interface{}{query}
+	countArgs = append(countArgs, genderArgs...)
 	if err := r.db.WithContext(ctx).Raw(countSQL, countArgs...).Scan(&total).Error; err != nil {
 		return nil, 0, err
 	}
