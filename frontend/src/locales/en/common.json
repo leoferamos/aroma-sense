@@ -193,8 +193,8 @@
     "shipping": {
       "title": "Shipping",
       "enterPostalCode": "Enter your postal code to see available options.",
-      "eta_one": "ETA: {{count}} day",
-      "eta_other": "ETA: {{count}} days",
+      "eta": "ETA: {{count}} day",
+      "eta_plural": "ETA: {{count}} days",
       "noOptions": "No shipping options for this postal code."
     },
     "cep": {

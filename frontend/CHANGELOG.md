@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/leoferamos/aroma-sense/compare/v1.3.0...v1.3.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* **checkout:** persist checkout and add Internalization  ([#98](https://github.com/leoferamos/aroma-sense/issues/98)) ([0037be2](https://github.com/leoferamos/aroma-sense/commit/0037be2f21b475ba269091cb188df96cc078b9f8))
+
 # [1.3.0](https://github.com/leoferamos/aroma-sense/compare/v1.2.1...v1.3.0) (2025-12-09)
 
 
