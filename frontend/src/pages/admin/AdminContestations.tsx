@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getPendingContestations, approveContestation, rejectContestation } from '../../services/adminContestations';
 import type { AdminContestation } from '../../services/adminContestations';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -22,7 +22,7 @@ const AdminContestations: React.FC = () => {
     { label: t('contestations'), to: '/admin/contestations' },
   ];
 
-  const fetchContestations = async () => {
+  const fetchContestations = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -33,7 +33,7 @@ const AdminContestations: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     fetchContestations();
