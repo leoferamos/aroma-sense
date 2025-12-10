@@ -59,7 +59,7 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 	lgpdService := lgpdservice.NewLgpdService(repos.user, repos.userContestation, auditLogService, notifier)
 	reviewService := reviewservice.NewReviewService(repos.review, repos.order, repos.product)
 	reviewReportService := reviewservice.NewReviewReportService(repos.reviewReport, repos.review, repos.user, adminUserService)
-	chatService := chatservice.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider, aiService)
+	chatService := chatservice.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider)
 	orderService := orderservice.NewOrderService(repos.order, repos.cart, repos.product, integrations.shipping.service)
 	passwordResetService := authservice.NewPasswordResetService(repos.resetToken, repos.user, notifier)
 	userProfileService := userservice.NewUserProfileService(repos.user, auditLogService)
