@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/leoferamos/aroma-sense/compare/v1.7.1...v1.8.0) (2025-12-10)
+
+
+### Features
+
+* **ai:** enhance ai flow ([#106](https://github.com/leoferamos/aroma-sense/issues/106)) ([8ec95e7](https://github.com/leoferamos/aroma-sense/commit/8ec95e75632347f2c3c73c621602ce765a49fe9b))
+
 ## [1.7.1](https://github.com/leoferamos/aroma-sense/compare/v1.7.0...v1.7.1) (2025-12-10)
 
 
