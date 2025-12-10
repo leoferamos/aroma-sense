@@ -43,7 +43,8 @@
     "agreePrivacyError": "You must agree to the privacy policy.",
     "alreadyHaveAccount": "Already have an account?",
     "passwordHelper": "Use at least 8 characters, numbers and symbols",
-    "createAccount": "Create Account"
+    "createAccount": "Create Account",
+    "invalidCredentials": "Invalid email or password"
   },
   "navbar": {
     "home": "Home",
@@ -145,6 +146,8 @@
     "deletionPendingText": "We received a request to delete your account on {{date}}. You have a 7-day cooling-off period during which you can cancel the deletion or export your data.",
     "deletionConfirmedTitle": "Account deletion confirmed",
     "deletionConfirmedText": "Your account deletion was confirmed on {{date}}. Your personal data will be retained for the configured retention period and then anonymized.",
+    "updateSuccess": "Profile updated successfully",
+    "activeOrdersBlockDeletion": "You can't delete your account while you have active orders. Please wait until your orders are completed.",
     "deletionModalTitle": "Request account deletion",
     "deletionModalDescription": "Type DELETE_MY_ACCOUNT to confirm that you want to request account deletion. You will have 7 days to cancel.",
     "requestDeletionConfirm": "Request deletion",
@@ -328,7 +331,8 @@
     "newPasswordRequired": "New password is required",
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordSymbol": "Password must contain at least one symbol",
-    "already_reported": "You have already reported this review."
+    "already_reported": "You have already reported this review.",
+    "currentPasswordIncorrect": "Current password is incorrect"
   },
   "order": {
     "myOrders": "My Orders",

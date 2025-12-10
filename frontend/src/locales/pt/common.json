@@ -158,6 +158,8 @@
     "deletionPendingText": "Recebemos uma solicitação para excluir sua conta em {{date}}. Você tem um período de carência de 7 dias durante o qual pode cancelar a exclusão ou exportar seus dados.",
     "deletionConfirmedTitle": "Exclusão da conta confirmada",
     "deletionConfirmedText": "A exclusão da sua conta foi confirmada em {{date}}. Seus dados pessoais serão retidos pelo período de retenção configurado e depois anonimizados.",
+    "updateSuccess": "Perfil atualizado com sucesso",
+    "activeOrdersBlockDeletion": "Você não pode excluir sua conta enquanto houver pedidos ativos. Aguarde até que os pedidos sejam concluídos.",
     "deletionModalTitle": "Solicitar exclusão da conta",
     "deletionModalDescription": "Digite DELETE_MY_ACCOUNT para confirmar que deseja solicitar a exclusão da conta. Você terá 7 dias para cancelar.",
     "requestDeletionConfirm": "Solicitar exclusão",

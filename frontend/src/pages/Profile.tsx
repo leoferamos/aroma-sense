@@ -54,7 +54,7 @@ const Profile: React.FC = () => {
     try {
       const updated = await updateMyProfile({ display_name: name.trim() });
       setProfile(updated);
-      setSuccess('Profile updated successfully');
+      setSuccess(t('profile.updateSuccess'));
     } catch (e: unknown) {
       if (isAxiosError(e) && e.response?.status === 401) {
         setError(t('errors.sessionExpired'));
@@ -243,8 +243,21 @@ const Profile: React.FC = () => {
               const updated = await getMyProfile();
               setProfile(updated);
               setSuccess(t('profile.deletionRequested'));
-            } catch {
-              setError(t('profile.requestDeletionFailed'));
+            } catch (e: unknown) {
+              if (isAxiosError(e)) {
+                const code = e.response?.data?.error;
+                if (code === 'active_orders_block_deletion') {
+                  setError(t('profile.activeOrdersBlockDeletion'));
+                } else if (e.response?.status === 401) {
+                  setError(t('errors.sessionExpired'));
+                } else {
+                  setError(t('profile.requestDeletionFailed'));
+                }
+              } else if (e instanceof Error) {
+                setError(e.message);
+              } else {
+                setError(t('profile.requestDeletionFailed'));
+              }
             } finally {
               setActionLoading(false);
               setDeleteModalOpen(false);
