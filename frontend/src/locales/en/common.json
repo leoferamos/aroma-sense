@@ -289,6 +289,11 @@
     "reportAlreadySubmitted": "You have already reported this review.",
     "reportRateLimited": "Too many reports. Please try again later."
   },
+  "chat": {
+    "placeholder": "Type your preference… (/clear-recs to reset)",
+    "clearRecommendations": "Clear recommendations",
+    "suggestions": "Suggestions"
+  },
   "errors": {
     "failedToLoadProfile": "Failed to load profile",
     "failedToUpdateProfile": "Failed to update profile",

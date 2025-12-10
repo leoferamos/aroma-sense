@@ -339,6 +339,11 @@
     "reportAlreadySubmitted": "Você já denunciou esta avaliação.",
     "reportRateLimited": "Muitas denúncias. Tente novamente mais tarde."
   },
+  "chat": {
+    "placeholder": "Digite sua preferência… (/clear-recs para limpar)",
+    "clearRecommendations": "Limpar recomendações",
+    "suggestions": "Sugestões"
+  },
   "errors": {
     "failedToLoadProfile": "Falha ao carregar perfil",
     "failedToUpdateProfile": "Falha ao atualizar perfil",

@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { Link } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import { chat as chatApi, type ChatResponse } from '../../services/ai';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
     id: string;
@@ -17,6 +18,7 @@ interface ChatAssistantProps {
 }
 
 const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
+    const { t } = useTranslation('common');
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
@@ -184,7 +186,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                     {/* Suggestions */}
                     {lastSuggestions && lastSuggestions.length > 0 && (
                         <div className="mt-4 space-y-2">
-                            <h3 className="text-sm font-semibold text-gray-700">Sugestões</h3>
+                            <h3 className="text-sm font-semibold text-gray-700">{t('chat.suggestions')}</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {lastSuggestions.map(s => (
                                     <Link key={s.id} to={`/products/${s.slug}`} className="flex gap-3 p-2 rounded-lg border border-gray-200 hover:border-blue-400 transition-colors">
@@ -224,7 +226,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                placeholder="Digite sua preferência… (/clear-recs para limpar)"
+                                placeholder={t('chat.placeholder')}
                                 className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-[15px]"
                                 disabled={isLoading}
                             />
@@ -250,7 +252,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                             disabled={isLoading}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                         >
-                            Limpar recomendações
+                            {t('chat.clearRecommendations')}
                         </button>
                     </div>
                 </form>
