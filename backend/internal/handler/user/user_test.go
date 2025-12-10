@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/dto"
-	"github.com/leoferamos/aroma-sense/internal/handler"
+	handler "github.com/leoferamos/aroma-sense/internal/handler/user"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
