@@ -4,34 +4,34 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestInMemorySlidingWindow(t *testing.T) {
+	t.Parallel()
+
 	limiter := NewInMemory()
 	ctx := context.Background()
 	bucket := "test:bucket"
 	limit := 3
 	window := 200 * time.Millisecond
 
-	// First 3 should pass
 	for i := 0; i < limit; i++ {
 		allowed, remaining, _, err := limiter.Allow(ctx, bucket, limit, window)
-		if err != nil || !allowed {
-			t.Fatalf("expected allowed on iteration %d got err=%v allowed=%v", i, err, allowed)
-		}
-		if remaining != (limit - (i + 1)) {
-			t.Errorf("remaining mismatch: got %d want %d", remaining, limit-(i+1))
-		}
+		require.NoErrorf(t, err, "iteration %d should not error", i)
+		require.Truef(t, allowed, "iteration %d should be allowed", i)
+		require.Equalf(t, limit-(i+1), remaining, "iteration %d remaining mismatch", i)
 	}
-	// 4th should block
+
 	allowed, remaining, _, err := limiter.Allow(ctx, bucket, limit, window)
-	if err != nil || allowed || remaining != 0 {
-		t.Errorf("expected deny on 4th call: allowed=%v remaining=%d err=%v", allowed, remaining, err)
-	}
-	// Wait for window to expire
+	require.NoError(t, err)
+	require.False(t, allowed)
+	require.Zero(t, remaining)
+
 	time.Sleep(window + 20*time.Millisecond)
 	allowed, remaining, _, err = limiter.Allow(ctx, bucket, limit, window)
-	if err != nil || !allowed || remaining != limit-1 {
-		t.Errorf("expected allow after window reset: allowed=%v remaining=%d err=%v", allowed, remaining, err)
-	}
+	require.NoError(t, err)
+	require.True(t, allowed)
+	require.Equal(t, limit-1, remaining)
 }

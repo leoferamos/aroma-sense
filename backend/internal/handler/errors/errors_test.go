@@ -6,55 +6,39 @@ import (
 	"testing"
 
 	"github.com/leoferamos/aroma-sense/internal/apperror"
+	"github.com/stretchr/testify/require"
 )
 
-func TestMapServiceError_DomainCodeMapped(t *testing.T) {
-	de := apperror.NewCodeMessage("unauthenticated", "unauthenticated")
-	status, msg, ok := mapServiceError(de)
-	if !ok {
-		t.Fatalf("expected ok=true")
-	}
-	if status != http.StatusUnauthorized {
-		t.Fatalf("unexpected status: %d", status)
-	}
-	if msg != "unauthenticated" {
-		t.Fatalf("unexpected message: %s", msg)
-	}
-}
+func TestMapServiceError(t *testing.T) {
+	t.Parallel()
 
-func TestMapServiceError_DomainCodeUnknownKeepsCode500(t *testing.T) {
-	de := apperror.NewCodeMessage("unknown_code", "oops")
-	status, msg, ok := mapServiceError(de)
-	if !ok {
-		t.Fatalf("expected ok=true")
+	tests := []struct {
+		name   string
+		input  error
+		ok     bool
+		status int
+		code   string
+	}{
+		{name: "domain code mapped", input: apperror.NewCodeMessage("unauthenticated", "unauthenticated"), ok: true, status: http.StatusUnauthorized, code: "unauthenticated"},
+		{name: "domain unknown code defaults 500", input: apperror.NewCodeMessage("unknown_code", "oops"), ok: true, status: http.StatusInternalServerError, code: "unknown_code"},
+		{name: "domain empty code becomes internal", input: apperror.NewDomain(errors.New("boom"), "", ""), ok: true, status: http.StatusInternalServerError, code: "internal_error"},
+		{name: "nil error", input: nil, ok: false},
+		{name: "non domain error", input: errors.New("plain"), ok: false},
 	}
-	if status != http.StatusInternalServerError {
-		t.Fatalf("unexpected status: %d", status)
-	}
-	if msg != "unknown_code" {
-		t.Fatalf("unexpected message: %s", msg)
-	}
-}
 
-func TestMapServiceError_DomainEmptyCodeDefaultsInternal(t *testing.T) {
-	de := apperror.NewDomain(errors.New("boom"), "", "")
-	status, msg, ok := mapServiceError(de)
-	if !ok {
-		t.Fatalf("expected ok=true")
-	}
-	if status != http.StatusInternalServerError {
-		t.Fatalf("unexpected status: %d", status)
-	}
-	if msg != "internal_error" {
-		t.Fatalf("unexpected message: %s", msg)
-	}
-}
+	for _, tt := range tests {
+		caseData := tt
+		t.Run(caseData.name, func(t *testing.T) {
+			t.Parallel()
 
-func TestMapServiceError_NilOrNonDomain(t *testing.T) {
-	if _, _, ok := mapServiceError(nil); ok {
-		t.Fatalf("expected ok=false for nil")
-	}
-	if _, _, ok := mapServiceError(errors.New("plain")); ok {
-		t.Fatalf("expected ok=false for non-domain error")
+			status, msg, ok := mapServiceError(caseData.input)
+			require.Equal(t, caseData.ok, ok)
+
+			if !caseData.ok {
+				return
+			}
+			require.Equal(t, caseData.status, status)
+			require.Equal(t, caseData.code, msg)
+		})
 	}
 }

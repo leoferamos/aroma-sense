@@ -17,6 +17,7 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/handler/product"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 // ---- MOCK SERVICE ----
@@ -171,6 +172,7 @@ func performMultipartRequest(t *testing.T, router *gin.Engine, method, url strin
 // ---- TESTS ----
 func TestProductHandler_CreateProduct(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupProductRouter()
@@ -294,6 +296,7 @@ func TestProductHandler_CreateProduct(t *testing.T) {
 
 func TestProductHandler_GetProduct(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupProductRouter()
@@ -313,7 +316,7 @@ func TestProductHandler_GetProduct(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 
 		var returnedProduct dto.ProductResponse
-		json.Unmarshal(w.Body.Bytes(), &returnedProduct)
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &returnedProduct))
 		assert.Equal(t, productResponse.Name, returnedProduct.Name)
 
 		mockService.AssertExpectations(t)
@@ -346,6 +349,7 @@ func TestProductHandler_GetProduct(t *testing.T) {
 
 func TestProductHandler_GetLatestProducts(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupProductRouter()
@@ -362,7 +366,7 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 
 		var returnedProducts []dto.ProductResponse
-		json.Unmarshal(w.Body.Bytes(), &returnedProducts)
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &returnedProducts))
 		assert.Len(t, returnedProducts, 2)
 
 		mockService.AssertExpectations(t)
@@ -390,6 +394,7 @@ func TestProductHandler_GetLatestProducts(t *testing.T) {
 
 func TestProductHandler_UpdateProduct(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupProductRouter()
@@ -433,6 +438,7 @@ func TestProductHandler_UpdateProduct(t *testing.T) {
 
 func TestProductHandler_DeleteProduct(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		router, mockService := setupProductRouter()
