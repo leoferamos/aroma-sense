@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/leoferamos/aroma-sense/compare/v1.3.2...v1.4.0) (2025-12-10)
+
+
+### Features
+
+* **review:** add full review report flow ([#100](https://github.com/leoferamos/aroma-sense/issues/100)) ([c7e7805](https://github.com/leoferamos/aroma-sense/commit/c7e7805afe38fe4ec01770a096764a3ee09b7457))
+
 ## [1.3.2](https://github.com/leoferamos/aroma-sense/compare/v1.3.1...v1.3.2) (2025-12-10)
 
 
