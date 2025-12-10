@@ -51,12 +51,22 @@ const OrderDetail: React.FC<Props> = ({ order }) => {
     }
   };
 
+  const orderIdToShow = order.public_id || order.id;
+  const formattedDate = new Date(order.created_at).toLocaleString(undefined, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+
   return (
     <div className="mt-3 bg-white p-6 rounded-lg shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div className="space-y-1">
-          <div className="text-sm text-gray-500">{t('order.orderNumber', { id: order.id })}</div>
-          <div className="text-lg font-semibold">{new Date(order.created_at).toLocaleString()}</div>
+          <div className="text-sm text-gray-500">{t('order.orderNumber', { id: orderIdToShow })}</div>
+          <div className="text-lg font-semibold">{formattedDate}</div>
         </div>
         <div className={`inline-flex items-center px-3 py-1 rounded text-sm font-medium ${statusColor(order.status)}`}>
           {t(`order.status.${order.status}`, order.status)}

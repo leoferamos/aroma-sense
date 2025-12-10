@@ -31,7 +31,7 @@ export function useLogin() {
     } catch (err: unknown) {
       if (isAxiosError(err)) {
         const errorMsg = err.response?.data?.error?.toLowerCase() || "";
-        if (errorMsg.includes("invalid credentials")) {
+        if (errorMsg.includes("invalid credentials") || errorMsg.includes("invalid_credentials")) {
           setError(t('auth.invalidCredentials'));
         } else {
           setError(err.response?.data?.error || t('errors.failedToLoadProfile'));
