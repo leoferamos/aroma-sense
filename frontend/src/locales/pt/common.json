@@ -243,8 +243,8 @@
     "shipping": {
       "title": "Frete",
       "enterPostalCode": "Informe o CEP para ver as opções disponíveis.",
-      "eta": "Prazo: {{count}} dia",
-      "eta_plural": "Prazo: {{count}} dias",
+      "eta_one": "Prazo: {{count}} dia",
+      "eta_other": "Prazo: {{count}} dias",
       "noOptions": "Nenhuma opção de frete para este CEP."
     },
     "cep": {
