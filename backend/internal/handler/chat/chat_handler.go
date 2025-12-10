@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
@@ -47,7 +48,7 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 	}
 	resp, err := h.chat.Chat(c.Request.Context(), req.SessionID, req.Message)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

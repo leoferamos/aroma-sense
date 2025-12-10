@@ -16,13 +16,14 @@ func TestValidatePassword(t *testing.T) {
 		{"no digit", "Abcdefgh", "user@example.com", false},
 	}
 	for _, tc := range cases {
-		err := ValidatePassword(tc.pw, tc.email)
-		if tc.ok && err != nil {
-			// report unexpected error
-			t.Errorf("%s expected success got error %v", tc.name, err)
-		}
-		if !tc.ok && err == nil {
-			t.Errorf("%s expected failure got success", tc.name)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			err := ValidatePassword(tc.pw, tc.email)
+			if tc.ok && err != nil {
+				t.Fatalf("expected success got error %v", err)
+			}
+			if !tc.ok && err == nil {
+				t.Fatalf("expected failure got success")
+			}
+		})
 	}
 }

@@ -2,6 +2,9 @@ package bootstrap
 
 import (
 	"github.com/leoferamos/aroma-sense/internal/handler"
+	admin "github.com/leoferamos/aroma-sense/internal/handler/admin"
+	product "github.com/leoferamos/aroma-sense/internal/handler/product"
+	shipping "github.com/leoferamos/aroma-sense/internal/handler/shipping"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 )
 
@@ -10,18 +13,18 @@ func initializeHandlers(services *services, rateLimiter rate.RateLimiter) *AppHa
 
 	return &AppHandlers{
 		UserHandler:              handler.NewUserHandler(services.auth, services.userProfile, services.lgpd, services.chat),
-		AdminUserHandler:         handler.NewAdminUserHandler(services.adminUser),
-		ProductHandler:           handler.NewProductHandler(services.product, services.review, services.userProfile),
+		AdminUserHandler:         admin.NewAdminUserHandler(services.adminUser),
+		ProductHandler:           product.NewProductHandler(services.product, services.review, services.userProfile),
 		CartHandler:              handler.NewCartHandler(services.cart),
 		OrderHandler:             handler.NewOrderHandler(services.order),
 		PasswordResetHandler:     handler.NewPasswordResetHandler(services.passwordReset, rateLimiter),
-		ShippingHandler:          handler.NewShippingHandler(services.shipping),
-		ReviewHandler:            handler.NewReviewHandler(services.review, services.reviewReport, services.userProfile, services.product, services.auditLog, rateLimiter),
+		ShippingHandler:          shipping.NewShippingHandler(services.shipping),
+		ReviewHandler:            product.NewReviewHandler(services.review, services.reviewReport, services.userProfile, services.product, services.auditLog, rateLimiter),
 		AIHandler:                handler.NewAIHandler(services.ai, rateLimiter),
 		ChatHandler:              handler.NewChatHandler(services.chat, rateLimiter),
 		AuditLogHandler:          handler.NewAuditLogHandler(services.auditLog),
-		AdminContestationHandler: handler.NewAdminContestationHandler(services.userContestation),
-		AdminReviewReportHandler: handler.NewAdminReviewReportHandler(services.reviewReport),
+		AdminContestationHandler: admin.NewAdminContestationHandler(services.userContestation),
+		AdminReviewReportHandler: admin.NewAdminReviewReportHandler(services.reviewReport),
 		PaymentHandler:           handler.NewPaymentHandler(services.payment),
 	}
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
-	handlererrors "github.com/leoferamos/aroma-sense/internal/handler"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 

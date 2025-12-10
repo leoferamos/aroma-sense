@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/auth"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -48,7 +49,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	input.Email = strings.ToLower(input.Email)
 
 	if err := h.authService.RegisterUser(input); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -81,7 +82,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 
 	accessToken, refreshToken, user, err := h.authService.Login(input)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -132,7 +133,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 	// Validate refresh token and generate new access token + rotate refresh token
 	accessToken, newRefreshToken, user, err := h.authService.RefreshAccessToken(refreshToken)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -169,7 +170,7 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 func (h *UserHandler) LogoutUser(c *gin.Context) {
 	if refreshToken, err := c.Cookie("refresh_token"); err == nil && refreshToken != "" {
 		if err := h.authService.InvalidateRefreshToken(refreshToken); err != nil {
-			if status, code, ok := mapServiceError(err); ok {
+			if status, code, ok := handlererrors.MapServiceError(err); ok {
 				c.JSON(status, dto.ErrorResponse{Error: code})
 				return
 			}
@@ -200,7 +201,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	}
 	user, err := h.userProfileService.GetByPublicID(publicID)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -245,7 +246,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 	user, err := h.userProfileService.UpdateDisplayName(publicID, req.DisplayName)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -284,7 +285,7 @@ func (h *UserHandler) ExportUserData(c *gin.Context) {
 
 	data, err := h.lgpdService.ExportUserData(publicID)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -328,7 +329,7 @@ func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
 	}
 
 	if err := h.lgpdService.RequestAccountDeletion(publicID); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -346,7 +347,7 @@ func (h *UserHandler) ConfirmAccountDeletion(c *gin.Context) {
 	}
 
 	if err := h.lgpdService.ConfirmAccountDeletion(publicID); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -377,7 +378,7 @@ func (h *UserHandler) CancelAccountDeletion(c *gin.Context) {
 	}
 
 	if err := h.lgpdService.CancelAccountDeletion(publicID); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -415,7 +416,7 @@ func (h *UserHandler) RequestContestation(c *gin.Context) {
 	}
 
 	if err := h.lgpdService.RequestContestation(publicID, req.Reason); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -453,7 +454,7 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 	}
 
 	if err := h.userProfileService.ChangePassword(publicID, req.CurrentPassword, req.NewPassword); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

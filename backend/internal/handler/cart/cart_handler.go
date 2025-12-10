@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -80,7 +81,7 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	// Add item to cart
 	cartResponse, err := h.cartService.AddItemToCart(userIDStr, req.ProductSlug, req.Quantity)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -132,7 +133,7 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 	// Update item quantity
 	cartResponse, err := h.cartService.UpdateItemQuantityBySlug(userIDStr, productSlug, req.Quantity)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -176,7 +177,7 @@ func (h *CartHandler) RemoveItem(c *gin.Context) {
 	// Remove item from cart
 	cartResponse, err := h.cartService.RemoveItemBySlug(userIDStr, productSlug)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -211,7 +212,7 @@ func (h *CartHandler) ClearCart(c *gin.Context) {
 	// Clear all items from cart
 	cartResponse, err := h.cartService.ClearCart(userIDStr)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

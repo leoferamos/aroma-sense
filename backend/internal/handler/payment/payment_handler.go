@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -34,7 +35,7 @@ func (h *PaymentHandler) CreateIntent(c *gin.Context) {
 
 	res, err := h.paymentService.CreateIntent(c.Request.Context(), userID, &req)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -63,7 +64,7 @@ func (h *PaymentHandler) HandleWebhook(c *gin.Context) {
 	}
 
 	if _, err := h.paymentService.HandleWebhook(c.Request.Context(), body, signature); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

@@ -2,6 +2,9 @@ package bootstrap
 
 import (
 	"github.com/leoferamos/aroma-sense/internal/handler"
+	admin "github.com/leoferamos/aroma-sense/internal/handler/admin"
+	product "github.com/leoferamos/aroma-sense/internal/handler/product"
+	shipping "github.com/leoferamos/aroma-sense/internal/handler/shipping"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/service"
@@ -12,18 +15,18 @@ import (
 // AppHandlers contains all initialized handlers
 type AppHandlers struct {
 	UserHandler              *handler.UserHandler
-	AdminUserHandler         *handler.AdminUserHandler
-	ProductHandler           *handler.ProductHandler
+	AdminUserHandler         *admin.AdminUserHandler
+	ProductHandler           *product.ProductHandler
 	CartHandler              *handler.CartHandler
 	OrderHandler             *handler.OrderHandler
 	PasswordResetHandler     *handler.PasswordResetHandler
-	ShippingHandler          *handler.ShippingHandler
-	ReviewHandler            *handler.ReviewHandler
+	ShippingHandler          *shipping.ShippingHandler
+	ReviewHandler            *product.ReviewHandler
 	AIHandler                *handler.AIHandler
 	ChatHandler              *handler.ChatHandler
 	AuditLogHandler          *handler.AuditLogHandler
-	AdminContestationHandler *handler.AdminContestationHandler
-	AdminReviewReportHandler *handler.AdminReviewReportHandler
+	AdminContestationHandler *admin.AdminContestationHandler
+	AdminReviewReportHandler *admin.AdminReviewReportHandler
 	PaymentHandler           *handler.PaymentHandler
 }
 

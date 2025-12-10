@@ -1,4 +1,4 @@
-package handler
+package product
 
 import (
 	"net/http"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/service"
@@ -27,34 +28,15 @@ func NewReviewHandler(s service.ReviewService, reportService service.ReviewRepor
 }
 
 // Create review handles the creation of a product review
-//
-// @Summary      Create product review
-// @Description  Creates a review for a delivered product. Requires authentication, a display_name set, and at least one delivered order containing the product. One review per user/product.
-// @Tags         reviews
-// @Accept       json
-// @Produce      json
-// @Param        slug    path     string            true  "Product slug"
-// @Param        review  body     dto.ReviewRequest true  "Review payload"
-// @Success      201  {object}  dto.ReviewResponse       "Review created"
-// @Failure      400  {object}  dto.ErrorResponse        "Error code: invalid_request"
-// @Failure      401  {object}  dto.ErrorResponse        "Error code: unauthenticated"
-// @Failure      403  {object}  dto.ErrorResponse        "Error code: profile_incomplete or not_delivered"
-// @Failure      404  {object}  dto.ErrorResponse        "Error code: product_not_found"
-// @Failure      409  {object}  dto.ErrorResponse        "Error code: already_reviewed"
-// @Failure      500  {object}  dto.ErrorResponse        "Error code: internal_error"
-// @Router       /products/{slug}/reviews [post]
-// @Security     BearerAuth
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	slug := c.Param("slug")
 
-	// Get product ID by slug
 	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
 		return
 	}
 
-	// Get authenticated user ID from context (set by JWT middleware)
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
@@ -80,7 +62,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 
 	review, err := h.service.CreateReview(c.Request.Context(), userModel, productID, req.Rating, req.Comment)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -100,24 +82,9 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 }
 
 // ListReviews handles the product reviews listing
-//
-// @Summary      List product reviews
-// @Description  Returns published reviews for a product in descending creation order.
-// @Tags         reviews
-// @Accept       json
-// @Produce      json
-// @Param        slug   path   string true   "Product slug"
-// @Param        page   query  int    false  "Page number"      default(1)
-// @Param        limit  query  int    false  "Items per page"   default(10)
-// @Success      200  {object}  dto.ReviewListResponse   "Paginated reviews"
-// @Failure      400  {object}  dto.ErrorResponse        "Error code: invalid_request"
-// @Failure      404  {object}  dto.ErrorResponse        "Error code: product_not_found"
-// @Failure      500  {object}  dto.ErrorResponse        "Error code: internal_error"
-// @Router       /products/{slug}/reviews [get]
 func (h *ReviewHandler) ListReviews(c *gin.Context) {
 	slug := c.Param("slug")
 
-	// Get product ID by slug
 	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
@@ -157,22 +124,9 @@ func (h *ReviewHandler) ListReviews(c *gin.Context) {
 }
 
 // GetSummary handles the product review summary
-//
-// @Summary      Get product review summary
-// @Description  Returns average rating, total review count, and rating distribution for a product.
-// @Tags         reviews
-// @Accept       json
-// @Produce      json
-// @Param        slug path  string  true  "Product slug"
-// @Success      200  {object}  dto.ReviewSummary       "Review summary"
-// @Failure      400  {object}  dto.ErrorResponse       "Error code: invalid_request"
-// @Failure      404  {object}  dto.ErrorResponse       "Error code: product_not_found"
-// @Failure      500  {object}  dto.ErrorResponse       "Error code: internal_error"
-// @Router       /products/{slug}/reviews/summary [get]
 func (h *ReviewHandler) GetSummary(c *gin.Context) {
 	slug := c.Param("slug")
 
-	// Get product ID by slug
 	productID, err := h.productService.GetProductIDBySlug(c.Request.Context(), slug)
 	if err != nil {
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "product_not_found"})
@@ -196,24 +150,9 @@ func (h *ReviewHandler) GetSummary(c *gin.Context) {
 }
 
 // DeleteReview handles the deletion of a user's own review
-//
-// @Summary      Delete product review
-// @Description  Soft deletes a review created by the authenticated user. Only the review author can delete their own review. The review data is retained for compliance purposes but marked as deleted and no longer visible.
-// @Tags         reviews
-// @Accept       json
-// @Produce      json
-// @Param        reviewID  path     string  true  "Review ID (UUID)"
-// @Success      200  {object}  dto.MessageResponse  "Review deleted successfully"
-// @Failure      401  {object}  dto.ErrorResponse    "Error code: unauthenticated"
-// @Failure      403  {object}  dto.ErrorResponse    "Error code: unauthorized"
-// @Failure      404  {object}  dto.ErrorResponse    "Error code: review_not_found"
-// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
-// @Router       /reviews/{reviewID} [delete]
-// @Security     BearerAuth
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	reviewID := c.Param("reviewID")
 
-	// Get authenticated user ID from context
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
@@ -228,7 +167,7 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 
 	err = h.service.DeleteOwnReview(c.Request.Context(), reviewID, publicID)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -236,7 +175,6 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 		return
 	}
 
-	// Log the deletion
 	if h.auditService != nil {
 		h.auditService.LogDeletionAction(&userModel.ID, userModel.ID, model.AuditActionReviewDeleted, map[string]interface{}{
 			"review_id":      reviewID,
@@ -248,23 +186,6 @@ func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 }
 
 // ReportReview handles reporting an abusive or inappropriate review
-//
-// @Summary      Report a review
-// @Description  Allows an authenticated user to report a review for abuse (spam/offensive/improper/other). Prevents self-reporting and duplicate reports per user.
-// @Tags         reviews
-// @Accept       json
-// @Produce      json
-// @Param        reviewID  path     string                     true  "Review ID (UUID)"
-// @Param        report    body     dto.ReviewReportRequest    true  "Report payload"
-// @Success      201  {object}  dto.MessageResponse  "Review reported successfully"
-// @Failure      400  {object}  dto.ErrorResponse    "Error code: invalid_request or invalid_category or reason_too_long"
-// @Failure      401  {object}  dto.ErrorResponse    "Error code: unauthenticated"
-// @Failure      403  {object}  dto.ErrorResponse    "Error code: cannot_report_own_review"
-// @Failure      404  {object}  dto.ErrorResponse    "Error code: review_not_found"
-// @Failure      409  {object}  dto.ErrorResponse    "Error code: already_reported"
-// @Failure      500  {object}  dto.ErrorResponse    "Error code: internal_error"
-// @Router       /reviews/{reviewID}/report [post]
-// @Security     BearerAuth
 func (h *ReviewHandler) ReportReview(c *gin.Context) {
 	reviewID := c.Param("reviewID")
 
@@ -281,7 +202,6 @@ func (h *ReviewHandler) ReportReview(c *gin.Context) {
 		}
 	}
 
-	// Get authenticated user ID from context
 	rawUserID, exists := c.Get("userID")
 	if !exists || rawUserID == "" {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthenticated"})
@@ -296,7 +216,7 @@ func (h *ReviewHandler) ReportReview(c *gin.Context) {
 	}
 
 	if err := h.reportService.Report(c.Request.Context(), reviewID, reporterID, req.Category, req.Reason); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

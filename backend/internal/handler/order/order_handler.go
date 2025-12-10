@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
@@ -50,7 +51,7 @@ func (h *OrderHandler) CreateOrderFromCart(c *gin.Context) {
 
 	orderResp, err := h.orderService.CreateOrderFromCart(userID, &req)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -143,7 +144,7 @@ func (h *OrderHandler) ListOrders(c *gin.Context) {
 
 	resp, err := h.orderService.AdminListOrders(status, startDatePtr, endDatePtr, page, perPage)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -173,7 +174,7 @@ func (h *OrderHandler) ListUserOrders(c *gin.Context) {
 
 	orders, err := h.orderService.GetOrdersByUser(userID)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

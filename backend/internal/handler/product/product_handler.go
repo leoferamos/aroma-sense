@@ -1,4 +1,4 @@
-package handler
+package product
 
 import (
 	"io"
@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/leoferamos/aroma-sense/internal/dto"
+	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/service"
 )
 
@@ -84,7 +85,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	if err := h.productService.CreateProduct(c.Request.Context(), form, fileUpload); err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -110,7 +111,7 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 
 	product, err := h.productService.GetProductBySlug(c.Request.Context(), slug)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -210,7 +211,7 @@ func (h *ProductHandler) GetLatestProducts(c *gin.Context) {
 
 	items, total, err := h.productService.SearchProducts(c.Request.Context(), query, page, limit, sort)
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -267,7 +268,7 @@ func (h *ProductHandler) AdminListProducts(c *gin.Context) {
 	products, total, err := h.productService.AdminListProducts(c.Request.Context(), page, limit)
 	if err != nil {
 		log.Printf("AdminListProducts error: %v", err)
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -306,7 +307,7 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 
 	product, err := h.productService.GetProductByID(c.Request.Context(), uint(id))
 	if err != nil {
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -349,7 +350,7 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 
 	if err := h.productService.UpdateProduct(c.Request.Context(), uint(id), input); err != nil {
 		log.Printf("UpdateProduct: service error: %v", err)
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}
@@ -385,7 +386,7 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 
 	if err := h.productService.DeleteProduct(c.Request.Context(), uint(id)); err != nil {
 		log.Printf("DeleteProduct: service error: %v", err)
-		if status, code, ok := mapServiceError(err); ok {
+		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
 			return
 		}

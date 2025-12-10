@@ -1,4 +1,4 @@
-package handler
+package handlererrors
 
 import (
 	"errors"
@@ -98,4 +98,9 @@ func mapServiceError(err error) (status int, message string, ok bool) {
 	}
 
 	return 0, "", false
+}
+
+// MapServiceError exposes error-to-HTTP mapping for handler subpackages.
+func MapServiceError(err error) (status int, message string, ok bool) {
+	return mapServiceError(err)
 }

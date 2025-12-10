@@ -1,4 +1,4 @@
-package handler_test
+package product_test
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/dto"
-	"github.com/leoferamos/aroma-sense/internal/handler"
+	"github.com/leoferamos/aroma-sense/internal/handler/product"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -104,7 +104,7 @@ func (m *MockProductService) AdminListProducts(ctx context.Context, page int, li
 // ---- SETUP ROUTER ----
 func setupProductRouter() (*gin.Engine, *MockProductService) {
 	mockService := new(MockProductService)
-	productHandler := handler.NewProductHandler(mockService, nil, nil)
+	productHandler := product.NewProductHandler(mockService, nil, nil)
 
 	router := gin.Default()
 	// Public routes
