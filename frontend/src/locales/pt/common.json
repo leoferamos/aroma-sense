@@ -399,7 +399,8 @@
       "pending": "Pendente",
       "shipped": "Enviado",
       "delivered": "Entregue",
-      "cancelled": "Cancelado"
+      "cancelled": "Cancelado",
+      "processing": "Processando"
     },
     "orderAgain": "Pedir Novamente",
     "reordering": "Repetindo...",

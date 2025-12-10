@@ -349,7 +349,8 @@
       "pending": "Pending",
       "shipped": "Shipped",
       "delivered": "Delivered",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "processing": "Processing"
     },
     "orderAgain": "Order Again",
     "reordering": "Reordering...",
