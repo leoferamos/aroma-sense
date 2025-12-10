@@ -13,6 +13,12 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/repository"
 )
 
+// ChatServiceInterface defines the minimal surface used by handlers for chat interactions.
+type ChatServiceInterface interface {
+	Chat(ctx context.Context, sessionID string, rawMsg string) (dto.ChatResponse, error)
+	ClearRetrievalCache()
+}
+
 // ChatService orchestrates conversational recommendation with a lightweight LLM.
 type ChatService struct {
 	products  repository.ProductRepository

@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -209,6 +210,16 @@ func (m *MockLgpdService) RequestAccountDeletion(publicID string) error {
 	return args.Error(0)
 }
 
+func (m *MockLgpdService) ProcessPendingDeletions() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockLgpdService) ProcessExpiredAnonymizations() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockLgpdService) ConfirmAccountDeletion(publicID string) error {
 	args := m.Called(publicID)
 	return args.Error(0)
@@ -231,7 +242,7 @@ func (m *MockLgpdService) RequestContestation(publicID string, reason string) er
 
 type MockChatService struct{ mock.Mock }
 
-func (m *MockChatService) Chat(ctx any, sessionID string, msg string) (dto.ChatResponse, error) {
+func (m *MockChatService) Chat(ctx context.Context, sessionID string, msg string) (dto.ChatResponse, error) {
 	args := m.Called(ctx, sessionID, msg)
 	return args.Get(0).(dto.ChatResponse), args.Error(1)
 }

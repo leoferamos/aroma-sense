@@ -14,11 +14,11 @@ type UserHandler struct {
 	authService        service.AuthService
 	userProfileService service.UserProfileService
 	lgpdService        service.LgpdService
-	chatService        *service.ChatService
+	chatService        service.ChatServiceInterface
 }
 
 // NewUserHandler creates a new instance of UserHandler
-func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService, chat *service.ChatService) *UserHandler {
+func NewUserHandler(auth service.AuthService, profile service.UserProfileService, lgpd service.LgpdService, chat service.ChatServiceInterface) *UserHandler {
 	return &UserHandler{authService: auth, userProfileService: profile, lgpdService: lgpd, chatService: chat}
 }
 
@@ -177,7 +177,6 @@ func (h *UserHandler) LogoutUser(c *gin.Context) {
 			return
 		}
 	}
-	h.chatService.ClearRetrievalCache()
 	auth.ClearRefreshTokenCookie(c)
 
 	c.JSON(http.StatusOK, dto.MessageResponse{Message: "Logout successful"})
