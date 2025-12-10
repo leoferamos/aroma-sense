@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/leoferamos/aroma-sense/compare/v1.5.0...v1.6.0) (2025-12-10)
+
+
+### Features
+
+* **super-admin:** implement super-admin role and create user admin funcionality ([#102](https://github.com/leoferamos/aroma-sense/issues/102)) ([97541e8](https://github.com/leoferamos/aroma-sense/commit/97541e8a39bd24c0d4e5efe5b9e73574931f0c42))
+
 # [1.5.0](https://github.com/leoferamos/aroma-sense/compare/v1.4.0...v1.5.0) (2025-12-10)
 
 
