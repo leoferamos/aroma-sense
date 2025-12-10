@@ -1,12 +1,17 @@
 package service
 
 import (
+	"strings"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/leoferamos/aroma-sense/internal/apperror"
 	"github.com/leoferamos/aroma-sense/internal/model"
 	"github.com/leoferamos/aroma-sense/internal/notification"
 	"github.com/leoferamos/aroma-sense/internal/repository"
+	"github.com/leoferamos/aroma-sense/internal/utils"
+	"github.com/leoferamos/aroma-sense/internal/validation"
 )
 
 // AdminUserService defines the interface for admin user management business logic
@@ -14,6 +19,7 @@ type AdminUserService interface {
 	ListUsers(limit int, offset int, filters map[string]interface{}) ([]*model.User, int64, error)
 	GetUserByID(id uint) (*model.User, error)
 	UpdateUserRole(userID uint, newRole string, adminPublicID string) error
+	CreateAdminUser(email string, password string, displayName string, superAdminPublicID string) (*model.User, error)
 	DeactivateUser(userID uint, adminPublicID string, reason string, notes string, suspensionUntil *time.Time) error
 	AdminReactivateUser(userID uint, adminPublicID string, reason string) error
 }
@@ -26,6 +32,48 @@ type adminUserService struct {
 
 func NewAdminUserService(repo repository.UserRepository, auditLogService AuditLogService, notifier notification.NotificationService) AdminUserService {
 	return &adminUserService{repo: repo, auditLogService: auditLogService, notifier: notifier}
+}
+
+// CreateAdminUser allows super admin to create a new admin user
+func (s *adminUserService) CreateAdminUser(email string, password string, displayName string, superAdminPublicID string) (*model.User, error) {
+	if err := validation.ValidatePassword(password, email); err != nil {
+		return nil, err
+	}
+	if existing, err := s.repo.FindByEmail(email); err == nil && existing != nil {
+		return nil, apperror.NewCodeMessage("email_already_registered", "email already registered")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, apperror.NewCodeMessage("password_hash_failed", "failed to hash password")
+	}
+
+	user := model.User{
+		Email:        strings.ToLower(email),
+		PasswordHash: string(hashedPassword),
+		Role:         "admin",
+	}
+	if displayName != "" {
+		user.DisplayName = &displayName
+	}
+
+	if err := s.repo.Create(&user); err != nil {
+		return nil, err
+	}
+
+	if s.auditLogService != nil {
+		admin, err := s.repo.FindByPublicID(superAdminPublicID)
+		if err == nil {
+			s.auditLogService.LogAdminAction(admin.ID, user.ID, model.AuditActionRoleChanged, map[string]interface{}{
+				"action":     "create_admin",
+				"new_role":   "admin",
+				"email":      utils.MaskEmail(user.Email),
+				"created_by": superAdminPublicID,
+			})
+		}
+	}
+
+	return &user, nil
 }
 
 // ListUsers returns paginated list of users for admin (LGPD compliance)

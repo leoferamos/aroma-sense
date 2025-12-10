@@ -14,7 +14,12 @@ func AdminRoutes(r *gin.Engine, adminUserHandler *handler.AdminUserHandler,
 	adminReviewReportHandler *handler.AdminReviewReportHandler) {
 	adminGroup := r.Group("/admin")
 	adminGroup.Use(auth.JWTAuthMiddleware(), auth.AdminOnly())
+
+	superAdminGroup := r.Group("/admin")
+	superAdminGroup.Use(auth.JWTAuthMiddleware(), auth.SuperAdminOnly())
 	{
+		superAdminGroup.POST("/users", adminUserHandler.AdminCreateAdmin)
+
 		// User management
 		adminGroup.GET("/users/:id/audit-logs", auditLogHandler.GetUserAuditLogs)
 		adminGroup.POST("/users/:id/reactivate", adminUserHandler.AdminReactivateUser)
