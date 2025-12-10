@@ -59,8 +59,38 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 	}
 
 	conv := s.getOrCreate(sid)
-	// Update conversation state
-	conv.AddMessage(sanitized, ai.Parse(sanitized))
+	// Parse latest user message
+	parsed := ai.Parse(sanitized)
+
+	// Detect context reset: if user message contains a new main slot (occasion, season, climate, intensity) or reset keywords, overwrite those slots and clear others
+	resetKeywords := []string{"agora", "na verdade", "quero outro", "outro", "mudei de ideia", "dessa vez", "desta vez", "novo pedido", "diferente", "mudou", "trocar", "quero"}
+	msgLower := strings.ToLower(sanitized)
+	reset := false
+	for _, kw := range resetKeywords {
+		if strings.Contains(msgLower, kw) {
+			reset = true
+			break
+		}
+	}
+	// If user provided a new occasion, season, climate, or intensity, treat as context reset
+	if len(parsed.Occasions) > 0 || len(parsed.Seasons) > 0 || len(parsed.Climate) > 0 || len(parsed.Intensity) > 0 {
+		reset = true
+	}
+	if reset {
+		// Overwrite main slots, clear others
+		conv.Prefs.Occasions = parsed.Occasions
+		conv.Prefs.Seasons = parsed.Seasons
+		conv.Prefs.Climate = parsed.Climate
+		conv.Prefs.Intensity = parsed.Intensity
+		conv.Prefs.Accords = parsed.Accords
+		conv.Prefs.Budget = parsed.Budget
+		conv.Prefs.Longevity = parsed.Longevity
+		conv.Prefs.Gender = parsed.Gender
+		conv.Prefs.Notes = parsed.Notes
+	} else {
+		conv.Prefs = ai.Merge(conv.Prefs, parsed)
+	}
+	conv.AddMessage(sanitized, parsed)
 
 	// If message seems off-topic and we don't have preferences yet
 	if !isOnTopic(sanitized) && isEmptyPrefs(conv.Prefs) {
