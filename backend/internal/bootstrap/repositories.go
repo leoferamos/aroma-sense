@@ -14,6 +14,7 @@ type repositories struct {
 	payment          repository.PaymentRepository
 	resetToken       repository.ResetTokenRepository
 	review           repository.ReviewRepository
+	reviewReport     repository.ReviewReportRepository
 	auditLog         repository.AuditLogRepository
 	userContestation repository.UserContestationRepository
 }
@@ -28,6 +29,7 @@ func initializeRepositories(db *gorm.DB) *repositories {
 		payment:          repository.NewPaymentRepository(db),
 		resetToken:       repository.NewResetTokenRepository(db),
 		review:           repository.NewReviewRepository(db),
+		reviewReport:     repository.NewReviewReportRepository(db),
 		auditLog:         repository.NewAuditLogRepository(db),
 		userContestation: repository.NewUserContestationRepository(db),
 	}
