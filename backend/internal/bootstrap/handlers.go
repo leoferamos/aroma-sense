@@ -16,11 +16,12 @@ func initializeHandlers(services *services, rateLimiter rate.RateLimiter) *AppHa
 		OrderHandler:             handler.NewOrderHandler(services.order),
 		PasswordResetHandler:     handler.NewPasswordResetHandler(services.passwordReset, rateLimiter),
 		ShippingHandler:          handler.NewShippingHandler(services.shipping),
-		ReviewHandler:            handler.NewReviewHandler(services.review, services.userProfile, services.product, services.auditLog),
+		ReviewHandler:            handler.NewReviewHandler(services.review, services.reviewReport, services.userProfile, services.product, services.auditLog, rateLimiter),
 		AIHandler:                handler.NewAIHandler(services.ai, rateLimiter),
 		ChatHandler:              handler.NewChatHandler(services.chat, rateLimiter),
 		AuditLogHandler:          handler.NewAuditLogHandler(services.auditLog),
 		AdminContestationHandler: handler.NewAdminContestationHandler(services.userContestation),
+		AdminReviewReportHandler: handler.NewAdminReviewReportHandler(services.reviewReport),
 		PaymentHandler:           handler.NewPaymentHandler(services.payment),
 	}
 }

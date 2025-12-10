@@ -20,6 +20,7 @@ type services struct {
 	payment          service.PaymentService
 	passwordReset    service.PasswordResetService
 	review           service.ReviewService
+	reviewReport     service.ReviewReportService
 	ai               *service.AIService
 	chat             *service.ChatService
 	shipping         service.ShippingService
@@ -46,6 +47,7 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 	userContestationService := service.NewUserContestationService(repos.userContestation, repos.user, adminUserService)
 	lgpdService := service.NewLgpdService(repos.user, repos.userContestation, auditLogService, notifier)
 	reviewService := service.NewReviewService(repos.review, repos.order, repos.product)
+	reviewReportService := service.NewReviewReportService(repos.reviewReport, repos.review, repos.user, adminUserService)
 	chatService := service.NewChatService(repos.product, integrations.ai.llmProvider, integrations.ai.embProvider, aiService)
 	orderService := service.NewOrderService(repos.order, repos.cart, repos.product, integrations.shipping.service)
 	passwordResetService := service.NewPasswordResetService(repos.resetToken, repos.user, notifier)
@@ -68,6 +70,7 @@ func initializeServices(repos *repositories, integrations *integrations, storage
 		payment:          paymentSvc,
 		passwordReset:    passwordResetService,
 		review:           reviewService,
+		reviewReport:     reviewReportService,
 		ai:               aiService,
 		chat:             chatService,
 		shipping:         integrations.shipping.service,

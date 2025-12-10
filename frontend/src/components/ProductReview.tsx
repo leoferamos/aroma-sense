@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import Toast from './Toast';
 import ConfirmModal from './ConfirmModal';
+import { reportReview, type ReportReviewRequest } from '../services/review';
+import { isAxiosError } from 'axios';
 
 interface ProductReviewProps {
     productSlug: string;
@@ -18,6 +20,9 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning' | 'info'; message: string } | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ open: boolean; reviewId: string | null }>({ open: false, reviewId: null });
+    const [reportModal, setReportModal] = useState<{ open: boolean; reviewId: string | null }>({ open: false, reviewId: null });
+    const [reportForm, setReportForm] = useState<ReportReviewRequest>({ category: 'spam', reason: '' });
+    const [reportSubmitting, setReportSubmitting] = useState(false);
     const [deletingReview, setDeletingReview] = useState(false);
     const [canReviewVisible, setCanReviewVisible] = useState<boolean>(!!canReview);
     const { reviews, summary, loading, error, createReview, deleteReview, page, limit, total, setPage, setLimit } = useReviews(productSlug);
@@ -79,6 +84,41 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
 
     const handleCancelDelete = () => {
         setConfirmModal({ open: false, reviewId: null });
+    };
+
+    const handleOpenReport = (reviewId: string) => {
+        setReportForm({ category: 'spam', reason: '' });
+        setReportModal({ open: true, reviewId });
+    };
+
+    const handleSubmitReport = async () => {
+        if (!reportModal.reviewId) return;
+        if (!reportForm.reason.trim()) {
+            setToast({ type: 'warning', message: t('reviews.provideReportReason') });
+            return;
+        }
+        setReportSubmitting(true);
+        try {
+            await reportReview(reportModal.reviewId, reportForm);
+            setToast({ type: 'success', message: t('reviews.reportSubmitted') });
+            setReportModal({ open: false, reviewId: null });
+        } catch (err: unknown) {
+            let message = t('reviews.reportFailed');
+            if (isAxiosError(err)) {
+                const code = err.response?.data?.code;
+                const status = err.response?.status;
+                if (code === 'already_reported') {
+                    message = t('reviews.reportAlreadySubmitted');
+                } else if (code === 'rate_limited' || status === 429) {
+                    message = t('reviews.reportRateLimited');
+                } else if (err.response?.data?.error) {
+                    message = err.response.data.error;
+                }
+            }
+            setToast({ type: 'error', message: message || t('reviews.reportFailed') });
+        } finally {
+            setReportSubmitting(false);
+        }
     };
 
     const displayRating = hoverRating || rating;
@@ -231,6 +271,7 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
                     {reviews.map((r) => {
                         // Show delete button only if user is the author of the review
                         const canDelete = user && r.author_id === user.public_id;
+                        const canReport = !!user && (!canDelete); // avoid reporting own review
                         
                         return (
                         <li key={r.id} className="border border-gray-200 rounded-md p-4">
@@ -247,6 +288,22 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
+                                        </button>
+                                    )}
+                                    {canReport && (
+                                        <button
+                                            onClick={() => handleOpenReport(r.id)}
+                                            className="text-amber-600 hover:text-amber-800 p-1 rounded transition-colors"
+                                            aria-label={t('reviews.report')}
+                                            title={t('reviews.report')}
+                                        >
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M4 21h2" />
+                                                <path d="M5 21V5" />
+                                                <path d="M5 5l10-2v10l-10 2z" />
+                                                <path d="M15 5l4-1v10l-4 1" />
+                                            </svg>
+                                            <span className="sr-only">{t('reviews.report')}</span>
                                         </button>
                                     )}
                                 </div>
@@ -305,6 +362,66 @@ const ProductReview: React.FC<ProductReviewProps> = ({ productSlug, canReview })
                 onCancel={handleCancelDelete}
                 loading={deletingReview}
             />
+
+            {/* Report Review Modal */}
+            {reportModal.open && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-lg font-semibold text-gray-900">{t('reviews.reportReview')}</h4>
+                            <button
+                                onClick={() => setReportModal({ open: false, reviewId: null })}
+                                className="text-gray-500 hover:text-gray-700"
+                                aria-label={t('common.close')}
+                            >
+                                X
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <label className="block text-sm text-gray-800">
+                                {t('reviews.reportCategory')}
+                                <select
+                                    value={reportForm.category}
+                                    onChange={(e) => setReportForm((prev) => ({ ...prev, category: e.target.value }))}
+                                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="spam">{t('reviews.reportSpam')}</option>
+                                    <option value="abuse">{t('reviews.reportAbuse')}</option>
+                                    <option value="offensive">{t('reviews.reportOffensive')}</option>
+                                    <option value="other">{t('reviews.reportOther')}</option>
+                                </select>
+                            </label>
+                            <label className="block text-sm text-gray-800">
+                                {t('reviews.reportReason')}
+                                <textarea
+                                    value={reportForm.reason}
+                                    onChange={(e) => setReportForm((prev) => ({ ...prev, reason: e.target.value }))}
+                                    rows={4}
+                                    maxLength={500}
+                                    className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder={t('reviews.reportPlaceholder')}
+                                />
+                            </label>
+                        </div>
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                onClick={() => setReportModal({ open: false, reviewId: null })}
+                                className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                disabled={reportSubmitting}
+                            >
+                                {t('common.cancel')}
+                            </button>
+                            <button
+                                onClick={handleSubmitReport}
+                                disabled={reportSubmitting}
+                                className={cn('px-4 py-2 rounded text-white', reportSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700')}
+                            >
+                                {reportSubmitting ? t('reviews.submitting') : t('reviews.submitReport')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };

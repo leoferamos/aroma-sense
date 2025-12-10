@@ -5,6 +5,7 @@
     "orders": "Orders",
     "products": "Products",
     "contestations": "Contestations",
+    "reviewReports": "Review reports",
     "auditLogs": "Audit Logs",
     "profile": "Profile",
     "logout": "Logout"
@@ -14,6 +15,7 @@
   "orders": "Orders",
   "products": "Products",
   "contestations": "Contestations",
+  "reviewReports": "Review reports",
   "loading": "Loading…",
   "totalActions": "Total actions",
   "addProduct": "Add Product",
@@ -110,4 +112,25 @@
   "actions": "Actions",
   "reviewNotesPlaceholder": "Review notes",
   "approve": "Approve",
-  "reject": "Reject"}
+  "reject": "Reject",
+  "reviewReportsTitle": "Review reports",
+  "review": "Review",
+  "reporter": "Reporter",
+  "rating": "Rating",
+  "noComment": "No comment",
+  "unknownUser": "Unknown user",
+  "reviewCategory": {
+    "spam": "Spam or promotion",
+    "abuse": "Harassment or hate",
+    "offensive": "Offensive content",
+    "other": "Other"
+  },
+  "accepted": "Accepted",
+  "rejected": "Rejected",
+  "failedToLoadReviewReports": "Failed to load review reports",
+  "failedToResolveReviewReport": "Failed to resolve review report",
+  "noReviewReports": "No review reports found for this status.",
+  "deactivateUser": "Deactivate user",
+  "suspensionUntil": "Suspension until",
+  "alreadyResolved": "Already resolved"
+}

@@ -27,6 +27,11 @@ export interface ReviewSummary {
   distribution: Record<number, number>;
 }
 
+export interface ReportReviewRequest {
+  category?: string;
+  reason: string;
+}
+
 export async function listReviews(
   productSlug: string,
   params?: { page?: number; limit?: number; signal?: AbortSignal }
@@ -66,4 +71,8 @@ export async function deleteReview(
   reviewId: string
 ): Promise<void> {
   await api.delete(`/reviews/${reviewId}`);
+}
+
+export async function reportReview(reviewId: string, payload: ReportReviewRequest): Promise<void> {
+  await api.post(`/reviews/${reviewId}/report`, payload);
 }

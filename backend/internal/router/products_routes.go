@@ -28,5 +28,6 @@ func ProductRoutes(r *gin.Engine, productHandler *handler.ProductHandler, review
 	{
 		authenticatedGroup.POST("/products/:slug/reviews", reviewHandler.CreateReview)
 		authenticatedGroup.DELETE("/reviews/:reviewID", reviewHandler.DeleteReview)
+		authenticatedGroup.POST("/reviews/:reviewID/report", reviewHandler.ReportReview)
 	}
 }

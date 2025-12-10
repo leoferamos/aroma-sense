@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getPendingContestations, approveContestation, rejectContestation } from '../../services/adminContestations';
 import type { AdminContestation } from '../../services/adminContestations';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -13,16 +13,8 @@ const AdminContestations: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [reviewNotes, setReviewNotes] = useState<{ [id: number]: string }>({});
 
-  const navItems = [
-    { label: t('dashboard'), to: '/admin/dashboard' },
-    { label: t('products'), to: '/admin/products' },
-    { label: t('orders'), to: '/admin/orders' },
-    { label: t('users'), to: '/admin/users' },
-    { label: t('auditLogs'), to: '/admin/audit-logs' },
-    { label: t('contestations'), to: '/admin/contestations' },
-  ];
 
-  const fetchContestations = async () => {
+  const fetchContestations = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -33,7 +25,7 @@ const AdminContestations: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     fetchContestations();
@@ -67,8 +59,7 @@ const AdminContestations: React.FC = () => {
 
   return (
     <AdminLayout
-      navItems={navItems}
-      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('dashboard')}</Link></div>}
+      actions={<div className="flex items-center gap-2"><Link to="/admin/dashboard" className="h-9 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">← {t('dashboard')}</Link></div>}
     >
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-4">{t('pendingUserContestations')}</h2>
