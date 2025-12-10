@@ -585,6 +585,84 @@ definitions:
       total:
         type: integer
     type: object
+  dto.ReviewReportAdminItem:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      reason_category:
+        type: string
+      reason_text:
+        type: string
+      reported_by:
+        type: string
+      reporter:
+        $ref: '#/definitions/dto.ReviewReportAdminReporter'
+      review:
+        $ref: '#/definitions/dto.ReviewReportAdminReview'
+      review_id:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.ReviewReportAdminReporter:
+    properties:
+      display_name:
+        type: string
+      public_id:
+        type: string
+    type: object
+  dto.ReviewReportAdminResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.ReviewReportAdminItem'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.ReviewReportAdminReview:
+    properties:
+      comment:
+        type: string
+      id:
+        type: string
+      rating:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  dto.ReviewReportRequest:
+    properties:
+      category:
+        type: string
+      reason:
+        maxLength: 500
+        type: string
+    required:
+    - category
+    type: object
+  dto.ReviewReportResolveRequest:
+    properties:
+      action:
+        enum:
+        - accept
+        - reject
+        type: string
+      deactivate_user:
+        type: boolean
+      notes:
+        type: string
+      suspension_until:
+        type: string
+    required:
+    - action
+    type: object
   dto.ReviewRequest:
     properties:
       comment:
@@ -1329,6 +1407,105 @@ paths:
       summary: Update product
       tags:
       - admin
+  /admin/review-reports:
+    get:
+      description: List review reports filtered by status (pending/accepted/rejected)
+      parameters:
+      - default: pending
+        description: Status filter
+        enum:
+        - pending
+        - accepted
+        - rejected
+        in: query
+        name: status
+        type: string
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ReviewReportAdminResponse'
+        "400":
+          description: 'Error code: invalid_status'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: 'Error code: unauthenticated'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: 'Error code: unauthorized'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 'Error code: internal_error'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List review reports
+      tags:
+      - admin-review-reports
+  /admin/review-reports/{id}/resolve:
+    post:
+      description: Accept or reject a review report. Accepting hides the review. Optionally
+        deactivate the user later.
+      parameters:
+      - description: Report ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Resolve payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewReportResolveRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: 'Error code: invalid_action or invalid_request'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: 'Error code: unauthenticated'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: 'Error code: unauthorized'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: 'Error code: report_not_found or review_not_found'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "409":
+          description: 'Error code: report_already_resolved'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 'Error code: internal_error'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Resolve a review report
+      tags:
+      - admin-review-reports
   /admin/users:
     get:
       consumes:
@@ -2184,6 +2361,60 @@ paths:
       security:
       - BearerAuth: []
       summary: Delete product review
+      tags:
+      - reviews
+  /reviews/{reviewID}/report:
+    post:
+      consumes:
+      - application/json
+      description: Allows an authenticated user to report a review for abuse (spam/offensive/improper/other).
+        Prevents self-reporting and duplicate reports per user.
+      parameters:
+      - description: Review ID (UUID)
+        in: path
+        name: reviewID
+        required: true
+        type: string
+      - description: Report payload
+        in: body
+        name: report
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewReportRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review reported successfully
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "400":
+          description: 'Error code: invalid_request or invalid_category or reason_too_long'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: 'Error code: unauthenticated'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: 'Error code: cannot_report_own_review'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: 'Error code: review_not_found'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "409":
+          description: 'Error code: already_reported'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: 'Error code: internal_error'
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Report a review
       tags:
       - reviews
   /shipping/options:
