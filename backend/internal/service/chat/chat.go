@@ -58,23 +58,52 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 		return dto.ChatResponse{Reply: reply}, nil
 	}
 
-	normalizedMsg := strings.TrimSpace(strings.ToLower(sanitized))
-	if normalizedMsg == "/clear" || normalizedMsg == "/clear-recs" || normalizedMsg == "limpar recomendações" || normalizedMsg == "limpar recomendacoes" {
-		s.retrieval.ClearCache()
-		s.resetConversation(sid)
-		reply := "Pronto! Limpei suas recomendações. Pode me dizer o que você procura agora 😊"
-		return dto.ChatResponse{Reply: reply}, nil
-	}
-
 	conv := s.getOrCreate(sid)
-	// Update conversation state
-	conv.AddMessage(sanitized, ai.Parse(sanitized))
+	// Parse latest user message
+	parsed := ai.Parse(sanitized)
+
+	// Detect context reset: if user message contains a new main slot (occasion, season, climate, intensity) or reset keywords, overwrite those slots and clear others
+	resetKeywords := []string{"agora", "na verdade", "quero outro", "outro", "mudei de ideia", "dessa vez", "desta vez", "novo pedido", "diferente", "mudou", "trocar", "quero"}
+	msgLower := strings.ToLower(sanitized)
+	reset := false
+	for _, kw := range resetKeywords {
+		if strings.Contains(msgLower, kw) {
+			reset = true
+			break
+		}
+	}
+	// If user provided a new occasion, season, climate, or intensity, treat as context reset
+	if len(parsed.Occasions) > 0 || len(parsed.Seasons) > 0 || len(parsed.Climate) > 0 || len(parsed.Intensity) > 0 {
+		reset = true
+	}
+	if reset {
+		// Overwrite main slots, clear others
+		conv.Prefs.Occasions = parsed.Occasions
+		conv.Prefs.Seasons = parsed.Seasons
+		conv.Prefs.Climate = parsed.Climate
+		conv.Prefs.Intensity = parsed.Intensity
+		conv.Prefs.Accords = parsed.Accords
+		conv.Prefs.Budget = parsed.Budget
+		conv.Prefs.Longevity = parsed.Longevity
+		conv.Prefs.Gender = parsed.Gender
+		conv.Prefs.Notes = parsed.Notes
+	} else {
+		conv.Prefs = ai.Merge(conv.Prefs, parsed)
+	}
+	conv.AddMessage(sanitized, parsed)
 
 	// If message seems off-topic and we don't have preferences yet
 	if !isOnTopic(sanitized) && isEmptyPrefs(conv.Prefs) {
 		reply := "Posso ajudar especificamente com perfumes. Me diga, por exemplo: ocasião (trabalho, festa), acordes que curte (cítrico, floral, amadeirado), intensidade (suave, moderada, forte) e sua faixa de preço."
 		follow := ai.BuildFollowUpHint(conv.Prefs)
 		return dto.ChatResponse{Reply: reply, FollowUpHint: follow}, nil
+	}
+
+	// Only suggest products if user has provided enough preferences
+	if !hasMinimumPrefs(conv.Prefs) {
+		reply := "Para te sugerir perfumes, preciso saber um pouco mais sobre suas preferências. Me diga, por exemplo: ocasião (trabalho, festa), acordes que curte (cítrico, floral, amadeirado), intensidade (suave, moderada, forte) ou gênero."
+		follow := ai.BuildFollowUpHint(conv.Prefs)
+		return dto.ChatResponse{Reply: reply, Suggestions: nil, FollowUpHint: follow}, nil
 	}
 
 	// Retrieve candidate products
@@ -139,12 +168,6 @@ func (s *ChatService) getOrCreate(id string) *ai.Conversation {
 	c := ai.NewConversation()
 	s.state[id] = c
 	return c
-}
-
-func (s *ChatService) resetConversation(id string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	delete(s.state, id)
 }
 
 // --- lightweight intent/topic helpers ---

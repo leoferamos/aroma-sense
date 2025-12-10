@@ -293,8 +293,7 @@
     "reportRateLimited": "Too many reports. Please try again later."
   },
   "chat": {
-    "placeholder": "Type your preference… (/clear-recs to reset)",
-    "clearRecommendations": "Clear recommendations",
+    "placeholder": "Type your preference…",
     "suggestions": "Suggestions"
   },
   "errors": {

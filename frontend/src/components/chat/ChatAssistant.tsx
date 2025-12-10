@@ -22,12 +22,13 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            content: 'Hello! I\'m your Aroma Sense assistant. How can I help you today?',
+            content: 'Olá! Eu sou a assistente da Aroma Sense. Como posso te ajudar hoje?',
             sender: 'assistant',
             timestamp: new Date(),
         },
     ]);
     const [inputValue, setInputValue] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [lastSuggestions, setLastSuggestions] = useState<ChatResponse['suggestions']>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -50,11 +51,13 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!inputValue.trim()) return;
-
-        await sendMessage(inputValue);
+        const msg = inputValue;
         setInputValue('');
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 0);
+        await sendMessage(msg);
     };
 
     const sendMessage = async (content: string) => {
@@ -113,11 +116,6 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleClearRecommendations = () => {
-        setLastSuggestions([]);
-        sendMessage('/clear-recs');
     };
 
     if (!isOpen) return null;
@@ -223,6 +221,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                     <div className="flex flex-col gap-2">
                         <div className="flex gap-2">
                             <input
+                                ref={inputRef}
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
@@ -240,20 +239,14 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ isOpen, onClose }) => {
                                         : 'bg-blue-600 text-white hover:bg-blue-700'
                                 )}
                                 aria-label="Send message"
+                                tabIndex={0}
                             >
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16141721 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.42274535 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99701575 L3.03521743,10.4380088 C3.03521743,10.5951061 3.34915502,10.7522035 3.50612381,10.7522035 L16.6915026,11.5376905 C16.6915026,11.5376905 17.1624089,11.5376905 17.1624089,12.0089827 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z" />
                                 </svg>
                             </button>
                         </div>
-                        <button
-                            type="button"
-                            onClick={handleClearRecommendations}
-                            disabled={isLoading}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                        >
-                            {t('chat.clearRecommendations')}
-                        </button>
+                        {/* Clear recommendations button removed to reduce latency and simplify UX */}
                     </div>
                 </form>
             </div>

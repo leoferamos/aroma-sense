@@ -342,8 +342,7 @@
     "reportRateLimited": "Muitas denúncias. Tente novamente mais tarde."
   },
   "chat": {
-    "placeholder": "Digite sua preferência… (/clear-recs para limpar)",
-    "clearRecommendations": "Limpar recomendações",
+    "placeholder": "Digite sua preferência…",
     "suggestions": "Sugestões"
   },
   "errors": {
