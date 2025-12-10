@@ -31,9 +31,29 @@ export interface GetAdminUsersParams {
   status?: string;
 }
 
+export interface CreateAdminRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+export interface CreateAdminResponse {
+  message: string;
+  user: {
+    public_id: string;
+    email: string;
+    role: string;
+  };
+}
+
 export async function getAdminUsers(params: GetAdminUsersParams = {}): Promise<AdminUsersResponse> {
   const { data } = await api.get('/admin/users', { params });
   return data as AdminUsersResponse;
+}
+
+export async function createAdminUser(payload: CreateAdminRequest): Promise<CreateAdminResponse> {
+  const { data } = await api.post('/admin/users', payload);
+  return data as CreateAdminResponse;
 }
 
 // Orders

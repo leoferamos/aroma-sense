@@ -23,7 +23,7 @@ export function useLogin() {
       setAuth(res.access_token, res.user);
       
       // Redirect based on role
-      if (res.user.role === "admin") {
+      if (res.user.role === "admin" || res.user.role === "super_admin") {
         navigate("/admin/dashboard");
       } else {
         navigate("/products");

@@ -20,6 +20,35 @@ func NewAdminUserHandler(s service.AdminUserService) *AdminUserHandler {
 	return &AdminUserHandler{userService: s}
 }
 
+// AdminCreateAdmin allows a super admin to create a new admin user
+func (h *AdminUserHandler) AdminCreateAdmin(c *gin.Context) {
+	var input dto.AdminCreateUserRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		return
+	}
+
+	superID := c.GetString("userID")
+	user, err := h.userService.CreateAdminUser(input.Email, input.Password, input.Name, superID)
+	if err != nil {
+		if status, code, ok := mapServiceError(err); ok {
+			c.JSON(status, dto.ErrorResponse{Error: code})
+			return
+		}
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "admin created",
+		"user": gin.H{
+			"public_id": user.PublicID,
+			"email":     user.Email,
+			"role":      user.Role,
+		},
+	})
+}
+
 // AdminListUsers returns paginated list of users for admin
 //
 // @Summary      List users for admin

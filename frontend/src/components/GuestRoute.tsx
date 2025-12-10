@@ -19,7 +19,7 @@ const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    if (role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (role === 'admin' || role === 'super_admin') return <Navigate to="/admin/dashboard" replace />;
     return <Navigate to="/products" replace />;
   }
 
