@@ -12,7 +12,9 @@ interface ProductFiltersProps {
     onFiltersChange: Dispatch<SetStateAction<FilterState>>;
     minPrice?: number;
     maxPrice?: number;
-}const ProductFilters: React.FC<ProductFiltersProps> = ({
+}
+
+const ProductFilters: React.FC<ProductFiltersProps> = ({
     filters,
     onFiltersChange,
     minPrice = 0,

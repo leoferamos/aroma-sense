@@ -87,6 +87,17 @@ const Products: React.FC = () => {
   const safeResults = useMemo(() => results, [results]);
   const safeSuggestions = useMemo(() => (suggestions ?? []).filter(Boolean) as Product[], [suggestions]);
 
+  const matchesFilters = (product: Product) => {
+    const gender = (product.gender || '').toLowerCase();
+    const price = Number(product.price) || 0;
+    const genderOk = filters.genders.length === 0 || filters.genders.some((g) => g.toLowerCase() === gender);
+    const priceOk = price >= filters.priceRange[0] && price <= filters.priceRange[1];
+    return genderOk && priceOk;
+  };
+
+  const filteredResults = useMemo(() => safeResults.filter(matchesFilters), [safeResults, filters]);
+  const filteredSuggestions = useMemo(() => safeSuggestions.filter(matchesFilters), [safeSuggestions, filters]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -119,7 +130,7 @@ const Products: React.FC = () => {
           <div className="lg:col-span-3">
 
             {/* Loading State */}
-            {(isLoading || (safeResults.length === 0 && query.trim() === '' && !error)) && (
+            {(isLoading || (filteredResults.length === 0 && query.trim() === '' && !error)) && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" aria-live="polite">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
@@ -134,7 +145,7 @@ const Products: React.FC = () => {
             {!isLoading && !error && (
               <>
                 {(() => {
-                  const showEmpty = safeResults.length === 0;
+                  const showEmpty = filteredResults.length === 0;
                   return showEmpty;
                 })() ? (
                   <div className="text-center py-20">
@@ -160,7 +171,7 @@ const Products: React.FC = () => {
                             <LoadingSpinner message={t('errors.loadingSuggestions')} />
                           ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                              {safeSuggestions.map((p) => (
+                              {filteredSuggestions.map((p) => (
                                 <ProductCard key={p.slug} product={p} showAddToCart={false} />
                               ))}
                             </div>
@@ -177,7 +188,7 @@ const Products: React.FC = () => {
                 ) : (
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                      {safeResults.map((product) => (
+                      {filteredResults.map((product) => (
                         <ProductCard key={product.slug} product={product} showAddToCart={false} />
                       ))}
                     </div>
