@@ -3,11 +3,11 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/auth"
-	"github.com/leoferamos/aroma-sense/internal/handler"
+	paymenthandler "github.com/leoferamos/aroma-sense/internal/handler/payment"
 )
 
 // PaymentRoutes defines payment-related routes.
-func PaymentRoutes(r *gin.Engine, handler *handler.PaymentHandler) {
+func PaymentRoutes(r *gin.Engine, handler *paymenthandler.PaymentHandler) {
 
 	payments := r.Group("/payments")
 	payments.Use(auth.JWTAuthMiddleware())

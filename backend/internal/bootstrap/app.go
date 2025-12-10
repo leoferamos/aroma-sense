@@ -1,11 +1,17 @@
 package bootstrap
 
 import (
-	"github.com/leoferamos/aroma-sense/internal/handler"
 	admin "github.com/leoferamos/aroma-sense/internal/handler/admin"
 	auth "github.com/leoferamos/aroma-sense/internal/handler/auth"
+	carthandler "github.com/leoferamos/aroma-sense/internal/handler/cart"
+	chathandler "github.com/leoferamos/aroma-sense/internal/handler/chat"
+	loghandler "github.com/leoferamos/aroma-sense/internal/handler/log"
+	orderhandler "github.com/leoferamos/aroma-sense/internal/handler/order"
+	paymenthandler "github.com/leoferamos/aroma-sense/internal/handler/payment"
 	product "github.com/leoferamos/aroma-sense/internal/handler/product"
+	reviewhandler "github.com/leoferamos/aroma-sense/internal/handler/review"
 	shipping "github.com/leoferamos/aroma-sense/internal/handler/shipping"
+	userhandler "github.com/leoferamos/aroma-sense/internal/handler/user"
 	"github.com/leoferamos/aroma-sense/internal/rate"
 	"github.com/leoferamos/aroma-sense/internal/repository"
 	"github.com/leoferamos/aroma-sense/internal/service"
@@ -15,20 +21,20 @@ import (
 
 // AppHandlers contains all initialized handlers
 type AppHandlers struct {
-	UserHandler              *handler.UserHandler
+	UserHandler              *userhandler.UserHandler
 	AdminUserHandler         *admin.AdminUserHandler
 	ProductHandler           *product.ProductHandler
-	CartHandler              *handler.CartHandler
-	OrderHandler             *handler.OrderHandler
+	CartHandler              *carthandler.CartHandler
+	OrderHandler             *orderhandler.OrderHandler
 	PasswordResetHandler     *auth.PasswordResetHandler
 	ShippingHandler          *shipping.ShippingHandler
-	ReviewHandler            *product.ReviewHandler
-	AIHandler                *handler.AIHandler
-	ChatHandler              *handler.ChatHandler
-	AuditLogHandler          *handler.AuditLogHandler
+	ReviewHandler            *reviewhandler.ReviewHandler
+	AIHandler                *chathandler.AIHandler
+	ChatHandler              *chathandler.ChatHandler
+	AuditLogHandler          *loghandler.AuditLogHandler
 	AdminContestationHandler *admin.AdminContestationHandler
 	AdminReviewReportHandler *admin.AdminReviewReportHandler
-	PaymentHandler           *handler.PaymentHandler
+	PaymentHandler           *paymenthandler.PaymentHandler
 }
 
 // AppServices contains service instances needed for jobs

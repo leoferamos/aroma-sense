@@ -4,11 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/auth"
 	product "github.com/leoferamos/aroma-sense/internal/handler/product"
+	reviewhandler "github.com/leoferamos/aroma-sense/internal/handler/review"
 	"github.com/leoferamos/aroma-sense/internal/middleware"
 )
 
 // ProductRoutes sets up the product-related routes
-func ProductRoutes(r *gin.Engine, productHandler *product.ProductHandler, reviewHandler *product.ReviewHandler) {
+func ProductRoutes(r *gin.Engine, productHandler *product.ProductHandler, reviewHandler *reviewhandler.ReviewHandler) {
 	// Public routes
 	publicProductGroup := r.Group("/products")
 	publicProductGroup.Use(auth.OptionalAuthMiddleware(), middleware.AccountStatusMiddleware())

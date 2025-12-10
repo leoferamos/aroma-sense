@@ -3,15 +3,16 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/auth"
-	"github.com/leoferamos/aroma-sense/internal/handler"
 	admin "github.com/leoferamos/aroma-sense/internal/handler/admin"
+	loghandler "github.com/leoferamos/aroma-sense/internal/handler/log"
+	orderhandler "github.com/leoferamos/aroma-sense/internal/handler/order"
 	product "github.com/leoferamos/aroma-sense/internal/handler/product"
 )
 
 // AdminRoutes sets up the admin-related routes
 func AdminRoutes(r *gin.Engine, adminUserHandler *admin.AdminUserHandler,
-	productHandler *product.ProductHandler, orderHandler *handler.OrderHandler,
-	auditLogHandler *handler.AuditLogHandler,
+	productHandler *product.ProductHandler, orderHandler *orderhandler.OrderHandler,
+	auditLogHandler *loghandler.AuditLogHandler,
 	adminContestationHandler *admin.AdminContestationHandler,
 	adminReviewReportHandler *admin.AdminReviewReportHandler) {
 	adminGroup := r.Group("/admin")

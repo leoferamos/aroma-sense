@@ -3,13 +3,13 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/leoferamos/aroma-sense/internal/auth"
-	"github.com/leoferamos/aroma-sense/internal/handler"
 	authhandler "github.com/leoferamos/aroma-sense/internal/handler/auth"
+	userhandler "github.com/leoferamos/aroma-sense/internal/handler/user"
 	"github.com/leoferamos/aroma-sense/internal/middleware"
 )
 
 // UserRoutes sets up the user-related routes
-func UserRoutes(r *gin.Engine, userHandler *handler.UserHandler, resetHandler *authhandler.PasswordResetHandler) {
+func UserRoutes(r *gin.Engine, userHandler *userhandler.UserHandler, resetHandler *authhandler.PasswordResetHandler) {
 	userGroup := r.Group("/users")
 	{
 		userGroup.POST("/register", userHandler.RegisterUser)
