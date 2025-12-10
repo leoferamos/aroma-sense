@@ -28,7 +28,7 @@ const AdminReviewReports: React.FC = () => {
       const res = await listReviewReports({ status: statusFilter, limit, offset });
       setReports(res.items);
       setTotal(res.total);
-    } catch (err) {
+    } catch {
       setError(t('failedToLoadReviewReports'));
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ const AdminReviewReports: React.FC = () => {
         notes: notes[id] ? notes[id] : null,
       });
       await fetchReports();
-    } catch (err) {
+    } catch {
       setError(t('failedToResolveReviewReport'));
     } finally {
       setActionLoading(null);
