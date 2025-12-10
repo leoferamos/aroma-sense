@@ -27,6 +27,7 @@ type PersistedCheckout = {
   order: OrderResponse;
   address: AddressForm;
   selectedShipping: ShippingOption | null;
+  cartItems: CartItemType[];
 };
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? '');
@@ -49,6 +50,7 @@ const Checkout: React.FC = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [orderResponse, setOrderResponse] = useState<OrderResponse | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [fallbackCartItems, setFallbackCartItems] = useState<CartItemType[] | null>(null);
 
   const { errors, validateAll, setErrors } = useCheckoutValidation();
   const [submitting, setSubmitting] = useState(false);
@@ -68,6 +70,7 @@ const Checkout: React.FC = () => {
         setOrderResponse(data.order);
         setAddress(data.address ?? address);
         setSelectedShipping(data.selectedShipping ?? null);
+        setFallbackCartItems(data.cartItems ?? null);
       }
     } catch {
       sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
@@ -115,6 +118,7 @@ const Checkout: React.FC = () => {
         order,
         address,
         selectedShipping,
+        cartItems: cart?.items ?? [],
       };
       sessionStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(snapshot));
     } catch (err) {
@@ -279,7 +283,7 @@ const Checkout: React.FC = () => {
                           />
                           <div>
                             <div className="font-medium text-gray-900">{opt.carrier} — {opt.service_code}</div>
-                            <div className="text-sm text-gray-600">{t('checkout.shipping.eta', { count: opt.estimated_days })}</div>
+                            <div className="text-sm text-gray-600">{t('checkout.shipping.eta', { count: Number(opt.estimated_days) })}</div>
                           </div>
                         </div>
                         <div className="font-semibold">{formatCurrency(opt.price)}</div>
@@ -362,7 +366,14 @@ const Checkout: React.FC = () => {
                 ) : orderResponse?.items?.length ? (
                   <ul className="divide-y divide-gray-200 mb-4">
                     {orderResponse.items.map((item) => (
-                      <li key={`${item.product_slug}-${item.product_name ?? ''}`} className="py-3 flex items-start justify-between">
+                      <li key={`${item.product_slug}-${item.product_name ?? ''}`} className="py-3 flex items-start justify-between gap-3">
+                        { (item.product_image_url || fallbackCartItems?.find((ci) => ci.product?.slug === item.product_slug)?.product?.image_url) && (
+                          <img
+                            src={item.product_image_url || fallbackCartItems?.find((ci) => ci.product?.slug === item.product_slug)?.product?.image_url || ''}
+                            alt={item.product_name ?? item.product_slug}
+                            className="h-14 w-14 object-cover rounded border border-gray-200"
+                          />
+                        )}
                         <div className="flex-1">
                           <div className="font-medium text-gray-900">{item.product_name ?? item.product_slug}</div>
                           <div className="text-sm text-gray-600">{t('cart.quantity')}: {item.quantity}</div>
