@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/leoferamos/aroma-sense/compare/v1.6.0...v1.7.0) (2025-12-10)
+
+
+### Features
+
+* **tests:** create general handler tests and refactor handler and services  ([#103](https://github.com/leoferamos/aroma-sense/issues/103)) ([f47db45](https://github.com/leoferamos/aroma-sense/commit/f47db458c721a1bd9274a1c62915648a7eb3540c))
+
 # [1.6.0](https://github.com/leoferamos/aroma-sense/compare/v1.5.0...v1.6.0) (2025-12-10)
 
 
