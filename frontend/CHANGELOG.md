@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/leoferamos/aroma-sense/compare/v1.7.0...v1.7.1) (2025-12-10)
+
+
+### Bug Fixes
+
+* **i18n:** update general i18n errors ([#104](https://github.com/leoferamos/aroma-sense/issues/104)) ([daf4878](https://github.com/leoferamos/aroma-sense/commit/daf4878abffcb29feb6446b82a83a19393844f51))
+
 # [1.7.0](https://github.com/leoferamos/aroma-sense/compare/v1.6.0...v1.7.0) (2025-12-10)
 
 
