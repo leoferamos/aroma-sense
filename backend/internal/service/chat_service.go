@@ -58,14 +58,6 @@ func (s *ChatService) Chat(ctx context.Context, sessionID string, rawMsg string)
 		return dto.ChatResponse{Reply: reply}, nil
 	}
 
-	normalizedMsg := strings.TrimSpace(strings.ToLower(sanitized))
-	if normalizedMsg == "/clear" || normalizedMsg == "/clear-recs" || normalizedMsg == "limpar recomendações" || normalizedMsg == "limpar recomendacoes" {
-		s.retrieval.ClearCache()
-		s.resetConversation(sid)
-		reply := "Pronto! Limpei suas recomendações. Pode me dizer o que você procura agora 😊"
-		return dto.ChatResponse{Reply: reply}, nil
-	}
-
 	conv := s.getOrCreate(sid)
 	// Update conversation state
 	conv.AddMessage(sanitized, ai.Parse(sanitized))
@@ -139,12 +131,6 @@ func (s *ChatService) getOrCreate(id string) *ai.Conversation {
 	c := ai.NewConversation()
 	s.state[id] = c
 	return c
-}
-
-func (s *ChatService) resetConversation(id string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	delete(s.state, id)
 }
 
 // --- lightweight intent/topic helpers ---
