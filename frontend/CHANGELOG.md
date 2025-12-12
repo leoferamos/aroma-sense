@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/leoferamos/aroma-sense/compare/v1.9.0...v1.10.0) (2025-12-12)
+
+
+### Features
+
+* **i18n:** add missing i18n to remaining screens ([#107](https://github.com/leoferamos/aroma-sense/issues/107)) ([6efa4fe](https://github.com/leoferamos/aroma-sense/commit/6efa4fe1a221813a081c014d69332bc2c86d547e))
+
 # [1.9.0](https://github.com/leoferamos/aroma-sense/compare/v1.8.0...v1.9.0) (2025-12-12)
 
 
