@@ -149,5 +149,6 @@
   "adminCreateRequiredFields": "Please fill name, email, and password",
   "adminCreateSuccess": "Admin created successfully",
   "adminCreateFailure": "Failed to create admin",
-  "failedToLoadUsers": "Failed to load users"
+  "noOrdersFound": "No orders found",
+  "unknown": "Unknown"
 }

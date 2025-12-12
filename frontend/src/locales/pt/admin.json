@@ -151,5 +151,6 @@
   "adminCreateRequiredFields": "Preencha nome, email e senha",
   "adminCreateSuccess": "Admin criado com sucesso",
   "adminCreateFailure": "Falha ao criar admin",
-  "failedToLoadUsers": "Falha ao carregar usuários"
+  "noOrdersFound": "Nenhum pedido encontrado",
+  "unknown": "Desconhecido"
 }
