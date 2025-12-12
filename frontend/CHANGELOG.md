@@ -1,3 +1,17 @@
+# [1.9.0](https://github.com/leoferamos/aroma-sense/compare/v1.8.0...v1.9.0) (2025-12-12)
+
+
+### Bug Fixes
+
+* **router:** correct AIHandler import in AIRoutes function ([dba1136](https://github.com/leoferamos/aroma-sense/commit/dba1136127bc484d249b401700b655c2bb4358ab))
+
+
+### Features
+
+* **bootstrap:** update AI handler import and initialization ([cc97392](https://github.com/leoferamos/aroma-sense/commit/cc97392d0a629b48719880338e045adfe4e0e504))
+* **handlers:** create general handlhandlers tests ([2118078](https://github.com/leoferamos/aroma-sense/commit/21180788511fd97af5c551665d5c2fc95fd12b89))
+* **services:** add unit tests for LGPD, Audit Log, and Order services ([a65f419](https://github.com/leoferamos/aroma-sense/commit/a65f419d82f41750e8f8a266713395bcef3c25cb))
+
 # [1.8.0](https://github.com/leoferamos/aroma-sense/compare/v1.7.1...v1.8.0) (2025-12-10)
 
 
