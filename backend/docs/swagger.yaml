@@ -285,7 +285,7 @@ definitions:
   dto.DeleteAccountRequest:
     properties:
       confirmation:
-        example: DELETE_MY_ACCOUNT
+        example: DELETE_MY_ACCOUNT or EXCLUIR_MINHA_CONTA
         type: string
     required:
     - confirmation

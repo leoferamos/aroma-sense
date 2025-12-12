@@ -81,5 +81,5 @@ type UpdateRoleRequest struct {
 
 // DeleteAccountRequest represents account deletion confirmation
 type DeleteAccountRequest struct {
-	Confirmation string `json:"confirmation" example:"DELETE_MY_ACCOUNT" validate:"required,eq=DELETE_MY_ACCOUNT"`
+	Confirmation string `json:"confirmation" example:"DELETE_MY_ACCOUNT or EXCLUIR_MINHA_CONTA" validate:"required,oneof=DELETE_MY_ACCOUNT EXCLUIR_MINHA_CONTA"`
 }
