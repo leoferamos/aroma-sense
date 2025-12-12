@@ -457,21 +457,6 @@ func normalizeSlotValue(v string, slotType string) string {
 	return v
 }
 
-func dedup(arr []string) []string {
-	if len(arr) == 0 {
-		return arr
-	}
-	seen := make(map[string]bool)
-	out := make([]string, 0, len(arr))
-	for _, v := range arr {
-		if !seen[v] {
-			seen[v] = true
-			out = append(out, v)
-		}
-	}
-	return out
-}
-
 func join(prefix string, arr []string) string {
 	if len(arr) == 0 {
 		return prefix + ":"

@@ -1,4 +1,4 @@
-package handler
+package chat
 
 import (
 	"net/http"
@@ -56,4 +56,13 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, resp)
+}
+
+func clientIP(c *gin.Context) string {
+	// honor X-Forwarded-For if present
+	if xff := c.GetHeader("X-Forwarded-For"); xff != "" {
+		parts := strings.Split(xff, ",")
+		return strings.TrimSpace(parts[0])
+	}
+	return c.ClientIP()
 }

@@ -1,6 +1,7 @@
-package handler
+package ai
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -9,15 +10,18 @@ import (
 	"github.com/leoferamos/aroma-sense/internal/dto"
 	handlererrors "github.com/leoferamos/aroma-sense/internal/handler/errors"
 	"github.com/leoferamos/aroma-sense/internal/rate"
-	chatservice "github.com/leoferamos/aroma-sense/internal/service/chat"
 )
 
+type AIServiceInterface interface {
+	Recommend(ctx context.Context, message string, limit int) ([]dto.RecommendSuggestion, string, error)
+}
+
 type AIHandler struct {
-	svc   *chatservice.AIService
+	svc   AIServiceInterface
 	limit rate.RateLimiter
 }
 
-func NewAIHandler(svc *chatservice.AIService, limiter rate.RateLimiter) *AIHandler {
+func NewAIHandler(svc AIServiceInterface, limiter rate.RateLimiter) *AIHandler {
 	return &AIHandler{svc: svc, limit: limiter}
 }
 
