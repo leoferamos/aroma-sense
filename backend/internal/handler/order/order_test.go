@@ -118,13 +118,7 @@ func TestOrderHandler_CreateOrderFromCart(t *testing.T) {
 		r.POST("/orders", handler.CreateOrderFromCart)
 
 		reqBody := `{
-			"shipping_address": {
-				"street": "Rua Teste",
-				"city": "São Paulo",
-				"state": "SP",
-				"zip_code": "01234-567",
-				"country": "Brazil"
-			},
+			"shipping_address": "Rua Teste, 123, São Paulo - SP, 01234-567",
 			"payment_method": "credit_card"
 		}`
 		req, _ := http.NewRequest("POST", "/orders", strings.NewReader(reqBody))
@@ -148,13 +142,7 @@ func TestOrderHandler_CreateOrderFromCart(t *testing.T) {
 		r := setupOrderRouter(svc)
 
 		reqBody := `{
-			"shipping_address": {
-				"street": "Rua Teste",
-				"city": "São Paulo",
-				"state": "SP",
-				"zip_code": "01234-567",
-				"country": "Brazil"
-			},
+			"shipping_address": "Rua Teste, 123, São Paulo - SP, 01234-567",
 			"payment_method": "credit_card"
 		}`
 		req, _ := http.NewRequest("POST", "/orders", strings.NewReader(reqBody))

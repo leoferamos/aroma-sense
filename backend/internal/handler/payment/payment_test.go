@@ -59,11 +59,7 @@ func TestPaymentHandler_CreateIntent(t *testing.T) {
 		r := setupPaymentRouter(svc)
 
 		reqBody := `{
-			"amount": 10000,
-			"currency": "brl",
-			"items": [
-				{"product_id": 1, "quantity": 2}
-			]
+			"shipping_address": "Rua Teste, 123, São Paulo - SP, 01234-567"
 		}`
 		req, _ := http.NewRequest("POST", "/payments/intent", strings.NewReader(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -108,11 +104,7 @@ func TestPaymentHandler_CreateIntent(t *testing.T) {
 		r.POST("/payments/intent", handler.CreateIntent)
 
 		reqBody := `{
-			"amount": 10000,
-			"currency": "brl",
-			"items": [
-				{"product_id": 1, "quantity": 2}
-			]
+			"shipping_address": "Rua Teste, 123, São Paulo - SP, 01234-567"
 		}`
 		req, _ := http.NewRequest("POST", "/payments/intent", strings.NewReader(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -135,11 +127,7 @@ func TestPaymentHandler_CreateIntent(t *testing.T) {
 		r := setupPaymentRouter(svc)
 
 		reqBody := `{
-			"amount": 10000,
-			"currency": "brl",
-			"items": [
-				{"product_id": 1, "quantity": 2}
-			]
+			"shipping_address": "Rua Teste, 123, São Paulo - SP, 01234-567"
 		}`
 		req, _ := http.NewRequest("POST", "/payments/intent", strings.NewReader(reqBody))
 		req.Header.Set("Content-Type", "application/json")
