@@ -2,11 +2,12 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	aihandler "github.com/leoferamos/aroma-sense/internal/handler/ai"
 	chathandler "github.com/leoferamos/aroma-sense/internal/handler/chat"
 )
 
 // AIRoutes registers AI chat related routes.
-func AIRoutes(r *gin.Engine, aiHandler *chathandler.AIHandler, chatHandler *chathandler.ChatHandler) {
+func AIRoutes(r *gin.Engine, aiHandler *aihandler.AIHandler, chatHandler *chathandler.ChatHandler) {
 	if aiHandler == nil && chatHandler == nil {
 		return
 	}
