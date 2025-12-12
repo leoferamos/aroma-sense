@@ -29,8 +29,8 @@ export interface DeleteAccountRequest {
   confirmation: string;
 }
 
-export async function requestAccountDeletion(): Promise<{ message: string }> {
-  const payload: DeleteAccountRequest = { confirmation: 'DELETE_MY_ACCOUNT' };
+export async function requestAccountDeletion(confirmationPhrase: string): Promise<{ message: string }> {
+  const payload: DeleteAccountRequest = { confirmation: confirmationPhrase };
   const { data } = await api.post('/users/me/deletion', payload);
   return data as { message: string };
 }

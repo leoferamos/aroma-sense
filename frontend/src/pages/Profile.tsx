@@ -232,14 +232,14 @@ const Profile: React.FC = () => {
         <ConfirmModal
           open={deleteModalOpen}
           title={t('profile.deletionModalTitle')}
-          description={t('profile.deletionModalDescription')}
+          description={t('profile.deletionModalDescription', { phrase: `<strong>${t('profile.deletionConfirmPhrase')}</strong>` })}
           confirmText={t('profile.requestDeletionConfirm')}
           cancelText={t('profile.cancel')}
-          requirePhrase="DELETE_MY_ACCOUNT"
+          requirePhrase={t('profile.deletionConfirmPhrase')}
           onConfirm={async () => {
             setActionLoading(true);
             try {
-              await requestAccountDeletion();
+              await requestAccountDeletion(t('profile.deletionConfirmPhrase'));
               const updated = await getMyProfile();
               setProfile(updated);
               setSuccess(t('profile.deletionRequested'));

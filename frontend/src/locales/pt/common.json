@@ -161,7 +161,8 @@
     "updateSuccess": "Perfil atualizado com sucesso",
     "activeOrdersBlockDeletion": "Você não pode excluir sua conta enquanto houver pedidos ativos. Aguarde até que os pedidos sejam concluídos.",
     "deletionModalTitle": "Solicitar exclusão da conta",
-    "deletionModalDescription": "Digite DELETE_MY_ACCOUNT para confirmar que deseja solicitar a exclusão da conta. Você terá 7 dias para cancelar.",
+    "deletionModalDescription": "Digite {{phrase}} para confirmar que deseja solicitar a exclusão da conta. Você terá 7 dias para cancelar.",
+    "deletionConfirmPhrase": "EXCLUIR_MINHA_CONTA",
     "requestDeletionConfirm": "Solicitar exclusão",
     "cancel": "Cancelar",
     "deletionRequested": "Exclusão da conta solicitada com sucesso",
@@ -289,6 +290,14 @@
     "shippingOptions": {
       "label": "Frete",
       "loading": "Carregando opções de frete..."
+    },
+    "orderConfirmation": {
+      "thankYou": "Obrigado",
+      "orderPlaced": "Seu pedido foi realizado com sucesso.",
+      "items": "Itens",
+      "total": "Total",
+      "continueShopping": "Continuar comprando",
+      "goBack": "Voltar"
     }
   },
   "userMenu": {

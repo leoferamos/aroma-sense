@@ -54,7 +54,7 @@ const OrdersTable: React.FC<Props> = ({ orders }) => {
                           o.status === 'cancelled' ? 'bg-red-100 text-red-700' :
                             'bg-gray-100 text-gray-700'
                     }`}>
-                    {o.status || 'Unknown'}
+                    {o.status || t('unknown')}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-gray-600 text-sm">{o.created_at ? new Date(o.created_at).toLocaleString() : '-'}</td>
@@ -67,7 +67,7 @@ const OrdersTable: React.FC<Props> = ({ orders }) => {
       {/* Mobile Card View - Visible only on mobile/tablet */}
       <div className="lg:hidden space-y-3">
         {orders.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 text-center text-gray-500">No orders found</div>
+          <div className="bg-white border border-gray-200 rounded-lg p-6 text-center text-gray-500">{t('noOrdersFound')}</div>
         ) : orders.map((o) => (
           <div
             key={o.id}
@@ -89,7 +89,7 @@ const OrdersTable: React.FC<Props> = ({ orders }) => {
                       o.status === 'cancelled' ? 'bg-red-100 text-red-700' :
                         'bg-gray-100 text-gray-700'
                 }`}>
-                {o.status || 'Unknown'}
+                {o.status || t('unknown')}
               </span>
             </div>
             <div className="border-t border-gray-100 pt-3 space-y-2">

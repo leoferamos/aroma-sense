@@ -149,7 +149,8 @@
     "updateSuccess": "Profile updated successfully",
     "activeOrdersBlockDeletion": "You can't delete your account while you have active orders. Please wait until your orders are completed.",
     "deletionModalTitle": "Request account deletion",
-    "deletionModalDescription": "Type DELETE_MY_ACCOUNT to confirm that you want to request account deletion. You will have 7 days to cancel.",
+    "deletionModalDescription": "Type {{phrase}} to confirm that you want to request account deletion. You will have 7 days to cancel.",
+    "deletionConfirmPhrase": "DELETE_MY_ACCOUNT",
     "requestDeletionConfirm": "Request deletion",
     "cancel": "Cancel",
     "deletionRequested": "Account deletion requested successfully",
@@ -240,6 +241,14 @@
     "shippingOptions": {
       "label": "Shipping",
       "loading": "Loading shipping options..."
+    },
+    "orderConfirmation": {
+      "thankYou": "Thank you",
+      "orderPlaced": "Your order has been placed successfully.",
+      "items": "Items",
+      "total": "Total",
+      "continueShopping": "Continue shopping",
+      "goBack": "Go back"
     }
   },
   "userMenu": {

@@ -325,12 +325,6 @@ func (h *UserHandler) RequestAccountDeletion(c *gin.Context) {
 		return
 	}
 
-	// Require explicit confirmation
-	if input.Confirmation != "DELETE_MY_ACCOUNT" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid_request"})
-		return
-	}
-
 	if err := h.lgpdService.RequestAccountDeletion(publicID); err != nil {
 		if status, code, ok := handlererrors.MapServiceError(err); ok {
 			c.JSON(status, dto.ErrorResponse{Error: code})
