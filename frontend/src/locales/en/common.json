@@ -240,6 +240,14 @@
     "shippingOptions": {
       "label": "Shipping",
       "loading": "Loading shipping options..."
+    },
+    "orderConfirmation": {
+      "thankYou": "Thank you",
+      "orderPlaced": "Your order has been placed successfully.",
+      "items": "Items",
+      "total": "Total",
+      "continueShopping": "Continue shopping",
+      "goBack": "Go back"
     }
   },
   "userMenu": {

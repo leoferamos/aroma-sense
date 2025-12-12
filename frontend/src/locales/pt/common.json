@@ -289,6 +289,14 @@
     "shippingOptions": {
       "label": "Frete",
       "loading": "Carregando opções de frete..."
+    },
+    "orderConfirmation": {
+      "thankYou": "Obrigado",
+      "orderPlaced": "Seu pedido foi realizado com sucesso.",
+      "items": "Itens",
+      "total": "Total",
+      "continueShopping": "Continuar comprando",
+      "goBack": "Voltar"
     }
   },
   "userMenu": {
