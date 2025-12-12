@@ -53,6 +53,17 @@ func setupOrderRouter(svc orderservice.OrderService) *gin.Engine {
 	return r
 }
 
+func setupOrderRouterUnauthenticated(svc orderservice.OrderService) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+
+	handler := NewOrderHandler(svc)
+	r.POST("/orders", handler.CreateOrderFromCart)
+	r.GET("/orders", handler.ListUserOrders)
+	r.GET("/admin/orders", handler.ListOrders)
+	return r
+}
+
 func TestOrderHandler_CreateOrderFromCart(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		orderResp := &dto.OrderResponse{PublicID: "order-123", Status: "pending", TotalAmount: 100.0}
@@ -62,13 +73,7 @@ func TestOrderHandler_CreateOrderFromCart(t *testing.T) {
 		r := setupOrderRouter(svc)
 
 		reqBody := `{
-			"shipping_address": {
-				"street": "Rua Teste",
-				"city": "São Paulo",
-				"state": "SP",
-				"zip_code": "01234-567",
-				"country": "Brazil"
-			},
+			"shipping_address": "Rua Teste, 123, São Paulo - SP, 01234-567",
 			"payment_method": "credit_card"
 		}`
 		req, _ := http.NewRequest("POST", "/orders", strings.NewReader(reqBody))
